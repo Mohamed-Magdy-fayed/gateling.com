@@ -143,28 +143,9 @@ src/
 
 ## Admin Entity Pattern
 
-Follow `docs/entity-blueprint.md` for every admin entity. Required structure per entity:
-best example is users table
-```
-features/system/<entity>/
-  admin/
-    components/
-      <entity>-form-dialog.tsx
-      <entity>s-grid-filters.tsx
-      <entity>-info-dialog.tsx
-      <entity>-row-actions.tsx
-      <entity>s-bulk-actions.tsx
-      <entity>s-table-columns.tsx
-    <entity>s-table-page.tsx
-    index.ts
-  server/
-    schemas.ts
-    queries.ts
-    mutations.ts
-    router.ts
-    types.ts
-  index.ts
-```
+Run `/new-entity` to scaffold any new admin entity. The skill enforces the full blueprint including intake questions, all implementation layers, bilingual copy, and the Definition of Done checklist.
+
+Canonical implementation reference: `src/features/system/users/` — read it before generating code for any entity.
 
 Registry at `src/features/system/registry/entities.ts` is the single source of truth for capabilities.
 
@@ -269,7 +250,7 @@ These are Gateling's real client projects — reference them for seeding and con
 
 ## Agent Workflow
 
-- Read `docs/entity-blueprint.md` before adding any admin entity
+- Run `/new-entity` before adding any admin entity — the skill enforces the full blueprint
 - Read `docs/seo-blueprint.md` before adding any public page
 - Read `docs/inngest-offload-policy.md` before adding any server mutation that involves email or external calls
 - Quality gate: `npm run typecheck && npm run build` must pass after every substantive change

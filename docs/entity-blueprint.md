@@ -2,7 +2,7 @@
 
 ## Goal
 
-This blueprint defines the standard implementation pattern for any admin-managed entity added to `Funtastic`.
+This blueprint defines the standard implementation pattern for any admin-managed entity added to **Gateling Solutions**.
 
 It exists so that:
 
@@ -12,7 +12,7 @@ It exists so that:
 
 ## Product Context
 
-`Funtastic` is not only an internal admin panel. The product direction is:
+**Gateling Solutions** is not only an internal admin panel. The product direction is:
 
 - a polished company-facing experience for selling products, services, or bookings
 - a strong admin workspace behind that experience
