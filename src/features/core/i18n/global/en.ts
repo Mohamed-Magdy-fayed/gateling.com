@@ -1,6 +1,7 @@
 import homeEn from "@/app/(landing-pages)/_translations/home-en";
 import aboutEn from "@/app/(landing-pages)/about/_translations/about-en";
 import contactEn from "@/app/(landing-pages)/contact/_translations/contact-en";
+import feedbackEn from "@/app/(landing-pages)/feedback/_translations/feedback-en";
 import servicesEn from "@/app/(landing-pages)/services/_translations/services-en";
 import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
@@ -11,6 +12,7 @@ export default {
   opposite: "عربي",
   greetings: "Hello {name}! Your last login was {lastLoginDate:date}.",
   appName: "Gateling Solutions",
+  logoName: "Gateling",
   common: {
     empty: "No data available.",
     menu: "Menu",
@@ -836,6 +838,7 @@ export default {
       readMore: "Read more →",
     },
     ...contactEn,
+    ...feedbackEn,
   },
   copyright: dt("© {year:date} {appName}. all rights reserved.", {
     date: { year: { year: "numeric" } },

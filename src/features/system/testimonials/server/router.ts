@@ -49,6 +49,29 @@ export const testimonialsRouter = createTRPCRouter({
       .where(and(eq(TestimonialsTable.isVisible, true)))
       .orderBy(asc(TestimonialsTable.sortOrder));
   }),
+  publicListByCaseStudy: baseProcedure
+    .input(z.object({ caseStudyId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db
+        .select({
+          id: TestimonialsTable.id,
+          clientName: TestimonialsTable.clientName,
+          company: TestimonialsTable.company,
+          role: TestimonialsTable.role,
+          content: TestimonialsTable.content,
+          avatarUrl: TestimonialsTable.avatarUrl,
+          rating: TestimonialsTable.rating,
+          sortOrder: TestimonialsTable.sortOrder,
+        })
+        .from(TestimonialsTable)
+        .where(
+          and(
+            eq(TestimonialsTable.isVisible, true),
+            eq(TestimonialsTable.caseStudyId, input.caseStudyId),
+          ),
+        )
+        .orderBy(asc(TestimonialsTable.sortOrder));
+    }),
   list: protectedProcedure.query(async ({ ctx }) => {
     assertAdmin(ctx.session?.user.role ?? "");
     return ctx.db

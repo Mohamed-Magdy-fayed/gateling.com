@@ -35,6 +35,7 @@ import { getT } from "@/features/core/i18n/server";
 
 export async function signInAction(
   rawInput: unknown,
+  returnTo?: string,
 ): Promise<TypedResponse<{ user: PartialUser }>> {
   const { t } = await getT();
   const { password, email } = await validateInput(signInSchema, rawInput);
@@ -94,7 +95,7 @@ export async function signInAction(
     };
   }
 
-  redirect(getPostAuthRedirect(signedInUser));
+  redirect(getPostAuthRedirect(signedInUser, returnTo));
 }
 
 export async function signUpAction(

@@ -6,7 +6,6 @@ import {
 } from "@/features/core/auth/core";
 import { PUBLIC_SITE_PATHS } from "@/features/public-catalog/lib/public-tabs";
 import { getProtectedScreenDefinitionByPathname } from "@/features/system/registry";
-import { env } from "./env/server";
 
 const authRoutes = [
   "/sign-in",
@@ -22,6 +21,7 @@ const publicRoutes = [
   "/view-dress",
   "/work/",
   "/blog/",
+  "/feedback",
 ];
 
 export async function proxy(request: NextRequest) {

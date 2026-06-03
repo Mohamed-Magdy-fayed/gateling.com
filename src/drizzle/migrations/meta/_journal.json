@@ -15,6 +15,13 @@
       "when": 1780425643171,
       "tag": "0001_add_live_url_to_case_studies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780507591491,
+      "tag": "0002_keen_scrambler",
+      "breakpoints": true
     }
   ]
 }

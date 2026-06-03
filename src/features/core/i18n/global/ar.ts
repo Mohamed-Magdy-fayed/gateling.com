@@ -1,6 +1,7 @@
 import homeAr from "@/app/(landing-pages)/_translations/home-ar";
 import aboutAr from "@/app/(landing-pages)/about/_translations/about-ar";
 import contactAr from "@/app/(landing-pages)/contact/_translations/contact-ar";
+import feedbackAr from "@/app/(landing-pages)/feedback/_translations/feedback-ar";
 import servicesAr from "@/app/(landing-pages)/services/_translations/services-ar";
 import workAr from "@/app/(landing-pages)/work/_translations/work-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
@@ -10,7 +11,8 @@ export default {
   locale: "ar",
   opposite: "English",
   greetings: "مرحبًا {name}! آخر تسجيل دخول لك كان في {lastLoginDate:date}.",
-  appName: "غيتلينج سوليوشنز",
+  appName: "بُوَيْب",
+  logoName: "بُوَيْب",
   common: {
     empty: "لا توجد بيانات متاحة.",
     menu: "القائمة",
@@ -400,7 +402,7 @@ export default {
     exportSubscribers: "تصدير CSV",
   },
   systemPages: {
-    appName: "غيتلينج سوليوشنز",
+    appName: "بُوَيْب",
     openMenu: "فتح القائمة",
     toggleSidebar: "تبديل الشريط الجانبي",
     mobileTabBarLabel: "التنقل في مساحة العمل",
@@ -774,22 +776,22 @@ export default {
       client1Company: "أتيلييه آلاء القصري",
       client1Role: "المديرة الإبداعية",
       client1Quote:
-        "Gateling Solutions بنت منصة إيجار بتتابع الفساتين، البروفات، والعربون من غير ولا شيت. الستايلست بيحجزوا القطع، العملاء بيدفعوا أونلاين، وبيجيلي تنبيه قبل كل تسليم.",
+        "بُوَيْب بنت منصة إيجار بتتابع الفساتين، البروفات، والعربون من غير ولا شيت. الستايلست بيحجزوا القطع، العملاء بيدفعوا أونلاين، وبيجيلي تنبيه قبل كل تسليم.",
       client2Name: "محمد هاني",
       client2Company: "لافيدا جانجل بلاي كافيه",
       client2Role: "مدير العمليات",
       client2Quote:
-        "Gateling Solutions سلّمت نظام POS وحجوزات بيغطي الطلبات، الحجوزات، وحتى بيشغّل إعلانات صوتية على السبيكرات. الـ QR للمنيو والطباعة الحرارية بتشتغل بدون أي مشاكل كل شيفت.",
+        "بُوَيْب سلّمت نظام POS وحجوزات بيغطي الطلبات، الحجوزات، وحتى بيشغّل إعلانات صوتية على السبيكرات. الـ QR للمنيو والطباعة الحرارية بتشتغل بدون أي مشاكل كل شيفت.",
       client3Name: "إيمان عبدالرحمن",
       client3Company: "أكاديمية إيمان عبدالرحمن لتعليم اللغة الإنجليزية",
       client3Role: "مدرّسة اللغة الإنجليزية الرئيسية",
       client3Quote:
-        "Gateling Solutions بنت سيستم إدارة تدريس بيمسك التسجيلات، المدفوعات، وجداول المحتوى. المدرسين عندهم داشبورداتهم وأنا بفتح دفعات جديدة في دقائق.",
+        "بُوَيْب بنت سيستم إدارة تدريس بيمسك التسجيلات، المدفوعات، وجداول المحتوى. المدرسين عندهم داشبورداتهم وأنا بفتح دفعات جديدة في دقائق.",
       client4Name: "حسين فاروق",
       client4Company: "Arabian Foods",
       client4Role: "المدير التجاري",
       client4Quote:
-        "Gateling Solutions أعادت بناء موقعنا وعملته قصة ثنائية اللغة نعدّلها داخليًا. الموزعين بقوا يبعتوا لينك واحد موثوق لما يعرّضوا منتجاتنا.",
+        "بُوَيْب أعادت بناء موقعنا وعملته قصة ثنائية اللغة نعدّلها داخليًا. الموزعين بقوا يبعتوا لينك واحد موثوق لما يعرّضوا منتجاتنا.",
       stat1Value: "60%",
       stat1Label: "تخفيض العمل اليدوي",
       stat1Description: "متوسط انخفاض وقت الإدارة عبر مشاريع العملاء.",
@@ -805,8 +807,7 @@ export default {
     ...aboutAr,
     ...workAr,
     blogPage: {
-      metaTitle:
-        "المدونة — رؤى أتمتة الأعمال والبرمجيات المخصصة | غيتلينج سوليوشنز",
+      metaTitle: "المدونة — رؤى أتمتة الأعمال والبرمجيات المخصصة | بُوَيْب",
       metaDescription:
         "رؤى حول أتمتة أعمالك وبناء برمجيات مخصصة وتكامل الذكاء الاصطناعي. للأعمال النامية في مصر والشرق الأوسط.",
       heading: "رؤى حول بناء برمجيات تهم فعلًا",
@@ -817,6 +818,7 @@ export default {
       readMore: "اقرأ المزيد ←",
     },
     ...contactAr,
+    ...feedbackAr,
   },
   copyright: dt("© {year:date} {appName}. جميع الحقوق محفوظة.", {
     date: { year: { year: "numeric" } },

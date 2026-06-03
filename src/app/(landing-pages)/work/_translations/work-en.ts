@@ -28,5 +28,6 @@ export default {
     ctaButton: "Let's Talk",
     notFoundTitle: "Case Study Not Found",
     notFoundDescription: "This case study may not be published yet.",
+    testimonialHeading: "What the client said",
   },
 } as const;

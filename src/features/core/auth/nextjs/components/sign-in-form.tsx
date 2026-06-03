@@ -46,7 +46,8 @@ export function SignInForm() {
     validators: { onSubmit: signInSchema, onDynamic: signInEmailStepSchema },
     onSubmit: async ({ value }) => {
       startTransition(async () => {
-        const result = await signInAction(value);
+        const returnTo = searchParams.get("returnTo") ?? undefined;
+        const result = await signInAction(value, returnTo);
         if (result?.isError) {
           toast.error(result.message);
         }

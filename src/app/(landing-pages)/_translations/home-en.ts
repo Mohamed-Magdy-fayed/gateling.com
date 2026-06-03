@@ -3,7 +3,7 @@ export default {
     trustIndicator1: "10+ systems shipped",
     trustIndicator2: "100% came back for more phases",
     trustIndicator3: "Founder-led partnership",
-    headlinePart1: "We're Gateling Solutions",
+    headlinePart1: "In Gateling",
     headlinePart2: "We design systems for teams chasing real growth",
     leadText:
       "We work with founders and operations leads to build custom platforms that clear the manual chaos, keep teams unified, and base every decision on live data.",

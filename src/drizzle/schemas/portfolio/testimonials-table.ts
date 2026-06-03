@@ -7,7 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-
+import { UsersTable } from "@/drizzle/schemas/auth/users-table";
 import {
   createdAt,
   createdBy,
@@ -26,6 +26,10 @@ export const TestimonialsTable = pgTable(
     role: varchar({ length: 128 }),
     content: varchar({ length: 1024 }).notNull(),
     avatarUrl: varchar({ length: 1024 }),
+    rating: integer(),
+    userId: uuid("user_id").references(() => UsersTable.id, {
+      onDelete: "set null",
+    }),
     caseStudyId: uuid().references(() => CaseStudiesTable.id, {
       onDelete: "set null",
     }),
@@ -39,6 +43,7 @@ export const TestimonialsTable = pgTable(
   (table) => [
     index("testimonials_case_study_idx").on(table.caseStudyId),
     index("testimonials_visible_idx").on(table.isVisible),
+    index("testimonials_user_idx").on(table.userId),
   ],
 );
 
@@ -48,6 +53,10 @@ export const testimonialsRelations = relations(
     caseStudy: one(CaseStudiesTable, {
       fields: [TestimonialsTable.caseStudyId],
       references: [CaseStudiesTable.id],
+    }),
+    user: one(UsersTable, {
+      fields: [TestimonialsTable.userId],
+      references: [UsersTable.id],
     }),
   }),
 );

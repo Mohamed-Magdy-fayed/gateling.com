@@ -14,12 +14,12 @@ import {
 import Link from "next/link";
 import { startTransition, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Separator } from "@/components/ui/separator";
 import { Status, StatusIndicator } from "@/components/ui/status";
 import { signOutAction } from "@/features/core/auth/nextjs/actions";
 import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
+import { UserAvatar } from "@/features/core/auth/nextjs/components/user-avatar";
 import { ThemeToggle } from "@/features/core/color-theme/client";
 import { LanguageToggle, useTranslation } from "@/features/core/i18n/client";
 import { getPublicAccountDestination } from "@/features/public-catalog/lib/public-account-destination";
@@ -104,10 +104,18 @@ export function AuthManagerSheetPanel() {
         userEmail={session.user.email}
       />
       <div className="flex flex-col gap-1">
-        <p className="mb-2 truncate px-3 font-medium text-sm">{display}</p>
-        <p className="mb-3 truncate px-3 text-muted-foreground text-xs">
-          {session.user.email}
-        </p>
+        <div className="mb-3 flex items-center gap-3 px-3">
+          <UserAvatar
+            className="size-9 rounded-lg"
+            fallbackClassName="rounded-lg text-sm font-medium"
+          />
+          <div className="grid flex-1 text-start leading-tight">
+            <span className="truncate text-sm font-medium">{display}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {session.user.email}
+            </span>
+          </div>
+        </div>
         <SheetAction>
           <Link
             className="flex w-full items-center gap-3"

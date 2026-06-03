@@ -3,7 +3,7 @@ export default {
     trustIndicator1: "أكتر من 10 نظام اشتغل",
     trustIndicator2: "١٠٠٪ رجعوا يطلبوا مراحل زيادة",
     trustIndicator3: "شراكة بقيادة المؤسس",
-    headlinePart1: "نحن Gateling Solutions",
+    headlinePart1: "في بُوَيْب",
     headlinePart2: "بنصمم أنظمة للفرق اللي عايزة نمو حقيقي",
     leadText:
       "بنتعامل مع المؤسسين ومديري التشغيل علشان نبني منصات معمولة مخصوص تشيل اللخبطة اليدوية، توحّد الفريق، وتخلي القرار مبني على بيانات لحظية.",
@@ -160,8 +160,7 @@ export default {
     method3Value: "الرد غالبًا خلال ساعات قليلة",
     reassurance1: "كل التفاصيل تحت NDA وسرية كاملة",
     reassurance2: "تنفيذ بقيادة المؤسس · تواصل شفاف · نتايج قابلة للقياس",
-    whatsappMessage:
-      "مرحبًا! أود مناقشة مشروع برمجيات مخصص مع Gateling Solutions.",
+    whatsappMessage: "مرحبًا! أود مناقشة مشروع برمجيات مخصص مع بُوَيْب.",
     ctaWhatsApp: "راسلنا على واتساب",
   },
 };

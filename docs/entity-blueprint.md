@@ -205,15 +205,16 @@ Expected primitives:
 - form dialog
 - row actions
 - audit info dialog
+- all columns that makes sense should have filters based on the column type
 
 Conditional primitives:
 
-- select column when row selection is enabled
-- action bar when row selection is enabled
-- bulk action component when bulk actions are enabled
-- import button when import is enabled
-- export button when export is enabled
-- filters that reflect meaningful business dimensions for the entity
+- select column when row selection is enabled (enabled by default)
+- action bar when row selection is enabled (enabled by default)
+- bulk action component when bulk actions are enabled (enabled by default)
+- import button when import is enabled (enabled by default)
+- export button when export is enabled (enabled by default)
+- filters that reflect meaningful business dimensions for the entity (all columns)
 - metrics header when the page needs decision support
 
 Rules:

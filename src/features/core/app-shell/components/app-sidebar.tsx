@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { GatelingLogo } from "@/components/ui/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -70,6 +71,20 @@ export function AppSidebar({ user }: AppSidebarProps) {
       dir={dir}
     >
       <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              tooltip={String(t("logoName"))}
+              render={<Link href="/" />}
+            >
+              <GatelingLogo className="text-primary" />
+              <span className="font-semibold text-primary">
+                {String(t("logoName"))}
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <BranchManager variant="sidebar" />
       </SidebarHeader>
 

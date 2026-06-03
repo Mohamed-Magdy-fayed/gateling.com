@@ -16,7 +16,10 @@ function getInitials(name: string): string {
 export async function TestimonialsSection() {
   const { t } = await getT();
   const caller = await api();
-  const testimonials = await caller.testimonials.publicList().catch(() => []);
+  const allTestimonials = await caller.testimonials
+    .publicList()
+    .catch(() => []);
+  const testimonials = allTestimonials.slice(0, 3);
 
   const stats = [
     {

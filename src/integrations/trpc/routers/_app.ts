@@ -7,6 +7,7 @@ import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import { blogPostsRouter } from "./blog-posts";
 import { branchesRouter } from "./branches";
 import { caseStudiesRouter } from "./case-studies";
+import { clientFeedbackRouter } from "./client-feedback";
 import { leadsRouter } from "./leads";
 import { servicesMgmtRouter } from "./services-mgmt";
 import { settingsRouter } from "./settings";
@@ -48,6 +49,7 @@ export const appRouter = createTRPCRouter({
 
   branches: branchesRouter,
   blogPosts: blogPostsRouter,
+  clientFeedback: clientFeedbackRouter,
   caseStudies: caseStudiesRouter,
   dashboard: dashboardRouter,
   leads: leadsRouter,

@@ -49,7 +49,9 @@ export const leadsRouter = createTRPCRouter({
         .insert(LeadsTable)
         .values(input)
         .returning({ id: LeadsTable.id });
-      await inngest.send(leadSubmittedEvent.create({ leadId: lead.id }));
+      try {
+        await inngest.send(leadSubmittedEvent.create({ leadId: lead.id }));
+      } catch {}
       return { submitted: true };
     }),
 
@@ -111,12 +113,14 @@ export const leadsRouter = createTRPCRouter({
         .update(LeadsTable)
         .set({ status: input.status, updatedAt: new Date() })
         .where(eq(LeadsTable.id, input.id));
-      await inngest.send(
-        leadStatusChangedEvent.create({
-          leadId: input.id,
-          newStatus: input.status,
-        }),
-      );
+      try {
+        await inngest.send(
+          leadStatusChangedEvent.create({
+            leadId: input.id,
+            newStatus: input.status,
+          }),
+        );
+      } catch {}
       return { updated: true };
     }),
 

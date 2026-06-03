@@ -86,9 +86,11 @@ export async function publishBlogPost(ctx: TRPCContext, id: string) {
       updatedBy: session.user.id,
     })
     .where(eq(BlogPostsTable.id, id));
-  await inngest.send(
-    blogPostPublishedEvent.create({ blogPostId: id, slug: existing.slug }),
-  );
+  try {
+    await inngest.send(
+      blogPostPublishedEvent.create({ blogPostId: id, slug: existing.slug }),
+    );
+  } catch {}
   return { published: true };
 }
 

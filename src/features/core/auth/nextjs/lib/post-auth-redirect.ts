@@ -4,8 +4,9 @@ import { SYSTEM_NAV_ITEMS } from "@/features/system/registry";
 
 const EMPLOYEE_HOME_HREF = "/leads";
 
-export function getPostAuthRedirect(user: PartialUser) {
+export function getPostAuthRedirect(user: PartialUser, returnTo?: string) {
   if (user.role === "customer") {
+    if (returnTo?.startsWith("/feedback/")) return returnTo;
     return "/my-account";
   }
 

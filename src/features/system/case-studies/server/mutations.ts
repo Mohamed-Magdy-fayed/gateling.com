@@ -115,9 +115,11 @@ export async function publishCaseStudy(ctx: TRPCContext, id: string) {
     })
     .where(eq(CaseStudiesTable.id, id));
 
-  await inngest.send(
-    caseStudyPublishedEvent.create({ caseStudyId: id, slug: existing.slug }),
-  );
+  try {
+    await inngest.send(
+      caseStudyPublishedEvent.create({ caseStudyId: id, slug: existing.slug }),
+    );
+  } catch {}
 
   return { published: true };
 }

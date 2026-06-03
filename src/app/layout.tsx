@@ -41,7 +41,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/favicon.ico" },
+    { rel: "icon", url: "/icon.svg", type: "image/svg+xml" },
+  ],
 };
 
 const jsonLd = {
@@ -86,7 +89,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={cn(
-        "antialiased font-sans",
+        "overflow-x-hidden antialiased font-sans",
         geistSans.variable,
         geistMono.variable,
         openSans.variable,
@@ -101,7 +104,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="overflow-hidden md:overflow-auto">
+      <body className="overflow-x-hidden md:overflow-auto">
         <Providers locale={locale} theme={theme}>
           {children}
         </Providers>

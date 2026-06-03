@@ -1,10 +1,14 @@
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
-import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ExternalLinkIcon,
+  QuoteIcon,
+  StarIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import { Container, Grid } from "@/components/ui/containers";
@@ -55,6 +59,18 @@ export default async function WorkDetailPage({ params }: Props) {
     .catch(() => null);
 
   if (!cs) notFound();
+
+  const testimonials = await caller.testimonials
+    .publicListByCaseStudy({ caseStudyId: cs.id })
+    .catch(() => []);
+
+  function getInitials(name: string) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return (parts[0]?.[0] ?? "?").toUpperCase();
+    return (
+      (parts[0]?.[0] ?? "") + (parts[parts.length - 1]?.[0] ?? "")
+    ).toUpperCase();
+  }
 
   return (
     <div className="relative min-h-screen bg-linear-to-b from-background via-background to-muted/30 pb-16">
@@ -162,6 +178,54 @@ export default async function WorkDetailPage({ params }: Props) {
             </div>
           )}
         </div>
+
+        {/* Testimonial */}
+        {testimonials.length > 0 && (
+          <div className="mt-16">
+            <h2 className="mb-6 text-2xl font-bold">
+              {t("publicPages.workDetailPage.testimonialHeading")}
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((t2) => (
+                <div
+                  key={t2.id}
+                  className="bg-muted/30 relative flex flex-col rounded-xl border p-6"
+                >
+                  <div className="bg-primary text-primary-foreground absolute -top-3 inset-s-5 flex h-6 w-6 items-center justify-center rounded-full">
+                    <QuoteIcon className="h-3 w-3" />
+                  </div>
+                  {t2.rating && (
+                    <div className="mb-3 flex gap-0.5 pt-2">
+                      {[1, 2, 3, 4, 5].slice(0, t2.rating).map((star) => (
+                        <StarIcon
+                          key={star}
+                          className="fill-primary text-primary h-4 w-4"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-foreground/80 mb-6 flex-1 text-sm leading-relaxed italic">
+                    &ldquo;{t2.content}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <span className="text-primary text-sm font-semibold">
+                        {getInitials(t2.clientName)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{t2.clientName}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {t2.role ? `${t2.role}, ` : ""}
+                        {t2.company}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* CTA */}
         <div className="mt-16 rounded-xl border bg-muted/30 p-8 text-center">

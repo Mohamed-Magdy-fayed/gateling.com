@@ -3,8 +3,8 @@
 import { LayoutDashboardIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 import { LinkButton } from "@/components/general/link-button";
+import { GatelingLogoLink } from "@/components/ui/logo";
 import { AuthManagerHeaderTrigger } from "@/features/core/auth/nextjs/components/auth-manager-header-trigger";
 import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
 import { useTranslation } from "@/features/core/i18n/client";
@@ -43,13 +43,10 @@ export function PublicHeader() {
     >
       <div className="container mx-auto relative flex h-16 items-center px-4 md:px-8">
         {/* Logo: absolutely centered on mobile, static left on desktop */}
-        <Link
-          href="/"
-          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 text-lg font-semibold md:static md:translate-x-0"
-        >
-          <span className="text-primary">Gateling</span>
-          <span className="text-muted-foreground font-normal">Solutions</span>
-        </Link>
+        <GatelingLogoLink
+          iconSize={28}
+          className="absolute left-1/2 -translate-x-1/2 text-lg md:static md:translate-x-0"
+        />
 
         {/* Desktop nav — centered via flex-1 */}
         <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">

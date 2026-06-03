@@ -17,7 +17,7 @@ import {
   MobileTabBar,
   MobileTabLink,
 } from "@/components/general/mobile-tab-bar";
-import { Button } from "@/components/ui/button";
+import { GatelingLogoLink } from "@/components/ui/logo";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -83,17 +83,13 @@ export function PublicLandingMobileTabBar() {
         </SheetTrigger>
         <SheetContent side="bottom" showCloseButton className="gap-0">
           <SheetHeader className="border-b border-border pb-4 text-start">
-            <SheetTitle>Gateling Solutions</SheetTitle>
+            <SheetTitle>
+              <GatelingLogoLink iconSize={22} />
+            </SheetTitle>
             <SheetDescription>{t("landing.authPanelLead")}</SheetDescription>
           </SheetHeader>
           <ScrollArea className="max-h-[min(75dvh,32rem)] p-4 pb-6">
             <AuthManagerSheetPanel />
-            <SheetClose
-              className="mt-4"
-              render={<Button className="w-full" variant="outline" />}
-            >
-              {t("common.close")}
-            </SheetClose>
           </ScrollArea>
         </SheetContent>
       </Sheet>
@@ -138,7 +134,9 @@ export function PublicLandingMobileTabBar() {
         </SheetTrigger>
         <SheetContent side="bottom" showCloseButton className="gap-0">
           <SheetHeader className="border-b border-border pb-4 text-start">
-            <SheetTitle>Gateling Solutions</SheetTitle>
+            <SheetTitle>
+              <GatelingLogoLink iconSize={22} />
+            </SheetTitle>
             <SheetDescription>
               {t("landing.moreSheetDescription")}
             </SheetDescription>
@@ -160,12 +158,6 @@ export function PublicLandingMobileTabBar() {
                 </SheetClose>
               ))}
             </div>
-            <SheetClose
-              className="mt-4"
-              render={<Button className="w-full" variant="outline" />}
-            >
-              {t("common.close")}
-            </SheetClose>
           </ScrollArea>
         </SheetContent>
       </Sheet>

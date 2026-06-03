@@ -16,6 +16,18 @@ import {
   SEED_ADMIN_EMAIL,
   SEED_ADMIN_ID,
   SEED_ADMIN_PASSWORD,
+  SEED_CLIENT_ALAA_EMAIL,
+  SEED_CLIENT_ALAA_ID,
+  SEED_CLIENT_ALAA_PASSWORD,
+  SEED_CLIENT_EMAN_EMAIL,
+  SEED_CLIENT_EMAN_ID,
+  SEED_CLIENT_EMAN_PASSWORD,
+  SEED_CLIENT_HANY_EMAIL,
+  SEED_CLIENT_HANY_ID,
+  SEED_CLIENT_HANY_PASSWORD,
+  SEED_CLIENT_HUSSEIN_EMAIL,
+  SEED_CLIENT_HUSSEIN_ID,
+  SEED_CLIENT_HUSSEIN_PASSWORD,
   SEED_SYSTEM_ACTOR,
   type SeedProfileName,
 } from "./constants";
@@ -279,11 +291,58 @@ async function seedPortfolioContent(
     ])
     .returning({ id: CaseStudiesTable.id });
 
+  // Client users must exist before testimonials that reference them via userId FK
+  const clientUsers = [
+    {
+      id: SEED_CLIENT_ALAA_ID,
+      name: "Alaa El-Kasry",
+      email: SEED_CLIENT_ALAA_EMAIL,
+      password: SEED_CLIENT_ALAA_PASSWORD,
+    },
+    {
+      id: SEED_CLIENT_HANY_ID,
+      name: "Mohamed Hany",
+      email: SEED_CLIENT_HANY_EMAIL,
+      password: SEED_CLIENT_HANY_PASSWORD,
+    },
+    {
+      id: SEED_CLIENT_EMAN_ID,
+      name: "Eman Abd-Elrahman",
+      email: SEED_CLIENT_EMAN_EMAIL,
+      password: SEED_CLIENT_EMAN_PASSWORD,
+    },
+    {
+      id: SEED_CLIENT_HUSSEIN_ID,
+      name: "Hussein Farouk",
+      email: SEED_CLIENT_HUSSEIN_EMAIL,
+      password: SEED_CLIENT_HUSSEIN_PASSWORD,
+    },
+  ];
+
+  for (const client of clientUsers) {
+    await tx.insert(UsersTable).values({
+      id: client.id,
+      createdBy: SEED_SYSTEM_ACTOR,
+      email: client.email,
+      name: client.name,
+      emailVerifiedAt: new Date(),
+      role: "customer",
+    });
+    const passwordHash = await hashPassword(client.password, client.id);
+    await tx.insert(UserCredentialsTable).values({
+      userId: client.id,
+      passwordHash,
+      passwordSalt: client.id,
+    });
+  }
+
   await tx.insert(TestimonialsTable).values([
     {
       clientName: "Alaa El-Kasry",
       company: "Atelier Alaa El-Kasry",
       role: "Creative Director",
+      rating: 5,
+      userId: SEED_CLIENT_ALAA_ID,
       content:
         "Gateling Solutions built a rental platform that tracks gowns, fittings, and deposits without a single spreadsheet. Stylists reserve pieces, clients pay online, and I get alerts before every pickup.",
       caseStudyId: atelier.id,
@@ -295,6 +354,8 @@ async function seedPortfolioContent(
       clientName: "Mohamed Hany",
       company: "Lavida Jungle Play Cafe",
       role: "Operations Manager",
+      rating: 5,
+      userId: SEED_CLIENT_HANY_ID,
       content:
         "Gateling Solutions delivered a cafe POS and reservation system that handles our orders, table bookings, and even plays automated announcements over our speakers. The QR menus and thermal receipt printing work seamlessly every shift.",
       caseStudyId: cafe.id,
@@ -306,6 +367,8 @@ async function seedPortfolioContent(
       clientName: "Eman Abd-Elrahman",
       company: "Eman Abd-Elrahman English Instructor Academy",
       role: "Lead English Instructor",
+      rating: 5,
+      userId: SEED_CLIENT_EMAN_ID,
       content:
         "Gateling Solutions built a teaching management system that now handles enrolments, payments, and curriculum drops. Tutors see their dashboards and I launch new cohorts in minutes.",
       caseStudyId: megz.id,
@@ -317,6 +380,8 @@ async function seedPortfolioContent(
       clientName: "Hussein Farouk",
       company: "Arabian Foods",
       role: "Commercial Director",
+      rating: 5,
+      userId: SEED_CLIENT_HUSSEIN_ID,
       content:
         "Gateling Solutions rebuilt our website into a bilingual story we can update in-house. Distributors finally share one authoritative link when pitching our aged cheeses and private-label lines.",
       caseStudyId: arabian.id,

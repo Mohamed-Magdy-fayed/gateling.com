@@ -13,6 +13,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { GatelingLogoLink } from "@/components/ui/logo";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 
@@ -136,22 +137,14 @@ export function PublicFooter() {
   };
 
   return (
-    <footer className="border-t border-border/50 bg-muted/30">
+    <footer className="overflow-x-hidden border-t border-border/50 bg-muted/30">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main footer content */}
         <div className="py-16">
           <div className="grid gap-8 lg:grid-cols-7">
             {/* Company info */}
             <div className="lg:col-span-2">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-lg font-semibold"
-              >
-                <span className="text-primary">Gateling</span>
-                <span className="font-normal text-muted-foreground">
-                  Solutions
-                </span>
-              </Link>
+              <GatelingLogoLink iconSize={26} className="text-lg" />
 
               <p className="mt-2 max-w-xs text-sm text-muted-foreground">
                 {t("publicPages.footer.description")}
@@ -299,7 +292,7 @@ export function PublicFooter() {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-border/50 py-6 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} {APP_CONFIG.name}.{" "}
+            © {new Date().getFullYear()} {String(t("appName"))}.{" "}
             {t("publicPages.footer.allRightsReserved")}
           </p>
           <div className="flex items-center gap-4">
