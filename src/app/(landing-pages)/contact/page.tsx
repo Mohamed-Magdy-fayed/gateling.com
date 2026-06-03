@@ -1,6 +1,6 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 
-import { Container, Section } from "@/components/ui/containers";
+import { Container, Section, SectionHeader } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { generateWhatsAppUrl } from "@/lib/phone";
 
@@ -21,11 +21,17 @@ export default async function ContactPage() {
     t("publicPages.contactPage.whatsappMessage"),
   );
 
-  const contactItems = [
+  const contactMethods = [
     {
       icon: "📧",
       label: t("publicPages.contactPage.emailLabel"),
-      value: "info@gateling.com",
+      value: t("publicPages.contactPage.emailValue"),
+      href: "mailto:info@gateling.com",
+    },
+    {
+      icon: "📞",
+      label: t("publicPages.contactPage.phoneLabel"),
+      value: t("publicPages.contactPage.phoneValue"),
       href: undefined,
     },
     {
@@ -35,54 +41,103 @@ export default async function ContactPage() {
       href: whatsappUrl,
     },
     {
-      icon: "⏱",
-      label: t("publicPages.contactPage.responseLabel"),
-      value: t("publicPages.contactPage.responseValue"),
+      icon: "📅",
+      label: t("publicPages.contactPage.meetingLabel"),
+      value: t("publicPages.contactPage.meetingValue"),
       href: undefined,
     },
   ];
 
+  const faqItems = [
+    {
+      q: t("publicPages.contactPage.faq1Q"),
+      a: t("publicPages.contactPage.faq1A"),
+    },
+    {
+      q: t("publicPages.contactPage.faq2Q"),
+      a: t("publicPages.contactPage.faq2A"),
+    },
+    {
+      q: t("publicPages.contactPage.faq3Q"),
+      a: t("publicPages.contactPage.faq3A"),
+    },
+    {
+      q: t("publicPages.contactPage.faq4Q"),
+      a: t("publicPages.contactPage.faq4A"),
+    },
+  ];
+
   return (
-    <Section>
-      <Container size="wide">
-        <div className="grid gap-12 md:grid-cols-2">
-          <div>
-            <h1 className="text-4xl font-bold">
-              {t("publicPages.contactPage.heading")}
-            </h1>
-            <p className="text-muted-foreground mt-4 text-lg">
-              {t("publicPages.contactPage.subheading")}
-            </p>
+    <>
+      <Section variant="compact">
+        <Container size="wide">
+          <div className="grid gap-12 md:grid-cols-2">
+            {/* Left: heading + contact methods */}
+            <div>
+              <h1 className="text-4xl font-bold">
+                {t("publicPages.contactPage.heading")}
+              </h1>
+              <p className="text-muted-foreground mt-4 text-lg">
+                {t("publicPages.contactPage.subheading")}
+              </p>
 
-            <div className="mt-10 space-y-6">
-              {contactItems.map((item) => (
-                <div key={item.label} className="flex items-center gap-4">
-                  <span className="text-2xl">{item.icon}</span>
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      {item.label}
-                    </p>
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-primary font-medium transition-colors"
-                      >
-                        {item.value}
-                      </a>
-                    ) : (
-                      <p className="font-medium">{item.value}</p>
-                    )}
+              <div className="mt-10 space-y-5">
+                {contactMethods.map((item) => (
+                  <div key={item.label} className="flex items-start gap-4">
+                    <span className="mt-0.5 text-2xl">{item.icon}</span>
+                    <div>
+                      <p className="font-semibold">{item.label}</p>
+                      {item.href ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline text-sm"
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">
+                          {item.value}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
 
-          <ContactForm />
-        </div>
-      </Container>
-    </Section>
+              <p className="text-muted-foreground mt-8 rounded-lg border bg-muted/30 px-4 py-3 text-sm">
+                {t("publicPages.contactPage.availabilityInfo")}
+              </p>
+            </div>
+
+            {/* Right: form */}
+            <ContactForm />
+          </div>
+        </Container>
+      </Section>
+
+      {/* FAQ */}
+      <Section variant="compact">
+        <Container size="wide">
+          <SectionHeader heading={t("publicPages.contactPage.faqTitle")} />
+          <div className="mt-6 space-y-4">
+            {faqItems.map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-xl border bg-muted/20 px-5 py-4"
+              >
+                <summary className="cursor-pointer list-none font-semibold group-open:mb-3">
+                  {item.q}
+                </summary>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </Container>
+      </Section>
+    </>
   );
 }

@@ -1,4 +1,8 @@
 import homeAr from "@/app/(landing-pages)/_translations/home-ar";
+import aboutAr from "@/app/(landing-pages)/about/_translations/about-ar";
+import contactAr from "@/app/(landing-pages)/contact/_translations/contact-ar";
+import servicesAr from "@/app/(landing-pages)/services/_translations/services-ar";
+import workAr from "@/app/(landing-pages)/work/_translations/work-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -785,122 +789,9 @@ export default {
       stat3Description: "من أول مكالمة إلى منتج حي، بوتيرة تناسب فريقك.",
       viewWork: "اطلع على دراسات الحالة",
     },
-    servicesPage: {
-      metaTitle: "خدمات البرمجيات المخصصة وأتمتة الأعمال | غيتلينج سوليوشنز",
-      metaDescription:
-        "تطوير برمجيات مخصصة، أتمتة العمليات، وتكامل الذكاء الاصطناعي للمطاعم والمدارس والتجزئة والفعاليات. استشارة مجانية 30 دقيقة. مصر والشرق الأوسط.",
-      heading: "حلول أعمال متكاملة",
-      subheading:
-        "من التطبيقات المخصصة إلى أتمتة الذكاء الاصطناعي — نبني ونسلّم من البداية للنهاية.",
-      service1Icon: "⚙️",
-      service1Title: "تطوير برمجيات مخصصة",
-      service1Description:
-        "أنظمة إدارة أعمال مصممة خصيصًا للمقاهي والمدارس والتجزئة والفعاليات. نبني ما لا تستطيع البرمجيات الجاهزة فعله.",
-      service1Feature1: "ثنائي اللغة عربي + إنجليزي بالكامل",
-      service1Feature2: "يعمل على الجوال ومتجاوب",
-      service1Feature3: "تحكم في الصلاحيات حسب الدور",
-      service1Feature4: "بيانات فورية وتقارير لحظية",
-      service2Icon: "🤖",
-      service2Title: "أتمتة عمليات الأعمال",
-      service2Description:
-        "تخلص من العمل اليدوي، قلل الأخطاء، وخفض التكاليف التشغيلية. نؤتمت سير عملك حتى يركز فريقك على ما يهم.",
-      service2Feature1: "رسم وتحسين مسارات العمل",
-      service2Feature2: "إشعارات وتنبيهات تلقائية",
-      service2Feature3: "توليد المستندات والإيصالات",
-      service2Feature4: "معالجة المهام في الخلفية",
-      service3Icon: "🧠",
-      service3Title: "تكامل الذكاء الاصطناعي",
-      service3Description:
-        "أدخل الذكاء الاصطناعي في عملياتك اليومية. أتمت تفاعلات العملاء، استخرج رؤى من البيانات، وعزز اتخاذ القرار.",
-      service3Feature1: "إعلانات مدعومة بالذكاء الاصطناعي (تحويل نص لكلام)",
-      service3Feature2: "جدولة وحجز ذكية",
-      service3Feature3: "تحليل البيانات والتنبؤ",
-      service3Feature4: "رؤى سلوك العملاء",
-      service4Icon: "🔄",
-      service4Title: "استشارات التحول الرقمي",
-      service4Description:
-        "لا تعرف من أين تبدأ؟ نراجع عملياتك الحالية، نحدد المكاسب السريعة، ونضع خارطة طريق رحلتك الرقمية.",
-      service4Feature1: "تقييم الوضع الراهن",
-      service4Feature2: "إرشاد اختيار التقنية",
-      service4Feature3: "خارطة طريق التنفيذ",
-      service4Feature4: "تدريب الفريق والتسليم",
-      ctaHeading: "لا تعرف أي خدمة تناسب مشكلتك؟",
-      ctaDescription:
-        "احجز استشارة مجانية 30 دقيقة. سنشخص المشكلة ونوصي بالمقاربة الصحيحة.",
-      ctaButton: "احصل على استشارة مجانية",
-    },
-    aboutPage: {
-      metaTitle:
-        "من نحن — Gateling Solutions، استوديو هندسة برمجيات وتصميم منتجات",
-      metaDescription:
-        "بنساعد المؤسسين وفِرق المنتجات على تخطيط وتصميم وإطلاق برمجيات متكاملة تشعر بالانسجام من أول اسكتش وحتى النشر النهائي.",
-      heading: "استوديو هندسة برمجيات وتصميم منتجات",
-      intro:
-        "بنساعد المؤسسين وفِرق المنتجات على تخطيط وتصميم وإطلاق برمجيات متكاملة تشعر بالانسجام من أول اسكتش وحتى النشر النهائي.",
-      problemHeading: "المشكلة التي نحلها",
-      problemDescription:
-        "المقاهي تدير الحجوزات على الورق. المدارس تتتبع التسجيل عبر واتساب. متاجر التجزئة تحسب النقد يدويًا كل ليلة. هذه ليست إزعاجات بسيطة — إنها ساعات مهدرة أسبوعيًا، وأخطاء تكلف المال، وبيانات لا تُسجَّل أبدًا.",
-      whatWeDoHeading: "ماذا نفعل",
-      whatWeDoDescription:
-        "نبني برمجيات مخصصة تتناسب تمامًا مع طريقة عمل شركتك — لا العكس. نبدأ بفهم المشكلة، ثم نصمم حلًا يُزيلها. كل منتج ثنائي اللغة (عربي + إنجليزي)، يعمل على الجوال، ومبني للنمو.",
-      valuesHeading: "كيف بنتعامل مع كل بناء",
-      value1Title: "تفكير منتجي",
-      value1Description:
-        "بنحوّل الأفكار الخام لخرائط طريق واضحة، وقصص مستخدمين، ومؤشرات نجاح قبل ما نكتب أي سطر كود.",
-      value2Title: "الوضوح التام",
-      value2Description: "لا مصطلحات تقنية. ستفهم بالضبط ما نبنيه ولماذا.",
-      value3Title: "شراكة طويلة الأمد",
-      value3Description: "نبني علاقات دائمة، لا مشاريع آنية.",
-      cta: "ابدأ محادثة",
-    },
-    workDetailPage: {
-      backToWork: "العودة إلى أعمالنا",
-      challengeHeading: "التحدي",
-      solutionHeading: "الحل",
-      resultsHeading: "النتائج",
-      viewLiveApp: "عرض التطبيق الحي",
-      ctaDescription: "هل لديك مشكلة مماثلة في عملك؟",
-      ctaButton: "لنتحدث",
-      notFoundTitle: "دراسة الحالة غير موجودة",
-      notFoundDescription: "قد لا تكون دراسة الحالة هذه منشورة بعد.",
-    },
-    workPage: {
-      metaTitle:
-        "دراسات الحالة — نتائج حقيقية لأعمال حقيقية | غيتلينج سوليوشنز",
-      metaDescription:
-        "اطلع على كيف ساعدنا مقهى في أتمتة النداءات، ومدرسة في رقمنة التسجيل، وأتيليه في إدارة الإيجارات متعدد الفروع. أثر حقيقي ونتائج قابلة للقياس.",
-      heading: "أعمال بنيناها — نتائج حقيقية لأعمال حقيقية",
-      subheading: "كل مشروع يبدأ بمشكلة مؤلمة. إليك كيف حللناها.",
-      challengeLabel: "التحدي",
-      solutionLabel: "الحل",
-      atelierClient: "أتيلييه علاء القصري",
-      atelierIndustry: "الموضة / التجزئة",
-      atelierProblem:
-        "تعارضات الحجوزات، التتبع الورقي عبر الفروع، لا رؤية فورية للمخزون.",
-      atelierSolution:
-        "مجموعة إدارة ثنائية اللغة — مخزون واعٍ بالفروع، حجوزات رقمية، تتبع المدفوعات، تحكم في الصلاحيات، مشاركة الإيصالات عبر واتساب.",
-      atelierResult: "70% أقل وقت إداري عبر +2 فرع",
-      atelierLiveUrl: "https://atelier.gateling.com/",
-      cafeClient: "لافيدا جانجل بلاي كافيه",
-      cafeIndustry: "المأكولات والمشروبات",
-      cafeProblem:
-        "فقدان نداءات عائلات منطقة الأطفال بسبب الموسيقى؛ الحجوزات تُدار ورقيًا؛ لا محاسبة يومية للنقد.",
-      cafeSolution:
-        "نظام حجز + مُعلن ذكاء اصطناعي بتحويل نص لكلام يخفت الموسيقى تلقائيًا وينادي أسماء العائلات عبر سماعات المقهى؛ تقارير إغلاق نقدي يومية.",
-      cafeResult: "صفر نداءات مفقودة، تسوية نقدية يومية كاملة",
-      cafeLiveUrl: "https://cafe.gateling.com/",
-      megzClient: "ميجز كورسز",
-      megzIndustry: "التعليم",
-      megzProblem:
-        "تسجيل الطلاب عبر واتساب؛ خط المبيعات غير مرئي؛ المدرسون بدون وصول رقمي للمواد.",
-      megzSolution:
-        "نظام CRM متكامل — خط مبيعات، لوحات وكلاء مبيعات، بوابات المدرسين، مواد دراسية رقمية، إدارة اختبارات التحديد، وصول متعدد الأدوار.",
-      megzResult: "+500 طالب رُقِّمت بياناتهم، صفر عملاء محتملين مفقودين",
-      megzLiveUrl: "https://tms.gateling.com/",
-      viewLiveApp: "عرض التطبيق الحي",
-      ctaDescription: "لديك مشكلة مماثلة؟",
-      ctaButton: "لنتحدث",
-    },
+    ...servicesAr,
+    ...aboutAr,
+    ...workAr,
     blogPage: {
       metaTitle:
         "المدونة — رؤى أتمتة الأعمال والبرمجيات المخصصة | غيتلينج سوليوشنز",
@@ -913,36 +804,7 @@ export default {
       getInTouch: "تواصل معنا",
       readMore: "اقرأ المزيد ←",
     },
-    contactPage: {
-      metaTitle: "تواصل معنا — برمجيات مخصصة وأتمتة | Gateling Solutions",
-      metaDescription:
-        "أخبرنا بأكبر مشكلة في عملك. سنصمم حلًا مخصصًا ونقدملك استشارة مجانية. مصر والشرق الأوسط وحول العالم.",
-      heading: "احكيلنا عن السيستم اللي فريقك محتاجه",
-      subheading:
-        "سواء بتبني منصة جديدة أو عايز تطوّر الموجود، هنشتغل معاك على خريطة طريق نتائجها ملموسة.",
-      emailLabel: "البريد الإلكتروني",
-      whatsappLabel: "واتساب",
-      whatsappValue: "راسلنا مباشرة",
-      responseLabel: "وقت الاستجابة",
-      responseValue: "خلال 24 ساعة",
-      whatsappMessage: "مرحبًا! أود مناقشة مشروع برمجيات مخصص.",
-      formNameLabel: "الاسم",
-      formNamePlaceholder: "اسمك",
-      formEmailLabel: "البريد الإلكتروني",
-      formEmailPlaceholder: "you@company.com",
-      formCompanyLabel: "الشركة",
-      formCompanyPlaceholder: "اسم الشركة (اختياري)",
-      formPhoneLabel: "الهاتف / واتساب",
-      formPhonePlaceholder: "+20 10 ...",
-      formMessageLabel: "أخبرنا عن أكبر تحدياتك",
-      formMessagePlaceholder: "شارك أهدافك، التحديات، أو أي لينكات مفيدة…",
-      formSubmit: "إرسال الرسالة",
-      formSubmitting: "جاري الإرسال...",
-      formSuccess: "تم إرسال رسالتك! سنتواصل معك خلال 24 ساعة.",
-      formError: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      formValidation: "يرجى ملء الاسم والبريد الإلكتروني والرسالة.",
-      formDisclaimer: "نرد خلال 24 ساعة. لا رسائل مزعجة، لا ضغط.",
-    },
+    ...contactAr,
   },
   copyright: dt("© {year:date} {appName}. جميع الحقوق محفوظة.", {
     date: { year: { year: "numeric" } },

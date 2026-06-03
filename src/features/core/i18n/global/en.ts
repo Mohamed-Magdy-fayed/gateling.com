@@ -1,4 +1,8 @@
 import homeEn from "@/app/(landing-pages)/_translations/home-en";
+import aboutEn from "@/app/(landing-pages)/about/_translations/about-en";
+import contactEn from "@/app/(landing-pages)/contact/_translations/contact-en";
+import servicesEn from "@/app/(landing-pages)/services/_translations/services-en";
+import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -804,126 +808,9 @@ export default {
       stat3Description: "From first call to live product, paced to your team.",
       viewWork: "See the case studies",
     },
-    servicesPage: {
-      metaTitle:
-        "Custom Software & Business Automation Services | Gateling Solutions",
-      metaDescription:
-        "Custom software development, process automation, and AI integration for restaurants, schools, retail, and events. Free 30-min consultation. Egypt & MENA.",
-      heading: "Full-Stack Business Solutions",
-      subheading:
-        "From custom apps to AI automation — we build and deliver end-to-end.",
-      service1Icon: "⚙️",
-      service1Title: "Custom Software Development",
-      service1Description:
-        "Purpose-built business management systems for cafes, schools, retail, and events. We build what off-the-shelf software can't do.",
-      service1Feature1: "Fully bilingual EN + AR",
-      service1Feature2: "Mobile-ready and responsive",
-      service1Feature3: "Role-based access control",
-      service1Feature4: "Real-time data and reporting",
-      service2Icon: "🤖",
-      service2Title: "Business Process Automation",
-      service2Description:
-        "Eliminate manual work, reduce errors, and cut operational costs. We automate your workflows so your team focuses on what matters.",
-      service2Feature1: "Workflow mapping and optimization",
-      service2Feature2: "Automated notifications and alerts",
-      service2Feature3: "Document and receipt generation",
-      service2Feature4: "Background job processing",
-      service3Icon: "🧠",
-      service3Title: "AI Integration",
-      service3Description:
-        "Bring AI into your daily operations. Automate customer interactions, extract insights from data, and enhance decision-making.",
-      service3Feature1: "AI-powered announcements (TTS)",
-      service3Feature2: "Smart scheduling and booking",
-      service3Feature3: "Data analysis and predictions",
-      service3Feature4: "Customer behavior insights",
-      service4Icon: "🔄",
-      service4Title: "Digital Transformation Consulting",
-      service4Description:
-        "Not sure where to start? We audit your current processes, identify quick wins, and build a roadmap for your digital journey.",
-      service4Feature1: "Current state assessment",
-      service4Feature2: "Technology selection guidance",
-      service4Feature3: "Implementation roadmap",
-      service4Feature4: "Team training and handover",
-      ctaHeading: "Not sure which service fits your problem?",
-      ctaDescription:
-        "Book a free 30-minute consultation. We'll diagnose the pain and recommend the right approach.",
-      ctaButton: "Get Free Consultation",
-    },
-    aboutPage: {
-      metaTitle:
-        "About Gateling Solutions — Software Engineering & Product Design Studio",
-      metaDescription:
-        "We help founders and product teams plan, design, and launch custom software that stays cohesive from first sketch to final deployment. Egypt & MENA.",
-      heading: "Software Engineering & Product Design Studio",
-      intro:
-        "We help founders and product teams plan, design, and launch thoughtful software that stays cohesive from first sketch to final deployment.",
-      problemHeading: "The Problem We Solve",
-      problemDescription:
-        "Cafes manage reservations on paper. Schools track enrollment through WhatsApp. Retail stores reconcile cash by hand every night. These are not small annoyances — they're hours of wasted time every week, errors that cost money, and data that never gets captured.",
-      whatWeDoHeading: "What We Do",
-      whatWeDoDescription:
-        "We build custom software that fits exactly how your business works — not the other way around. We start by understanding the pain, then design and build a solution that eliminates it. Every product is bilingual (English + Arabic), mobile-ready, and built to scale.",
-      valuesHeading: "How We Approach Every Build",
-      value1Title: "Product Thinking",
-      value1Description:
-        "We translate raw ideas into clear roadmaps, user stories, and success metrics before a line of code is written.",
-      value2Title: "Radical Clarity",
-      value2Description:
-        "No jargon. You understand exactly what we're building and why.",
-      value3Title: "Long-term Partnership",
-      value3Description:
-        "We build lasting relationships, not one-off projects.",
-      cta: "Start a Conversation",
-    },
-    workDetailPage: {
-      backToWork: "Back to Our Work",
-      challengeHeading: "The Challenge",
-      solutionHeading: "The Solution",
-      resultsHeading: "Results",
-      viewLiveApp: "View Live App",
-      ctaDescription: "Have a similar problem in your business?",
-      ctaButton: "Let's Talk",
-      notFoundTitle: "Case Study Not Found",
-      notFoundDescription: "This case study may not be published yet.",
-    },
-    workPage: {
-      metaTitle:
-        "Case Studies — Real Results for Real Businesses | Gateling Solutions",
-      metaDescription:
-        "See how we helped a cafe automate callouts, a school digitize enrollment, and an atelier manage multi-branch rentals. Real impact, measurable results.",
-      heading: "Work We've Built — Real Results for Real Businesses",
-      subheading:
-        "Every project starts with a painful problem. Here's how we solved them.",
-      challengeLabel: "Challenge",
-      solutionLabel: "Solution",
-      atelierClient: "Atelier Alaa El-Kasry",
-      atelierIndustry: "Fashion / Retail",
-      atelierProblem:
-        "Reservation conflicts, paper tracking across branches, no real-time inventory visibility.",
-      atelierSolution:
-        "Bilingual (EN/AR) admin suite — branch-aware inventory, digital reservations, payment tracking, employee role-based access, WhatsApp receipt sharing.",
-      atelierResult: "70% less admin time across 2+ branches",
-      atelierLiveUrl: "https://atelier.gateling.com/",
-      cafeClient: "Lavida Jungle Play Cafe",
-      cafeIndustry: "Food & Beverage",
-      cafeProblem:
-        "Kids area families missed because staff called names over music; reservations managed on paper; no daily cash accountability.",
-      cafeSolution:
-        "Reservation system + AI TTS announcer that auto-ducks background music and broadcasts family names over cafe PC speakers; daily cash closure reports.",
-      cafeResult: "Zero missed callouts, full daily cash reconciliation",
-      cafeLiveUrl: "https://cafe.gateling.com/",
-      megzClient: "Megz Courses",
-      megzIndustry: "Education",
-      megzProblem:
-        "Student enrollment via WhatsApp; sales pipeline invisible; teachers had no digital access to course materials.",
-      megzSolution:
-        "Full CRM — lead pipeline, sales agent dashboards, teacher portals, digital course materials, placement test management, multi-role access.",
-      megzResult: "500+ students fully digitized, zero lost leads",
-      megzLiveUrl: "https://tms.gateling.com/",
-      viewLiveApp: "View Live App",
-      ctaDescription: "Have a similar problem?",
-      ctaButton: "Let's Talk",
-    },
+    ...servicesEn,
+    ...aboutEn,
+    ...workEn,
     blogPage: {
       metaTitle:
         "Blog — Business Automation & Custom Software Insights | Gateling Solutions",
@@ -936,37 +823,7 @@ export default {
       getInTouch: "Get in touch",
       readMore: "Read more →",
     },
-    contactPage: {
-      metaTitle:
-        "Get in Touch — Custom Software & Automation | Gateling Solutions",
-      metaDescription:
-        "Tell us your biggest business problem. We'll design a custom solution and give you a free consultation. Egypt, MENA & worldwide.",
-      heading: "Tell Us About the System Your Team Needs",
-      subheading:
-        "Whether you're shaping a new platform or evolving something that already exists, we'll help you map the path to measurable outcomes.",
-      emailLabel: "Email",
-      whatsappLabel: "WhatsApp",
-      whatsappValue: "Message us directly",
-      responseLabel: "Response time",
-      responseValue: "Within 24 hours",
-      whatsappMessage: "Hi! I'd like to discuss a custom software project.",
-      formNameLabel: "Name",
-      formNamePlaceholder: "Your name",
-      formEmailLabel: "Email",
-      formEmailPlaceholder: "you@company.com",
-      formCompanyLabel: "Company",
-      formCompanyPlaceholder: "Company name (optional)",
-      formPhoneLabel: "Phone / WhatsApp",
-      formPhonePlaceholder: "+20 10 ...",
-      formMessageLabel: "Tell us about your biggest challenge",
-      formMessagePlaceholder: "Share goals, challenges, or helpful links…",
-      formSubmit: "Send Message",
-      formSubmitting: "Sending...",
-      formSuccess: "Message sent! We'll be in touch within 24 hours.",
-      formError: "Something went wrong. Please try again.",
-      formValidation: "Please fill in your name, email, and message.",
-      formDisclaimer: "We respond within 24 hours. No spam, no pressure.",
-    },
+    ...contactEn,
   },
   copyright: dt("© {year:date} {appName}. all rights reserved.", {
     date: { year: { year: "numeric" } },
