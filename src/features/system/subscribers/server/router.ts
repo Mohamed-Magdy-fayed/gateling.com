@@ -36,18 +36,22 @@ export const subscribersRouter = createTRPCRouter({
           .update(SubscribersTable)
           .set({ status: "active", confirmedAt: null })
           .where(eq(SubscribersTable.id, existing.id));
-        await inngest.send(
-          subscriberCreatedEvent.create({ subscriberId: existing.id }),
-        );
+        try {
+          await inngest.send(
+            subscriberCreatedEvent.create({ subscriberId: existing.id }),
+          );
+        } catch {}
         return { subscribed: true };
       }
       const [sub] = await ctx.db
         .insert(SubscribersTable)
         .values({ email: input.email.toLowerCase() })
         .returning({ id: SubscribersTable.id });
-      await inngest.send(
-        subscriberCreatedEvent.create({ subscriberId: sub.id }),
-      );
+      try {
+        await inngest.send(
+          subscriberCreatedEvent.create({ subscriberId: sub.id }),
+        );
+      } catch {}
       return { subscribed: true };
     }),
 
