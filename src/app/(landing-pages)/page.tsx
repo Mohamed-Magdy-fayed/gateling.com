@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { CapabilitiesSection } from "./_components/capabilities-section";
 import { FinalCtaSection } from "./_components/final-cta-section";
 import { HeroSection } from "./_components/hero-section";
 import { NewsletterSection } from "./_components/newsletter-section";
@@ -9,10 +10,9 @@ import { ValuePropositionSection } from "./_components/value-proposition-section
 import { WorkPreviewSection } from "./_components/work-preview-section";
 
 export const metadata: Metadata = {
-  title:
-    "Custom Software Development & Business Automation | Gateling Solutions",
+  title: "Gateling Solutions — Software Engineering & Product Design Studio",
   description:
-    "We find the most painful points in your business and resolve them with custom software and AI. Serving cafes, schools, retail & events across Egypt and MENA.",
+    "We partner with founders and operations leads to build custom platforms that clear the manual chaos, keep teams unified, and base every decision on live data. Egypt & MENA.",
 };
 
 export default function HomePage() {
@@ -20,9 +20,10 @@ export default function HomePage() {
     <>
       <HeroSection />
       <ValuePropositionSection />
+      <CapabilitiesSection />
       <WorkPreviewSection />
-      <TestimonialsSection />
       <ProcessSection />
+      <TestimonialsSection />
       <NewsletterSection />
       <FinalCtaSection />
     </>
