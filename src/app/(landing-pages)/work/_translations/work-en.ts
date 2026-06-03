@@ -7,13 +7,19 @@ export default {
     heading: "Work We've Built — Real Results for Real Businesses",
     subheading:
       "Every project starts with a painful problem. Here's how we solved them.",
+    heroDescription:
+      "A curated selection of platforms, systems, and automations built for real businesses across Egypt and MENA.",
     challengeLabel: "Challenge",
     solutionLabel: "Solution",
+    noResults: "No published case studies yet. Check back soon.",
     ctaDescription: "Have a similar problem?",
     ctaButton: "Let's Talk",
   },
   workDetailPage: {
     backToWork: "Back to Our Work",
+    clientLabel: "Client",
+    industryLabel: "Industry",
+    liveAppLabel: "View Live App",
     challengeHeading: "The Challenge",
     solutionHeading: "The Solution",
     resultsHeading: "Results",

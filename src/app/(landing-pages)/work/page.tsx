@@ -28,16 +28,21 @@ export default async function WorkPage() {
             {t("publicPages.workPage.heading")}
           </h1>
           <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg">
-            {t("publicPages.workPage.subheading")}
+            {t("publicPages.workPage.heroDescription")}
           </p>
         </Container>
       </Section>
 
       <Section>
-        <Container size="narrow">
-          <div className="space-y-8">
+        <Container>
+          {cases.length === 0 && (
+            <p className="text-muted-foreground text-center">
+              {t("publicPages.workPage.noResults")}
+            </p>
+          )}
+          <div className="grid gap-6 sm:grid-cols-2">
             {cases.map((cs) => (
-              <WorkCaseCard key={cs.slug} cs={cs} variant="full" />
+              <WorkCaseCard key={cs.slug} cs={cs} variant="preview" />
             ))}
           </div>
 

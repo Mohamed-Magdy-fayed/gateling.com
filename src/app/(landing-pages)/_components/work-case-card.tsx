@@ -1,4 +1,5 @@
 import { ArrowRightIcon, ExternalLinkIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ export type WorkCase = {
   solution: string;
   results: CaseStudyResults;
   liveUrl: string | null;
+  coverImageUrl: string | null | undefined;
 };
 
 type Props = {
@@ -26,22 +28,35 @@ export async function WorkCaseCard({ cs, variant }: Props) {
 
   if (variant === "preview") {
     return (
-      <div className="group bg-background relative flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:ring-1 hover:ring-primary/20">
-        {firstMetric && (
-          <div className="bg-primary/8 border-b px-5 py-3">
-            <p className="text-primary text-sm font-semibold">
-              {"✦"} {firstMetric.value} — {firstMetric.label}
-            </p>
+      <div className="group bg-background flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+        {cs.coverImageUrl ? (
+          <div className="relative aspect-video w-full overflow-hidden">
+            <Image
+              src={cs.coverImageUrl}
+              alt={cs.client}
+              fill
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+        ) : (
+          <div className="aspect-video w-full bg-muted/40 flex items-center justify-center">
+            <span className="text-muted-foreground text-sm">{cs.industry}</span>
           </div>
         )}
         <div className="flex flex-1 flex-col p-5">
           <Badge variant="secondary" className="mb-3 w-fit">
             {cs.industry}
           </Badge>
+          {firstMetric && (
+            <p className="text-primary mb-2 text-sm font-semibold">
+              {"✦"} {firstMetric.value} — {firstMetric.label}
+            </p>
+          )}
           <h3 className="mb-2 font-bold transition-colors group-hover:text-primary">
             {cs.client}
           </h3>
-          <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
+          <p className="text-muted-foreground flex-1 text-sm leading-relaxed line-clamp-3">
             {cs.problemStatement}
           </p>
           <div className="mt-4 flex items-center justify-between gap-2">
@@ -80,7 +95,9 @@ export async function WorkCaseCard({ cs, variant }: Props) {
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           {firstMetric && (
-            <p className="text-primary font-bold">→ {firstMetric.value} {firstMetric.label}</p>
+            <p className="text-primary font-bold">
+              {"→"} {firstMetric.value} {firstMetric.label}
+            </p>
           )}
           {cs.liveUrl && (
             <a

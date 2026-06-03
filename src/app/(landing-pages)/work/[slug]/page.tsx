@@ -4,9 +4,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
-import { Container, Grid, Section } from "@/components/ui/containers";
+import { Container, Grid } from "@/components/ui/containers";
 import { db } from "@/drizzle";
 import { CaseStudiesTable } from "@/drizzle/schema";
 import { getT } from "@/features/core/i18n/server";
@@ -56,33 +57,31 @@ export default async function WorkDetailPage({ params }: Props) {
   if (!cs) notFound();
 
   return (
-    <>
-      {/* ── Header ── */}
-      <Section variant="compact">
-        <Container size="narrow">
-          <Link
-            href="/work"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
-          >
-            <ArrowLeftIcon className="h-3.5 w-3.5" />
-            {t("publicPages.workDetailPage.backToWork")}
-          </Link>
+    <div className="relative min-h-screen bg-linear-to-b from-background via-background to-muted/30 pb-16">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-linear-to-b from-primary/10 via-transparent to-transparent blur-3xl"
+      />
 
-          {cs.coverImageUrl && (
-            <div className="relative mt-6 h-64 overflow-hidden rounded-xl border md:h-80">
-              <Image
-                src={cs.coverImageUrl}
-                alt={cs.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
+      <Container className="pt-12">
+        {/* Back link */}
+        <Link
+          href="/work"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5" />
+          {t("publicPages.workDetailPage.backToWork")}
+        </Link>
 
-          <div className="mt-6">
-            <Badge variant="secondary">{cs.industry}</Badge>
-            <h1 className="mt-3 text-4xl font-bold md:text-5xl">{cs.title}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-4">
+        {/* Two-column header + body */}
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1.7fr,1fr]">
+          {/* Left: content */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Badge variant="secondary">{cs.industry}</Badge>
+              <h1 className="text-4xl font-bold leading-tight md:text-5xl">
+                {cs.title}
+              </h1>
               <p className="text-muted-foreground text-lg">{cs.client}</p>
               {cs.liveUrl && (
                 <a
@@ -96,14 +95,7 @@ export default async function WorkDetailPage({ params }: Props) {
                 </a>
               )}
             </div>
-          </div>
-        </Container>
-      </Section>
 
-      {/* ── Body ── */}
-      <Section>
-        <Container size="narrow">
-          <div className="space-y-12">
             {/* Challenge */}
             <div>
               <h2 className="text-2xl font-bold">
@@ -156,17 +148,31 @@ export default async function WorkDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="mt-16 rounded-xl border bg-muted/30 p-8 text-center">
-            <p className="text-lg font-medium">
-              {t("publicPages.workDetailPage.ctaDescription")}
-            </p>
-            <LinkButton href="/contact" size="lg" className="mt-4">
-              {t("publicPages.workDetailPage.ctaButton")}
-            </LinkButton>
-          </div>
-        </Container>
-      </Section>
-    </>
+          {/* Right: sticky cover image */}
+          {cs.coverImageUrl && (
+            <div className="sticky top-24 self-start overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
+              <Image
+                src={cs.coverImageUrl}
+                alt={cs.title}
+                width={960}
+                height={540}
+                priority
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-16 rounded-xl border bg-muted/30 p-8 text-center">
+          <p className="text-lg font-medium">
+            {t("publicPages.workDetailPage.ctaDescription")}
+          </p>
+          <LinkButton href="/contact" size="lg" className="mt-4">
+            {t("publicPages.workDetailPage.ctaButton")}
+          </LinkButton>
+        </div>
+      </Container>
+    </div>
   );
 }
