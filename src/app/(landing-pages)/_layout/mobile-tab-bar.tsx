@@ -3,6 +3,7 @@
 import {
   BookOpenIcon,
   BriefcaseIcon,
+  CircleUserIcon,
   HomeIcon,
   InfoIcon,
   MenuIcon,
@@ -18,7 +19,6 @@ import {
 } from "@/components/general/mobile-tab-bar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetClose,
@@ -29,34 +29,76 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { AuthManagerSheetPanel } from "@/features/core/auth/nextjs/components/auth-manager/auth-manager-sheet-panel";
+import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
+import { UserAvatar } from "@/features/core/auth/nextjs/components/user-avatar";
 import { useTranslation } from "@/features/core/i18n/client";
 import { getPublicTabIndex } from "@/features/public-catalog/lib/public-tabs";
 import { cn } from "@/lib/utils";
 
 export function PublicLandingMobileTabBar() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const pathname = usePathname() ?? "/";
   const activeIndex = getPublicTabIndex(pathname);
-  const isMoreActive = activeIndex === 4;
+  const isMoreActive = activeIndex === 3;
 
+  // Columns 2–4: Work | Home | Services
   const tabs = [
-    { href: "/", icon: HomeIcon, label: t("landing.tabHome") },
     { href: "/work", icon: BriefcaseIcon, label: t("landing.tabWork") },
+    { href: "/", icon: HomeIcon, label: t("landing.tabHome") },
     { href: "/services", icon: WrenchIcon, label: t("landing.tabServices") },
+  ] as const;
+
+  // More sheet links: Contact, Blog, About
+  const moreNav = [
     {
       href: "/contact",
       icon: MessageSquareIcon,
       label: t("landing.tabContact"),
     },
-  ] as const;
-
-  const moreNav = [
     { href: "/blog", icon: BookOpenIcon, label: t("publicPages.nav.blog") },
     { href: "/about", icon: InfoIcon, label: t("publicPages.nav.about") },
   ] as const;
 
   return (
     <MobileTabBar ariaLabel={t("landing.mobileTabBarLabel")} columnCount={5}>
+      {/* Column 1: Account / Profile */}
+      <Sheet>
+        <SheetTrigger
+          render={
+            <button
+              type="button"
+              className="relative flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 py-2 text-[0.625rem] font-medium text-muted-foreground transition-colors hover:text-foreground active:bg-muted/60"
+            />
+          }
+        >
+          {isAuthenticated ? (
+            <UserAvatar className="size-[1.35rem]" />
+          ) : (
+            <CircleUserIcon className="size-[1.35rem] shrink-0" aria-hidden />
+          )}
+          <span className="line-clamp-2 text-center leading-tight">
+            {t("landing.tabAccount")}
+          </span>
+        </SheetTrigger>
+        <SheetContent side="bottom" showCloseButton className="gap-0">
+          <SheetHeader className="border-b border-border pb-4 text-start">
+            <SheetTitle>Gateling Solutions</SheetTitle>
+            <SheetDescription>{t("landing.authPanelLead")}</SheetDescription>
+          </SheetHeader>
+          <ScrollArea className="max-h-[min(75dvh,32rem)] p-4 pb-6">
+            <AuthManagerSheetPanel />
+            <SheetClose
+              className="mt-4"
+              render={<Button className="w-full" variant="outline" />}
+            >
+              {t("common.close")}
+            </SheetClose>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Columns 2–4: Work | Home (center) | Services */}
       {tabs.map((tab, index) => (
         <MobileTabLink
           key={tab.href}
@@ -66,6 +108,8 @@ export function PublicLandingMobileTabBar() {
           active={activeIndex === index}
         />
       ))}
+
+      {/* Column 5: More */}
       <Sheet>
         <SheetTrigger
           render={
@@ -100,7 +144,6 @@ export function PublicLandingMobileTabBar() {
             </SheetDescription>
           </SheetHeader>
           <ScrollArea className="max-h-[min(75dvh,32rem)] p-4 pb-6">
-            {/* Secondary nav links (Blog, About) */}
             <div className="flex flex-col gap-1">
               {moreNav.map((item) => (
                 <SheetClose
@@ -117,8 +160,6 @@ export function PublicLandingMobileTabBar() {
                 </SheetClose>
               ))}
             </div>
-            <Separator className="my-4" />
-            <AuthManagerSheetPanel />
             <SheetClose
               className="mt-4"
               render={<Button className="w-full" variant="outline" />}

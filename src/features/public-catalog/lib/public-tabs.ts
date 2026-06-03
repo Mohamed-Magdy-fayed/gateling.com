@@ -12,21 +12,26 @@ export const PUBLIC_SITE_PATHS = [
 ] as const;
 
 export const PUBLIC_MOBILE_TABS = [
-  { href: "/", key: "home" },
   { href: "/work", key: "work" },
+  { href: "/", key: "home" },
   { href: "/services", key: "services" },
-  { href: "/contact", key: "contact" },
 ] as const;
 
 export type PublicMobileTabKey = (typeof PUBLIC_MOBILE_TABS)[number]["key"];
 
+/** Returns the active tab index for the tabs array [Work=0, Home=1, Services=2].
+ *  Profile (col 1) is not a tab index. More sheet returns 3. */
 export function getPublicTabIndex(pathname: string): number {
-  if (pathname === "/") return 0;
-  if (pathname.startsWith("/work")) return 1;
+  if (pathname.startsWith("/work")) return 0;
+  if (pathname === "/") return 1;
   if (pathname.startsWith("/services") || pathname.startsWith("/tools"))
     return 2;
-  if (pathname.startsWith("/contact")) return 3;
-  // Blog and About live in the "More" sheet
-  if (pathname.startsWith("/blog") || pathname.startsWith("/about")) return 4;
+  // Contact, Blog, About live in the "More" sheet
+  if (
+    pathname.startsWith("/contact") ||
+    pathname.startsWith("/blog") ||
+    pathname.startsWith("/about")
+  )
+    return 3;
   return -1;
 }

@@ -1,3 +1,4 @@
+import homeEn from "@/app/(landing-pages)/_translations/home-en";
 import authEn from "@/features/core/auth/translations/auth-en";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -146,9 +147,10 @@ export default {
     tabWork: "Work",
     tabServices: "Services",
     tabContact: "Contact",
+    tabAccount: "Account",
     tabMore: "More",
     mobileTabBarLabel: "Site navigation",
-    moreSheetDescription: "Sign in, change language, or browse more pages.",
+    moreSheetDescription: "Browse more pages.",
     myAccount: "My Account",
     workspace: "Workspace",
   },
@@ -738,40 +740,7 @@ export default {
       navPrivacy: "Privacy",
       navTerms: "Terms",
     },
-    hero: {
-      eyebrow: "Business Technology & AI Consulting",
-      heading: "We Design Systems for Teams Chasing Real Growth",
-      description:
-        "We work with founders and operations leads to build custom platforms that clear the manual chaos, keep teams unified, and base every decision on live data.",
-      ctaContact: "Get in Touch",
-      ctaWork: "Browse Projects",
-      stat1Value: "10+",
-      stat1Label: "Systems Shipped",
-      stat2Value: "100%",
-      stat2Label: "Returned for More",
-      stat3Value: "Egypt & MENA",
-      stat3Label: "Client Base",
-      stat4Value: "24h",
-      stat4Label: "Response Time",
-    },
-    valueProposition: {
-      eyebrow: "How We Work",
-      heading: "Why Teams Choose to Work With Us",
-      subheading:
-        "We mix product strategy, service design, and engineering so every system feels tailor-made and delivers tangible wins.",
-      step1Label: "Step 1",
-      step1Title: "Identify the Pain",
-      step1Description:
-        "We go deep into your operations to find exactly what's slowing you down — before writing a single line of code.",
-      step2Label: "Step 2",
-      step2Title: "Build the Solution",
-      step2Description:
-        "Purpose-built software designed around your workflows, not someone else's template. Bilingual, mobile-ready, fully custom.",
-      step3Label: "Step 3",
-      step3Title: "Measure the Impact",
-      step3Description:
-        "We track the metrics that matter — time saved, errors eliminated, revenue captured — so you see the return.",
-    },
+    ...homeEn,
     workPreview: {
       eyebrow: "Success Stories",
       heading: "Work We've Built",
@@ -796,40 +765,6 @@ export default {
       megzResult: "500+ students fully digitized",
       megzLiveUrl: "https://tms.gateling.com/",
       viewLiveApp: "View Live App",
-    },
-    process: {
-      eyebrow: "Our Process",
-      heading: "Our Process",
-      subheading: "From first call to live product in weeks, not months.",
-      step1Number: "01",
-      step1Title: "Discover",
-      step1Description:
-        "We spend time understanding your business — the broken processes, the manual work, the missed opportunities.",
-      step2Number: "02",
-      step2Title: "Design",
-      step2Description:
-        "We map out exactly what to build: the features, the data model, the user flows. You approve before we write code.",
-      step3Number: "03",
-      step3Title: "Build",
-      step3Description:
-        "We build iteratively and demo as we go. Bilingual, mobile-ready, secure, and fast.",
-      step4Number: "04",
-      step4Title: "Support",
-      step4Description:
-        "We train your team, hand over the keys, and stay available for improvements and new features.",
-    },
-    newsletter: {
-      heading: "Get Business Automation Insights",
-      description:
-        "Practical tips on custom software, AI automation, and digital transformation — straight to your inbox.",
-      placeholder: "your@email.com",
-      subscribe: "Subscribe",
-      subscribing: "Subscribing...",
-      alreadySubscribed: "You're already subscribed!",
-      success: "Check your inbox for a confirmation email.",
-      error: "Something went wrong. Please try again.",
-      noSpam: "No spam. Unsubscribe any time.",
-      invalidEmail: "Please enter a valid email address.",
     },
     testimonialsSection: {
       eyebrow: "Client Voices",
@@ -868,15 +803,6 @@ export default {
       stat3Label: "Typical delivery",
       stat3Description: "From first call to live product, paced to your team.",
       viewWork: "See the case studies",
-    },
-    finalCta: {
-      heading: "Let's Architect the System Your Team Keeps Asking For",
-      description:
-        "Share where the friction lives, and we'll help you design, build, and roll out a platform that unlocks the next stage of growth.",
-      ctaContact: "Book a Strategy Call",
-      ctaWhatsApp: "WhatsApp Us",
-      whatsappMessage:
-        "Hi! I'd like to discuss a custom software project with Gateling Solutions.",
     },
     servicesPage: {
       metaTitle:

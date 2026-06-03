@@ -26,6 +26,8 @@ import type { User } from "@/drizzle/schema";
 import { SYSTEM_MOBILE_PRIMARY_SCREEN_KEYS } from "@/features/core/app-shell/lib/mobile-nav";
 import { SYSTEM_NAV_ITEMS } from "@/features/core/app-shell/lib/nav";
 import { hasPermission } from "@/features/core/auth/core/permissions";
+import { AuthManagerSheetPanel } from "@/features/core/auth/nextjs/components/auth-manager/auth-manager-sheet-panel";
+import { UserAvatar } from "@/features/core/auth/nextjs/components/user-avatar";
 import { ThemeToggle } from "@/features/core/color-theme/client";
 import { LanguageToggle, useTranslation } from "@/features/core/i18n/client";
 import { cn } from "@/lib/utils";
@@ -70,13 +72,46 @@ export function SystemMobileTabBar({ user }: { user: User }) {
 
   if (primaryNav.length === 0) return null;
 
-  const tabColumnCount = primaryNav.length + 1;
+  // Profile col (1) + primary nav cols + More col (1)
+  const tabColumnCount = primaryNav.length + 2;
 
   return (
     <MobileTabBar
       ariaLabel={String(t("systemPages.mobileTabBarLabel"))}
       columnCount={tabColumnCount}
     >
+      {/* Column 1: Profile / Account */}
+      <Sheet>
+        <SheetTrigger
+          render={
+            <button
+              type="button"
+              className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 py-2 text-[0.625rem] font-medium text-muted-foreground transition-colors hover:text-foreground active:bg-muted/60"
+            />
+          }
+        >
+          <UserAvatar className="size-[1.35rem]" />
+          <span className="line-clamp-2 text-center leading-tight">
+            {String(t("landing.tabAccount"))}
+          </span>
+        </SheetTrigger>
+        <SheetContent className="gap-0" side="bottom" showCloseButton>
+          <SheetHeader className="border-b border-border pb-4 text-start">
+            <SheetTitle>{user.name || user.email}</SheetTitle>
+            <SheetDescription>{user.email}</SheetDescription>
+          </SheetHeader>
+          <ScrollArea className="flex max-h-[min(70dvh,28rem)] flex-col gap-2 p-4">
+            <AuthManagerSheetPanel />
+            <SheetClose
+              render={<Button className="mt-4 w-full" variant="outline" />}
+            >
+              {String(t("common.close"))}
+            </SheetClose>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Columns 2–(n+1): Primary nav — Leads | Dashboard | Work */}
       {primaryNav.map(({ href, translationKey, Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
@@ -89,6 +124,8 @@ export function SystemMobileTabBar({ user }: { user: User }) {
           />
         );
       })}
+
+      {/* Last column: More */}
       <Sheet>
         <SheetTrigger
           render={

@@ -1,3 +1,4 @@
+import homeAr from "@/app/(landing-pages)/_translations/home-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -144,9 +145,10 @@ export default {
     tabWork: "الأعمال",
     tabServices: "الخدمات",
     tabContact: "تواصل",
+    tabAccount: "الحساب",
     tabMore: "المزيد",
     mobileTabBarLabel: "تنقل الموقع",
-    moreSheetDescription: "سجّل دخولك أو غيّر اللغة أو تصفح مزيدًا من الصفحات.",
+    moreSheetDescription: "تصفح مزيدًا من الصفحات.",
     myAccount: "حسابي",
     workspace: "مساحة العمل",
   },
@@ -721,40 +723,7 @@ export default {
       navPrivacy: "الخصوصية",
       navTerms: "الشروط",
     },
-    hero: {
-      eyebrow: "تكنولوجيا الأعمال والذكاء الاصطناعي",
-      heading: "بنصمم أنظمة للفرق اللي عايزة نمو حقيقي",
-      description:
-        "بنتعامل مع المؤسسين ومديري التشغيل علشان نبني منصات معمولة خصيصًا تشيل الفوضى اليدوية، توحّد الفريق، وتخلّي القرار مبني على بيانات لحظية.",
-      ctaContact: "تواصل معنا",
-      ctaWork: "استعرض المشاريع",
-      stat1Value: "+10",
-      stat1Label: "نظام منفّذ",
-      stat2Value: "100%",
-      stat2Label: "عادوا لمراحل جديدة",
-      stat3Value: "مصر والشرق الأوسط",
-      stat3Label: "قاعدة العملاء",
-      stat4Value: "24 ساعة",
-      stat4Label: "وقت الاستجابة",
-    },
-    valueProposition: {
-      eyebrow: "كيف نعمل",
-      heading: "ليه الفرق تختار Gateling Solutions",
-      subheading:
-        "بنمزج استراتيجية المنتج، تصميم الخدمات، والهندسة علشان كل سيستم يبقى مفصّل ويحقق مكاسب ملموسة.",
-      step1Label: "الخطوة 1",
-      step1Title: "تحديد المشكلة",
-      step1Description:
-        "ندرس عملياتك بعمق لنحدد بالضبط ما يعيقك — قبل كتابة سطر كود واحد.",
-      step2Label: "الخطوة 2",
-      step2Title: "بناء الحل",
-      step2Description:
-        "برمجيات مصممة حول سير عملك، لا حول قوالب جاهزة. ثنائية اللغة، تعمل على الجوال، مخصصة بالكامل.",
-      step3Label: "الخطوة 3",
-      step3Title: "قياس الأثر",
-      step3Description:
-        "نتابع المقاييس المهمة — الوقت الموفر، الأخطاء المُلغاة، الإيرادات المُحققة — حتى ترى العائد بنفسك.",
-    },
+    ...homeAr,
     workPreview: {
       eyebrow: "قصص النجاح",
       heading: "أعمال بنيناها",
@@ -779,40 +748,6 @@ export default {
       megzResult: "+500 طالب رُقِّمت بياناتهم",
       megzLiveUrl: "https://tms.gateling.com/",
       viewLiveApp: "عرض التطبيق الحي",
-    },
-    process: {
-      eyebrow: "عمليتنا",
-      heading: "عمليتنا",
-      subheading: "من أول مكالمة إلى منتج حي في أسابيع، لا أشهر.",
-      step1Number: "01",
-      step1Title: "الاستكشاف",
-      step1Description:
-        "نقضي وقتًا في فهم عملك — العمليات المعطلة، العمل اليدوي، والفرص الضائعة.",
-      step2Number: "02",
-      step2Title: "التصميم",
-      step2Description:
-        "نخطط بالضبط ما سيُبنى: المميزات، نموذج البيانات، مسارات المستخدم. تعتمده قبل أن نكتب كودًا.",
-      step3Number: "03",
-      step3Title: "البناء",
-      step3Description:
-        "نبني بشكل تكراري ونعرض التقدم أولًا بأول. ثنائي اللغة، يعمل على الجوال، آمن وسريع.",
-      step4Number: "04",
-      step4Title: "الدعم",
-      step4Description:
-        "ندرّب فريقك، نسلمك المفاتيح، ونبقى متاحين للتحسينات والمميزات الجديدة.",
-    },
-    newsletter: {
-      heading: "احصل على رؤى أتمتة الأعمال",
-      description:
-        "نصائح عملية حول البرمجيات المخصصة وأتمتة الذكاء الاصطناعي والتحول الرقمي — مباشرة إلى بريدك.",
-      placeholder: "بريدك@الإلكتروني.com",
-      subscribe: "اشترك",
-      subscribing: "جاري الاشتراك...",
-      alreadySubscribed: "أنت مشترك بالفعل!",
-      success: "تحقق من بريدك الوارد لرسالة التأكيد.",
-      error: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      noSpam: "لا رسائل مزعجة. إلغاء الاشتراك في أي وقت.",
-      invalidEmail: "يرجى إدخال بريد إلكتروني صحيح.",
     },
     testimonialsSection: {
       eyebrow: "آراء العملاء",
@@ -849,15 +784,6 @@ export default {
       stat3Label: "مدة التسليم المعتادة",
       stat3Description: "من أول مكالمة إلى منتج حي، بوتيرة تناسب فريقك.",
       viewWork: "اطلع على دراسات الحالة",
-    },
-    finalCta: {
-      heading: "تعالى نصمّم السيستم اللي فريقك محتاجه",
-      description:
-        "شارك مكان الاحتكاك، وإحنا هنساعدك تصمم، تبني، وتطلق منصة تفتح مرحلة النمو اللي بعدها.",
-      ctaContact: "احجز مكالمة استراتيجية",
-      ctaWhatsApp: "راسلنا على واتساب",
-      whatsappMessage:
-        "مرحبًا! أود مناقشة مشروع برمجيات مخصص مع غيتلينج سوليوشنز.",
     },
     servicesPage: {
       metaTitle: "خدمات البرمجيات المخصصة وأتمتة الأعمال | غيتلينج سوليوشنز",
