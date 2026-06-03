@@ -22,10 +22,10 @@ export function PublicHeader() {
   }, []);
 
   const nav = [
-    { label: t("publicPages.nav.services"), href: "/services" },
-    { label: t("publicPages.nav.work"), href: "/work" },
-    { label: t("publicPages.nav.blog"), href: "/blog" },
     { label: t("publicPages.nav.about"), href: "/about" },
+    { label: t("publicPages.nav.work"), href: "/work" },
+    { label: t("publicPages.nav.services"), href: "/services" },
+    { label: t("publicPages.nav.blog"), href: "/blog" },
   ];
 
   const isAdmin =

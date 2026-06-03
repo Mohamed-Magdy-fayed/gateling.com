@@ -8,7 +8,12 @@ import {
 } from "lucide-react";
 
 import { LinkButton } from "@/components/general/link-button";
-import { Container, Grid, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  Container,
+  Grid,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
 const CAP_ICONS = [

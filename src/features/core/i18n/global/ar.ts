@@ -143,6 +143,11 @@ export default {
       slugFormat: "يجب أن يحتوي الرابط على أحرف صغيرة وأرقام وشرطات فقط.",
       branchShortCode: "استخدم 2-8 أحرف أو أرقام (مثال: MAIN).",
     },
+    imageUpload: {
+      success: "تم رفع الصورة بنجاح.",
+      error: "فشل رفع الصورة. يرجى المحاولة مرة أخرى.",
+      uploading: "جارٍ الرفع...",
+    },
   },
   landing: {
     headerAccountMenu: "قائمة الحساب",
@@ -818,7 +823,7 @@ export default {
       readMore: "اقرأ المزيد ←",
     },
     ...contactAr,
-    ...feedbackAr,
+    feedbackPage: feedbackAr.feedbackPage,
   },
   copyright: dt("© {year:date} {appName}. جميع الحقوق محفوظة.", {
     date: { year: { year: "numeric" } },

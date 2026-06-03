@@ -9,18 +9,16 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-background md:h-auto md:min-h-screen md:overflow-visible">
-      <PublicHeader />
-      <div className="flex min-h-0 flex-1 flex-col">
-        {/* overflow-x-clip (not hidden) avoids creating an X scroll container that pushes the Y scrollbar off-screen */}
-        {/* overscroll-y-contain stops scroll-chaining to the body when main hits its boundary */}
+    <div className="relative flex h-svh flex-col overflow-hidden bg-background md:h-auto md:min-h-screen md:overflow-visible">
+      <div className=" flex min-h-0 flex-1 flex-col">
+        <PublicHeader />
         <main className="min-h-0 flex-1 overflow-x-clip overflow-y-auto md:overflow-visible">
           {children}
           <PublicFooter />
+          <WhatsAppFloatButton />
         </main>
         <PublicLandingMobileTabBar />
       </div>
-      <WhatsAppFloatButton />
     </div>
   );
 }

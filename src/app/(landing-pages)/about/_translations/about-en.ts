@@ -25,11 +25,16 @@ export default {
     visionDescription:
       "We work in focused sprints with clear deliverables, async-friendly communication, and the flexibility to embed into your existing team or operate as your dedicated build partner.",
     whyChooseUsTitle: "Why teams hire us",
-    whyUs1: "Discovery workshops that uncover the real problem before budget is committed.",
-    whyUs2: "Design systems and component libraries tailored to your roadmap and brand.",
-    whyUs3: "Full-stack builds across React, TypeScript, Node.js, and cloud-native deployments.",
-    whyUs4: "Automated QA, observability, and analytics instrumentation baked in from sprint one.",
-    whyUs5: "Fractional product leadership to mentor your team and hand off with clarity.",
+    whyUs1:
+      "Discovery workshops that uncover the real problem before budget is committed.",
+    whyUs2:
+      "Design systems and component libraries tailored to your roadmap and brand.",
+    whyUs3:
+      "Full-stack builds across React, TypeScript, Node.js, and cloud-native deployments.",
+    whyUs4:
+      "Automated QA, observability, and analytics instrumentation baked in from sprint one.",
+    whyUs5:
+      "Fractional product leadership to mentor your team and hand off with clarity.",
     valuesTitle: "How we approach every build",
     valuesDescription:
       "From first workshop to final deploy, we stay focused on clarity, craftsmanship, and measurable outcomes.",

@@ -105,12 +105,8 @@
           "name": "biometric_credentials_user_id_users_id_fk",
           "tableFrom": "biometric_credentials",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -163,12 +159,8 @@
           "name": "branch_memberships_branchId_branches_id_fk",
           "tableFrom": "branch_memberships",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branchId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branchId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -176,12 +168,8 @@
           "name": "branch_memberships_userId_users_id_fk",
           "tableFrom": "branch_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,10 +177,7 @@
       "compositePrimaryKeys": {
         "branch_memberships_branchId_userId_pk": {
           "name": "branch_memberships_branchId_userId_pk",
-          "columns": [
-            "branchId",
-            "userId"
-          ]
+          "columns": ["branchId", "userId"]
         }
       },
       "uniqueConstraints": {},
@@ -307,12 +292,8 @@
           "name": "branches_ownerId_users_id_fk",
           "tableFrom": "branches",
           "tableTo": "users",
-          "columnsFrom": [
-            "ownerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ownerId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -401,12 +382,8 @@
           "name": "user_credentials_userId_users_id_fk",
           "tableFrom": "user_credentials",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -518,12 +495,8 @@
           "name": "user_oauth_accounts_userId_users_id_fk",
           "tableFrom": "user_oauth_accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -531,10 +504,7 @@
       "compositePrimaryKeys": {
         "user_oauth_accounts_providerAccountId_provider_pk": {
           "name": "user_oauth_accounts_providerAccountId_provider_pk",
-          "columns": [
-            "providerAccountId",
-            "provider"
-          ]
+          "columns": ["providerAccountId", "provider"]
         }
       },
       "uniqueConstraints": {},
@@ -605,12 +575,8 @@
           "name": "user_tokens_userId_users_id_fk",
           "tableFrom": "user_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -620,9 +586,7 @@
         "user_tokens_tokenHash_unique": {
           "name": "user_tokens_tokenHash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tokenHash"
-          ]
+          "columns": ["tokenHash"]
         }
       },
       "policies": {},
@@ -911,9 +875,7 @@
         "blog_posts_slug_unique": {
           "name": "blog_posts_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1082,9 +1044,7 @@
         "case_studies_slug_unique": {
           "name": "case_studies_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1345,9 +1305,7 @@
         "services_slug_unique": {
           "name": "services_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1431,9 +1389,7 @@
         "subscribers_email_unique": {
           "name": "subscribers_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1564,12 +1520,8 @@
           "name": "testimonials_caseStudyId_case_studies_id_fk",
           "tableFrom": "testimonials",
           "tableTo": "case_studies",
-          "columnsFrom": [
-            "caseStudyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["caseStudyId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1677,9 +1629,7 @@
         "settings_code_unique": {
           "name": "settings_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -1691,72 +1641,42 @@
     "public.oauth_provider": {
       "name": "oauth_provider",
       "schema": "public",
-      "values": [
-        "google"
-      ]
+      "values": ["google"]
     },
     "public.user_token_type": {
       "name": "user_token_type",
       "schema": "public",
-      "values": [
-        "email_verification",
-        "password_reset",
-        "device_trust",
-        "otp"
-      ]
+      "values": ["email_verification", "password_reset", "device_trust", "otp"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "super_admin",
-        "admin",
-        "employee",
-        "customer"
-      ]
+      "values": ["super_admin", "admin", "employee", "customer"]
     },
     "public.blog_post_status": {
       "name": "blog_post_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
+      "values": ["draft", "published"]
     },
     "public.case_study_status": {
       "name": "case_study_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "values": ["draft", "published", "archived"]
     },
     "public.lead_status": {
       "name": "lead_status",
       "schema": "public",
-      "values": [
-        "new",
-        "contacted",
-        "qualified",
-        "closed"
-      ]
+      "values": ["new", "contacted", "qualified", "closed"]
     },
     "public.subscriber_status": {
       "name": "subscriber_status",
       "schema": "public",
-      "values": [
-        "active",
-        "unsubscribed"
-      ]
+      "values": ["active", "unsubscribed"]
     },
     "public.settings_label": {
       "name": "settings_label",
       "schema": "public",
-      "values": [
-        "policy",
-        "integration"
-      ]
+      "values": ["policy", "integration"]
     }
   },
   "schemas": {},

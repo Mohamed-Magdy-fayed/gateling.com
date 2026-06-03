@@ -1,6 +1,7 @@
 import { QuoteIcon, StarIcon } from "lucide-react";
 
 import { LinkButton } from "@/components/general/link-button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Container, Section, SectionHeader } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
@@ -75,9 +76,15 @@ export async function TestimonialsSection() {
 
               <div className="flex items-center gap-3">
                 <div className="bg-primary/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                  <span className="text-primary text-sm font-semibold">
-                    {getInitials(client.clientName)}
-                  </span>
+                  <Avatar className="after:border-0">
+                    <AvatarImage
+                      src={client.avatarUrl || ""}
+                      alt={client.clientName}
+                    />
+                    <AvatarFallback className="bg-transparent">
+                      {getInitials(client.clientName)}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{client.clientName}</p>

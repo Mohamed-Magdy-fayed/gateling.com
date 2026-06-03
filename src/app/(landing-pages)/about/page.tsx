@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 
 import { LinkButton } from "@/components/general/link-button";
-import { Container, Grid, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  Container,
+  Grid,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -136,8 +141,12 @@ export default async function AboutPage() {
           <ul className="space-y-3">
             {whyItems.map((item) => (
               <li key={item} className="flex items-start gap-3">
-                <span className="text-primary mt-0.5 shrink-0 text-lg">{"✓"}</span>
-                <span className="text-muted-foreground leading-relaxed">{item}</span>
+                <span className="text-primary mt-0.5 shrink-0 text-lg">
+                  {"✓"}
+                </span>
+                <span className="text-muted-foreground leading-relaxed">
+                  {item}
+                </span>
               </li>
             ))}
           </ul>

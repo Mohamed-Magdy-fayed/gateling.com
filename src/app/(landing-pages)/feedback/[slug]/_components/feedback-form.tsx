@@ -26,7 +26,7 @@ type Props = {
   caseStudy: CaseStudy;
   testimonial: Testimonial;
   user: User;
-  projectFeatures: string[];
+  projectFeatures: readonly string[];
 };
 
 const feedbackSchema = z.object({

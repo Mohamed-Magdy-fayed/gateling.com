@@ -9,7 +9,12 @@ import {
   ZapIcon,
 } from "lucide-react";
 
-import { Container, Grid, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  Container,
+  Grid,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
 export async function ValuePropositionSection() {

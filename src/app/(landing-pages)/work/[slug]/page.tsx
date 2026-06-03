@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import { Container, Grid } from "@/components/ui/containers";
@@ -50,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function WorkDetailPage({ params }: Props) {
+async function WorkDetailContent({ params }: Props) {
   const { slug } = await params;
   const { t } = await getT();
   const caller = await api();
@@ -238,5 +239,13 @@ export default async function WorkDetailPage({ params }: Props) {
         </div>
       </Container>
     </div>
+  );
+}
+
+export default async function WorkDetailPage({ params }: Props) {
+  return (
+    <Suspense>
+      <WorkDetailContent params={params} />
+    </Suspense>
   );
 }

@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from "react";
+import { Suspense } from "react";
 
 import { BackLink } from "@/components/general/back-link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,27 +10,34 @@ import { getT } from "@/features/core/i18n/server";
 
 type AuthLayoutProps = PropsWithChildren;
 
-export default async function AuthLayout({ children }: AuthLayoutProps) {
+async function AuthNav() {
   const { t } = await getT();
+  return (
+    <div className="flex items-center gap-2 justify-between">
+      <BackLink
+        variant={"link"}
+        className="ps-0"
+        href="/"
+        text={t("authTranslations.backToHome")}
+      />
+      <div className="flex gap-2 items-center">
+        <ThemeToggle />
+        <LanguageToggle />
+      </div>
+    </div>
+  );
+}
 
+export default async function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6">
       <div className="w-full max-w-sm md:max-w-4xl">
         <Card className="overflow-hidden p-0">
           <CardContent className="grid p-0 md:grid-cols-2">
             <div className="p-6">
-              <div className="flex items-center gap-2 justify-between">
-                <BackLink
-                  variant={"link"}
-                  className="ps-0"
-                  href="/"
-                  text={t("authTranslations.backToHome")}
-                />
-                <div className="flex gap-2 items-center">
-                  <ThemeToggle />
-                  <LanguageToggle />
-                </div>
-              </div>
+              <Suspense>
+                <AuthNav />
+              </Suspense>
               {children}
             </div>
             <div className="relative hidden bg-muted p-6 md:block">

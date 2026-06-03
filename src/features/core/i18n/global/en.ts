@@ -145,6 +145,11 @@ export default {
       slugFormat: "Slug must be lowercase letters, numbers, and hyphens only.",
       branchShortCode: "Use 2–8 letters or numbers (e.g. CAI, MAIN).",
     },
+    imageUpload: {
+      success: "Photo uploaded successfully.",
+      error: "Failed to upload photo. Please try again.",
+      uploading: "Uploading...",
+    },
   },
   landing: {
     headerAccountMenu: "Account menu",
@@ -838,7 +843,7 @@ export default {
       readMore: "Read more →",
     },
     ...contactEn,
-    ...feedbackEn,
+    feedbackPage: feedbackEn.feedbackPage,
   },
   copyright: dt("© {year:date} {appName}. all rights reserved.", {
     date: { year: { year: "numeric" } },

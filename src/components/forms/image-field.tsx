@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ImageUpIcon, UploadCloudIcon } from "lucide-react";
+import { ImageUpIcon, Loader2Icon, UploadCloudIcon } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import type { FileUploadProps } from "@/components/ui/file-upload";
@@ -12,6 +12,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { FormBase, type FormFieldProps } from "./form-base";
 import { useFieldContext } from "./hooks";
@@ -22,11 +23,13 @@ export function FormImageField({
   ...props
 }: FormFieldProps & { placeholder?: string }) {
   const field = useFieldContext<string | null>();
+  const { t } = useTranslation();
   const trpc = useTRPC();
   const { mutateAsync: uploadImage, isPending: isUploading } = useMutation(
     trpc.uploadImage.mutationOptions(),
   );
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const currentUrl = field.state.value;
 
   const onUpload: NonNullable<FileUploadProps["onUpload"]> = useCallback(
     async (files, options) => {
@@ -72,17 +75,15 @@ export function FormImageField({
           options.onProgress(file, 100);
           options.onSuccess(file);
           field.setValue(uploadedUrl);
-        } catch (error) {
-          const uploadError =
-            error instanceof Error
-              ? error
-              : new Error("An unknown error occurred");
-          options.onError(file, uploadError);
-          toast.error(uploadError.message);
+          toast.success(t("forms.imageUpload.success" as never));
+        } catch {
+          const errMsg = t("forms.imageUpload.error" as never);
+          options.onError(file, new Error(errMsg));
+          toast.error(errMsg);
         }
       }
     },
-    [field, uploadImage],
+    [field, uploadImage, t],
   );
 
   return (
@@ -97,7 +98,19 @@ export function FormImageField({
       >
         <InputGroup>
           <InputGroupAddon>
-            <ImageUpIcon />
+            {isUploading ? (
+              <Loader2Icon className="animate-spin" />
+            ) : currentUrl ? (
+              // biome-ignore lint/performance/noImgElement: thumbnail preview from user-uploaded URL
+              <img
+                src={currentUrl}
+                alt=""
+                aria-hidden
+                className="size-5 rounded-full object-cover"
+              />
+            ) : (
+              <ImageUpIcon />
+            )}
           </InputGroupAddon>
           <InputGroupInput
             aria-invalid={isInvalid}
@@ -109,7 +122,12 @@ export function FormImageField({
             onChange={(e) =>
               field.handleChange(e.target.value ? e.target.value : null)
             }
-            placeholder={placeholder}
+            placeholder={
+              isUploading
+                ? (t("forms.imageUpload.uploading" as never) as string)
+                : placeholder
+            }
+            readOnly={isUploading}
             value={field.state.value ?? ""}
           />
           <InputGroupAddon align="inline-end">

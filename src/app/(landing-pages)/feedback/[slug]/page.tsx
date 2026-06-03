@@ -31,7 +31,8 @@ export default async function FeedbackPage({ params }: Props) {
   const locale = await getLocaleCookie();
   const featureMap =
     locale === "ar" ? feedbackAr.projectFeatures : feedbackEn.projectFeatures;
-  const projectFeatures = (featureMap as Record<string, string[]>)[slug] ?? [];
+  const projectFeatures =
+    (featureMap as Record<string, readonly string[]>)[slug] ?? [];
 
   const caller = await api();
   let data: Awaited<ReturnType<typeof caller.clientFeedback.getForCaseStudy>>;
