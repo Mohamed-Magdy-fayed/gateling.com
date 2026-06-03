@@ -736,13 +736,25 @@ export default {
     },
     footer: {
       tagline: "Building software that solves real business problems.",
+      description:
+        "We find the most painful points in your business and resolve them using technology and AI.",
+      workTogetherTitle: "Work Together",
+      companyTitle: "Company",
+      resourcesTitle: "Resources",
       navServices: "Services",
       navWork: "Our Work",
       navBlog: "Blog",
       navAbout: "About",
       navContact: "Contact",
+      navProcess: "Our Process",
+      navTestimonials: "Testimonials",
       navPrivacy: "Privacy",
       navTerms: "Terms",
+      location: "Cairo, Egypt · Remote-first",
+      newsletterTitle: "Stay in the Loop",
+      newsletterDescription:
+        "Occasional insights on business automation and AI from the Gateling team.",
+      allRightsReserved: "All rights reserved.",
     },
     ...homeEn,
     workPreview: {

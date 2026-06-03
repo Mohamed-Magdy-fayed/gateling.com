@@ -12,8 +12,9 @@ export default function LandingPagesLayout({
     <div className="flex h-svh flex-col overflow-hidden bg-background md:h-auto md:min-h-screen md:overflow-visible">
       <PublicHeader />
       <div className="flex min-h-0 flex-1 flex-col">
-        {/* scrollable on mobile, natural on desktop */}
-        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:overflow-visible">
+        {/* overflow-x-clip (not hidden) avoids creating an X scroll container that pushes the Y scrollbar off-screen */}
+        {/* overscroll-y-contain stops scroll-chaining to the body when main hits its boundary */}
+        <main className="min-h-0 flex-1 overflow-x-clip overflow-y-auto overscroll-y-contain md:overflow-visible">
           {children}
           <PublicFooter />
         </main>

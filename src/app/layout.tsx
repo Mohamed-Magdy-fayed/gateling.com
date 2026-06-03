@@ -101,7 +101,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body>
+      <body className="overflow-hidden md:overflow-auto">
         <Providers locale={locale} theme={theme}>
           {children}
         </Providers>

@@ -719,13 +719,25 @@ export default {
     },
     footer: {
       tagline: "نبني برمجيات تحل مشاكل الأعمال الحقيقية.",
+      description:
+        "نحدد أشد نقاط الألم في أعمالك ونحلها باستخدام التكنولوجيا والذكاء الاصطناعي.",
+      workTogetherTitle: "تعاون معنا",
+      companyTitle: "الشركة",
+      resourcesTitle: "الموارد",
       navServices: "الخدمات",
       navWork: "أعمالنا",
       navBlog: "المدونة",
       navAbout: "من نحن",
       navContact: "تواصل معنا",
+      navProcess: "طريقة عملنا",
+      navTestimonials: "آراء العملاء",
       navPrivacy: "الخصوصية",
       navTerms: "الشروط",
+      location: "القاهرة، مصر · عمل عن بعد",
+      newsletterTitle: "ابقَ على اطلاع",
+      newsletterDescription:
+        "رؤى دورية حول أتمتة الأعمال والذكاء الاصطناعي من فريق Gateling.",
+      allRightsReserved: "جميع الحقوق محفوظة.",
     },
     ...homeAr,
     workPreview: {
