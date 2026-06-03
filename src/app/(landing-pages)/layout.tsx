@@ -13,7 +13,7 @@ export default function LandingPagesLayout({
       <PublicHeader />
       <div className="flex min-h-0 flex-1 flex-col">
         {/* scrollable on mobile, natural on desktop */}
-        <main className="min-h-0 flex-1 overflow-y-auto md:overflow-visible">
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:overflow-visible">
           {children}
           <PublicFooter />
         </main>

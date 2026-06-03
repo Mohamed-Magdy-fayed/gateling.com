@@ -82,11 +82,11 @@ export async function HeroSection() {
               <p className="mb-4 text-sm text-muted-foreground">
                 {t("publicPages.hero.socialProof")}
               </p>
-              <div className="flex items-center gap-6 opacity-50">
-                <div className="h-8 w-20 rounded bg-muted" />
-                <div className="h-8 w-20 rounded bg-muted" />
-                <div className="h-8 w-20 rounded bg-muted" />
-                <div className="h-8 w-20 rounded bg-muted" />
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 opacity-50">
+                <div className="h-8 w-16 rounded bg-muted" />
+                <div className="h-8 w-16 rounded bg-muted" />
+                <div className="h-8 w-16 rounded bg-muted" />
+                <div className="h-8 w-16 rounded bg-muted" />
               </div>
             </div>
           </div>

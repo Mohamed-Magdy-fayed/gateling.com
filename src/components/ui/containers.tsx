@@ -110,7 +110,10 @@ export function HeroContainer({
 }: HTMLAttributes<HTMLElement>) {
   return (
     <section
-      className={cn("relative overflow-hidden py-24 md:py-36", className)}
+      className={cn(
+        "relative overflow-hidden py-16 md:py-24 lg:py-32",
+        className,
+      )}
       {...props}
     >
       {/* gradient backdrop */}
