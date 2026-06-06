@@ -8,10 +8,7 @@ export type PublicAccountDestination = {
 export function getPublicAccountDestination(user: {
   role: string;
 }): PublicAccountDestination {
-  const isStaff =
-    user.role === "super_admin" ||
-    user.role === "admin" ||
-    user.role === "employee";
+  const isStaff = user.role === "admin" || user.role === "employee";
 
   return isStaff
     ? { href: "/dashboard", labelKey: "landing.workspace" }

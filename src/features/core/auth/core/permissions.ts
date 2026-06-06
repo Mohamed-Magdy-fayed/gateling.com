@@ -56,11 +56,6 @@ const EMPLOYEE_BLOCKED_SCREENS = new Set<ScreenKey>([
 ]);
 
 export const rolesPermissions = {
-  super_admin: {
-    users: unrestricted,
-    screens: unrestricted,
-    branches: unrestricted,
-  },
   admin: {
     users: unrestricted,
     screens: unrestricted,

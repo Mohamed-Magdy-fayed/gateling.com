@@ -8,7 +8,7 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 export type ProtectedTRPCSession = NonNullable<TRPCContext["session"]>;
 
 export function assertOperationalStaff(role: string) {
-  if (role !== "super_admin" && role !== "admin" && role !== "employee") {
+  if (role !== "admin" && role !== "employee") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Insufficient permissions",
@@ -17,7 +17,7 @@ export function assertOperationalStaff(role: string) {
 }
 
 export function assertAdminRole(role: string) {
-  if (role !== "super_admin" && role !== "admin") {
+  if (role !== "admin") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Admin access required",
@@ -30,7 +30,7 @@ export async function assertUserCanAccessBranch(
   session: ProtectedTRPCSession,
   branchId: string,
 ): Promise<void> {
-  if (session.user.role === "super_admin" || session.user.role === "admin") {
+  if (session.user.role === "admin") {
     return;
   }
 
@@ -56,7 +56,7 @@ export async function resolveListBranchId(
   session: ProtectedTRPCSession,
   branchId?: string,
 ): Promise<string | undefined> {
-  if (session.user.role === "super_admin" || session.user.role === "admin") {
+  if (session.user.role === "admin") {
     return branchId;
   }
 

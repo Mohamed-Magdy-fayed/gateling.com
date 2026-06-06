@@ -58,7 +58,7 @@ export async function seedScenario(
           email: SEED_ADMIN_EMAIL,
           emailVerifiedAt: new Date(),
           name: "Mohamed Magdy",
-          role: "super_admin",
+          role: "admin",
         })
         .returning()
         .then((data) => data[0]);

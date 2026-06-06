@@ -28,9 +28,7 @@ export function PublicHeader() {
     { label: t("publicPages.nav.blog"), href: "/blog" },
   ];
 
-  const isAdmin =
-    isAuthenticated &&
-    (session?.user.role === "admin" || session?.user.role === "super_admin");
+  const isAdmin = isAuthenticated && session?.user.role === "admin";
 
   return (
     <header

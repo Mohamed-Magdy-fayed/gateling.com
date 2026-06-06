@@ -15,7 +15,7 @@ import {
 } from "@/integrations/trpc/init";
 
 function assertStaff(role: string) {
-  if (role !== "super_admin" && role !== "admin" && role !== "employee")
+  if (role !== "admin" && role !== "employee")
     throw new TRPCError({ code: "FORBIDDEN" });
 }
 

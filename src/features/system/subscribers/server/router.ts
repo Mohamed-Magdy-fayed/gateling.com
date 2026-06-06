@@ -11,8 +11,7 @@ import {
 } from "@/integrations/trpc/init";
 
 function assertAdmin(role: string) {
-  if (role !== "super_admin" && role !== "admin")
-    throw new TRPCError({ code: "FORBIDDEN" });
+  if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
 }
 
 const listSubscribersInput = z.object({
