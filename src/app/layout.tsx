@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   icons: [
     { rel: "icon", url: "/favicon.ico" },
-    { rel: "icon", url: "/icon.svg", type: "image/svg+xml" },
+    { rel: "icon", url: "/icon.png", type: "image/png" },
   ],
 };
 
