@@ -18,7 +18,7 @@ export async function WhatsAppFloatButton() {
       aria-label={t("publicPages.finalCta.ctaWhatsApp")}
       className="fixed bottom-20 inset-e-4 z-50 h-14 w-14 items-center justify-center rounded-full bg-secondary text-accent-foreground shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex"
     >
-      s<MessageCircleIcon className="size-8" />
+      <MessageCircleIcon className="size-8" />
     </Link>
   );
 }
