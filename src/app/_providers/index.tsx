@@ -1,4 +1,5 @@
 import { DirectionProvider } from "@base-ui/react";
+import Script from "next/script";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { ThemeProvider } from "@/features/core/color-theme/client";
 import type { Theme } from "@/features/core/color-theme/server";
 import { TranslationProvider } from "@/features/core/i18n/client";
 import { TRPCReactProvider } from "@/integrations/trpc/client";
+import { api } from "@/integrations/trpc/server";
 
 type ProvidersProps = PropsWithChildren<{
   locale: string;
@@ -22,9 +24,20 @@ export async function Providers({ children, locale, theme }: ProvidersProps) {
         includeAllBranches: authState.session.user.role === "admin",
       })
     : null;
+  const { facebookPixelId } = await (await api()).settings.getPublicValues();
 
   return (
     <ThemeProvider theme={theme}>
+      {facebookPixelId && (
+        <Script
+          id="fb-pixel"
+          strategy="beforeInteractive"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: facebook pixel bootstrap
+          dangerouslySetInnerHTML={{
+            __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${facebookPixelId}');fbq('track','PageView');`,
+          }}
+        />
+      )}
       <TranslationProvider defaultLocale={locale} fallbackLocale="en">
         <AuthProvider value={authState}>
           <BranchProvider value={branchsState}>

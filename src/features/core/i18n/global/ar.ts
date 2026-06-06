@@ -509,6 +509,9 @@ export default {
     settingDesc00001: "البريد الإلكتروني المعروض في صفحة التواصل.",
     settingDesc00002: "رقم واتساب لزر التواصل العائم (صيغة E.164).",
     settingDesc00003: "المنطقة الزمنية IANA المستخدمة في لوحة التحكم.",
+    settingName00004: "فيسبوك بيكسل",
+    settingDesc00004:
+      "معرّف الفيسبوك بيكسل لتتبع التحويلات وإعادة الاستهداف على منصات ميتا.",
     settingStatePricesShown: "نشط",
     settingStatePricesHidden: "غير نشط",
     settingsShowPricesState: "تبديل الحالة",

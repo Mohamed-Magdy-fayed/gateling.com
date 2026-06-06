@@ -1,4 +1,3 @@
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import {
   ArrowLeftIcon,
   ExternalLinkIcon,
@@ -13,27 +12,10 @@ import { Suspense } from "react";
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import { Container, Grid } from "@/components/ui/containers";
-import { db } from "@/drizzle";
-import { CaseStudiesTable } from "@/drizzle/schema";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 
 type Props = { params: Promise<{ slug: string }> };
-
-export async function generateStaticParams() {
-  const slugs = await db
-    .select({ slug: CaseStudiesTable.slug })
-    .from(CaseStudiesTable)
-    .where(
-      and(
-        eq(CaseStudiesTable.status, "published"),
-        isNull(CaseStudiesTable.deletedAt),
-      ),
-    )
-    .orderBy(asc(CaseStudiesTable.sortOrder), desc(CaseStudiesTable.createdAt))
-    .catch(() => []);
-  return slugs.map((cs) => ({ slug: cs.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

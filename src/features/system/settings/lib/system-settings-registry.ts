@@ -8,6 +8,7 @@ export const SYSTEM_SETTING_CODE = {
   CONTACT_EMAIL: "00001",
   WHATSAPP_NUMBER: "00002",
   BUSINESS_TIMEZONE: "00003",
+  FACEBOOK_PIXEL_ID: "00004",
 } as const;
 
 export type SystemSettingCode =
@@ -17,13 +18,22 @@ export const SYSTEM_SETTING_CODES: SystemSettingCode[] = [
   SYSTEM_SETTING_CODE.CONTACT_EMAIL,
   SYSTEM_SETTING_CODE.WHATSAPP_NUMBER,
   SYSTEM_SETTING_CODE.BUSINESS_TIMEZONE,
+  SYSTEM_SETTING_CODE.FACEBOOK_PIXEL_ID,
 ];
 
 export type SystemSettingDefinition = {
   code: SystemSettingCode;
   label: SettingsLabel;
-  nameKey: "settingName00001" | "settingName00002" | "settingName00003";
-  descriptionKey: "settingDesc00001" | "settingDesc00002" | "settingDesc00003";
+  nameKey:
+    | "settingName00001"
+    | "settingName00002"
+    | "settingName00003"
+    | "settingName00004";
+  descriptionKey:
+    | "settingDesc00001"
+    | "settingDesc00002"
+    | "settingDesc00003"
+    | "settingDesc00004";
   descriptionEn: string;
   editable: {
     isActive?: boolean;
@@ -66,6 +76,16 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
       "IANA timezone used for date display across the admin dashboard.",
     editable: { isActive: true, value: true },
     seed: { isActive: true, value: DEFAULT_BUSINESS_TIMEZONE },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.FACEBOOK_PIXEL_ID,
+    label: "integration",
+    nameKey: "settingName00004",
+    descriptionKey: "settingDesc00004",
+    descriptionEn:
+      "Facebook Pixel ID for conversion tracking and retargeting on Meta platforms.",
+    editable: { isActive: true, value: true },
+    seed: { isActive: false, value: null },
   },
 ];
 

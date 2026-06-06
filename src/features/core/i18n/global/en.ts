@@ -521,6 +521,9 @@ export default {
       "WhatsApp number for the floating contact button (E.164 format, e.g. +201001234567).",
     settingDesc00003:
       "IANA timezone used for date display across the admin dashboard.",
+    settingName00004: "Facebook Pixel",
+    settingDesc00004:
+      "Facebook Pixel ID for conversion tracking and retargeting on Meta platforms.",
     settingStatePricesShown: "Active",
     settingStatePricesHidden: "Inactive",
     settingsShowPricesState: "Toggle active",
