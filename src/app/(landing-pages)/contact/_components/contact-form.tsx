@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 
 export function ContactForm() {
   const { t } = useTranslation();
@@ -25,6 +26,10 @@ export function ContactForm() {
   const mutation = useMutation(
     trpc.leads.submit.mutationOptions({
       onSuccess: () => {
+        trackPixelEvent("Lead", {
+          content_name: "Contact Form",
+          content_category: "Lead Generation",
+        });
         toast.success(t("publicPages.contactPage.formSuccess"));
         setForm({ name: "", email: "", company: "", phone: "", message: "" });
       },
