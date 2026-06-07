@@ -112,9 +112,9 @@ export async function ValuePropositionSection() {
         {/* Partnership section */}
         <ContentCard className="p-8">
           <div className="mb-8 text-center">
-            <h3 className="text-primary text-xl font-bold">
+            <CardHeading className="text-primary text-xl font-bold">
               {t("publicPages.valueProposition.partnershipHeader")}
-            </h3>
+            </CardHeading>
           </div>
           <Grid cols={4} gap="compact">
             {partnerBenefits.map(({ Icon, title, description }) => (
@@ -128,11 +128,11 @@ export async function ValuePropositionSection() {
         </ContentCard>
 
         {/* Stats row */}
-        <div className="mt-16 grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+        <Grid cols={4} className="mt-16 text-center">
           {stats.map(({ value, label }) => (
             <Stat key={label} value={value} label={label} />
           ))}
-        </div>
+        </Grid>
       </Container>
     </Section>
   );

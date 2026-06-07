@@ -1,10 +1,12 @@
+import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+
 export const metadata = { title: "Terms of Service" };
 
 export default function TermsPage() {
   return (
-    <section className="py-20">
-      <div className="container mx-auto max-w-3xl px-4 md:px-8 prose dark:prose-invert">
-        <h1>Terms of Service</h1>
+    <HeroContainer>
+      <Container size="narrow" className="prose dark:prose-invert">
+        <PageHeading>Terms of Service</PageHeading>
         <p>Last updated: 2025</p>
         <p>
           By using the Gateling Solutions website (gateling.com), you agree to
@@ -15,7 +17,7 @@ export default function TermsPage() {
         <p>
           Contact us at info@gateling.com for any questions about these terms.
         </p>
-      </div>
-    </section>
+      </Container>
+    </HeroContainer>
   );
 }

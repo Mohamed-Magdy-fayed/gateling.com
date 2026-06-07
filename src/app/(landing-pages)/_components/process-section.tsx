@@ -138,9 +138,9 @@ export async function ProcessSection() {
 
         {/* Timeline box */}
         <ContentCard className="mt-16 text-center">
-          <h3 className="text-primary mb-6 text-xl font-bold">
+          <CardHeading className="text-primary mb-6 text-xl font-bold">
             {t("publicPages.process.timelineTitle")}
-          </h3>
+          </CardHeading>
           <div className="mx-auto grid max-w-2xl gap-6 sm:grid-cols-3">
             {timeline.map(({ value, label }) => (
               <Stat key={label} value={value} label={label} />

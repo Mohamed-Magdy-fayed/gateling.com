@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
+import { LinkButton } from "@/components/general/link-button";
 import {
   Container,
+  ContentCard,
   HeroContainer,
   PageHeading,
   ProseText,
@@ -129,17 +131,28 @@ export default async function ContactPage() {
           <SectionHeader heading={t("publicPages.contactPage.faqTitle")} />
           <div className="mt-6 space-y-4">
             {faqItems.map((item) => (
-              <details
-                key={item.q}
-                className="group rounded-xl border bg-muted/20 px-5 py-4"
-              >
-                <summary className="cursor-pointer list-none font-semibold group-open:mb-3">
-                  {item.q}
-                </summary>
-                <ProseText size="sm">{item.a}</ProseText>
-              </details>
+              <ContentCard key={item.q} className="bg-muted/20 p-0">
+                <details className="group px-5 py-4">
+                  <summary className="cursor-pointer list-none font-semibold group-open:mb-3">
+                    {item.q}
+                  </summary>
+                  <ProseText size="sm">{item.a}</ProseText>
+                </details>
+              </ContentCard>
             ))}
           </div>
+        </Container>
+      </Section>
+
+      <Section variant="cta">
+        <Container size="narrow" className="text-center">
+          <SectionHeader
+            heading={t("publicPages.contactPage.ctaHeading")}
+            subheading={t("publicPages.contactPage.ctaSubheading")}
+          />
+          <LinkButton href="/contact" size="lg">
+            {t("publicPages.contactPage.ctaButton")}
+          </LinkButton>
         </Container>
       </Section>
     </>

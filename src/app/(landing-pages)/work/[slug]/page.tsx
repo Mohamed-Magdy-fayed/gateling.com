@@ -20,6 +20,7 @@ import {
   ProseText,
   Section,
   SectionHeader,
+  StatCard,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
@@ -145,17 +146,12 @@ async function WorkDetailContent({ params }: Props) {
           {cs.results.metrics.length > 0 && (
             <Grid cols={3} gap="compact">
               {cs.results.metrics.map((metric) => (
-                <div
+                <StatCard
                   key={metric.label}
-                  className="bg-primary/5 rounded-xl border p-5 text-center"
-                >
-                  <p className="text-primary text-3xl font-bold">
-                    {metric.value}
-                  </p>
-                  <ProseText size="sm" className="mt-1">
-                    {metric.label}
-                  </ProseText>
-                </div>
+                  value={metric.value}
+                  label={metric.label}
+                  className="bg-primary/5 text-center"
+                />
               ))}
             </Grid>
           )}

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { LinkButton } from "@/components/general/link-button";
 import {
   Container,
+  Grid,
   HeroContainer,
   PageHeading,
   ProseText,
@@ -41,15 +42,15 @@ export default async function WorkPage() {
       <Section variant="feature">
         <Container>
           {cases.length === 0 && (
-            <p className="text-muted-foreground text-center">
+            <ProseText className="text-center">
               {t("publicPages.workPage.noResults")}
-            </p>
+            </ProseText>
           )}
-          <div className="grid gap-6 sm:grid-cols-2">
+          <Grid cols={2} gap="compact">
             {cases.map((cs) => (
               <WorkCaseCard key={cs.slug} cs={cs} variant="preview" />
             ))}
-          </div>
+          </Grid>
         </Container>
       </Section>
 

@@ -47,5 +47,8 @@ export default {
     formError: "Something went wrong. Please try again.",
     formValidation: "Please fill in your name, email, and message.",
     formDisclaimer: "We respond within 24 hours. No spam, no pressure.",
+    ctaHeading: "Prefer to reach out directly?",
+    ctaSubheading: "We're available by email, phone, and WhatsApp.",
+    ctaButton: "Send Us a Message",
   },
 } as const;

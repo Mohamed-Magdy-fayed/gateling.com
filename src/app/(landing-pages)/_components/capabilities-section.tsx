@@ -81,10 +81,10 @@ export async function CapabilitiesSection() {
           })}
         </Grid>
 
-        <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/5 to-primary/10 p-8 text-center">
-          <h3 className="mb-4 text-2xl font-bold">
+        <ContentCard className="border-primary/20 bg-linear-to-r from-primary/5 to-primary/10 text-center">
+          <CardHeading className="mb-4 text-2xl font-bold">
             {t("publicPages.capabilities.ctaTitle")}
-          </h3>
+          </CardHeading>
           <ProseText size="base" className="mx-auto mb-6 max-w-2xl">
             {t("publicPages.capabilities.ctaDescription")}
           </ProseText>
@@ -99,7 +99,7 @@ export async function CapabilitiesSection() {
           <ProseText size="sm" className="mt-4">
             {t("publicPages.capabilities.ctaNote")}
           </ProseText>
-        </div>
+        </ContentCard>
       </Container>
     </Section>
   );

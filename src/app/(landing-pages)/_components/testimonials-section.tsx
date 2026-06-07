@@ -104,7 +104,7 @@ export async function TestimonialsSection() {
           ))}
         </div>
 
-        <div className="border-primary/10 bg-primary/5 mt-12 rounded-2xl border p-8">
+        <ContentCard className="border-primary/10 bg-primary/5 mt-12">
           <div className="grid gap-8 text-center md:grid-cols-3">
             {stats.map((stat) => (
               <div key={stat.label}>
@@ -116,7 +116,7 @@ export async function TestimonialsSection() {
               </div>
             ))}
           </div>
-        </div>
+        </ContentCard>
 
         <div className="mt-10 text-center">
           <LinkButton href="/work" variant="outline" size="lg">

@@ -1,7 +1,13 @@
 import { ArrowRightIcon, CheckCircleIcon, StarIcon } from "lucide-react";
 
 import { LinkButton } from "@/components/general/link-button";
-import { Container, HeroContainer } from "@/components/ui/containers";
+import {
+  CheckItem,
+  Container,
+  HeroContainer,
+  PageHeading,
+  ProseText,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
 export async function HeroSection() {
@@ -38,14 +44,14 @@ export async function HeroSection() {
 
             {/* Headline */}
             <div className="space-y-3">
-              <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
+              <PageHeading className="font-extrabold lg:text-6xl">
                 <span className="text-primary">
                   {t("publicPages.hero.headlinePart1")}
                 </span>
                 <span className="block">
                   {t("publicPages.hero.headlinePart2")}
                 </span>
-              </h1>
+              </PageHeading>
               <p className="max-w-xl text-lg text-foreground/80">
                 {t("publicPages.hero.leadText")}
               </p>
@@ -54,10 +60,7 @@ export async function HeroSection() {
             {/* Benefits list */}
             <div className="space-y-3">
               {benefits.map((benefit) => (
-                <div key={benefit} className="flex items-start gap-2">
-                  <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <p className="text-foreground/80">{benefit}</p>
-                </div>
+                <CheckItem key={benefit}>{benefit}</CheckItem>
               ))}
             </div>
 
@@ -79,9 +82,9 @@ export async function HeroSection() {
 
             {/* Social proof */}
             <div className="border-t border-border/50 pt-8">
-              <p className="mb-4 text-sm text-muted-foreground">
+              <ProseText size="sm" className="mb-4">
                 {t("publicPages.hero.socialProof")}
-              </p>
+              </ProseText>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 opacity-50">
                 <div className="h-8 w-16 rounded bg-muted" />
                 <div className="h-8 w-16 rounded bg-muted" />

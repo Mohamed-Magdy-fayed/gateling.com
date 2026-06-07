@@ -1,6 +1,5 @@
 import {
   Bot,
-  CheckCircle2,
   Code,
   Compass,
   Cpu,
@@ -25,6 +24,7 @@ import type { ComponentType } from "react";
 import { LinkButton } from "@/components/general/link-button";
 import {
   CardHeading,
+  CheckItem,
   Container,
   ContentCard,
   Grid,
@@ -167,14 +167,11 @@ export default async function ServicesPage() {
                 <ProseText size="sm" className="mb-5">
                   {service.shortDescription}
                 </ProseText>
-                <ul className="space-y-2">
+                <div className="space-y-2">
                   {service.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="text-primary h-4 w-4 shrink-0" />
-                      {f}
-                    </li>
+                    <CheckItem key={f}>{f}</CheckItem>
                   ))}
-                </ul>
+                </div>
               </ContentCard>
             ))}
           </Grid>

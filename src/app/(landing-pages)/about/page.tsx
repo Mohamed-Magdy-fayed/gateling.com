@@ -108,7 +108,9 @@ export default async function AboutPage() {
               <CardHeading className="mb-3 text-2xl">
                 {t("publicPages.aboutPage.storyTitle")}
               </CardHeading>
-              <ProseText>{t("publicPages.aboutPage.storyDescription")}</ProseText>
+              <ProseText>
+                {t("publicPages.aboutPage.storyDescription")}
+              </ProseText>
             </div>
 
             <div>
@@ -182,9 +184,9 @@ export default async function AboutPage() {
                 <p className="font-semibold">
                   {t("publicPages.aboutPage.founderName")}
                 </p>
-                <p className="text-muted-foreground text-sm">
+                <ProseText size="sm">
                   {t("publicPages.aboutPage.founderRole")}
-                </p>
+                </ProseText>
                 <ProseText size="sm" className="mt-3">
                   {t("publicPages.aboutPage.founderBio")}
                 </ProseText>

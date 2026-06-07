@@ -3,6 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  CardHeading,
+  ContentCard,
+  ProseText,
+} from "@/components/ui/containers";
 import type { CaseStudyResults } from "@/drizzle/schema";
 import { getT } from "@/features/core/i18n/server";
 
@@ -28,7 +33,7 @@ export async function WorkCaseCard({ cs, variant }: Props) {
 
   if (variant === "preview") {
     return (
-      <div className="group bg-background flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <ContentCard className="group flex flex-col overflow-hidden p-0 hover:-translate-y-1 hover:shadow-lg">
         {cs.coverImageUrl ? (
           <div className="relative aspect-video w-full overflow-hidden">
             <Image
@@ -53,12 +58,12 @@ export async function WorkCaseCard({ cs, variant }: Props) {
               {"✦"} {firstMetric.value} — {firstMetric.label}
             </p>
           )}
-          <h3 className="mb-2 font-bold transition-colors group-hover:text-primary">
+          <CardHeading className="mb-2 transition-colors group-hover:text-primary">
             {cs.client}
-          </h3>
-          <p className="text-muted-foreground flex-1 text-sm leading-relaxed line-clamp-3">
+          </CardHeading>
+          <ProseText size="sm" className="flex-1 line-clamp-3">
             {cs.problemStatement}
-          </p>
+          </ProseText>
           <div className="mt-4 flex items-center justify-between gap-2">
             <Link
               href={`/work/${cs.slug}`}
@@ -80,15 +85,15 @@ export async function WorkCaseCard({ cs, variant }: Props) {
             )}
           </div>
         </div>
-      </div>
+      </ContentCard>
     );
   }
 
   return (
-    <div className="bg-background rounded-xl border p-8 shadow-sm">
+    <ContentCard className="p-8">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">{cs.client}</h2>
+          <CardHeading className="text-2xl font-bold">{cs.client}</CardHeading>
           <Badge variant="secondary" className="mt-1">
             {cs.industry}
           </Badge>
@@ -117,17 +122,17 @@ export async function WorkCaseCard({ cs, variant }: Props) {
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide">
             {t("publicPages.workPage.challengeLabel")}
           </p>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <ProseText size="sm">
             {cs.problemStatement}
-          </p>
+          </ProseText>
         </div>
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide">
             {t("publicPages.workPage.solutionLabel")}
           </p>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <ProseText size="sm">
             {cs.solution}
-          </p>
+          </ProseText>
         </div>
       </div>
       <div className="mt-5">
@@ -139,6 +144,6 @@ export async function WorkCaseCard({ cs, variant }: Props) {
           <ArrowRightIcon className="h-3.5 w-3.5" />
         </Link>
       </div>
-    </div>
+    </ContentCard>
   );
 }

@@ -1,10 +1,12 @@
+import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+
 export const metadata = { title: "Privacy Policy" };
 
 export default function PrivacyPage() {
   return (
-    <section className="py-20">
-      <div className="container mx-auto max-w-3xl px-4 md:px-8 prose dark:prose-invert">
-        <h1>Privacy Policy</h1>
+    <HeroContainer>
+      <Container size="narrow" className="prose dark:prose-invert">
+        <PageHeading>Privacy Policy</PageHeading>
         <p>Last updated: 2025</p>
         <p>
           Gateling Solutions respects your privacy. We collect only the
@@ -18,7 +20,7 @@ export default function PrivacyPage() {
           as required by law. You can request deletion of your data at any time
           by emailing info@gateling.com.
         </p>
-      </div>
-    </section>
+      </Container>
+    </HeroContainer>
   );
 }

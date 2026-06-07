@@ -2,6 +2,13 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import { LinkButton } from "@/components/general/link-button";
+import {
+  Container,
+  ContentCard,
+  HeroContainer,
+  PageHeading,
+  ProseText,
+} from "@/components/ui/containers";
 import { db } from "@/drizzle";
 import { UsersTable } from "@/drizzle/schema";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
@@ -23,23 +30,23 @@ export default async function MyAccountPage() {
   });
 
   return (
-    <section className="py-20">
-      <div className="container mx-auto max-w-3xl px-4 md:px-8">
-        <h1 className="text-3xl font-bold">
+    <HeroContainer>
+      <Container size="narrow">
+        <PageHeading>
           Welcome back{user?.name ? `, ${user.name}` : ""}
-        </h1>
-        <p className="text-muted-foreground mt-2">
+        </PageHeading>
+        <ProseText className="mt-2">
           Your account is active. We'll be in touch about any inquiries you've
           submitted.
-        </p>
+        </ProseText>
 
-        <div className="mt-8 rounded-xl border p-8">
+        <ContentCard className="mt-8 p-8">
           <p className="text-muted-foreground mb-4">
             Have a new business challenge you'd like us to look at?
           </p>
           <LinkButton href="/contact">Submit a New Inquiry</LinkButton>
-        </div>
-      </div>
-    </section>
+        </ContentCard>
+      </Container>
+    </HeroContainer>
   );
 }
