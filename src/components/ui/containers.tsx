@@ -123,7 +123,7 @@ export function HeroContainer({
   return (
     <section
       className={cn(
-        "relative flex min-h-[calc(100dvh-4rem)] flex-col justify-center overflow-hidden",
+        "relative flex min-h-full flex-col justify-center overflow-hidden",
         className,
       )}
       {...props}
@@ -338,10 +338,7 @@ export function PageHeading({
 }) {
   return (
     <h1
-      className={cn(
-        "text-4xl font-bold tracking-tight md:text-5xl",
-        className,
-      )}
+      className={cn("text-4xl font-bold tracking-tight md:text-5xl", className)}
     >
       {children}
     </h1>
@@ -359,9 +356,7 @@ export function CardHeading({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>
-  );
+  return <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>;
 }
 
 // ─── ProseText ───────────────────────────────────────────────────────────────

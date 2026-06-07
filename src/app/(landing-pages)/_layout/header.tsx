@@ -2,23 +2,28 @@
 
 import { LayoutDashboardIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { LinkButton } from "@/components/general/link-button";
-import { GatelingLogoLink } from "@/components/ui/logo";
+import { GatelingLogo, GatelingLogoLink } from "@/components/ui/logo";
 import { AuthManagerHeaderTrigger } from "@/features/core/auth/nextjs/components/auth-manager-header-trigger";
 import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
-import { useTranslation } from "@/features/core/i18n/client";
+import { ThemeToggle } from "@/features/core/color-theme/client";
+import { LanguageToggle, useTranslation } from "@/features/core/i18n/client";
 import { cn } from "@/lib/utils";
 
 export function PublicHeader() {
   const { t } = useTranslation();
   const { isAuthenticated, session } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname() ?? "/";
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const el = document.getElementById("site-scroll");
+    if (!el) return;
+    const onScroll = () => setIsScrolled(el.scrollTop > 10);
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
   const nav = [
@@ -27,6 +32,20 @@ export function PublicHeader() {
     { label: t("publicPages.nav.services"), href: "/services" },
     { label: t("publicPages.nav.blog"), href: "/blog" },
   ];
+
+  const mobileTitle = useMemo(() => {
+    const routes = [
+      { href: "/about", label: t("publicPages.nav.about") },
+      { href: "/work", label: t("publicPages.nav.work") },
+      { href: "/services", label: t("publicPages.nav.services") },
+      { href: "/blog", label: t("publicPages.nav.blog") },
+      { href: "/contact", label: t("publicPages.footer.navContact") },
+    ];
+    const match =
+      routes.find((r) => r.href === pathname) ??
+      routes.find((r) => pathname.startsWith(r.href));
+    return match?.label ?? t("landing.tabHome");
+  }, [pathname, t]);
 
   const isAdmin = isAuthenticated && session?.user.role === "admin";
 
@@ -39,12 +58,24 @@ export function PublicHeader() {
           : "bg-background/95 backdrop-blur",
       )}
     >
-      <div className="container mx-auto relative flex h-16 items-center px-4 md:px-8">
-        {/* Logo: absolutely centered on mobile, static left on desktop */}
-        <GatelingLogoLink
-          iconSize={28}
-          className="absolute left-1/2 -translate-x-1/2 text-lg md:static md:translate-x-0"
-        />
+      <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
+        {/* Mobile: logo icon + current page title */}
+        <Link
+          href="/"
+          className="flex flex-1 items-center gap-2 truncate md:hidden"
+        >
+          <GatelingLogo size={22} />
+          <span className="truncate text-sm font-semibold">{mobileTitle}</span>
+        </Link>
+
+        {/* Mobile: theme + language toggles */}
+        <div className="flex shrink-0 items-center gap-0.5 md:hidden">
+          <ThemeToggle />
+          <LanguageToggle />
+        </div>
+
+        {/* Desktop: logo */}
+        <GatelingLogoLink iconSize={28} className="hidden md:inline-flex" />
 
         {/* Desktop nav — centered via flex-1 */}
         <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">
@@ -59,7 +90,7 @@ export function PublicHeader() {
           ))}
         </nav>
 
-        {/* Right buttons: desktop only */}
+        {/* Desktop right: auth + CTA */}
         <div className="hidden items-center gap-2 md:flex">
           <AuthManagerHeaderTrigger />
           {isAdmin ? (

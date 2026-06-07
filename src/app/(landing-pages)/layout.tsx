@@ -9,9 +9,9 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-dvh flex-col bg-background">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <PublicHeader />
-      <main className="flex-1 overflow-x-clip pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
+      <main id="site-scroll" className="flex-1 overflow-y-auto overflow-x-clip">
         {children}
         <PublicFooter />
         <WhatsAppFloatButton />
