@@ -19,7 +19,7 @@ export async function WorkPreviewSection() {
   if (preview.length === 0) return null;
 
   return (
-    <Section>
+    <Section variant="alternate">
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.workPreview.eyebrow")}

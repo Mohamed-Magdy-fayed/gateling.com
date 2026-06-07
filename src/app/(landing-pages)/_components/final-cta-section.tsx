@@ -6,7 +6,16 @@ import {
   MessageCircleIcon,
 } from "lucide-react";
 import { AnchorButton, LinkButton } from "@/components/general/link-button";
-import { Container, Section } from "@/components/ui/containers";
+import {
+  CardHeading,
+  Container,
+  ContentCard,
+  Grid,
+  IconBox,
+  ProseText,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { generateWhatsAppUrl } from "@/lib/phone";
 
@@ -55,7 +64,7 @@ export async function FinalCtaSection() {
   ];
 
   return (
-    <Section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/10">
+    <Section variant="cta" className="relative overflow-hidden">
       {/* Background blurs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
@@ -64,16 +73,13 @@ export async function FinalCtaSection() {
 
       <Container>
         <div className="mx-auto max-w-4xl text-center">
-          {/* Main CTA */}
-          <h2 className="text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
-            {t("publicPages.finalCta.mainCtaTitle")}
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            {t("publicPages.finalCta.mainCtaDescription")}
-          </p>
+          <SectionHeader
+            heading={t("publicPages.finalCta.mainCtaTitle")}
+            subheading={t("publicPages.finalCta.mainCtaDescription")}
+          />
 
           {/* CTA buttons */}
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="-mt-4 mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <LinkButton
               href="/contact"
               size="lg"
@@ -93,7 +99,7 @@ export async function FinalCtaSection() {
           </div>
 
           {/* Urgency factors */}
-          <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+          <div className="mb-12 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             {urgencyFactors.map((factor) => (
               <div key={factor} className="flex items-center gap-2">
                 <ClockIcon className="h-4 w-4 text-primary" />
@@ -103,12 +109,12 @@ export async function FinalCtaSection() {
           </div>
 
           {/* Contact method cards */}
-          <div className="mt-12 rounded-2xl border border-border/50 bg-background/80 p-8 shadow-lg backdrop-blur">
-            <h3 className="mb-6 text-xl font-bold text-primary">
+          <ContentCard className="p-8 backdrop-blur">
+            <h3 className="text-primary mb-6 text-xl font-bold">
               {t("publicPages.finalCta.contactHeader")}
             </h3>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <Grid cols={3}>
               {contactMethods.map(
                 ({
                   Icon,
@@ -120,13 +126,11 @@ export async function FinalCtaSection() {
                   external,
                 }) => (
                   <div key={title} className="group text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
-                      <Icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="mb-2 text-lg font-bold">{title}</h3>
-                    <p className="mb-3 text-sm text-muted-foreground">
+                    <IconBox icon={Icon} size="lg" className="mx-auto mb-4" />
+                    <CardHeading className="mb-2">{title}</CardHeading>
+                    <ProseText size="sm" className="mb-3">
                       {description}
-                    </p>
+                    </ProseText>
                     {value && (
                       <p className="mb-3 text-sm font-medium">{value}</p>
                     )}
@@ -148,17 +152,17 @@ export async function FinalCtaSection() {
                   </div>
                 ),
               )}
-            </div>
-          </div>
+            </Grid>
+          </ContentCard>
 
           {/* Final reassurance */}
           <div className="mt-12">
-            <p className="text-muted-foreground">
+            <ProseText size="base">
               {t("publicPages.finalCta.reassurance1")}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
+            </ProseText>
+            <ProseText size="sm" className="mt-2">
               {t("publicPages.finalCta.reassurance2")}
-            </p>
+            </ProseText>
           </div>
         </div>
       </Container>

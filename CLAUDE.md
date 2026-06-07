@@ -121,6 +121,52 @@ src/
 | `employee` | Branch-scoped access (users, leads) |
 | `customer` | `/my-account` — view own submitted leads |
 
+## Landing Page Design System
+
+All public pages use a strict design system. Read and follow these rules before touching any file under `src/app/(landing-pages)/`.
+
+### The 5 Section Styles — use ONLY these
+
+| Style | Component | Purpose | Padding | Background |
+|-------|-----------|---------|---------|------------|
+| **Hero** | `<HeroContainer>` | First section of every public page | `min-h-[calc(100dvh-4rem)]` flex-centered | gradient + dot grid |
+| **Feature** | `<Section variant="feature">` | Primary content, white bg | `py-20` | default |
+| **Alternate** | `<Section variant="alternate">` | Alternating muted section | `py-20` | `bg-muted/30` |
+| **Emphasis** | `<Section variant="emphasis">` | High-contrast primary; max 1/page | `py-24` | `bg-primary` |
+| **CTA** | `<Section variant="cta">` | Last section of every page | `py-24` | gradient |
+
+`compact` (py-12) is only for secondary sub-content inside a section — **never** a page-level hero or top section.
+
+### Rules
+
+1. **HeroContainer is mandatory** — every public page MUST open with `<HeroContainer>`. The hero fills the full viewport so the value proposition is visible without scrolling. Never use `<Section>` as a page hero.
+2. **Alternation is mandatory** — after HeroContainer, sections must strictly alternate `feature → alternate → feature → alternate`. Never two consecutive same-background sections. End every page with `variant="cta"`.
+3. **ContentCard for all cards** — never write raw `<div className="rounded-xl border p-6 ...">`. Use `<ContentCard>` from `@/components/ui/containers`.
+4. **Extract at 2+ uses** — if a UI pattern appears in 2 or more places, extract it to a named component in `containers.tsx`. Do not copy-paste Tailwind markup.
+5. **Typography components** — never write raw `<h1 className="text-4xl ...">` or `<p className="text-muted-foreground ...">`. Use:
+   - `<PageHeading>` — h1 inside HeroContainer
+   - `<SectionHeader>` — section intro (eyebrow + h2 + subheading)
+   - `<CardHeading>` — h3 inside ContentCard
+   - `<ProseText size="sm|base|lg">` — body/supporting paragraphs
+6. **Container size guide** — `wide` (max-w-7xl) for hero + multi-column; `default` (max-w-6xl) for content; `narrow` (max-w-3xl) for focused/form content.
+7. **IconBox for icons** — never write raw `<div className="flex h-12 w-12 ... bg-primary/10">`. Use `<IconBox icon={Icon} size="sm|md|lg">`.
+
+### Component inventory (`src/components/ui/containers.tsx`)
+
+`Section`, `Container`, `SectionHeader`, `HeroContainer`, `Grid`, `ContentCard`, `GradientText`, `Stat`, `IconBox`, `CheckItem`, `StatCard`, `PageHeading`, `CardHeading`, `ProseText`
+
+### Page template
+
+```
+HeroContainer           ← full viewport, value prop
+Section variant="alternate"  ← first content section
+Section variant="feature"    ← second content section
+Section variant="alternate"  ← social proof / stats
+Section variant="cta"        ← always last, → /contact
+```
+
+---
+
 ## Architecture Rules
 
 1. **Thin routes** — `page.tsx` composes the feature page only; business logic in features or server modules.

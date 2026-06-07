@@ -9,8 +9,12 @@ import {
 
 import { LinkButton } from "@/components/general/link-button";
 import {
+  CardHeading,
   Container,
+  ContentCard,
   Grid,
+  IconBox,
+  ProseText,
   Section,
   SectionHeader,
 } from "@/components/ui/containers";
@@ -56,7 +60,7 @@ export async function CapabilitiesSection() {
   ];
 
   return (
-    <Section>
+    <Section variant="feature">
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.capabilities.eyebrow")}
@@ -68,16 +72,11 @@ export async function CapabilitiesSection() {
           {capabilities.map(({ title, description }, i) => {
             const Icon = CAP_ICONS[i];
             return (
-              <div
-                key={title}
-                className="group rounded-xl border border-border/50 bg-background p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Icon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 font-bold">{title}</h3>
-                <p className="text-sm text-muted-foreground">{description}</p>
-              </div>
+              <ContentCard key={title} className="group">
+                <IconBox icon={Icon} className="mb-4" />
+                <CardHeading className="mb-2">{title}</CardHeading>
+                <ProseText size="sm">{description}</ProseText>
+              </ContentCard>
             );
           })}
         </Grid>
@@ -86,9 +85,9 @@ export async function CapabilitiesSection() {
           <h3 className="mb-4 text-2xl font-bold">
             {t("publicPages.capabilities.ctaTitle")}
           </h3>
-          <p className="mx-auto mb-6 max-w-2xl text-muted-foreground">
+          <ProseText size="base" className="mx-auto mb-6 max-w-2xl">
             {t("publicPages.capabilities.ctaDescription")}
-          </p>
+          </ProseText>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <LinkButton href="/services" size="lg">
               {t("publicPages.capabilities.ctaServices")}
@@ -97,9 +96,9 @@ export async function CapabilitiesSection() {
               {t("publicPages.capabilities.ctaContact")}
             </LinkButton>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <ProseText size="sm" className="mt-4">
             {t("publicPages.capabilities.ctaNote")}
-          </p>
+          </ProseText>
         </div>
       </Container>
     </Section>

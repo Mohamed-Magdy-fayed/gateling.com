@@ -1,21 +1,28 @@
-import type { HTMLAttributes } from "react";
+import { CheckCircle2 } from "lucide-react";
+import type { ComponentType, HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
 // ─── Section ─────────────────────────────────────────────────────────────────
-// Wraps a page section with standardized vertical padding and optional bg.
+// Five semantic section variants — use these and only these on public pages.
+// feature:  standard content, white bg            → py-20
+// compact:  secondary sub-content within a page   → py-12  (never for page heroes)
+// alternate: muted bg, alternates with feature    → py-20 bg-muted/30
+// emphasis: primary color highlight, max 1/page   → py-24 bg-primary
+// cta:      always the last section on every page → py-24 gradient
 
-type SectionVariant = "default" | "muted" | "primary" | "compact";
+type SectionVariant = "feature" | "compact" | "alternate" | "emphasis" | "cta";
 
 const sectionVariants: Record<SectionVariant, string> = {
-  default: "py-20",
+  feature: "py-20",
   compact: "py-12",
-  muted: "bg-muted/30 py-20",
-  primary: "bg-primary text-primary-foreground py-24",
+  alternate: "bg-muted/30 py-20",
+  emphasis: "bg-primary text-primary-foreground py-24",
+  cta: "bg-linear-to-br from-primary/5 via-background to-primary/10 py-24",
 };
 
 export function Section({
-  variant = "default",
+  variant = "feature",
   className,
   children,
   ...props
@@ -29,6 +36,9 @@ export function Section({
 
 // ─── Container ───────────────────────────────────────────────────────────────
 // Centered, max-width constrained, horizontally padded container.
+// wide:    max-w-7xl — hero, multi-column landing layouts
+// default: max-w-6xl — standard content sections
+// narrow:  max-w-3xl — focused content, forms, sub-page centered text
 
 type ContainerSize = "default" | "narrow" | "wide";
 
@@ -59,7 +69,8 @@ export function Container({
 }
 
 // ─── SectionHeader ────────────────────────────────────────────────────────────
-// Centered section intro: optional eyebrow label + heading + subheading.
+// Centered section intro: optional eyebrow label + h2 heading + subheading.
+// Always use this — never write raw h2 + p for a section intro.
 
 export function SectionHeader({
   eyebrow,
@@ -101,7 +112,8 @@ export function SectionHeader({
 }
 
 // ─── HeroContainer ─────────────────────────────────────────────────────────────
-// Full-width hero with gradient backdrop + subtle dot grid pattern.
+// Full-viewport hero (100dvh minus 4rem sticky header) with gradient + dot grid.
+// ALWAYS the first section on every public page — never use Section for a page hero.
 
 export function HeroContainer({
   className,
@@ -111,7 +123,7 @@ export function HeroContainer({
   return (
     <section
       className={cn(
-        "relative overflow-hidden py-16 md:py-24 lg:py-32",
+        "relative flex min-h-[calc(100dvh-4rem)] flex-col justify-center overflow-hidden",
         className,
       )}
       {...props}
@@ -127,7 +139,7 @@ export function HeroContainer({
           backgroundSize: "24px 24px",
         }}
       />
-      <div className="relative">{children}</div>
+      <div className="relative z-10 py-12">{children}</div>
     </section>
   );
 }
@@ -169,7 +181,8 @@ export function Grid({
 }
 
 // ─── ContentCard ─────────────────────────────────────────────────────────────
-// Simple content card with consistent shadow + border treatment.
+// Standard card primitive. Use for every card-shaped content block.
+// Never write raw div with rounded-xl border p-* — always use this.
 
 export function ContentCard({
   className,
@@ -212,7 +225,7 @@ export function GradientText({
 }
 
 // ─── Stat ─────────────────────────────────────────────────────────────────────
-// A single metric/stat display for the hero stats row.
+// A single metric/stat display (value + label, centered column).
 
 export function Stat({
   value,
@@ -229,4 +242,148 @@ export function Stat({
       <p className="text-muted-foreground mt-0.5 text-sm">{label}</p>
     </div>
   );
+}
+
+// ─── IconBox ─────────────────────────────────────────────────────────────────
+// Sized, styled icon container with hover effect (place parent in a `group`).
+// sm: h-10 w-10 rounded-lg   (compact cards)
+// md: h-12 w-12 rounded-lg   (standard cards, default)
+// lg: h-16 w-16 rounded-full (CTA and hero sections)
+
+type IconBoxSize = "sm" | "md" | "lg";
+
+const iconBoxSizes: Record<IconBoxSize, { wrapper: string; icon: string }> = {
+  sm: {
+    wrapper:
+      "flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20",
+    icon: "h-5 w-5 text-primary",
+  },
+  md: {
+    wrapper:
+      "flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20",
+    icon: "h-6 w-6 text-primary",
+  },
+  lg: {
+    wrapper:
+      "flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20",
+    icon: "h-8 w-8 text-primary",
+  },
+};
+
+export function IconBox({
+  icon: Icon,
+  size = "md",
+  className,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  size?: IconBoxSize;
+  className?: string;
+}) {
+  const { wrapper, icon } = iconBoxSizes[size];
+  return (
+    <div className={cn(wrapper, className)}>
+      <Icon className={icon} />
+    </div>
+  );
+}
+
+// ─── CheckItem ───────────────────────────────────────────────────────────────
+// A single checked list item. Use inside `<div className="space-y-2">`.
+
+export function CheckItem({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-start gap-2", className)}>
+      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+      <p className="text-sm text-foreground/80">{children}</p>
+    </div>
+  );
+}
+
+// ─── StatCard ─────────────────────────────────────────────────────────────────
+// A metric card: prominent value + descriptive label. Wraps ContentCard.
+
+export function StatCard({
+  value,
+  label,
+  className,
+}: {
+  value: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <ContentCard className={cn("text-start", className)}>
+      <p className="text-primary text-lg font-bold">{value}</p>
+      <p className="text-muted-foreground mt-1 text-sm">{label}</p>
+    </ContentCard>
+  );
+}
+
+// ─── PageHeading ─────────────────────────────────────────────────────────────
+// h1 for page-level hero sections. Always use inside HeroContainer.
+// Never write raw <h1 className="text-4xl ..."> on a public page.
+
+export function PageHeading({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h1
+      className={cn(
+        "text-4xl font-bold tracking-tight md:text-5xl",
+        className,
+      )}
+    >
+      {children}
+    </h1>
+  );
+}
+
+// ─── CardHeading ─────────────────────────────────────────────────────────────
+// h3 for ContentCard primary titles.
+// Never write raw <h3 className="..."> inside a card.
+
+export function CardHeading({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>
+  );
+}
+
+// ─── ProseText ───────────────────────────────────────────────────────────────
+// Supporting/body paragraph with consistent muted styling.
+// Never write raw <p className="text-muted-foreground ..."> for body copy.
+
+type ProseSize = "sm" | "base" | "lg";
+
+const proseSizes: Record<ProseSize, string> = {
+  sm: "text-sm text-muted-foreground leading-relaxed",
+  base: "text-base text-muted-foreground leading-relaxed",
+  lg: "text-lg text-muted-foreground leading-relaxed",
+};
+
+export function ProseText({
+  children,
+  size = "base",
+  className,
+}: {
+  children: React.ReactNode;
+  size?: ProseSize;
+  className?: string;
+}) {
+  return <p className={cn(proseSizes[size], className)}>{children}</p>;
 }

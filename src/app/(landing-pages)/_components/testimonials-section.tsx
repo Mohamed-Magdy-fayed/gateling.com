@@ -2,7 +2,13 @@ import { QuoteIcon, StarIcon } from "lucide-react";
 
 import { LinkButton } from "@/components/general/link-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Container, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  Container,
+  ContentCard,
+  ProseText,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 
@@ -43,7 +49,7 @@ export async function TestimonialsSection() {
   if (testimonials.length === 0) return null;
 
   return (
-    <Section variant="muted">
+    <Section variant="alternate">
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.testimonialsSection.eyebrow")}
@@ -53,9 +59,9 @@ export async function TestimonialsSection() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map((client) => (
-            <div
+            <ContentCard
               key={client.id}
-              className="bg-background relative flex flex-col rounded-xl border p-6 shadow-sm"
+              className="relative flex flex-col hover:ring-0"
             >
               <div className="bg-primary text-primary-foreground absolute -top-3 inset-s-5 flex h-6 w-6 items-center justify-center rounded-full">
                 <QuoteIcon className="h-3 w-3" />
@@ -70,9 +76,9 @@ export async function TestimonialsSection() {
                 ))}
               </div>
 
-              <p className="text-foreground/80 mb-6 flex-1 text-sm leading-relaxed italic">
+              <ProseText size="sm" className="mb-6 flex-1 italic">
                 &ldquo;{client.content}&rdquo;
-              </p>
+              </ProseText>
 
               <div className="flex items-center gap-3">
                 <div className="bg-primary/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
@@ -94,7 +100,7 @@ export async function TestimonialsSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </ContentCard>
           ))}
         </div>
 
@@ -104,9 +110,9 @@ export async function TestimonialsSection() {
               <div key={stat.label}>
                 <p className="text-primary text-4xl font-bold">{stat.value}</p>
                 <p className="mt-1 font-semibold">{stat.label}</p>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <ProseText size="sm" className="mt-1">
                   {stat.description}
-                </p>
+                </ProseText>
               </div>
             ))}
           </div>

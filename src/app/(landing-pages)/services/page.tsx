@@ -24,9 +24,14 @@ import type { ComponentType } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
 import {
+  CardHeading,
   Container,
   ContentCard,
   Grid,
+  HeroContainer,
+  IconBox,
+  PageHeading,
+  ProseText,
   Section,
   SectionHeader,
 } from "@/components/ui/containers";
@@ -119,15 +124,13 @@ export default async function ServicesPage() {
 
   return (
     <>
-      <Section variant="compact">
+      <HeroContainer>
         <Container className="text-center">
-          <h1 className="text-4xl font-bold md:text-5xl">
-            {t("publicPages.servicesPage.heading")}
-          </h1>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg">
+          <PageHeading>{t("publicPages.servicesPage.heading")}</PageHeading>
+          <ProseText size="lg" className="mx-auto mt-4 max-w-2xl">
             {t("publicPages.servicesPage.heroDescription")}
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
+          </ProseText>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton href="/contact">
               {t("publicPages.servicesPage.heroPrimary")}
             </LinkButton>
@@ -136,20 +139,19 @@ export default async function ServicesPage() {
             </LinkButton>
           </div>
         </Container>
-      </Section>
+      </HeroContainer>
 
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container size="narrow" className="text-center">
-          <h2 className="text-3xl font-bold">
-            {t("publicPages.servicesPage.introTitle")}
-          </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            {t("publicPages.servicesPage.introDescription")}
-          </p>
+          <SectionHeader
+            heading={t("publicPages.servicesPage.introTitle")}
+            subheading={t("publicPages.servicesPage.introDescription")}
+            className="mb-0"
+          />
         </Container>
       </Section>
 
-      <Section>
+      <Section variant="feature">
         <Container>
           <SectionHeader
             heading={t("publicPages.servicesPage.servicesGridTitle")}
@@ -161,16 +163,13 @@ export default async function ServicesPage() {
                 <div className="mb-4">
                   <ServiceIcon name={service.icon} />
                 </div>
-                <h2 className="mb-3 text-xl font-bold">{service.title}</h2>
-                <p className="text-muted-foreground mb-5 text-sm leading-relaxed">
+                <CardHeading className="mb-3">{service.title}</CardHeading>
+                <ProseText size="sm" className="mb-5">
                   {service.shortDescription}
-                </p>
+                </ProseText>
                 <ul className="space-y-2">
                   {service.features.map((f) => (
-                    <li
-                      key={f}
-                      className="text-muted-foreground flex items-center gap-2 text-sm"
-                    >
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="text-primary h-4 w-4 shrink-0" />
                       {f}
                     </li>
@@ -182,7 +181,7 @@ export default async function ServicesPage() {
         </Container>
       </Section>
 
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container>
           <SectionHeader
             heading={t("publicPages.servicesPage.toolsetTitle")}
@@ -190,19 +189,17 @@ export default async function ServicesPage() {
           />
           <Grid cols={2} className="mt-8">
             {toolGroups.map(({ Icon, title, items }) => (
-              <ContentCard key={title}>
-                <div className="bg-primary/10 mb-4 inline-flex rounded-lg p-3">
-                  <Icon className="text-primary h-6 w-6" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">{title}</h3>
-                <p className="text-muted-foreground text-sm">{items}</p>
+              <ContentCard key={title} className="group">
+                <IconBox icon={Icon} className="mb-4" />
+                <CardHeading className="mb-2">{title}</CardHeading>
+                <ProseText size="sm">{items}</ProseText>
               </ContentCard>
             ))}
           </Grid>
         </Container>
       </Section>
 
-      <Section>
+      <Section variant="feature">
         <Container>
           <SectionHeader
             heading={t("publicPages.servicesPage.timelineTitle")}
@@ -210,21 +207,19 @@ export default async function ServicesPage() {
           />
           <Grid cols={2} className="mt-8">
             {timelineSteps.map(({ Icon, title, description }) => (
-              <ContentCard key={title} className="relative">
+              <ContentCard key={title} className="group relative">
                 <div className="pointer-events-none absolute inset-0 rounded-xl border border-dashed opacity-40" />
-                <div className="bg-primary/10 mb-4 inline-flex rounded-full p-3">
-                  <Icon className="text-primary h-6 w-6" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">{title}</h3>
-                <p className="text-muted-foreground text-sm">{description}</p>
+                <IconBox icon={Icon} size="sm" className="mb-4" />
+                <CardHeading className="mb-2">{title}</CardHeading>
+                <ProseText size="sm">{description}</ProseText>
               </ContentCard>
             ))}
           </Grid>
         </Container>
       </Section>
 
-      <Section variant="compact">
-        <Container className="text-center">
+      <Section variant="cta">
+        <Container size="narrow" className="text-center">
           <SectionHeader
             heading={t("publicPages.servicesPage.ctaHeading")}
             subheading={t("publicPages.servicesPage.ctaDescription")}

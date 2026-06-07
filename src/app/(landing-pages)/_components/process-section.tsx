@@ -6,7 +6,16 @@ import {
   RocketIcon,
 } from "lucide-react";
 
-import { Container, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  CardHeading,
+  Container,
+  ContentCard,
+  IconBox,
+  ProseText,
+  Section,
+  SectionHeader,
+  Stat,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
 const STEP_ICONS = [MessageSquareIcon, LightbulbIcon, CodeIcon, RocketIcon];
@@ -69,7 +78,7 @@ export async function ProcessSection() {
   ];
 
   return (
-    <Section variant="muted">
+    <Section variant="feature">
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.process.eyebrow")}
@@ -87,25 +96,21 @@ export async function ProcessSection() {
               const Icon = STEP_ICONS[i];
               return (
                 <div key={step.number} className="relative">
-                  <div className="relative z-10 rounded-xl border border-border/50 bg-background p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                  <ContentCard className="relative z-10">
                     {/* Step number badge */}
                     <div className="absolute -top-4 inset-s-6 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                       {i + 1}
                     </div>
 
-                    {/* Icon */}
                     <div className="mb-4 pt-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                        <Icon className="h-6 w-6 text-primary" />
-                      </div>
+                      <IconBox icon={Icon} />
                     </div>
 
-                    <h3 className="mb-3 text-lg font-bold">{step.title}</h3>
-                    <p className="mb-4 text-sm text-muted-foreground">
+                    <CardHeading className="mb-3">{step.title}</CardHeading>
+                    <ProseText size="sm" className="mb-4">
                       {step.description}
-                    </p>
+                    </ProseText>
 
-                    {/* Detail bullets */}
                     <ul className="space-y-2">
                       {step.details.map((detail) => (
                         <li
@@ -117,11 +122,11 @@ export async function ProcessSection() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </ContentCard>
 
                   {/* Arrow between steps on mobile */}
                   {i < steps.length - 1 && (
-                    <div className="flex justify-center my-6 lg:hidden">
+                    <div className="my-6 flex justify-center lg:hidden">
                       <ArrowRightIcon className="h-6 w-6 text-primary" />
                     </div>
                   )}
@@ -132,22 +137,19 @@ export async function ProcessSection() {
         </div>
 
         {/* Timeline box */}
-        <div className="mt-16 rounded-xl border border-border/50 bg-background p-8 text-center shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-primary">
+        <ContentCard className="mt-16 text-center">
+          <h3 className="text-primary mb-6 text-xl font-bold">
             {t("publicPages.process.timelineTitle")}
           </h3>
           <div className="mx-auto grid max-w-2xl gap-6 sm:grid-cols-3">
             {timeline.map(({ value, label }) => (
-              <div key={label}>
-                <p className="mb-2 text-2xl font-bold text-primary">{value}</p>
-                <p className="text-sm text-muted-foreground">{label}</p>
-              </div>
+              <Stat key={label} value={value} label={label} />
             ))}
           </div>
-          <p className="mt-6 text-muted-foreground">
+          <ProseText size="base" className="mt-6">
             {t("publicPages.process.timelineDescription")}
-          </p>
-        </div>
+          </ProseText>
+        </ContentCard>
       </Container>
     </Section>
   );

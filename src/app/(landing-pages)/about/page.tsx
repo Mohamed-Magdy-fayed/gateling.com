@@ -2,10 +2,17 @@ import type { Metadata } from "next";
 
 import { LinkButton } from "@/components/general/link-button";
 import {
+  CardHeading,
+  CheckItem,
   Container,
+  ContentCard,
   Grid,
+  HeroContainer,
+  PageHeading,
+  ProseText,
   Section,
   SectionHeader,
+  StatCard,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
@@ -73,88 +80,74 @@ export default async function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <Section variant="compact">
+      <HeroContainer>
         <Container size="narrow">
-          <h1 className="text-4xl font-bold md:text-5xl">
-            {t("publicPages.aboutPage.heroTitle")}
-          </h1>
-          <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+          <PageHeading>{t("publicPages.aboutPage.heroTitle")}</PageHeading>
+          <ProseText size="lg" className="mt-6">
             {t("publicPages.aboutPage.heroDescription")}
-          </p>
+          </ProseText>
         </Container>
-      </Section>
+      </HeroContainer>
 
       {/* Stats row */}
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container size="narrow">
           <Grid cols={2} gap="compact">
             {stats.map((s) => (
-              <div key={s.label} className="rounded-xl border bg-muted/30 p-5">
-                <p className="text-primary text-lg font-bold">{s.value}</p>
-                <p className="text-muted-foreground mt-1 text-sm">{s.label}</p>
-              </div>
+              <StatCard key={s.label} value={s.value} label={s.label} />
             ))}
           </Grid>
         </Container>
       </Section>
 
       {/* Story + Mission + Vision */}
-      <Section>
+      <Section variant="feature">
         <Container size="narrow">
           <div className="space-y-12">
             <div>
-              <h2 className="mb-3 text-2xl font-bold">
+              <CardHeading className="mb-3 text-2xl">
                 {t("publicPages.aboutPage.storyTitle")}
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {t("publicPages.aboutPage.storyDescription")}
-              </p>
+              </CardHeading>
+              <ProseText>{t("publicPages.aboutPage.storyDescription")}</ProseText>
             </div>
 
             <div>
-              <h2 className="mb-3 text-2xl font-bold">
+              <CardHeading className="mb-3 text-2xl">
                 {t("publicPages.aboutPage.missionTitle")}
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
+              </CardHeading>
+              <ProseText>
                 {t("publicPages.aboutPage.missionDescription")}
-              </p>
+              </ProseText>
             </div>
 
             <div>
-              <h2 className="mb-3 text-2xl font-bold">
+              <CardHeading className="mb-3 text-2xl">
                 {t("publicPages.aboutPage.visionTitle")}
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
+              </CardHeading>
+              <ProseText>
                 {t("publicPages.aboutPage.visionDescription")}
-              </p>
+              </ProseText>
             </div>
           </div>
         </Container>
       </Section>
 
       {/* Why choose us */}
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container size="narrow">
-          <h2 className="mb-6 text-2xl font-bold">
+          <CardHeading className="mb-6 text-2xl">
             {t("publicPages.aboutPage.whyChooseUsTitle")}
-          </h2>
-          <ul className="space-y-3">
+          </CardHeading>
+          <div className="space-y-3">
             {whyItems.map((item) => (
-              <li key={item} className="flex items-start gap-3">
-                <span className="text-primary mt-0.5 shrink-0 text-lg">
-                  {"✓"}
-                </span>
-                <span className="text-muted-foreground leading-relaxed">
-                  {item}
-                </span>
-              </li>
+              <CheckItem key={item}>{item}</CheckItem>
             ))}
-          </ul>
+          </div>
         </Container>
       </Section>
 
       {/* Values */}
-      <Section>
+      <Section variant="feature">
         <Container size="narrow">
           <SectionHeader
             heading={t("publicPages.aboutPage.valuesTitle")}
@@ -162,27 +155,25 @@ export default async function AboutPage() {
           />
           <Grid cols={3} gap="compact" className="mt-8">
             {values.map((v) => (
-              <div key={v.title} className="rounded-xl border p-5">
-                <h3 className="mb-2 font-semibold">{v.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {v.desc}
-                </p>
-              </div>
+              <ContentCard key={v.title}>
+                <CardHeading className="mb-2">{v.title}</CardHeading>
+                <ProseText size="sm">{v.desc}</ProseText>
+              </ContentCard>
             ))}
           </Grid>
         </Container>
       </Section>
 
       {/* Founder */}
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container size="narrow">
-          <div className="rounded-xl border bg-muted/20 p-8">
-            <h2 className="mb-2 text-2xl font-bold">
+          <ContentCard className="p-8">
+            <CardHeading className="mb-2 text-2xl">
               {t("publicPages.aboutPage.founderTitle")}
-            </h2>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            </CardHeading>
+            <ProseText className="mb-6">
               {t("publicPages.aboutPage.founderDescription")}
-            </p>
+            </ProseText>
             <div className="flex items-start gap-4">
               <div className="bg-primary/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-2xl font-bold">
                 M
@@ -194,33 +185,29 @@ export default async function AboutPage() {
                 <p className="text-muted-foreground text-sm">
                   {t("publicPages.aboutPage.founderRole")}
                 </p>
-                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                <ProseText size="sm" className="mt-3">
                   {t("publicPages.aboutPage.founderBio")}
-                </p>
+                </ProseText>
               </div>
             </div>
-          </div>
+          </ContentCard>
         </Container>
       </Section>
 
       {/* CTA */}
-      <Section variant="compact">
-        <Container size="narrow">
-          <div className="rounded-xl border bg-muted/30 p-8 text-center">
-            <h2 className="mb-3 text-2xl font-bold">
-              {t("publicPages.aboutPage.ctaTitle")}
-            </h2>
-            <p className="text-muted-foreground mx-auto mb-6 max-w-xl leading-relaxed">
-              {t("publicPages.aboutPage.ctaDescription")}
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <LinkButton href="/contact" size="lg">
-                {t("publicPages.aboutPage.ctaPrimary")}
-              </LinkButton>
-              <LinkButton href="/work" size="lg" variant="outline">
-                {t("publicPages.aboutPage.ctaSecondary")}
-              </LinkButton>
-            </div>
+      <Section variant="cta">
+        <Container size="narrow" className="text-center">
+          <SectionHeader
+            heading={t("publicPages.aboutPage.ctaTitle")}
+            subheading={t("publicPages.aboutPage.ctaDescription")}
+          />
+          <div className="flex flex-wrap justify-center gap-3">
+            <LinkButton href="/contact" size="lg">
+              {t("publicPages.aboutPage.ctaPrimary")}
+            </LinkButton>
+            <LinkButton href="/work" size="lg" variant="outline">
+              {t("publicPages.aboutPage.ctaSecondary")}
+            </LinkButton>
           </div>
         </Container>
       </Section>

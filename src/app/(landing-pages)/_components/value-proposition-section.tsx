@@ -10,10 +10,15 @@ import {
 } from "lucide-react";
 
 import {
+  CardHeading,
   Container,
+  ContentCard,
   Grid,
+  IconBox,
+  ProseText,
   Section,
   SectionHeader,
+  Stat,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 
@@ -86,7 +91,7 @@ export async function ValuePropositionSection() {
   ];
 
   return (
-    <Section variant="muted">
+    <Section variant="alternate">
       <Container>
         <SectionHeader
           heading={t("publicPages.valueProposition.heading")}
@@ -96,48 +101,36 @@ export async function ValuePropositionSection() {
         {/* 4 main benefit cards */}
         <Grid cols={4} className="mb-16">
           {mainBenefits.map(({ Icon, title, description }) => (
-            <div
-              key={title}
-              className="group rounded-xl border border-border/50 bg-background p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Icon className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-              <h3 className="mb-2 text-lg font-bold">{title}</h3>
-              <p className="text-sm text-muted-foreground">{description}</p>
-            </div>
+            <ContentCard key={title} className="group">
+              <IconBox icon={Icon} className="mb-4" />
+              <CardHeading className="mb-2">{title}</CardHeading>
+              <ProseText size="sm">{description}</ProseText>
+            </ContentCard>
           ))}
         </Grid>
 
         {/* Partnership section */}
-        <div className="rounded-2xl border border-border/50 bg-background p-8 shadow-sm">
+        <ContentCard className="p-8">
           <div className="mb-8 text-center">
-            <h3 className="text-xl font-bold text-primary">
+            <h3 className="text-primary text-xl font-bold">
               {t("publicPages.valueProposition.partnershipHeader")}
             </h3>
           </div>
           <Grid cols={4} gap="compact">
             {partnerBenefits.map(({ Icon, title, description }) => (
               <div key={title} className="group text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Icon className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="mb-2 text-base font-bold">{title}</h3>
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <IconBox icon={Icon} size="lg" className="mx-auto mb-4" />
+                <CardHeading className="mb-2">{title}</CardHeading>
+                <ProseText size="sm">{description}</ProseText>
               </div>
             ))}
           </Grid>
-        </div>
+        </ContentCard>
 
         {/* Stats row */}
         <div className="mt-16 grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
           {stats.map(({ value, label }) => (
-            <div key={label}>
-              <p className="mb-2 text-3xl font-bold text-primary">{value}</p>
-              <p className="text-sm text-muted-foreground">{label}</p>
-            </div>
+            <Stat key={label} value={value} label={label} />
           ))}
         </div>
       </Container>

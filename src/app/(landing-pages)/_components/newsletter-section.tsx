@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Container, Section } from "@/components/ui/containers";
+import { Container, Section, SectionHeader } from "@/components/ui/containers";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
@@ -43,17 +43,16 @@ export function NewsletterSection() {
   }
 
   return (
-    <Section variant="muted">
+    <Section variant="feature">
       <Container size="narrow" className="text-center">
-        <h2 className="text-2xl font-bold md:text-3xl">
-          {t("publicPages.newsletter.heading")}
-        </h2>
-        <p className="text-muted-foreground mt-3">
-          {t("publicPages.newsletter.description")}
-        </p>
+        <SectionHeader
+          heading={t("publicPages.newsletter.heading")}
+          subheading={t("publicPages.newsletter.description")}
+          className="mb-6"
+        />
         <form
           onSubmit={handleSubmit}
-          className="mt-6 flex flex-col gap-3 sm:flex-row"
+          className="flex flex-col gap-3 sm:flex-row"
         >
           <Input
             type="email"

@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 
-import { Container, Section, SectionHeader } from "@/components/ui/containers";
+import {
+  Container,
+  HeroContainer,
+  PageHeading,
+  ProseText,
+  Section,
+  SectionHeader,
+} from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { generateWhatsAppUrl } from "@/lib/phone";
 
@@ -69,17 +76,15 @@ export default async function ContactPage() {
 
   return (
     <>
-      <Section variant="compact">
+      <HeroContainer>
         <Container size="wide">
           <div className="grid gap-12 md:grid-cols-2">
             {/* Left: heading + contact methods */}
             <div>
-              <h1 className="text-4xl font-bold">
-                {t("publicPages.contactPage.heading")}
-              </h1>
-              <p className="text-muted-foreground mt-4 text-lg">
+              <PageHeading>{t("publicPages.contactPage.heading")}</PageHeading>
+              <ProseText size="lg" className="mt-4">
                 {t("publicPages.contactPage.subheading")}
-              </p>
+              </ProseText>
 
               <div className="mt-10 space-y-5">
                 {contactMethods.map((item) => (
@@ -97,28 +102,29 @@ export default async function ContactPage() {
                           {item.value}
                         </a>
                       ) : (
-                        <p className="text-muted-foreground text-sm">
-                          {item.value}
-                        </p>
+                        <ProseText size="sm">{item.value}</ProseText>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <p className="text-muted-foreground mt-8 rounded-lg border bg-muted/30 px-4 py-3 text-sm">
+              <ProseText
+                size="sm"
+                className="mt-8 rounded-lg border bg-muted/30 px-4 py-3"
+              >
                 {t("publicPages.contactPage.availabilityInfo")}
-              </p>
+              </ProseText>
             </div>
 
             {/* Right: form */}
             <ContactForm />
           </div>
         </Container>
-      </Section>
+      </HeroContainer>
 
       {/* FAQ */}
-      <Section variant="compact">
+      <Section variant="alternate">
         <Container size="wide">
           <SectionHeader heading={t("publicPages.contactPage.faqTitle")} />
           <div className="mt-6 space-y-4">
@@ -130,9 +136,7 @@ export default async function ContactPage() {
                 <summary className="cursor-pointer list-none font-semibold group-open:mb-3">
                   {item.q}
                 </summary>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {item.a}
-                </p>
+                <ProseText size="sm">{item.a}</ProseText>
               </details>
             ))}
           </div>
