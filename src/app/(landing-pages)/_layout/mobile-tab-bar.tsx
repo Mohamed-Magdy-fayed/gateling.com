@@ -61,7 +61,11 @@ export function PublicLandingMobileTabBar() {
   ] as const;
 
   return (
-    <MobileTabBar ariaLabel={t("landing.mobileTabBarLabel")} columnCount={5}>
+    <MobileTabBar
+      ariaLabel={t("landing.mobileTabBarLabel")}
+      columnCount={5}
+      position="fixed"
+    >
       {/* Column 1: Account / Profile */}
       <Sheet>
         <SheetTrigger

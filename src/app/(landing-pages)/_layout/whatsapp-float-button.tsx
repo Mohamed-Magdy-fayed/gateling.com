@@ -20,7 +20,7 @@ export function WhatsAppFloatButton() {
       rel="noopener noreferrer"
       aria-label={t("publicPages.finalCta.ctaWhatsApp")}
       onClick={() => trackPixelEvent("Contact", { content_name: "WhatsApp" })}
-      className="fixed bottom-20 inset-e-4 z-50 h-14 w-14 items-center justify-center rounded-full bg-secondary text-accent-foreground shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex"
+      className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom)+1rem)] inset-e-4 z-50 h-14 w-14 items-center justify-center rounded-full bg-secondary text-accent-foreground shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex"
     >
       <MessageCircleIcon className="size-8" />
     </Link>

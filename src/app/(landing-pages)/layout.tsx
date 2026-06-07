@@ -9,16 +9,14 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex h-svh flex-col overflow-hidden bg-background md:h-auto md:min-h-screen md:overflow-visible">
-      <div className=" flex min-h-0 flex-1 flex-col">
-        <PublicHeader />
-        <main className="min-h-0 flex-1 overflow-x-clip overflow-y-auto md:overflow-visible">
-          {children}
-          <PublicFooter />
-          <WhatsAppFloatButton />
-        </main>
-        <PublicLandingMobileTabBar />
-      </div>
+    <div className="relative flex min-h-dvh flex-col bg-background">
+      <PublicHeader />
+      <main className="flex-1 overflow-x-clip pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
+        {children}
+        <PublicFooter />
+        <WhatsAppFloatButton />
+      </main>
+      <PublicLandingMobileTabBar />
     </div>
   );
 }

@@ -14,16 +14,24 @@ export function MobileTabBar({
   ariaLabel,
   columnCount,
   children,
+  position = "in-flow",
 }: {
   ariaLabel: string;
   /** Defaults to the number of direct children (tabs + “More”). */
   columnCount?: number;
   children: ReactNode;
+  position?: "in-flow" | "fixed";
 }) {
   const columns = columnCount ?? Children.count(children);
 
   return (
-    <nav aria-label={ariaLabel} className={mobileTabBarShellClassName}>
+    <nav
+      aria-label={ariaLabel}
+      className={cn(
+        mobileTabBarShellClassName,
+        position === "fixed" && "fixed bottom-0 inset-x-0 z-40",
+      )}
+    >
       <div
         className="mx-auto grid h-15 max-w-lg"
         style={{
