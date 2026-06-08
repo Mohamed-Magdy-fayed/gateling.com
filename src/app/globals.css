@@ -229,11 +229,6 @@
   }
 }
 
-/* App scrollbars: explicit pseudo-elements so Chrome matches in dev and production.
-   Tailwind scrollbar-* utilities only set scrollbar-color, which Chrome on Windows
-   does not consistently apply. System pages scroll inside [data-slot="scroll-area"];
-   desktop public pages scroll the document (html); on mobile, public pages scroll
-   inside #site-scroll (hidden on mobile for a native app-like feel). */
 @layer components {
   html,
   body,
@@ -280,5 +275,81 @@
   #site-scroll::-webkit-scrollbar-corner,
   [data-slot="scroll-area"]::-webkit-scrollbar-corner {
     background: transparent;
+  }
+}
+
+/* ─── View Transitions ─────────────────────────────────── */
+
+/* Header stays fixed and above sliding content */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+:root {
+  --vt-exit: 150ms;
+  --vt-enter: 210ms;
+}
+
+/* Forward nav: old slides left out, new slides in from right */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+/* Back nav: old slides right out, new slides in from left */
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s;
+    animation-delay: 0s;
   }
 }

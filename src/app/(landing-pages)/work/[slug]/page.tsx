@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -72,6 +72,7 @@ async function WorkDetailContent({ params }: Props) {
         <Container size="narrow">
           <Link
             href="/work"
+            transitionTypes={["nav-back"]}
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeftIcon className="h-3.5 w-3.5" />
@@ -120,16 +121,18 @@ async function WorkDetailContent({ params }: Props) {
 
             {/* Right: sticky cover image */}
             {cs.coverImageUrl && (
-              <div className="sticky top-24 self-start overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
-                <Image
-                  src={cs.coverImageUrl}
-                  alt={cs.title}
-                  width={960}
-                  height={540}
-                  priority
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              <ViewTransition name={`case-${cs.slug}`}>
+                <div className="sticky top-24 self-start overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
+                  <Image
+                    src={cs.coverImageUrl}
+                    alt={cs.title}
+                    width={960}
+                    height={540}
+                    priority
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </ViewTransition>
             )}
           </div>
         </Container>

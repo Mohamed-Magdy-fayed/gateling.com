@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PublicFooter } from "./_layout/footer";
 import { PublicHeader } from "./_layout/header";
@@ -10,19 +11,31 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <div className="flex relative h-svh flex-col overflow-auto">
+    <div className="flex relative h-svh flex-col">
+      <ScrollArea
+        slot="main"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+      >
         <PublicHeader />
-        <ScrollArea
-          slot="main"
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden md:overflow-visible"
+        <ViewTransition
+          enter={{
+            "nav-forward": "nav-forward",
+            "nav-back": "nav-back",
+            default: "none",
+          }}
+          exit={{
+            "nav-forward": "nav-forward",
+            "nav-back": "nav-back",
+            default: "none",
+          }}
+          default="none"
         >
           {children}
-          <PublicFooter />
-        </ScrollArea>
-        <PublicLandingMobileTabBar />
-      </div>
+        </ViewTransition>
+        <PublicFooter />
+      </ScrollArea>
+      <PublicLandingMobileTabBar />
       <WhatsAppFloatButton />
-    </>
+    </div>
   );
 }
