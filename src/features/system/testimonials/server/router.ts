@@ -9,6 +9,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/integrations/trpc/init";
+import { localize } from "@/lib/i18n-content";
 
 function assertAdmin(role: string) {
   if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
@@ -21,7 +22,9 @@ const testimonialMutationSchema = z.object({
   clientName: z.string().trim().min(1, required).max(255, max255),
   company: z.string().trim().min(1, required).max(255, max255),
   role: z.string().trim().max(128).optional().nullable(),
+  roleAr: z.string().trim().max(128).optional().nullable(),
   content: z.string().trim().min(1, required).max(1024),
+  contentAr: z.string().trim().max(1024).optional().nullable(),
   avatarUrl: z.string().max(1024).optional().nullable(),
   caseStudyId: z.string().uuid().optional().nullable(),
   isVisible: z.boolean().default(true),
@@ -34,30 +37,43 @@ const testimonialUpdateSchema = testimonialMutationSchema.extend({
 
 export const testimonialsRouter = createTRPCRouter({
   publicList: baseProcedure.query(async ({ ctx }) => {
-    return ctx.db
+    const rows = await ctx.db
       .select({
         id: TestimonialsTable.id,
         clientName: TestimonialsTable.clientName,
         company: TestimonialsTable.company,
         role: TestimonialsTable.role,
+        roleAr: TestimonialsTable.roleAr,
         content: TestimonialsTable.content,
+        contentAr: TestimonialsTable.contentAr,
         avatarUrl: TestimonialsTable.avatarUrl,
         sortOrder: TestimonialsTable.sortOrder,
       })
       .from(TestimonialsTable)
       .where(and(eq(TestimonialsTable.isVisible, true)))
       .orderBy(asc(TestimonialsTable.sortOrder));
+    return rows.map((row) => ({
+      id: row.id,
+      clientName: row.clientName,
+      company: row.company,
+      avatarUrl: row.avatarUrl,
+      sortOrder: row.sortOrder,
+      role: localize(row.role ?? null, row.roleAr, ctx.locale),
+      content: localize(row.content, row.contentAr, ctx.locale),
+    }));
   }),
   publicListByCaseStudy: baseProcedure
     .input(z.object({ caseStudyId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db
+      const rows = await ctx.db
         .select({
           id: TestimonialsTable.id,
           clientName: TestimonialsTable.clientName,
           company: TestimonialsTable.company,
           role: TestimonialsTable.role,
+          roleAr: TestimonialsTable.roleAr,
           content: TestimonialsTable.content,
+          contentAr: TestimonialsTable.contentAr,
           avatarUrl: TestimonialsTable.avatarUrl,
           rating: TestimonialsTable.rating,
           sortOrder: TestimonialsTable.sortOrder,
@@ -70,6 +86,16 @@ export const testimonialsRouter = createTRPCRouter({
           ),
         )
         .orderBy(asc(TestimonialsTable.sortOrder));
+      return rows.map((row) => ({
+        id: row.id,
+        clientName: row.clientName,
+        company: row.company,
+        avatarUrl: row.avatarUrl,
+        rating: row.rating,
+        sortOrder: row.sortOrder,
+        role: localize(row.role ?? null, row.roleAr, ctx.locale),
+        content: localize(row.content, row.contentAr, ctx.locale),
+      }));
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     assertAdmin(ctx.session?.user.role ?? "");

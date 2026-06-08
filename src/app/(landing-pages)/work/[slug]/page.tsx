@@ -75,7 +75,7 @@ async function WorkDetailContent({ params }: Props) {
             transitionTypes={["nav-back"]}
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
-            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            <ArrowLeftIcon className="h-3.5 w-3.5 rtl:-scale-x-100" />
             {t("publicPages.workDetailPage.backToWork")}
           </Link>
 

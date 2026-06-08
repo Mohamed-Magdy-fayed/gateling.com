@@ -8,6 +8,44 @@ import {
   type TRPCContext,
 } from "./shared";
 
+export async function listPublishedBlogPosts(ctx: TRPCContext) {
+  return ctx.db
+    .select({
+      id: BlogPostsTable.id,
+      title: BlogPostsTable.title,
+      titleAr: BlogPostsTable.titleAr,
+      slug: BlogPostsTable.slug,
+      excerpt: BlogPostsTable.excerpt,
+      excerptAr: BlogPostsTable.excerptAr,
+      authorName: BlogPostsTable.authorName,
+      tags: BlogPostsTable.tags,
+      publishedAt: BlogPostsTable.publishedAt,
+      coverImageUrl: BlogPostsTable.coverImageUrl,
+      content: BlogPostsTable.content,
+    })
+    .from(BlogPostsTable)
+    .where(
+      and(
+        eq(BlogPostsTable.status, "published"),
+        isNull(BlogPostsTable.deletedAt),
+      ),
+    )
+    .orderBy(desc(BlogPostsTable.publishedAt));
+}
+
+export async function getPublishedBlogPostBySlug(
+  ctx: TRPCContext,
+  slug: string,
+) {
+  return ctx.db.query.BlogPostsTable.findFirst({
+    where: and(
+      eq(BlogPostsTable.slug, slug),
+      eq(BlogPostsTable.status, "published"),
+      isNull(BlogPostsTable.deletedAt),
+    ),
+  });
+}
+
 export async function listBlogPosts(
   ctx: TRPCContext,
   input: ListBlogPostsInput,
@@ -53,8 +91,11 @@ export async function listBlogPosts(
     .select({
       id: BlogPostsTable.id,
       title: BlogPostsTable.title,
+      titleAr: BlogPostsTable.titleAr,
       slug: BlogPostsTable.slug,
       excerpt: BlogPostsTable.excerpt,
+      excerptAr: BlogPostsTable.excerptAr,
+      contentAr: BlogPostsTable.contentAr,
       authorName: BlogPostsTable.authorName,
       tags: BlogPostsTable.tags,
       status: BlogPostsTable.status,

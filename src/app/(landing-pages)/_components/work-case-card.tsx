@@ -74,7 +74,7 @@ export async function WorkCaseCard({ cs, variant }: Props) {
               className="flex items-center gap-1 text-sm font-medium text-primary"
             >
               <span>{t("common.readMore")}</span>
-              <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
             </Link>
             {cs.liveUrl && (
               <Link
@@ -142,7 +142,7 @@ export async function WorkCaseCard({ cs, variant }: Props) {
           className="inline-flex items-center gap-1 text-sm font-medium text-primary"
         >
           {t("common.readMore")}
-          <ArrowRightIcon className="h-3.5 w-3.5" />
+          <ArrowRightIcon className="h-3.5 w-3.5 rtl:-scale-x-100" />
         </Link>
       </div>
     </ContentCard>

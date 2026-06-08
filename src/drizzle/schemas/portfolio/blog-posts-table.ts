@@ -29,9 +29,12 @@ export const BlogPostsTable = pgTable(
   {
     id,
     title: varchar({ length: 255 }).notNull(),
+    titleAr: varchar({ length: 255 }),
     slug: varchar({ length: 255 }).notNull().unique(),
     excerpt: varchar({ length: 512 }).notNull(),
+    excerptAr: varchar({ length: 512 }),
     content: text().notNull(),
+    contentAr: text(),
     coverImageUrl: varchar({ length: 1024 }),
     authorName: varchar({ length: 255 })
       .notNull()

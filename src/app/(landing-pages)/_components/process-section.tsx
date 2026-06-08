@@ -127,7 +127,7 @@ export async function ProcessSection() {
                   {/* Arrow between steps on mobile */}
                   {i < steps.length - 1 && (
                     <div className="my-6 flex justify-center lg:hidden">
-                      <ArrowRightIcon className="h-6 w-6 text-primary" />
+                      <ArrowRightIcon className="h-6 w-6 text-primary rtl:-scale-x-100" />
                     </div>
                   )}
                 </div>

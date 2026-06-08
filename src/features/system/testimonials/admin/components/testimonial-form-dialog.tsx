@@ -25,6 +25,7 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import type { Testimonial } from "@/integrations/trpc/routers/testimonials";
@@ -33,7 +34,9 @@ const formSchema = z.object({
   clientName: z.string().trim().min(1).max(255),
   company: z.string().trim().min(1).max(255),
   role: z.string().trim().max(128).optional().nullable(),
+  roleAr: z.string().trim().max(128).optional().nullable(),
   content: z.string().trim().min(1).max(1024),
+  contentAr: z.string().trim().max(1024).optional().nullable(),
   avatarUrl: z.string().max(1024).optional().nullable(),
   sortOrder: z.number().int().min(0),
   isVisible: z.boolean(),
@@ -67,7 +70,9 @@ export function TestimonialFormDialog({
       clientName: "",
       company: "",
       role: null,
+      roleAr: null,
       content: "",
+      contentAr: null,
       avatarUrl: null,
       sortOrder: 0,
       isVisible: true,
@@ -83,6 +88,8 @@ export function TestimonialFormDialog({
         const payload = {
           ...value,
           role: value.role || null,
+          roleAr: value.roleAr || null,
+          contentAr: value.contentAr || null,
           avatarUrl: value.avatarUrl || null,
         };
         if (isEdit && testimonial) {
@@ -119,7 +126,9 @@ export function TestimonialFormDialog({
       clientName: testimonial.clientName,
       company: testimonial.company,
       role: testimonial.role ?? null,
+      roleAr: testimonial.roleAr ?? null,
       content: testimonial.content,
+      contentAr: testimonial.contentAr ?? null,
       avatarUrl: testimonial.avatarUrl ?? null,
       sortOrder: testimonial.sortOrder,
       isVisible: testimonial.isVisible,
@@ -187,33 +196,78 @@ export function TestimonialFormDialog({
                   )}
                 </form.AppField>
               </FieldGroup>
-              <form.Field name="role">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>
-                      {String(t("testimonials.role"))}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      value={(field.state.value as string) ?? ""}
-                      onChange={(e) =>
-                        field.handleChange(e.target.value || null)
-                      }
-                      onBlur={field.handleBlur}
-                      placeholder={String(t("testimonials.rolePlaceholder"))}
-                    />
-                  </Field>
-                )}
-              </form.Field>
-              <form.AppField name="content">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("testimonials.content"))}
-                    placeholder={String(t("testimonials.contentPlaceholder"))}
-                    rows={4}
-                  />
-                )}
-              </form.AppField>
+
+              <Tabs defaultValue="en">
+                <TabsList>
+                  <TabsTrigger value="en">English</TabsTrigger>
+                  <TabsTrigger value="ar">العربية</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="en">
+                  <FieldGroup>
+                    <form.Field name="role">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {String(t("testimonials.role"))}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={(field.state.value as string) ?? ""}
+                            onChange={(e) =>
+                              field.handleChange(e.target.value || null)
+                            }
+                            onBlur={field.handleBlur}
+                            placeholder={String(t("testimonials.rolePlaceholder"))}
+                          />
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.AppField name="content">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("testimonials.content"))}
+                          placeholder={String(t("testimonials.contentPlaceholder"))}
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                  </FieldGroup>
+                </TabsContent>
+
+                <TabsContent value="ar" dir="rtl">
+                  <FieldGroup>
+                    <form.Field name="roleAr">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {String(t("testimonials.role"))} (AR)
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={(field.state.value as string) ?? ""}
+                            onChange={(e) =>
+                              field.handleChange(e.target.value || null)
+                            }
+                            onBlur={field.handleBlur}
+                            placeholder="المسمى الوظيفي"
+                          />
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.AppField name="contentAr">
+                      {(field) => (
+                        <field.TextareaField
+                          label={`${String(t("testimonials.content"))} (AR)`}
+                          placeholder="نص التقييم بالعربية..."
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                  </FieldGroup>
+                </TabsContent>
+              </Tabs>
+
               <FieldGroup>
                 <form.Field name="avatarUrl">
                   {(field) => (

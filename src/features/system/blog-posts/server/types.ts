@@ -4,8 +4,11 @@ export type BlogPostRow = Pick<
   BlogPost,
   | "id"
   | "title"
+  | "titleAr"
   | "slug"
   | "excerpt"
+  | "excerptAr"
+  | "contentAr"
   | "authorName"
   | "tags"
   | "status"

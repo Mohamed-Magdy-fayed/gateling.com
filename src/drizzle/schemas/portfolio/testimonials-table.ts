@@ -24,7 +24,9 @@ export const TestimonialsTable = pgTable(
     clientName: varchar({ length: 255 }).notNull(),
     company: varchar({ length: 255 }).notNull(),
     role: varchar({ length: 128 }),
+    roleAr: varchar({ length: 128 }),
     content: varchar({ length: 1024 }).notNull(),
+    contentAr: varchar({ length: 1024 }),
     avatarUrl: varchar({ length: 1024 }),
     rating: integer(),
     userId: uuid("user_id").references(() => UsersTable.id, {

@@ -844,6 +844,17 @@ export default {
       noPosts: "No posts yet. Check back soon.",
       getInTouch: "Get in touch",
       readMore: "Read more →",
+      readingTime: "{n} min read",
+      ctaHeading: "Ready to build something remarkable?",
+      ctaDescription:
+        "Let's discuss your project and see what we can create together.",
+      ctaButton: "Start a Conversation",
+    },
+    blogDetailPage: {
+      backToBlog: "Back to Blog",
+      publishedOn: "Published on",
+      byAuthor: "By {author}",
+      readingTime: "{n} min read",
       ctaHeading: "Ready to build something remarkable?",
       ctaDescription:
         "Let's discuss your project and see what we can create together.",

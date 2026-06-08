@@ -32,6 +32,7 @@ import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
@@ -39,6 +40,7 @@ import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
 
 const formSchema = z.object({
   title: z.string().trim().min(1).max(255),
+  titleAr: z.string().trim().max(255).optional().nullable(),
   slug: z
     .string()
     .trim()
@@ -46,13 +48,22 @@ const formSchema = z.object({
     .max(255)
     .regex(/^[a-z0-9-]+$/),
   client: z.string().trim().min(1).max(255),
+  clientAr: z.string().trim().max(255).optional().nullable(),
   industry: z.string().trim().min(1).max(128),
+  industryAr: z.string().trim().max(128).optional().nullable(),
   problemStatement: z.string().trim().min(1).max(4000),
+  problemStatementAr: z.string().trim().max(4000).optional().nullable(),
   solution: z.string().trim().min(1).max(4000),
+  solutionAr: z.string().trim().max(4000).optional().nullable(),
   resultsSummary: z.string().trim().min(1).max(512),
+  resultsArSummary: z.string().trim().max(512).optional().nullable(),
   resultsMetrics: z
     .array(z.object({ label: z.string(), value: z.string() }))
     .min(1),
+  resultsArMetrics: z
+    .array(z.object({ label: z.string(), value: z.string() }))
+    .optional()
+    .nullable(),
   coverImageUrl: z.string().max(1024).optional().nullable(),
   liveUrl: z.string().max(1024).optional().nullable(),
   sortOrder: z.number().int().min(0),
@@ -95,13 +106,20 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
   const defaultValues = useMemo<FormValues>(
     () => ({
       title: "",
+      titleAr: null,
       slug: "",
       client: "",
+      clientAr: null,
       industry: "",
+      industryAr: null,
       problemStatement: "",
+      problemStatementAr: null,
       solution: "",
+      solutionAr: null,
       resultsSummary: "",
+      resultsArSummary: null,
       resultsMetrics: [{ label: "", value: "" }],
+      resultsArMetrics: [{ label: "", value: "" }],
       coverImageUrl: null,
       liveUrl: null,
       sortOrder: 0,
@@ -114,14 +132,29 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
       try {
+        const arMetrics = (value.resultsArMetrics ?? []).filter(
+          (m) => m.label.trim() || m.value.trim(),
+        );
         const payload = {
           ...value,
+          titleAr: value.titleAr || null,
+          clientAr: value.clientAr || null,
+          industryAr: value.industryAr || null,
+          problemStatementAr: value.problemStatementAr || null,
+          solutionAr: value.solutionAr || null,
           coverImageUrl: value.coverImageUrl || null,
           liveUrl: value.liveUrl || null,
           results: {
             summary: value.resultsSummary,
             metrics: value.resultsMetrics,
           },
+          resultsAr:
+            arMetrics.length > 0 || value.resultsArSummary?.trim()
+              ? {
+                  summary: value.resultsArSummary ?? "",
+                  metrics: arMetrics,
+                }
+              : null,
         };
         if (isEdit && caseStudy) {
           await toast
@@ -152,15 +185,25 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
     if (!detail) return;
     form.reset({
       title: detail.title,
+      titleAr: detail.titleAr ?? null,
       slug: detail.slug,
       client: detail.client,
+      clientAr: detail.clientAr ?? null,
       industry: detail.industry,
+      industryAr: detail.industryAr ?? null,
       problemStatement: detail.problemStatement,
+      problemStatementAr: detail.problemStatementAr ?? null,
       solution: detail.solution,
+      solutionAr: detail.solutionAr ?? null,
       resultsSummary: detail.results.summary,
+      resultsArSummary: detail.resultsAr?.summary ?? null,
       resultsMetrics:
         detail.results.metrics.length > 0
           ? detail.results.metrics
+          : [{ label: "", value: "" }],
+      resultsArMetrics:
+        detail.resultsAr && detail.resultsAr.metrics.length > 0
+          ? detail.resultsAr.metrics
           : [{ label: "", value: "" }],
       coverImageUrl: detail.coverImageUrl ?? null,
       liveUrl: detail.liveUrl ?? null,
@@ -201,27 +244,294 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
             className="space-y-4 p-6"
           >
             <FieldSet disabled={pending}>
-              <FieldGroup>
-                <form.Field name="title">
-                  {(field) => (
+              <Tabs defaultValue="en">
+                <TabsList>
+                  <TabsTrigger value="en">English</TabsTrigger>
+                  <TabsTrigger value="ar">العربية</TabsTrigger>
+                </TabsList>
+
+                {/* ── English tab ── */}
+                <TabsContent value="en">
+                  <FieldGroup>
+                    <form.Field name="title">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {String(t("work.name"))}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={field.state.value as string}
+                            onChange={(e) => {
+                              field.handleChange(e.target.value);
+                              if (!isEdit)
+                                form.setFieldValue(
+                                  "slug",
+                                  slugify(e.target.value),
+                                );
+                            }}
+                            onBlur={field.handleBlur}
+                            placeholder={String(t("work.namePlaceholder"))}
+                          />
+                        </Field>
+                      )}
+                    </form.Field>
+                    <FieldGroup>
+                      <form.AppField name="client">
+                        {(field) => (
+                          <field.StringField
+                            label={String(t("work.client"))}
+                            placeholder={String(t("work.clientPlaceholder"))}
+                          />
+                        )}
+                      </form.AppField>
+                      <form.AppField name="industry">
+                        {(field) => (
+                          <field.StringField
+                            label={String(t("work.industry"))}
+                            placeholder={String(t("work.industryPlaceholder"))}
+                          />
+                        )}
+                      </form.AppField>
+                    </FieldGroup>
+                    <form.AppField name="problemStatement">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("work.problem"))}
+                          placeholder={String(t("work.problemPlaceholder"))}
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                    <form.AppField name="solution">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("work.solution"))}
+                          placeholder={String(t("work.solutionPlaceholder"))}
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                    <Separator />
+                    <form.Field name="resultsMetrics" mode="array">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel>{String(t("work.results"))}</FieldLabel>
+                          <div className="space-y-2">
+                            {field.state.value.map((_, index) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: TanStack Form array fields have no stable ID
+                              <div key={index} className="flex gap-2">
+                                <form.Field
+                                  name={`resultsMetrics[${index}].label`}
+                                >
+                                  {(subField) => (
+                                    <Input
+                                      value={subField.state.value as string}
+                                      onChange={(e) =>
+                                        subField.handleChange(e.target.value)
+                                      }
+                                      placeholder={String(
+                                        t("work.resultsMetricLabelPlaceholder"),
+                                      )}
+                                      className="flex-1"
+                                    />
+                                  )}
+                                </form.Field>
+                                <form.Field
+                                  name={`resultsMetrics[${index}].value`}
+                                >
+                                  {(subField) => (
+                                    <Input
+                                      value={subField.state.value as string}
+                                      onChange={(e) =>
+                                        subField.handleChange(e.target.value)
+                                      }
+                                      placeholder={String(
+                                        t("work.resultsMetricValuePlaceholder"),
+                                      )}
+                                      className="w-28"
+                                    />
+                                  )}
+                                </form.Field>
+                                {field.state.value.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => field.removeValue(index)}
+                                  >
+                                    <Trash2Icon className="size-3.5" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                field.pushValue({ label: "", value: "" })
+                              }
+                            >
+                              <PlusIcon className="me-1 size-3.5" />
+                              {String(t("work.addMetric"))}
+                            </Button>
+                          </div>
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.AppField name="resultsSummary">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("work.resultsSummary"))}
+                          placeholder={String(
+                            t("work.resultsSummaryPlaceholder"),
+                          )}
+                          rows={2}
+                        />
+                      )}
+                    </form.AppField>
+                  </FieldGroup>
+                </TabsContent>
+
+                {/* ── Arabic tab ── */}
+                <TabsContent value="ar" dir="rtl">
+                  <FieldGroup>
+                    <form.AppField name="titleAr">
+                      {(field) => (
+                        <field.StringField
+                          label={`${String(t("work.name"))} (AR)`}
+                          placeholder="اسم المشروع بالعربية..."
+                        />
+                      )}
+                    </form.AppField>
+                    <FieldGroup>
+                      <form.AppField name="clientAr">
+                        {(field) => (
+                          <field.StringField
+                            label={`${String(t("work.client"))} (AR)`}
+                            placeholder="اسم العميل بالعربية..."
+                          />
+                        )}
+                      </form.AppField>
+                      <form.AppField name="industryAr">
+                        {(field) => (
+                          <field.StringField
+                            label={`${String(t("work.industry"))} (AR)`}
+                            placeholder="القطاع بالعربية..."
+                          />
+                        )}
+                      </form.AppField>
+                    </FieldGroup>
+                    <form.AppField name="problemStatementAr">
+                      {(field) => (
+                        <field.TextareaField
+                          label={`${String(t("work.problem"))} (AR)`}
+                          placeholder="وصف المشكلة بالعربية..."
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                    <form.AppField name="solutionAr">
+                      {(field) => (
+                        <field.TextareaField
+                          label={`${String(t("work.solution"))} (AR)`}
+                          placeholder="وصف الحل بالعربية..."
+                          rows={4}
+                        />
+                      )}
+                    </form.AppField>
+                    <Separator />
+                    <form.Field name="resultsArMetrics" mode="array">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel>
+                            {`${String(t("work.results"))} (AR)`}
+                          </FieldLabel>
+                          <div className="space-y-2">
+                            {(field.state.value ?? []).map((_, index) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: TanStack Form array fields have no stable ID
+                              <div key={index} className="flex gap-2">
+                                <form.Field
+                                  name={`resultsArMetrics[${index}].label`}
+                                >
+                                  {(subField) => (
+                                    <Input
+                                      value={subField.state.value as string}
+                                      onChange={(e) =>
+                                        subField.handleChange(e.target.value)
+                                      }
+                                      placeholder="تسمية المقياس بالعربية"
+                                      className="flex-1"
+                                    />
+                                  )}
+                                </form.Field>
+                                <form.Field
+                                  name={`resultsArMetrics[${index}].value`}
+                                >
+                                  {(subField) => (
+                                    <Input
+                                      value={subField.state.value as string}
+                                      onChange={(e) =>
+                                        subField.handleChange(e.target.value)
+                                      }
+                                      placeholder="70%"
+                                      className="w-28"
+                                    />
+                                  )}
+                                </form.Field>
+                                {(field.state.value ?? []).length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => field.removeValue(index)}
+                                  >
+                                    <Trash2Icon className="size-3.5" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                field.pushValue({ label: "", value: "" })
+                              }
+                            >
+                              <PlusIcon className="me-1 size-3.5" />
+                              {String(t("work.addMetric"))}
+                            </Button>
+                          </div>
+                        </Field>
+                      )}
+                    </form.Field>
                     <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {String(t("work.name"))}
+                      <FieldLabel>
+                        {`${String(t("work.resultsSummary"))} (AR)`}
                       </FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value as string}
-                        onChange={(e) => {
-                          field.handleChange(e.target.value);
-                          if (!isEdit)
-                            form.setFieldValue("slug", slugify(e.target.value));
-                        }}
-                        onBlur={field.handleBlur}
-                        placeholder={String(t("work.namePlaceholder"))}
-                      />
+                      <form.Field name="resultsArSummary">
+                        {(field) => (
+                          <Textarea
+                            value={(field.state.value as string) ?? ""}
+                            onChange={(e) =>
+                              field.handleChange(e.target.value || null)
+                            }
+                            onBlur={field.handleBlur}
+                            placeholder="ملخص النتائج بالعربية..."
+                            rows={2}
+                          />
+                        )}
+                      </form.Field>
                     </Field>
-                  )}
-                </form.Field>
+                  </FieldGroup>
+                </TabsContent>
+              </Tabs>
+
+              <Separator />
+
+              <FieldGroup>
                 <form.Field name="slug">
                   {(field) => (
                     <Field>
@@ -239,124 +549,6 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     </Field>
                   )}
                 </form.Field>
-              </FieldGroup>
-              <FieldGroup>
-                <form.AppField name="client">
-                  {(field) => (
-                    <field.StringField
-                      label={String(t("work.client"))}
-                      placeholder={String(t("work.clientPlaceholder"))}
-                    />
-                  )}
-                </form.AppField>
-                <form.AppField name="industry">
-                  {(field) => (
-                    <field.StringField
-                      label={String(t("work.industry"))}
-                      placeholder={String(t("work.industryPlaceholder"))}
-                    />
-                  )}
-                </form.AppField>
-              </FieldGroup>
-              <form.AppField name="problemStatement">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("work.problem"))}
-                    placeholder={String(t("work.problemPlaceholder"))}
-                    rows={4}
-                  />
-                )}
-              </form.AppField>
-              <form.AppField name="solution">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("work.solution"))}
-                    placeholder={String(t("work.solutionPlaceholder"))}
-                    rows={4}
-                  />
-                )}
-              </form.AppField>
-
-              <Separator />
-
-              {/* Results metrics */}
-              <form.Field name="resultsMetrics" mode="array">
-                {(field) => (
-                  <Field>
-                    <FieldLabel>{String(t("work.results"))}</FieldLabel>
-                    <div className="space-y-2">
-                      {field.state.value.map((_, index) => (
-                        // biome-ignore lint/suspicious/noArrayIndexKey: TanStack Form array fields have no stable ID
-                        <div key={index} className="flex gap-2">
-                          <form.Field name={`resultsMetrics[${index}].label`}>
-                            {(subField) => (
-                              <Input
-                                value={subField.state.value as string}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.value)
-                                }
-                                placeholder={String(
-                                  t("work.resultsMetricLabelPlaceholder"),
-                                )}
-                                className="flex-1"
-                              />
-                            )}
-                          </form.Field>
-                          <form.Field name={`resultsMetrics[${index}].value`}>
-                            {(subField) => (
-                              <Input
-                                value={subField.state.value as string}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.value)
-                                }
-                                placeholder={String(
-                                  t("work.resultsMetricValuePlaceholder"),
-                                )}
-                                className="w-28"
-                              />
-                            )}
-                          </form.Field>
-                          {field.state.value.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => field.removeValue(index)}
-                            >
-                              <Trash2Icon className="size-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          field.pushValue({ label: "", value: "" })
-                        }
-                      >
-                        <PlusIcon className="me-1 size-3.5" />
-                        {String(t("work.addMetric"))}
-                      </Button>
-                    </div>
-                  </Field>
-                )}
-              </form.Field>
-
-              <form.AppField name="resultsSummary">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("work.resultsSummary"))}
-                    placeholder={String(t("work.resultsSummaryPlaceholder"))}
-                    rows={2}
-                  />
-                )}
-              </form.AppField>
-
-              <Separator />
-
-              <FieldGroup>
                 <form.Field name="coverImageUrl">
                   {(field) => (
                     <Field>

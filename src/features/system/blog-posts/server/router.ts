@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
+import {
+  baseProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/integrations/trpc/init";
 import {
   createBlogPost,
   deleteBlogPost,
@@ -8,7 +12,11 @@ import {
   unpublishBlogPost,
   updateBlogPost,
 } from "./mutations";
-import { listBlogPosts } from "./queries";
+import {
+  getPublishedBlogPostBySlug,
+  listBlogPosts,
+  listPublishedBlogPosts,
+} from "./queries";
 import {
   blogPostMutationSchema,
   blogPostUpdateSchema,
@@ -16,6 +24,10 @@ import {
 } from "./schemas";
 
 export const blogPostsRouter = createTRPCRouter({
+  publicList: baseProcedure.query(({ ctx }) => listPublishedBlogPosts(ctx)),
+  publicGetBySlug: baseProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(({ ctx, input }) => getPublishedBlogPostBySlug(ctx, input.slug)),
   list: protectedProcedure
     .input(listBlogPostsInput)
     .query(({ ctx, input }) => listBlogPosts(ctx, input)),

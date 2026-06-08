@@ -9,6 +9,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/integrations/trpc/init";
+import { localize } from "@/lib/i18n-content";
 
 function assertAdmin(role: string) {
   if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
@@ -19,6 +20,7 @@ const max255 = translationKey("forms.validation.max255");
 
 const serviceMutationSchema = z.object({
   title: z.string().trim().min(1, required).max(255, max255),
+  titleAr: z.string().trim().max(255).optional().nullable(),
   slug: z
     .string()
     .trim()
@@ -26,9 +28,12 @@ const serviceMutationSchema = z.object({
     .max(255, max255)
     .regex(/^[a-z0-9-]+$/, translationKey("forms.validation.slugFormat")),
   shortDescription: z.string().trim().min(1, required).max(512),
+  shortDescriptionAr: z.string().trim().max(512).optional().nullable(),
   fullDescription: z.string().trim().max(2048).optional().nullable(),
+  fullDescriptionAr: z.string().trim().max(2048).optional().nullable(),
   icon: z.string().trim().min(1, required).max(64).default("Zap"),
   features: z.array(z.string().trim().min(1)).default([]),
+  featuresAr: z.array(z.string().trim().min(1)).optional().nullable(),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -39,14 +44,17 @@ const serviceUpdateSchema = serviceMutationSchema.extend({
 
 export const servicesMgmtRouter = createTRPCRouter({
   publicList: baseProcedure.query(async ({ ctx }) => {
-    return ctx.db
+    const rows = await ctx.db
       .select({
         id: ServicesTable.id,
         title: ServicesTable.title,
+        titleAr: ServicesTable.titleAr,
         slug: ServicesTable.slug,
         shortDescription: ServicesTable.shortDescription,
+        shortDescriptionAr: ServicesTable.shortDescriptionAr,
         icon: ServicesTable.icon,
         features: ServicesTable.features,
+        featuresAr: ServicesTable.featuresAr,
         sortOrder: ServicesTable.sortOrder,
       })
       .from(ServicesTable)
@@ -54,6 +62,19 @@ export const servicesMgmtRouter = createTRPCRouter({
         and(eq(ServicesTable.isActive, true), isNull(ServicesTable.deletedAt)),
       )
       .orderBy(asc(ServicesTable.sortOrder));
+    return rows.map((row) => ({
+      id: row.id,
+      slug: row.slug,
+      icon: row.icon,
+      sortOrder: row.sortOrder,
+      title: localize(row.title, row.titleAr, ctx.locale),
+      shortDescription: localize(
+        row.shortDescription,
+        row.shortDescriptionAr,
+        ctx.locale,
+      ),
+      features: localize(row.features, row.featuresAr, ctx.locale),
+    }));
   }),
   list: protectedProcedure.query(async ({ ctx }) => {
     assertAdmin(ctx.session?.user.role ?? "");

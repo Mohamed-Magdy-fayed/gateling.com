@@ -5,6 +5,7 @@ import z, { ZodError } from "zod";
 
 import { db } from "@/drizzle";
 import { getUserSession } from "@/features/core/auth/core";
+import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
 import { getT } from "@/features/core/i18n/server";
 import { handleDatabaseError } from "./db-error";
 
@@ -12,8 +13,9 @@ export const createTRPCContext = async () => {
   const cookieStore = await cookies();
   const session = await getUserSession(cookieStore);
   const { t } = await getT();
+  const locale = cookieStore.get(LOCALE_COOKIE_NAME)?.value ?? "en";
 
-  return { session, cookies: cookieStore, t, db };
+  return { session, cookies: cookieStore, t, db, locale };
 };
 
 const t = initTRPC

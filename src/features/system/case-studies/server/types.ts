@@ -4,9 +4,14 @@ export type CaseStudyRow = Pick<
   CaseStudy,
   | "id"
   | "title"
+  | "titleAr"
   | "slug"
   | "client"
+  | "clientAr"
   | "industry"
+  | "industryAr"
+  | "problemStatementAr"
+  | "solutionAr"
   | "status"
   | "publishedAt"
   | "sortOrder"
@@ -14,6 +19,6 @@ export type CaseStudyRow = Pick<
   | "liveUrl"
   | "createdAt"
   | "updatedAt"
-> & { results: CaseStudyResults };
+> & { results: CaseStudyResults; resultsAr: CaseStudyResults | null };
 
 export type CaseStudyDetail = CaseStudy;

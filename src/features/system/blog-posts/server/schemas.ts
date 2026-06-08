@@ -7,6 +7,7 @@ const max255 = translationKey("forms.validation.max255");
 
 export const blogPostMutationSchema = z.object({
   title: z.string().trim().min(1, required).max(255, max255),
+  titleAr: z.string().trim().max(255).optional().nullable(),
   slug: z
     .string()
     .trim()
@@ -14,7 +15,9 @@ export const blogPostMutationSchema = z.object({
     .max(255, max255)
     .regex(/^[a-z0-9-]+$/, translationKey("forms.validation.slugFormat")),
   excerpt: z.string().trim().min(1, required).max(512),
+  excerptAr: z.string().trim().max(512).optional().nullable(),
   content: z.string().trim().min(1, required),
+  contentAr: z.string().trim().optional().nullable(),
   coverImageUrl: z.string().max(1024).optional().nullable(),
   authorName: z
     .string()

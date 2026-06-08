@@ -86,7 +86,7 @@ export async function FinalCtaSection() {
               className="min-w-[200px] px-8 py-6 text-lg"
             >
               {t("publicPages.finalCta.ctaButton")}
-              <ArrowRightIcon className="ms-2 h-5 w-5" />
+              <ArrowRightIcon className="ms-2 h-5 w-5 rtl:-scale-x-100" />
             </LinkButton>
             <LinkButton
               href="/work"

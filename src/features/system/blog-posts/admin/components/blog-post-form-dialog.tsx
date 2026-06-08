@@ -25,12 +25,14 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import type { BlogPostRow } from "@/integrations/trpc/routers/blog-posts";
 
 const formSchema = z.object({
   title: z.string().trim().min(1).max(255),
+  titleAr: z.string().trim().max(255).optional().nullable(),
   slug: z
     .string()
     .trim()
@@ -38,7 +40,9 @@ const formSchema = z.object({
     .max(255)
     .regex(/^[a-z0-9-]+$/),
   excerpt: z.string().trim().min(1).max(512),
+  excerptAr: z.string().trim().max(512).optional().nullable(),
   content: z.string().trim().min(1),
+  contentAr: z.string().trim().optional().nullable(),
   authorName: z.string().trim().min(1).max(255),
   coverImageUrl: z.string().max(1024).optional().nullable(),
 });
@@ -74,9 +78,12 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
   const defaultValues = useMemo<FormValues>(
     () => ({
       title: "",
+      titleAr: null,
       slug: "",
       excerpt: "",
+      excerptAr: null,
       content: "",
+      contentAr: null,
       authorName: "Gateling Solutions",
       coverImageUrl: null,
     }),
@@ -90,6 +97,9 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
       try {
         const payload = {
           ...value,
+          titleAr: value.titleAr || null,
+          excerptAr: value.excerptAr || null,
+          contentAr: value.contentAr || null,
           coverImageUrl: value.coverImageUrl || null,
         };
         if (isEdit && post) {
@@ -121,9 +131,12 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
     if (!post) return;
     form.reset({
       title: post.title,
+      titleAr: post.titleAr ?? null,
       slug: post.slug,
       excerpt: post.excerpt,
+      excerptAr: post.excerptAr ?? null,
       content: "",
+      contentAr: post.contentAr ?? null,
       authorName: post.authorName,
       coverImageUrl: post.coverImageUrl ?? null,
     });
@@ -164,29 +177,93 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
             className="space-y-4 p-6"
           >
             <FieldSet disabled={pending}>
+              <Tabs defaultValue="en">
+                <TabsList>
+                  <TabsTrigger value="en">English</TabsTrigger>
+                  <TabsTrigger value="ar">العربية</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="en">
+                  <FieldGroup>
+                    <form.Field name="title">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {String(t("blogPosts.postTitle"))}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={field.state.value as string}
+                            onChange={(e) => {
+                              field.handleChange(e.target.value);
+                              if (!isEdit)
+                                form.setFieldValue(
+                                  "slug",
+                                  slugify(e.target.value),
+                                );
+                            }}
+                            onBlur={field.handleBlur}
+                            placeholder={String(
+                              t("blogPosts.postTitlePlaceholder"),
+                            )}
+                          />
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.AppField name="excerpt">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("blogPosts.excerpt"))}
+                          placeholder={String(t("blogPosts.excerptPlaceholder"))}
+                          rows={3}
+                        />
+                      )}
+                    </form.AppField>
+                    <form.AppField name="content">
+                      {(field) => (
+                        <field.TextareaField
+                          label={String(t("blogPosts.content"))}
+                          placeholder={String(t("blogPosts.contentPlaceholder"))}
+                          rows={8}
+                        />
+                      )}
+                    </form.AppField>
+                  </FieldGroup>
+                </TabsContent>
+
+                <TabsContent value="ar" dir="rtl">
+                  <FieldGroup>
+                    <form.AppField name="titleAr">
+                      {(field) => (
+                        <field.StringField
+                          label={`${String(t("blogPosts.postTitle"))} (AR)`}
+                          placeholder="عنوان المقال بالعربية..."
+                        />
+                      )}
+                    </form.AppField>
+                    <form.AppField name="excerptAr">
+                      {(field) => (
+                        <field.TextareaField
+                          label={`${String(t("blogPosts.excerpt"))} (AR)`}
+                          placeholder="ملخص المقال بالعربية..."
+                          rows={3}
+                        />
+                      )}
+                    </form.AppField>
+                    <form.AppField name="contentAr">
+                      {(field) => (
+                        <field.TextareaField
+                          label={`${String(t("blogPosts.content"))} (AR)`}
+                          placeholder="محتوى المقال بالعربية..."
+                          rows={8}
+                        />
+                      )}
+                    </form.AppField>
+                  </FieldGroup>
+                </TabsContent>
+              </Tabs>
+
               <FieldGroup>
-                <form.Field name="title">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {String(t("blogPosts.postTitle"))}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value as string}
-                        onChange={(e) => {
-                          field.handleChange(e.target.value);
-                          if (!isEdit)
-                            form.setFieldValue("slug", slugify(e.target.value));
-                        }}
-                        onBlur={field.handleBlur}
-                        placeholder={String(
-                          t("blogPosts.postTitlePlaceholder"),
-                        )}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
                 <form.Field name="slug">
                   {(field) => (
                     <Field>
@@ -204,26 +281,6 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     </Field>
                   )}
                 </form.Field>
-              </FieldGroup>
-              <form.AppField name="excerpt">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("blogPosts.excerpt"))}
-                    placeholder={String(t("blogPosts.excerptPlaceholder"))}
-                    rows={3}
-                  />
-                )}
-              </form.AppField>
-              <form.AppField name="content">
-                {(field) => (
-                  <field.TextareaField
-                    label={String(t("blogPosts.content"))}
-                    placeholder={String(t("blogPosts.contentPlaceholder"))}
-                    rows={8}
-                  />
-                )}
-              </form.AppField>
-              <FieldGroup>
                 <form.AppField name="authorName">
                   {(field) => (
                     <field.StringField
