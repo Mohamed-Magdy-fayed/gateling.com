@@ -93,7 +93,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={cn(
-        "overflow-hidden antialiased font-sans",
+        "antialiased font-sans",
         geistSans.variable,
         geistMono.variable,
         openSans.variable,
@@ -108,7 +108,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="overflow-hidden">
+      <body>
         <Providers locale={locale} theme={theme}>
           {children}
         </Providers>

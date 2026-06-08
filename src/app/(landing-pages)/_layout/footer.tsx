@@ -137,7 +137,7 @@ export function PublicFooter() {
   };
 
   return (
-    <footer className="overflow-x-hidden border-t border-border/50 bg-muted/30">
+    <footer className="overflow-hidden border-t border-border/50 bg-muted/30">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main footer content */}
         <div className="py-16">

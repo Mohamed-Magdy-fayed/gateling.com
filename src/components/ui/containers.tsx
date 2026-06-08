@@ -123,7 +123,7 @@ export function HeroContainer({
   return (
     <section
       className={cn(
-        "relative flex min-h-full flex-col justify-center overflow-hidden",
+        "relative flex min-h-full flex-col justify-center overflow-hidden md:min-h-[calc(100dvh-4rem)]",
         className,
       )}
       {...props}

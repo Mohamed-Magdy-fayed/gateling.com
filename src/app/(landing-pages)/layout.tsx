@@ -1,3 +1,4 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { PublicFooter } from "./_layout/footer";
 import { PublicHeader } from "./_layout/header";
 import { PublicLandingMobileTabBar } from "./_layout/mobile-tab-bar";
@@ -9,14 +10,19 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
-      <PublicHeader />
-      <main id="site-scroll" className="flex-1 overflow-y-auto overflow-x-clip">
-        {children}
-        <PublicFooter />
-        <WhatsAppFloatButton />
-      </main>
-      <PublicLandingMobileTabBar />
-    </div>
+    <>
+      <div className="flex relative h-svh flex-col overflow-auto">
+        <PublicHeader />
+        <ScrollArea
+          slot="main"
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden md:overflow-visible"
+        >
+          {children}
+          <PublicFooter />
+        </ScrollArea>
+        <PublicLandingMobileTabBar />
+      </div>
+      <WhatsAppFloatButton />
+    </>
   );
 }
