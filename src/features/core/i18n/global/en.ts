@@ -862,6 +862,32 @@ export default {
     },
     ...contactEn,
     feedbackPage: feedbackEn.feedbackPage,
+    myAccountPage: {
+      metaTitle: "My Account | Gateling Solutions",
+      metaDescription: "View your submitted inquiries and track their status.",
+      heading: "Welcome back",
+      headingWithName: "Welcome back, {name}",
+      subheading: "Here's a summary of your inquiries with Gateling Solutions.",
+      inquiriesSectionEyebrow: "Your Submissions",
+      inquiriesSectionHeading: "Your Inquiries",
+      inquiriesSectionSubheading:
+        "Track the status of every request you've sent us.",
+      noInquiriesHeading: "No inquiries yet",
+      noInquiriesText:
+        "You haven't submitted any inquiries yet. Let us know what you need.",
+      noInquiriesButton: "Submit an Inquiry",
+      statusNew: "Received",
+      statusContacted: "In Discussion",
+      statusQualified: "Qualified",
+      statusClosed: "Closed",
+      submittedOn: "Submitted on",
+      companyLabel: "Company",
+      messageLabel: "Your message",
+      ctaHeading: "Have a new challenge for us?",
+      ctaSubheading:
+        "Submit a new inquiry and we'll get back to you within 24 hours.",
+      ctaButton: "Submit a New Inquiry",
+    },
   },
   copyright: dt("© {year:date} {appName}. all rights reserved.", {
     date: { year: { year: "numeric" } },

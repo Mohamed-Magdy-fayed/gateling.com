@@ -131,4 +131,21 @@ export const leadsRouter = createTRPCRouter({
       await ctx.db.delete(LeadsTable).where(eq(LeadsTable.id, input.id));
       return { deleted: true };
     }),
+
+  myLeads: protectedProcedure.query(async ({ ctx }) => {
+    const userEmail = ctx.session.user.email;
+    if (!userEmail) return [];
+    return ctx.db
+      .select({
+        id: LeadsTable.id,
+        status: LeadsTable.status,
+        message: LeadsTable.message,
+        company: LeadsTable.company,
+        createdAt: LeadsTable.createdAt,
+        updatedAt: LeadsTable.updatedAt,
+      })
+      .from(LeadsTable)
+      .where(eq(LeadsTable.email, userEmail))
+      .orderBy(desc(LeadsTable.createdAt));
+  }),
 });
