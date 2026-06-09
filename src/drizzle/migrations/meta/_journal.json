@@ -36,6 +36,20 @@
       "when": 1780948105658,
       "tag": "0004_great_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780986037730,
+      "tag": "0005_spooky_sway",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780988645153,
+      "tag": "0006_noisy_squirrel_girl",
+      "breakpoints": true
     }
   ]
 }
