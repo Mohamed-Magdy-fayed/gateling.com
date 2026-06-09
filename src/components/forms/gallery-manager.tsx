@@ -13,10 +13,9 @@ import {
 import Image from "next/image";
 import { useCallback, useId, useState } from "react";
 import { toast } from "sonner";
-
-import { FileUpload, FileUploadTrigger } from "@/components/ui/file-upload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FileUpload, FileUploadTrigger } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -46,7 +45,11 @@ function isValidVideoUrl(url: string): boolean {
     return (
       u.hostname.includes("youtube.com") ||
       u.hostname === "youtu.be" ||
-      u.hostname === "vimeo.com"
+      u.hostname === "vimeo.com" ||
+      u.hostname === "www.vimeo.com" ||
+      u.hostname.includes("facebook.com") ||
+      u.hostname === "fb.watch" ||
+      u.hostname.includes("tiktok.com")
     );
   } catch {
     return false;
@@ -67,7 +70,14 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
   );
 
   const handleUpload = useCallback(
-    async (files: File[], options: { onProgress: (f: File, p: number) => void; onSuccess: (f: File) => void; onError: (f: File, e: Error) => void }) => {
+    async (
+      files: File[],
+      options: {
+        onProgress: (f: File, p: number) => void;
+        onSuccess: (f: File) => void;
+        onError: (f: File, e: Error) => void;
+      },
+    ) => {
       for (const file of files) {
         setUploadingCount((n) => n + 1);
         try {
@@ -146,10 +156,12 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
   }
 
   function remove(index: number) {
-    const next = value.filter((_, i) => i !== index).map((item, i) => ({
-      ...item,
-      sortOrder: i,
-    }));
+    const next = value
+      .filter((_, i) => i !== index)
+      .map((item, i) => ({
+        ...item,
+        sortOrder: i,
+      }));
     onChange(next);
   }
 
@@ -374,7 +386,9 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                 addVideo();
               }
             }}
-            placeholder={String(t("galleryManager.videoUrlPlaceholder" as never))}
+            placeholder={String(
+              t("galleryManager.videoUrlPlaceholder" as never),
+            )}
             className={cn("text-sm", videoError && "border-destructive")}
             disabled={isDisabled}
           />

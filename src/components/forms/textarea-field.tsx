@@ -22,7 +22,7 @@ export function FormTextareaField({
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        value={field.state.value}
+        value={field.state.value ?? ""}
       />
     </FormBase>
   );

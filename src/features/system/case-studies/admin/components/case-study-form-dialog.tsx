@@ -99,11 +99,10 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
 
   const [media, setMedia] = useState<GalleryItem[]>([]);
 
-  const existingQuery = useQuery({
+  const { data: detail } = useQuery({
     ...trpc.caseStudies.getById.queryOptions({ id: caseStudy?.id ?? "" }),
     enabled: open && isEdit && Boolean(caseStudy?.id),
   });
-  const detail = existingQuery.data;
 
   const createMut = useMutation(trpc.caseStudies.create.mutationOptions());
   const updateMut = useMutation(trpc.caseStudies.update.mutationOptions());
@@ -196,54 +195,62 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
     },
   });
 
-  const resetToDetail = useCallback(() => {
-    if (!detail) return;
-    form.reset({
-      title: detail.title,
-      titleAr: detail.titleAr ?? null,
-      slug: detail.slug,
-      client: detail.client,
-      clientAr: detail.clientAr ?? null,
-      industry: detail.industry,
-      industryAr: detail.industryAr ?? null,
-      problemStatement: detail.problemStatement,
-      problemStatementAr: detail.problemStatementAr ?? null,
-      solution: detail.solution,
-      solutionAr: detail.solutionAr ?? null,
-      resultsSummary: detail.results.summary,
-      resultsArSummary: detail.resultsAr?.summary ?? null,
-      resultsMetrics:
-        detail.results.metrics.length > 0
-          ? detail.results.metrics
-          : [{ label: "", value: "" }],
-      resultsArMetrics:
-        detail.resultsAr && detail.resultsAr.metrics.length > 0
-          ? detail.resultsAr.metrics
-          : [{ label: "", value: "" }],
-      coverImageUrl: detail.coverImageUrl ?? null,
-      liveUrl: detail.liveUrl ?? null,
-      sortOrder: detail.sortOrder,
-    });
-    setMedia(
-      (detail.media ?? []).map((m) => ({
-        id: m.id,
-        type: m.type,
-        url: m.url,
-        title: m.title,
-        isFeatured: m.isFeatured,
-        isSecondary: m.isSecondary,
-        sortOrder: m.sortOrder,
-      })),
+  const resetToCaseStudy = useCallback(() => {
+    if (!caseStudy) return;
+    form.reset(
+      {
+        title: caseStudy.title,
+        titleAr: caseStudy.titleAr ?? null,
+        slug: caseStudy.slug,
+        client: caseStudy.client,
+        clientAr: caseStudy.clientAr ?? null,
+        industry: caseStudy.industry,
+        industryAr: caseStudy.industryAr ?? null,
+        problemStatement: caseStudy.problemStatement,
+        problemStatementAr: caseStudy.problemStatementAr ?? null,
+        solution: caseStudy.solution,
+        solutionAr: caseStudy.solutionAr ?? null,
+        resultsSummary: caseStudy.results.summary,
+        resultsArSummary: caseStudy.resultsAr?.summary ?? null,
+        resultsMetrics:
+          caseStudy.results.metrics.length > 0
+            ? caseStudy.results.metrics
+            : [{ label: "", value: "" }],
+        resultsArMetrics:
+          caseStudy.resultsAr && caseStudy.resultsAr.metrics.length > 0
+            ? caseStudy.resultsAr.metrics
+            : [{ label: "", value: "" }],
+        coverImageUrl: caseStudy.coverImageUrl ?? null,
+        liveUrl: caseStudy.liveUrl ?? null,
+        sortOrder: caseStudy.sortOrder,
+      },
+      { keepDefaultValues: true },
     );
-  }, [detail, form]);
+  }, [caseStudy, form]);
 
   useEffect(() => {
-    if (open && isEdit && detail) resetToDetail();
+    if (open && isEdit && caseStudy) resetToCaseStudy();
     else if (open && !isEdit) {
       form.reset(defaultValues);
       setMedia([]);
     }
-  }, [open, isEdit, detail, resetToDetail, form, defaultValues]);
+  }, [open, isEdit, caseStudy, resetToCaseStudy, form, defaultValues]);
+
+  useEffect(() => {
+    if (detail?.media) {
+      setMedia(
+        detail.media.map((m) => ({
+          id: m.id,
+          type: m.type,
+          url: m.url,
+          title: m.title,
+          isFeatured: m.isFeatured,
+          isSecondary: m.isSecondary,
+          sortOrder: m.sortOrder,
+        })),
+      );
+    }
+  }, [detail]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -274,13 +281,13 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
           >
             <FieldSet disabled={pending}>
               <Tabs defaultValue="en">
-                <TabsList>
+                <TabsList variant="line">
                   <TabsTrigger value="en">English</TabsTrigger>
                   <TabsTrigger value="ar">العربية</TabsTrigger>
                 </TabsList>
 
                 {/* ── English tab ── */}
-                <TabsContent value="en">
+                <TabsContent value="en" keepMounted>
                   <FieldGroup>
                     <form.Field name="title">
                       {(field) => (
@@ -424,7 +431,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                 </TabsContent>
 
                 {/* ── Arabic tab ── */}
-                <TabsContent value="ar" dir="rtl">
+                <TabsContent value="ar" dir="rtl" keepMounted>
                   <FieldGroup>
                     <form.AppField name="titleAr">
                       {(field) => (

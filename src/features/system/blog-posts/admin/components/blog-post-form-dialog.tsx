@@ -165,17 +165,20 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
 
   const resetToPost = useCallback(() => {
     if (!post) return;
-    form.reset({
-      title: post.title,
-      titleAr: post.titleAr ?? null,
-      slug: post.slug,
-      excerpt: post.excerpt,
-      excerptAr: post.excerptAr ?? null,
-      content: "",
-      contentAr: post.contentAr ?? null,
-      authorName: post.authorName,
-      coverImageUrl: post.coverImageUrl ?? null,
-    });
+    form.reset(
+      {
+        title: post.title,
+        titleAr: post.titleAr ?? null,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        excerptAr: post.excerptAr ?? null,
+        content: "",
+        contentAr: post.contentAr ?? null,
+        authorName: post.authorName,
+        coverImageUrl: post.coverImageUrl ?? null,
+      },
+      { keepDefaultValues: true },
+    );
   }, [post, form]);
 
   useEffect(() => {

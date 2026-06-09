@@ -718,8 +718,9 @@ export default {
       "أضف صورًا أو مقاطع فيديو. ضع علامة 'مميز' على عنصر واحد (يظهر في الأعلى) وعنصر 'ثانوي' اختياريًا.",
     addImage: "إضافة صورة",
     addVideo: "إضافة فيديو",
-    videoUrl: "رابط الفيديو (YouTube / Vimeo)",
-    videoUrlPlaceholder: "https://youtube.com/watch?v=...",
+    videoUrl: "رابط الفيديو (YouTube / Facebook / TikTok)",
+    videoUrlPlaceholder:
+      "https://youtube.com/watch?v=... أو رابط TikTok / Facebook",
     titleLabel: "تعليق (اختياري)",
     titlePlaceholder: "وصف هذه الصورة أو الفيديو",
     markFeatured: "تعيين كمميز",
@@ -731,7 +732,7 @@ export default {
     remove: "حذف",
     moveUp: "تحريك لأعلى",
     moveDown: "تحريك لأسفل",
-    invalidVideoUrl: "الصق رابط YouTube أو Vimeo.",
+    invalidVideoUrl: "الصق رابط فيديو من YouTube أو Facebook أو TikTok.",
   },
   oauthComplete: {
     successTitle: "تم ربط الحساب",

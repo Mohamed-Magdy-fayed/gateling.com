@@ -13,7 +13,10 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { type GalleryItem, GalleryManager } from "@/components/forms/gallery-manager";
+import {
+  type GalleryItem,
+  GalleryManager,
+} from "@/components/forms/gallery-manager";
 import { useAppForm } from "@/components/forms/hooks";
 import {
   OverlayFormBody,
@@ -183,21 +186,24 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
     if (!service) return;
     const features = service.features as string[];
     const featuresAr = service.featuresAr as string[] | null;
-    form.reset({
-      title: service.title,
-      titleAr: service.titleAr ?? null,
-      slug: service.slug,
-      shortDescription: service.shortDescription,
-      shortDescriptionAr: service.shortDescriptionAr ?? null,
-      fullDescription: service.fullDescription ?? null,
-      fullDescriptionAr: service.fullDescriptionAr ?? null,
-      icon: service.icon,
-      coverImageUrl: service.coverImageUrl ?? null,
-      features: features.length > 0 ? features : [""],
-      featuresAr: featuresAr && featuresAr.length > 0 ? featuresAr : [""],
-      sortOrder: service.sortOrder,
-      isActive: service.isActive,
-    });
+    form.reset(
+      {
+        title: service.title,
+        titleAr: service.titleAr ?? null,
+        slug: service.slug,
+        shortDescription: service.shortDescription,
+        shortDescriptionAr: service.shortDescriptionAr ?? null,
+        fullDescription: service.fullDescription ?? null,
+        fullDescriptionAr: service.fullDescriptionAr ?? null,
+        icon: service.icon,
+        coverImageUrl: service.coverImageUrl ?? null,
+        features: features.length > 0 ? features : [""],
+        featuresAr: featuresAr && featuresAr.length > 0 ? featuresAr : [""],
+        sortOrder: service.sortOrder,
+        isActive: service.isActive,
+      },
+      { keepDefaultValues: true },
+    );
   }, [service, form]);
 
   useEffect(() => {
@@ -295,7 +301,9 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.Field name="features" mode="array">
                       {(field) => (
                         <Field>
-                          <FieldLabel>{String(t("services.features"))}</FieldLabel>
+                          <FieldLabel>
+                            {String(t("services.features"))}
+                          </FieldLabel>
                           <div className="space-y-2">
                             {field.state.value.map((_, index) => (
                               // biome-ignore lint/suspicious/noArrayIndexKey: TanStack Form array fields have no stable ID

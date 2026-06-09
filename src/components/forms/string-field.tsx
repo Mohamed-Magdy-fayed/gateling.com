@@ -33,7 +33,7 @@ export function FormStringField({
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         type={inputType}
-        value={field.state.value}
+        value={field.state.value ?? ""}
       />
     </FormBase>
   );

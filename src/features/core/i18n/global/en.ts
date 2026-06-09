@@ -734,8 +734,9 @@ export default {
       "Add images or videos. Mark one as Featured (shown at the top) and optionally one as Secondary.",
     addImage: "Add image",
     addVideo: "Add video",
-    videoUrl: "Video URL (YouTube / Vimeo)",
-    videoUrlPlaceholder: "https://youtube.com/watch?v=...",
+    videoUrl: "Video URL (YouTube / Facebook / TikTok)",
+    videoUrlPlaceholder:
+      "https://youtube.com/watch?v=... or TikTok / Facebook link",
     titleLabel: "Caption (optional)",
     titlePlaceholder: "Describe this image or video",
     markFeatured: "Set as featured",
@@ -747,7 +748,7 @@ export default {
     remove: "Remove",
     moveUp: "Move up",
     moveDown: "Move down",
-    invalidVideoUrl: "Paste a YouTube or Vimeo URL.",
+    invalidVideoUrl: "Paste a YouTube, Facebook, or TikTok video URL.",
   },
   oauthComplete: {
     successTitle: "Account connected",

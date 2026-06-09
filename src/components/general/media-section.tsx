@@ -32,14 +32,24 @@ function toEmbedUrl(url: string): string {
     if (u.hostname.includes("youtube.com")) {
       const v = u.searchParams.get("v");
       if (v) return `https://www.youtube.com/embed/${v}?rel=0`;
+      const shorts = u.pathname.match(/\/shorts\/([^/?]+)/);
+      if (shorts?.[1])
+        return `https://www.youtube.com/embed/${shorts[1]}?rel=0`;
     }
     if (u.hostname === "youtu.be") {
-      const id = u.pathname.slice(1);
+      const id = u.pathname.slice(1).split("?")[0];
       if (id) return `https://www.youtube.com/embed/${id}?rel=0`;
     }
-    if (u.hostname === "vimeo.com") {
+    if (u.hostname === "vimeo.com" || u.hostname === "www.vimeo.com") {
       const id = u.pathname.slice(1);
       if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+    if (u.hostname.includes("facebook.com") || u.hostname === "fb.watch") {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
+    }
+    if (u.hostname.includes("tiktok.com")) {
+      const match = u.pathname.match(/\/video\/(\d+)/);
+      if (match?.[1]) return `https://www.tiktok.com/embed/v2/${match[1]}`;
     }
   } catch {
     // pass through
@@ -67,7 +77,7 @@ function MediaDisplay({
         <iframe
           src={toEmbedUrl(item.url)}
           title={item.title ?? ""}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           allowFullScreen
           className="absolute inset-0 h-full w-full border-0"
         />
