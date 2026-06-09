@@ -10,6 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, ViewTransition } from "react";
 import { LinkButton } from "@/components/general/link-button";
+import { MediaSection } from "@/components/general/media-section";
 import { Badge } from "@/components/ui/badge";
 import {
   Container,
@@ -37,9 +38,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${cs.title} — ${cs.client}`,
     description: cs.results.summary || cs.problemStatement.slice(0, 155),
-    openGraph: cs.coverImageUrl
-      ? { images: [{ url: cs.coverImageUrl }] }
-      : undefined,
+    openGraph: (() => {
+      const img = cs.media?.find((m) => m.isFeatured)?.url ?? cs.coverImageUrl;
+      return img ? { images: [{ url: img }] } : undefined;
+    })(),
   };
 }
 
@@ -119,21 +121,25 @@ async function WorkDetailContent({ params }: Props) {
               </div>
             </div>
 
-            {/* Right: sticky cover image */}
-            {cs.coverImageUrl && (
-              <ViewTransition name={`case-${cs.slug}`}>
-                <div className="sticky top-24 self-start overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
-                  <Image
-                    src={cs.coverImageUrl}
-                    alt={cs.title}
-                    width={960}
-                    height={540}
-                    priority
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </ViewTransition>
-            )}
+            {/* Right: media section or fallback cover image */}
+            <ViewTransition name={`case-${cs.slug}`}>
+              <div className="sticky top-24 self-start">
+                {cs.media && cs.media.length > 0 ? (
+                  <MediaSection items={cs.media} />
+                ) : cs.coverImageUrl ? (
+                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
+                    <Image
+                      src={cs.coverImageUrl}
+                      alt={cs.title}
+                      width={960}
+                      height={540}
+                      priority
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </ViewTransition>
           </div>
         </Container>
       </Section>
@@ -165,9 +171,26 @@ async function WorkDetailContent({ params }: Props) {
         </Container>
       </Section>
 
+      {/* Secondary media — shown naturally between results and testimonials */}
+      {(() => {
+        const secondary = cs.media?.find((m) => m.isSecondary);
+        if (!secondary) return null;
+        return (
+          <Section variant="feature">
+            <Container>
+              <MediaSection items={[secondary]} />
+            </Container>
+          </Section>
+        );
+      })()}
+
       {/* Testimonials */}
       {testimonials.length > 0 && (
-        <Section variant="feature">
+        <Section
+          variant={
+            cs.media?.find((m) => m.isSecondary) ? "alternate" : "feature"
+          }
+        >
           <Container>
             <SectionHeader
               heading={t("publicPages.workDetailPage.testimonialHeading")}
@@ -195,11 +218,23 @@ async function WorkDetailContent({ params }: Props) {
                     &ldquo;{t2.content}&rdquo;
                   </ProseText>
                   <div className="flex items-center gap-3">
-                    <div className="bg-primary/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <span className="text-primary text-sm font-semibold">
-                        {getInitials(t2.clientName)}
-                      </span>
-                    </div>
+                    {t2.avatarUrl ? (
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <Image
+                          src={t2.avatarUrl}
+                          alt={t2.clientName}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-primary/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                        <span className="text-primary text-sm font-semibold">
+                          {getInitials(t2.clientName)}
+                        </span>
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm font-semibold">{t2.clientName}</p>
                       <p className="text-muted-foreground text-xs">

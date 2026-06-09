@@ -1,10 +1,13 @@
 import { db } from "@/drizzle";
 import {
+  BlogPostMediaTable,
   BlogPostsTable,
   BranchesTable,
   BranchMembershipsTable,
   CaseStudiesTable,
+  CaseStudyMediaTable,
   type CaseStudyResults,
+  ServiceMediaTable,
   ServicesTable,
   TestimonialsTable,
   UserCredentialsTable,
@@ -118,104 +121,203 @@ async function seedPortfolioContent(
   tx: DbTx,
   createdBy: string,
 ): Promise<void> {
-  await tx.insert(ServicesTable).values([
+  const svcRows = await tx
+    .insert(ServicesTable)
+    .values([
+      {
+        title: "Custom Software Development",
+        titleAr: "تطوير البرمجيات المخصصة",
+        slug: "custom-software-development",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+        shortDescription:
+          "Purpose-built business management systems designed around your exact workflows.",
+        shortDescriptionAr:
+          "أنظمة إدارة أعمال مصممة خصيصاً لتناسب سير عملك بالكامل.",
+        icon: "Code",
+        features: [
+          "Fully bilingual EN + AR",
+          "Mobile-ready and responsive",
+          "Role-based access control",
+          "Real-time data and reporting",
+        ],
+        featuresAr: [
+          "ثنائي اللغة عربي + إنجليزي بالكامل",
+          "متوافق مع الجوال وسريع الاستجابة",
+          "تحكم في الصلاحيات حسب الأدوار",
+          "بيانات وتقارير فورية",
+        ],
+        sortOrder: 0,
+        isActive: true,
+        createdBy,
+      },
+      {
+        title: "Business Process Automation",
+        titleAr: "أتمتة العمليات التجارية",
+        slug: "business-process-automation",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80",
+        shortDescription:
+          "Eliminate manual work, reduce errors, and cut operational costs.",
+        shortDescriptionAr:
+          "تخلص من العمل اليدوي، وقلل الأخطاء، وخفض التكاليف التشغيلية.",
+        icon: "Zap",
+        features: [
+          "Workflow mapping and optimization",
+          "Automated notifications and alerts",
+          "Document and receipt generation",
+          "Background job processing",
+        ],
+        featuresAr: [
+          "رسم خرائط سير العمل وتحسينه",
+          "إشعارات وتنبيهات آلية",
+          "توليد المستندات والإيصالات",
+          "معالجة المهام في الخلفية",
+        ],
+        sortOrder: 1,
+        isActive: true,
+        createdBy,
+      },
+      {
+        title: "AI Integration",
+        titleAr: "تكامل الذكاء الاصطناعي",
+        slug: "ai-integration",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+        shortDescription:
+          "Bring intelligent automation into your daily operations.",
+        shortDescriptionAr: "أدخل الأتمتة الذكية إلى عملياتك اليومية.",
+        icon: "Bot",
+        features: [
+          "AI-powered announcements (TTS)",
+          "Smart scheduling and booking",
+          "Data analysis and predictions",
+          "Customer behavior insights",
+        ],
+        featuresAr: [
+          "إعلانات مدعومة بالذكاء الاصطناعي (TTS)",
+          "جدولة وحجوزات ذكية",
+          "تحليل البيانات والتنبؤات",
+          "رؤى سلوك العملاء",
+        ],
+        sortOrder: 2,
+        isActive: true,
+        createdBy,
+      },
+      {
+        title: "Digital Transformation Consulting",
+        titleAr: "استشارات التحول الرقمي",
+        slug: "digital-transformation-consulting",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+        shortDescription:
+          "Not sure where to start? We audit your processes and build a roadmap.",
+        shortDescriptionAr:
+          "لا تعرف من أين تبدأ؟ نراجع عملياتك ونضع لك خارطة طريق واضحة.",
+        icon: "Map",
+        features: [
+          "Current state assessment",
+          "Technology selection guidance",
+          "Implementation roadmap",
+          "Team training and handover",
+        ],
+        featuresAr: [
+          "تقييم الوضع الحالي",
+          "إرشادات اختيار التقنية المناسبة",
+          "خارطة طريق التنفيذ",
+          "تدريب الفريق وتسليم المشروع",
+        ],
+        sortOrder: 3,
+        isActive: true,
+        createdBy,
+      },
+    ])
+    .returning({ id: ServicesTable.id });
+
+  const svcSoftwareId = svcRows[0]?.id ?? "";
+  const svcAutomationId = svcRows[1]?.id ?? "";
+  const svcAiId = svcRows[2]?.id ?? "";
+  const svcConsultingId = svcRows[3]?.id ?? "";
+
+  await tx.insert(ServiceMediaTable).values([
     {
-      title: "Custom Software Development",
-      titleAr: "تطوير البرمجيات المخصصة",
-      slug: "custom-software-development",
-      shortDescription:
-        "Purpose-built business management systems designed around your exact workflows.",
-      shortDescriptionAr:
-        "أنظمة إدارة أعمال مصممة خصيصاً لتناسب سير عملك بالكامل.",
-      icon: "Code",
-      features: [
-        "Fully bilingual EN + AR",
-        "Mobile-ready and responsive",
-        "Role-based access control",
-        "Real-time data and reporting",
-      ],
-      featuresAr: [
-        "ثنائي اللغة عربي + إنجليزي بالكامل",
-        "متوافق مع الجوال وسريع الاستجابة",
-        "تحكم في الصلاحيات حسب الأدوار",
-        "بيانات وتقارير فورية",
-      ],
+      serviceId: svcSoftwareId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+      title: "Custom software dashboard",
+      isFeatured: true,
+      isSecondary: false,
       sortOrder: 0,
-      isActive: true,
       createdBy,
     },
     {
-      title: "Business Process Automation",
-      titleAr: "أتمتة العمليات التجارية",
-      slug: "business-process-automation",
-      shortDescription:
-        "Eliminate manual work, reduce errors, and cut operational costs.",
-      shortDescriptionAr:
-        "تخلص من العمل اليدوي، وقلل الأخطاء، وخفض التكاليف التشغيلية.",
-      icon: "Zap",
-      features: [
-        "Workflow mapping and optimization",
-        "Automated notifications and alerts",
-        "Document and receipt generation",
-        "Background job processing",
-      ],
-      featuresAr: [
-        "رسم خرائط سير العمل وتحسينه",
-        "إشعارات وتنبيهات آلية",
-        "توليد المستندات والإيصالات",
-        "معالجة المهام في الخلفية",
-      ],
+      serviceId: svcSoftwareId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
+      title: "Development workflow",
+      isFeatured: false,
+      isSecondary: true,
       sortOrder: 1,
-      isActive: true,
       createdBy,
     },
     {
-      title: "AI Integration",
-      titleAr: "تكامل الذكاء الاصطناعي",
-      slug: "ai-integration",
-      shortDescription:
-        "Bring intelligent automation into your daily operations.",
-      shortDescriptionAr: "أدخل الأتمتة الذكية إلى عملياتك اليومية.",
-      icon: "Bot",
-      features: [
-        "AI-powered announcements (TTS)",
-        "Smart scheduling and booking",
-        "Data analysis and predictions",
-        "Customer behavior insights",
-      ],
-      featuresAr: [
-        "إعلانات مدعومة بالذكاء الاصطناعي (TTS)",
-        "جدولة وحجوزات ذكية",
-        "تحليل البيانات والتنبؤات",
-        "رؤى سلوك العملاء",
-      ],
-      sortOrder: 2,
-      isActive: true,
+      serviceId: svcAutomationId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80",
+      title: "Automation circuitry",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
       createdBy,
     },
     {
-      title: "Digital Transformation Consulting",
-      titleAr: "استشارات التحول الرقمي",
-      slug: "digital-transformation-consulting",
-      shortDescription:
-        "Not sure where to start? We audit your processes and build a roadmap.",
-      shortDescriptionAr:
-        "لا تعرف من أين تبدأ؟ نراجع عملياتك ونضع لك خارطة طريق واضحة.",
-      icon: "Map",
-      features: [
-        "Current state assessment",
-        "Technology selection guidance",
-        "Implementation roadmap",
-        "Team training and handover",
-      ],
-      featuresAr: [
-        "تقييم الوضع الحالي",
-        "إرشادات اختيار التقنية المناسبة",
-        "خارطة طريق التنفيذ",
-        "تدريب الفريق وتسليم المشروع",
-      ],
-      sortOrder: 3,
-      isActive: true,
+      serviceId: svcAutomationId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
+      title: "Workflow automation",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      serviceId: svcAiId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+      title: "AI integration",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      serviceId: svcAiId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&q=80",
+      title: "Intelligent systems",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      serviceId: svcConsultingId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+      title: "Digital transformation roadmap",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      serviceId: svcConsultingId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+      title: "Strategy consulting",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
       createdBy,
     },
   ]);
@@ -301,10 +403,10 @@ async function seedPortfolioContent(
     .values([
       {
         title: "Atelier Alaa El-Kasry: 70% Less Admin Time Across 2 Branches",
-        titleAr: "استوديو علاء القصري: توفير 70% من وقت الإدارة عبر فرعين",
+        titleAr: "استوديو آلاء القصري: توفير 70% من وقت الإدارة عبر فرعين",
         slug: "atelier-alaa-el-kasry",
         client: "Atelier Alaa El-Kasry",
-        clientAr: "استوديو علاء القصري",
+        clientAr: "استوديو آلاء القصري",
         industry: "Fashion / Retail",
         industryAr: "أزياء / تجزئة",
         problemStatement:
@@ -315,6 +417,8 @@ async function seedPortfolioContent(
           "Bilingual admin suite with branch-aware inventory, digital reservations, payment tracking, and WhatsApp receipt sharing.",
         solutionAr:
           "منظومة إدارة ثنائية اللغة مع مخزون يراعي الفروع، حجوزات رقمية، تتبع المدفوعات، ومشاركة الإيصالات عبر واتساب.",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
         results: atelierResults,
         resultsAr: atelierResultsAr,
         status: "published",
@@ -339,6 +443,8 @@ async function seedPortfolioContent(
           "Reservation system + AI TTS announcer that auto-ducks background music. Daily cash closure reports per cashier.",
         solutionAr:
           "نظام حجز مع مُعلن TTS ذكي يخفض الموسيقى تلقائياً. تقارير إغلاق نقد يومية لكل أمين صندوق.",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80",
         results: cafeResults,
         resultsAr: cafeResultsAr,
         status: "published",
@@ -362,6 +468,8 @@ async function seedPortfolioContent(
           "Full CRM with lead pipeline, teacher portals, course materials, placement tests, multi-role access, orders and refunds.",
         solutionAr:
           "نظام CRM كامل مع قمع عملاء محتملين، بوابات معلمين، مواد دراسية، اختبارات تحديد مستوى، صلاحيات متعددة الأدوار، طلبات ومبالغ مستردة.",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
         results: megzResults,
         resultsAr: megzResultsAr,
         status: "published",
@@ -387,6 +495,8 @@ async function seedPortfolioContent(
           "Rebuilt arabianfoods.net as a fully bilingual (EN/AR) content-driven website the marketing team can update in-house without developer involvement.",
         solutionAr:
           "إعادة بناء arabianfoods.net كموقع ثنائي اللغة (عربي/إنجليزي) يمكن فريق التسويق من تحديثه داخلياً دون الحاجة لمطور.",
+        coverImageUrl:
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
         results: arabianResults,
         resultsAr: arabianResultsAr,
         status: "published",
@@ -396,6 +506,119 @@ async function seedPortfolioContent(
       },
     ])
     .returning({ id: CaseStudiesTable.id });
+
+  await tx.insert(CaseStudyMediaTable).values([
+    {
+      caseStudyId: atelier?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+      title: "Atelier reservation system",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      caseStudyId: atelier?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80",
+      title: "Fashion inventory dashboard",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      caseStudyId: atelier?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
+      title: "Branch management view",
+      isFeatured: false,
+      isSecondary: false,
+      sortOrder: 2,
+      createdBy,
+    },
+    {
+      caseStudyId: cafe?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80",
+      title: "Lavida Jungle Play Cafe",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      caseStudyId: cafe?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&q=80",
+      title: "POS system at the counter",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      caseStudyId: cafe?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80",
+      title: "Kids play area",
+      isFeatured: false,
+      isSecondary: false,
+      sortOrder: 2,
+      createdBy,
+    },
+    {
+      caseStudyId: megz?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
+      title: "Megz Courses student dashboard",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      caseStudyId: megz?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+      title: "Teacher portal",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      caseStudyId: megz?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+      title: "Online course materials",
+      isFeatured: false,
+      isSecondary: false,
+      sortOrder: 2,
+      createdBy,
+    },
+    {
+      caseStudyId: arabian?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+      title: "Arabian Foods product showcase",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      caseStudyId: arabian?.id ?? "",
+      type: "image",
+      url: "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80",
+      title: "Bilingual website interface",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+  ]);
 
   // Client users must exist before testimonials that reference them via userId FK
   const clientUsers = [
@@ -509,17 +732,19 @@ async function seedPortfolioContent(
     },
   ]);
 
-  await tx.insert(BlogPostsTable).values([
-    {
-      title:
-        "How to Automate Your Cafe Operations Without Losing the Human Touch",
-      titleAr: "كيف تؤتمت عمليات مقهاك دون أن تفقد الطابع الإنساني",
-      slug: "automate-cafe-operations",
-      excerptAr:
-        "كثير من أصحاب المقاهي يخشون أن الأتمتة ستجعل الخدمة باردة وآلية. الواقع عكس ذلك تماماً: الأدوات الصحيحة تُحرر فريقك للتركيز على اللحظات التي تصنع الفارق.",
-      excerpt:
-        "Most cafe owners fear that automation means cold, robotic service. The reality is the opposite: the right tools free your team to focus on the moments that actually matter to customers.",
-      content: `<p><strong>Every minute your barista spends typing orders by hand, reconciling cash drawers, or manually checking inventory is a minute not spent on the customer in front of them.</strong></p>
+  const blogPostRows = await tx
+    .insert(BlogPostsTable)
+    .values([
+      {
+        title:
+          "How to Automate Your Cafe Operations Without Losing the Human Touch",
+        titleAr: "كيف تؤتمت عمليات مقهاك دون أن تفقد الطابع الإنساني",
+        slug: "automate-cafe-operations",
+        excerptAr:
+          "كثير من أصحاب المقاهي يخشون أن الأتمتة ستجعل الخدمة باردة وآلية. الواقع عكس ذلك تماماً: الأدوات الصحيحة تُحرر فريقك للتركيز على اللحظات التي تصنع الفارق.",
+        excerpt:
+          "Most cafe owners fear that automation means cold, robotic service. The reality is the opposite: the right tools free your team to focus on the moments that actually matter to customers.",
+        content: `<p><strong>Every minute your barista spends typing orders by hand, reconciling cash drawers, or manually checking inventory is a minute not spent on the customer in front of them.</strong></p>
 
 <p>Cafe owners across Egypt are discovering that automation doesn't replace hospitality — it makes more of it possible. The cafes investing in smart operations today are not becoming less personal; they're becoming more consistent, more profitable, and more present for the moments that actually build loyalty.</p>
 
@@ -591,7 +816,7 @@ async function seedPortfolioContent(
 </ul>
 
 <p>If any of these sound familiar, the conversation about automation is worth having — not to change what makes your cafe special, but to protect it.</p>`,
-      contentAr: `<p><strong>كل دقيقة يقضيها البَرِيستا في تدوين الطلبات يدويًا أو جرد الخزينة أو فحص المخزون هي دقيقة مسروقة من الزبون الذي ينتظر أمامه.</strong></p>
+        contentAr: `<p><strong>كل دقيقة يقضيها البَرِيستا في تدوين الطلبات يدويًا أو جرد الخزينة أو فحص المخزون هي دقيقة مسروقة من الزبون الذي ينتظر أمامه.</strong></p>
 
 <p>يكتشف أصحاب المقاهي في مصر يومًا بعد يوم أن الأتمتة لا تحلّ محل الضيافة، بل تجعلها أكثر وفرةً وعمقًا. المقاهي التي تستثمر في تطوير عملياتها اليوم لا تصبح أقل دفئًا، بل تصبح أكثر اتساقًا وربحيةً وحضورًا في اللحظات التي تبني الولاء الحقيقي.</p>
 
@@ -632,21 +857,23 @@ async function seedPortfolioContent(
 <h2>هل مقهاك جاهز للأتمتة؟</h2>
 
 <p>لا تحتاج إلى أن تكون سلسلة كبيرة للاستفادة من الأتمتة. إذا كنت تقضي أكثر من 30 دقيقة في التسوية يوميًا، أو واجهت مشاكل مخزون متكررة، أو تفتح فرعًا ثانيًا — فالحديث عن الأتمتة يستحق الوقت، ليس لتغيير ما يميز مقهاك، بل لحمايته.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["cafe automation", "hospitality", "operations"],
-      status: "published",
-      publishedAt: new Date("2026-01-20"),
-      createdBy,
-    },
-    {
-      title: "Custom Software vs. Off-the-Shelf: Which One Actually Works?",
-      titleAr: "البرمجيات المخصصة مقابل الجاهزة: أيهما يناسبك فعلاً؟",
-      slug: "custom-software-vs-off-the-shelf",
-      excerptAr:
-        "البرامج الجاهزة تجبر عملك على التكيف مع عمليات شخص آخر. إليك إطاراً واضحاً لتحديد متى تستحق البرمجيات المخصصة تكلفتها — ومتى لا تستحق.",
-      excerpt:
-        "Generic software forces your business to adapt to someone else's process. Here's a clear framework for deciding when custom software pays for itself — and when it doesn't.",
-      content: `<p><strong>Every software vendor will tell you their product can handle your business. The question is whether your business should have to change itself to fit the software.</strong></p>
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["cafe automation", "hospitality", "operations"],
+        tagsAr: ["أتمتة المقاهي", "الضيافة", "العمليات"],
+        status: "published",
+        publishedAt: new Date("2026-01-20"),
+        createdBy,
+      },
+      {
+        title: "Custom Software vs. Off-the-Shelf: Which One Actually Works?",
+        titleAr: "البرمجيات المخصصة مقابل الجاهزة: أيهما يناسبك فعلاً؟",
+        slug: "custom-software-vs-off-the-shelf",
+        excerptAr:
+          "البرامج الجاهزة تجبر عملك على التكيف مع عمليات شخص آخر. إليك إطاراً واضحاً لتحديد متى تستحق البرمجيات المخصصة تكلفتها — ومتى لا تستحق.",
+        excerpt:
+          "Generic software forces your business to adapt to someone else's process. Here's a clear framework for deciding when custom software pays for itself — and when it doesn't.",
+        content: `<p><strong>Every software vendor will tell you their product can handle your business. The question is whether your business should have to change itself to fit the software.</strong></p>
 
 <p>This is the core tension behind one of the most common decisions growing businesses in Egypt face: buy an off-the-shelf system, or invest in something built specifically for how you operate. There's no universal answer — but there is a clear framework for thinking it through.</p>
 
@@ -716,7 +943,7 @@ async function seedPortfolioContent(
 <p>If the answer to question one is "quite a lot" and the answer to question four is "not really," the conversation about custom is worth having. We start every engagement with this analysis — and sometimes our recommendation is to use something off the shelf, because that's the right answer for that business at that moment.</p>
 
 <p>The goal isn't to sell custom software. The goal is software that actually works for your business.</p>`,
-      contentAr: `<p><strong>السؤال الذي يُواجه كل صاحب عمل يفكر في تطوير عملياته التكنولوجية: هل أشتري برنامجًا جاهزًا أم أبني نظامًا مخصصًا؟</strong></p>
+        contentAr: `<p><strong>السؤال الذي يُواجه كل صاحب عمل يفكر في تطوير عملياته التكنولوجية: هل أشتري برنامجًا جاهزًا أم أبني نظامًا مخصصًا؟</strong></p>
 
 <p>الإجابة ليست إحدى الخيارين دائمًا — إنها تعتمد على حجم عملك، وطبيعة عملياتك، ومدى تعقيد متطلباتك. في هذا المقال نستعرض معايير القرار بشكل عملي يناسب بيئة الأعمال في مصر ومنطقة الشرق الأوسط وشمال أفريقيا.</p>
 
@@ -763,23 +990,25 @@ async function seedPortfolioContent(
 <p>اخترنا لشركة موزعة متوسطة الحجم في القاهرة نظام ERP جاهزًا شهيرًا. بعد ثمانية عشر شهرًا، كان نصف عملياتهم يُدار في جداول Excel خارج النظام لأن المنطق الجاهز لا يدعم نموذج الموزع الإقليمي الخاص بهم. الانتقال إلى نظام مخصص استغرق ثلاثة أشهر فقط — لكن الثمن الحقيقي كان سنة ونصف من البيانات الضائعة والتقارير غير الدقيقة.</p>
 
 <p>الهدف ليس بيع برمجيات مخصصة. الهدف هو برنامج يعمل فعلًا لصالح عملك.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["custom software", "strategy", "ERP"],
-      status: "published",
-      publishedAt: new Date("2026-02-17"),
-      createdBy,
-    },
-    {
-      title:
-        "Egypt's E-Invoicing Mandate: How Smart Businesses Are Turning Compliance Into Efficiency",
-      titleAr:
-        "منظومة الفاتورة الإلكترونية في مصر: كيف تحوّل الامتثال إلى كفاءة",
-      slug: "egypt-einvoicing-mandate",
-      excerptAr:
-        "أصبحت الفاتورة الإلكترونية إلزامية لجميع الشركات المسجلة في ضريبة القيمة المضافة. الشركات التي تعاملت مع هذا المتطلب كفرصة لتطوير منظومتها — لا مجرد التزام — خرجت بعمليات مالية أكثر كفاءة بكثير.",
-      excerpt:
-        "Egypt's Tax Authority has made e-invoicing mandatory for all VAT-registered businesses. The companies that treat this as a systems upgrade opportunity — not just a compliance checkbox — are emerging with dramatically better financial operations.",
-      content: `<p><strong>Egypt's e-invoicing mandate is not optional, and the compliance deadline has passed for most businesses.</strong> But the conversation worth having now isn't about avoiding penalties — it's about how the businesses that approached this requirement intelligently are coming out with fundamentally better operations than they had before.</p>
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["custom software", "strategy", "ERP"],
+        tagsAr: ["برمجة مخصصة", "الاستراتيجية", "ERP"],
+        status: "published",
+        publishedAt: new Date("2026-02-17"),
+        createdBy,
+      },
+      {
+        title:
+          "Egypt's E-Invoicing Mandate: How Smart Businesses Are Turning Compliance Into Efficiency",
+        titleAr:
+          "منظومة الفاتورة الإلكترونية في مصر: كيف تحوّل الامتثال إلى كفاءة",
+        slug: "egypt-einvoicing-mandate",
+        excerptAr:
+          "أصبحت الفاتورة الإلكترونية إلزامية لجميع الشركات المسجلة في ضريبة القيمة المضافة. الشركات التي تعاملت مع هذا المتطلب كفرصة لتطوير منظومتها — لا مجرد التزام — خرجت بعمليات مالية أكثر كفاءة بكثير.",
+        excerpt:
+          "Egypt's Tax Authority has made e-invoicing mandatory for all VAT-registered businesses. The companies that treat this as a systems upgrade opportunity — not just a compliance checkbox — are emerging with dramatically better financial operations.",
+        content: `<p><strong>Egypt's e-invoicing mandate is not optional, and the compliance deadline has passed for most businesses.</strong> But the conversation worth having now isn't about avoiding penalties — it's about how the businesses that approached this requirement intelligently are coming out with fundamentally better operations than they had before.</p>
 
 <p>The Egyptian Tax Authority's e-invoicing system (نظام الفاتورة الإلكترونية) requires all VAT-registered businesses to issue and receive invoices through the government's digital platform. For businesses that scrambled to add a bolt-on solution at the last minute, compliance came at the cost of workflow disruption. For businesses that planned carefully, it came with something valuable: real-time financial data, automated reconciliation, and integration possibilities that didn't exist before.</p>
 
@@ -854,7 +1083,7 @@ async function seedPortfolioContent(
 <p>If you're already compliant but operating with a bolt-on solution, the right question is: what is the monthly cost (in team time) of your current reconciliation and manual processes? That number, annualized, is your budget for a proper integration. In most cases, the ROI calculation resolves quickly.</p>
 
 <p>If you're still navigating initial compliance, start by choosing the right foundation — a billing system with native ETA integration rather than a portal-based workaround. The incremental cost of doing this right from the start is far lower than retrofitting it later.</p>`,
-      contentAr: `<p><strong>منذ تطبيق هيئة الضرائب المصرية لمنظومة الفاتورة الإلكترونية، أصبح الامتثال واجبًا لا اختيارًا. لكن الشركات الأكثر استعدادًا اكتشفت شيئًا لم يكن متوقعًا: الامتثال يمكن أن يُحوَّل إلى ميزة تشغيلية حقيقية.</strong></p>
+        contentAr: `<p><strong>منذ تطبيق هيئة الضرائب المصرية لمنظومة الفاتورة الإلكترونية، أصبح الامتثال واجبًا لا اختيارًا. لكن الشركات الأكثر استعدادًا اكتشفت شيئًا لم يكن متوقعًا: الامتثال يمكن أن يُحوَّل إلى ميزة تشغيلية حقيقية.</strong></p>
 
 <p>في هذا المقال، نستعرض كيف تستطيع الشركات في مصر تجاوز نموذج "الامتثال فقط" وبناء منظومة فوترة رقمية تُحسّن تدفق الأموال وتُقلّص الوقت الضائع في التسويات الضريبية.</p>
 
@@ -897,22 +1126,24 @@ async function seedPortfolioContent(
 </ul>
 
 <p>إذا كنت تعمل بالفعل بحل مُركَّب، احسب التكلفة الفعلية لعمليات التسوية الشهرية — هذا الرقم مُضاعَفًا 12 مرة هو ميزانيتك المنطقية لتكامل أفضل. في معظم الحالات، حساب العائد على الاستثمار يحسم القرار بسرعة.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["e-invoicing", "tax compliance", "Egypt", "ERP"],
-      status: "published",
-      publishedAt: new Date("2026-03-10"),
-      createdBy,
-    },
-    {
-      title:
-        "5 Hidden Operational Bottlenecks Killing Your Business Growth (And How to Fix Them)",
-      titleAr: "5 عوائق تشغيلية خفية تُعيق نمو عملك (وكيف تحلّها)",
-      slug: "hidden-operational-bottlenecks",
-      excerptAr:
-        "العمليات التي تُبطئ عملك نادراً ما تكون واضحة — إنها تختبئ في التسليمات اليدوية والأنظمة المنفصلة والعادات التي اعتاد عليها فريقك. إليك كيفية اكتشاف العوائق التشغيلية الخمس الأكثر شيوعاً في الشركات المصرية.",
-      excerpt:
-        "The processes slowing your business down are rarely obvious — they hide in manual handoffs, disconnected systems, and habits your team has normalized. Here's how to find and fix the five most common operational bottlenecks in growing Egyptian businesses.",
-      content: `<p><strong>Every business has a throughput ceiling — a point at which growth stops being limited by demand and starts being limited by operations.</strong></p>
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["e-invoicing", "tax compliance", "Egypt", "ERP"],
+        tagsAr: ["الفواتير الإلكترونية", "الامتثال الضريبي", "مصر", "ERP"],
+        status: "published",
+        publishedAt: new Date("2026-03-10"),
+        createdBy,
+      },
+      {
+        title:
+          "5 Hidden Operational Bottlenecks Killing Your Business Growth (And How to Fix Them)",
+        titleAr: "5 عوائق تشغيلية خفية تُعيق نمو عملك (وكيف تحلّها)",
+        slug: "hidden-operational-bottlenecks",
+        excerptAr:
+          "العمليات التي تُبطئ عملك نادراً ما تكون واضحة — إنها تختبئ في التسليمات اليدوية والأنظمة المنفصلة والعادات التي اعتاد عليها فريقك. إليك كيفية اكتشاف العوائق التشغيلية الخمس الأكثر شيوعاً في الشركات المصرية.",
+        excerpt:
+          "The processes slowing your business down are rarely obvious — they hide in manual handoffs, disconnected systems, and habits your team has normalized. Here's how to find and fix the five most common operational bottlenecks in growing Egyptian businesses.",
+        content: `<p><strong>Every business has a throughput ceiling — a point at which growth stops being limited by demand and starts being limited by operations.</strong></p>
 
 <p>The frustrating thing about operational bottlenecks is that they're often invisible until you're already inside them. Your team adapts, builds workarounds, and normalizes the friction. What was once a slow-down becomes standard operating procedure. The business grows around the constraint rather than through it — until the constraint becomes too large to ignore.</p>
 
@@ -990,7 +1221,7 @@ async function seedPortfolioContent(
 <p>The disconnected data problem is usually worth addressing first because it's a foundation — better data visibility makes every other improvement easier to measure and sustain. Approval chain fixes have the highest immediate team satisfaction payoff. The reporting gap fix often has the clearest ROI calculation.</p>
 
 <p>Start with a diagnostic. Map your core business processes from end to end and count the manual handoffs, the data reconciliation steps, and the approval dependencies. The bottlenecks will reveal themselves — and with them, the path to a business that scales the way you built it to.</p>`,
-      contentAr: `<p><strong>معظم الشركات لا تتوقف عن النمو بسبب ضعف المنتج أو غياب الطلب — بل بسبب عمليات داخلية تعمل بمستوى أدنى من طاقتها الحقيقية.</strong></p>
+        contentAr: `<p><strong>معظم الشركات لا تتوقف عن النمو بسبب ضعف المنتج أو غياب الطلب — بل بسبب عمليات داخلية تعمل بمستوى أدنى من طاقتها الحقيقية.</strong></p>
 
 <p>في جلسات التشخيص التي أجريناها مع شركات متوسطة الحجم في مصر، اكتشفنا أن أكثر من 60٪ من العوائق التشغيلية تعود إلى أنماط يمكن حلها دون استثمارات ضخمة — فقط بإعادة تصميم العمليات ورقمنة نقاط التحويل الصحيحة.</p>
 
@@ -1028,21 +1259,23 @@ async function seedPortfolioContent(
 </ol>
 
 <p>ابدأ بمشكلة البيانات المتشتتة — إصلاحها يُسهّل قياس كل تحسين لاحق. الشركات التي تُجري هذا التشخيص بصدق تجد دائمًا أن المسار نحو نمو فعلي كان أوضح مما تصورت.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["operations", "process optimization", "productivity"],
-      status: "published",
-      publishedAt: new Date("2026-04-07"),
-      createdBy,
-    },
-    {
-      title: "Cloud ERP vs. On-Premise in Egypt: A Complete 2026 Comparison",
-      titleAr: "الـ ERP السحابي مقابل المحلي في مصر: مقارنة شاملة لعام 2026",
-      slug: "cloud-erp-vs-on-premise-egypt",
-      excerptAr:
-        "الاختيار بين ERP سحابي ومحلي من أهم قرارات التقنية في الشركات المصرية المتنامية. هذا الدليل يغطي المقايضات الحقيقية — التكلفة، والامتثال، والتحكم، والتوقيت — بمنظور السوق المصري لعام 2026.",
-      excerpt:
-        "Choosing between cloud and on-premise ERP is one of the most consequential technology decisions a growing Egyptian business will make. This guide covers the real trade-offs — cost, compliance, control, and timing — specific to the Egyptian market in 2026.",
-      content: `<p><strong>The cloud vs. on-premise ERP debate has largely been settled globally — cloud won.</strong> In Egypt, the answer is more nuanced, and the specific context of your business, your data, and your growth trajectory matters more than any global trend.</p>
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["operations", "process optimization", "productivity"],
+        tagsAr: ["العمليات", "تحسين العمليات", "الإنتاجية"],
+        status: "published",
+        publishedAt: new Date("2026-04-07"),
+        createdBy,
+      },
+      {
+        title: "Cloud ERP vs. On-Premise in Egypt: A Complete 2026 Comparison",
+        titleAr: "الـ ERP السحابي مقابل المحلي في مصر: مقارنة شاملة لعام 2026",
+        slug: "cloud-erp-vs-on-premise-egypt",
+        excerptAr:
+          "الاختيار بين ERP سحابي ومحلي من أهم قرارات التقنية في الشركات المصرية المتنامية. هذا الدليل يغطي المقايضات الحقيقية — التكلفة، والامتثال، والتحكم، والتوقيت — بمنظور السوق المصري لعام 2026.",
+        excerpt:
+          "Choosing between cloud and on-premise ERP is one of the most consequential technology decisions a growing Egyptian business will make. This guide covers the real trade-offs — cost, compliance, control, and timing — specific to the Egyptian market in 2026.",
+        content: `<p><strong>The cloud vs. on-premise ERP debate has largely been settled globally — cloud won.</strong> In Egypt, the answer is more nuanced, and the specific context of your business, your data, and your growth trajectory matters more than any global trend.</p>
 
 <p>This guide is written for decision-makers at Egyptian businesses who are actively evaluating ERP options. We'll cover total cost of ownership, compliance implications, the Egyptian-specific factors that change the calculus, and the situations where each approach genuinely makes more sense than the other.</p>
 
@@ -1128,7 +1361,7 @@ async function seedPortfolioContent(
 </ol>
 
 <p>There is no universally correct answer. The right ERP architecture depends on your specific business context — not on which option is trending. What matters is that the system you choose is one your team will actually use effectively, and that it serves your operations five years from now as well as it does today.</p>`,
-      contentAr: `<p><strong>أحد أكثر الأسئلة شيوعًا التي نتلقاها من الشركات المصرية المتوسطة الحجم: هل نستثمر في ERP سحابي أم نُثبّت خادمًا محليًا؟</strong></p>
+        contentAr: `<p><strong>أحد أكثر الأسئلة شيوعًا التي نتلقاها من الشركات المصرية المتوسطة الحجم: هل نستثمر في ERP سحابي أم نُثبّت خادمًا محليًا؟</strong></p>
 
 <p>الإجابة في 2026 أصبحت أوضح من أي وقت مضى — لكنها لا تزال تعتمد على سياقك التشغيلي المحدد. دعنا نُحلّل المعادلة بصدق.</p>
 
@@ -1178,22 +1411,24 @@ async function seedPortfolioContent(
 </ol>
 
 <p>لا توجد إجابة صحيحة شاملة. القرار الصحيح يعتمد على سياق عملك — لا على ما هو رائج حاليًا. ما يهم هو أن النظام الذي تختاره سيستخدمه فريقك فعلًا، وسيخدم عملياتك بعد خمس سنوات بنفس الكفاءة.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["ERP", "cloud", "Egypt", "comparison"],
-      status: "published",
-      publishedAt: new Date("2026-05-05"),
-      createdBy,
-    },
-    {
-      title:
-        "How Retail Businesses in Egypt Are Cutting Inventory Costs with Smart Automation",
-      titleAr: "كيف تخفض تجارة التجزئة في مصر تكاليف المخزون بالأتمتة الذكية",
-      slug: "retail-inventory-automation-egypt",
-      excerptAr:
-        "المخزون هو في آنٍ واحد أكثر أصول بيزنس التجزئة قيمةً وأكثرها تكلفةً. تجار التجزئة المصريون الذين يستخدمون الأتمتة الذكية يخفضون تكاليف التخزين، ويقللون نفاذ المخزون، ويستعيدون هامش الربح.",
-      excerpt:
-        "Inventory is simultaneously a retail business's most valuable asset and its most expensive liability. Egyptian retailers using smart automation are cutting carrying costs, reducing stockouts, and recovering margin that used to disappear into waste and shrinkage.",
-      content: `<p><strong>Retail inventory is money sitting on a shelf.</strong> Too little and you lose sales. Too much and you lose margin to carrying costs, obsolescence, and eventual markdowns. Getting this balance right manually — especially across multiple product categories, locations, and suppliers — is genuinely difficult. Getting it right with automation is, if not easy, at least systematic.</p>
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["ERP", "cloud", "Egypt", "comparison"],
+        tagsAr: ["ERP", "السحابة", "مصر", "مقارنة"],
+        status: "published",
+        publishedAt: new Date("2026-05-05"),
+        createdBy,
+      },
+      {
+        title:
+          "How Retail Businesses in Egypt Are Cutting Inventory Costs with Smart Automation",
+        titleAr: "كيف تخفض تجارة التجزئة في مصر تكاليف المخزون بالأتمتة الذكية",
+        slug: "retail-inventory-automation-egypt",
+        excerptAr:
+          "المخزون هو في آنٍ واحد أكثر أصول بيزنس التجزئة قيمةً وأكثرها تكلفةً. تجار التجزئة المصريون الذين يستخدمون الأتمتة الذكية يخفضون تكاليف التخزين، ويقللون نفاذ المخزون، ويستعيدون هامش الربح.",
+        excerpt:
+          "Inventory is simultaneously a retail business's most valuable asset and its most expensive liability. Egyptian retailers using smart automation are cutting carrying costs, reducing stockouts, and recovering margin that used to disappear into waste and shrinkage.",
+        content: `<p><strong>Retail inventory is money sitting on a shelf.</strong> Too little and you lose sales. Too much and you lose margin to carrying costs, obsolescence, and eventual markdowns. Getting this balance right manually — especially across multiple product categories, locations, and suppliers — is genuinely difficult. Getting it right with automation is, if not easy, at least systematic.</p>
 
 <p>Egyptian retailers are operating in an environment that makes inventory management harder than in many other markets: import-dependent supply chains with unpredictable lead times, currency fluctuation that changes landed costs mid-season, and a consumer market that's increasingly demanding on availability. The retailers building operational advantages right now are the ones using technology to turn these challenges from sources of cost into sources of competitive advantage.</p>
 
@@ -1279,7 +1514,7 @@ async function seedPortfolioContent(
 <p>The businesses implementing these systems today are not doing it because it's technically interesting. They're doing it because the margin recovery from reduced waste, reduced dead stock, and reduced stockouts typically exceeds the investment within 12–18 months — and then continues to compound as the system learns and improves.</p>
 
 <p>The question isn't whether smart inventory automation is worth it. For most retail businesses in Egypt, it is. The question is how soon you'd like to start capturing the benefit.</p>`,
-      contentAr: `<p><strong>في قطاع التجزئة، المخزون هو المال. كل وحدة زائدة تجمّد رأس المال، وكل وحدة ناقصة تفقدك بيعًا وعميلًا.</strong></p>
+        contentAr: `<p><strong>في قطاع التجزئة، المخزون هو المال. كل وحدة زائدة تجمّد رأس المال، وكل وحدة ناقصة تفقدك بيعًا وعميلًا.</strong></p>
 
 <p>تجار التجزئة المصريون الذين ينجحون في إدارة المخزون بكفاءة لا يعتمدون على الخبرة والحدس فقط — بل يستخدمون أنظمة ذكية تتعلم أنماط الطلب وتُنبّه قبل حدوث المشكلة لا بعدها.</p>
 
@@ -1329,10 +1564,93 @@ async function seedPortfolioContent(
 </ul>
 
 <p>هذه الأرقام الثلاثة، مجموعة على مدار عام، هي ما يمكن لأتمتة المخزون استرداد جزء كبير منه. الشركات التي تطبّق هذه الأنظمة اليوم لا تفعل ذلك لأنها مثيرة تقنيًا — بل لأن استرداد الاستثمار يتم في 12-18 شهرًا، ثم يستمر النظام في التحسن.</p>`,
-      authorName: "Gateling Solutions",
-      tags: ["retail", "inventory management", "automation"],
-      status: "published",
-      publishedAt: new Date("2026-06-02"),
+        authorName: "Gateling Solutions",
+        authorNameAr: "بويب",
+        tags: ["retail", "inventory management", "automation"],
+        tagsAr: ["التجزئة", "إدارة المخزون", "الأتمتة"],
+        status: "published",
+        publishedAt: new Date("2026-06-02"),
+        createdBy,
+      },
+    ])
+    .returning({ id: BlogPostsTable.id });
+
+  const postCafeId = blogPostRows[0]?.id ?? "";
+  const postSoftwareId = blogPostRows[1]?.id ?? "";
+  const postEinvoiceId = blogPostRows[2]?.id ?? "";
+  const postBottleneckId = blogPostRows[3]?.id ?? "";
+  const postErpId = blogPostRows[4]?.id ?? "";
+  const postInventoryId = blogPostRows[5]?.id ?? "";
+
+  await tx.insert(BlogPostMediaTable).values([
+    {
+      blogPostId: postCafeId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80",
+      title: "Cafe automation in action",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      blogPostId: postCafeId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&q=80",
+      title: "Modern POS system",
+      isFeatured: false,
+      isSecondary: true,
+      sortOrder: 1,
+      createdBy,
+    },
+    {
+      blogPostId: postSoftwareId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+      title: "Custom software vs off-the-shelf",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      blogPostId: postEinvoiceId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
+      title: "Egypt e-invoicing mandate",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      blogPostId: postBottleneckId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80",
+      title: "Operational bottleneck analysis",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      blogPostId: postErpId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+      title: "Cloud ERP vs on-premise",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
+      createdBy,
+    },
+    {
+      blogPostId: postInventoryId,
+      type: "image",
+      url: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80",
+      title: "Retail inventory automation",
+      isFeatured: true,
+      isSecondary: false,
+      sortOrder: 0,
       createdBy,
     },
   ]);

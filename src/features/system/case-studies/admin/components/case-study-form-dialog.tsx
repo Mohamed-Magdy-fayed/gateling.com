@@ -9,10 +9,14 @@ import {
   XIcon,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useCallback, useEffect, useId, useMemo } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import {
+  type GalleryItem,
+  GalleryManager,
+} from "@/components/forms/gallery-manager";
 import { useAppForm } from "@/components/forms/hooks";
 import {
   OverlayFormBody,
@@ -93,6 +97,8 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
   const formId = useId();
   const isEdit = caseStudy != null;
 
+  const [media, setMedia] = useState<GalleryItem[]>([]);
+
   const existingQuery = useQuery({
     ...trpc.caseStudies.getById.queryOptions({ id: caseStudy?.id ?? "" }),
     enabled: open && isEdit && Boolean(caseStudy?.id),
@@ -155,6 +161,15 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                   metrics: arMetrics,
                 }
               : null,
+          media: media.map((m, i) => ({
+            id: m.id,
+            type: m.type,
+            url: m.url,
+            title: m.title ?? null,
+            isFeatured: m.isFeatured,
+            isSecondary: m.isSecondary,
+            sortOrder: i,
+          })),
         };
         if (isEdit && caseStudy) {
           await toast
@@ -209,11 +224,25 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
       liveUrl: detail.liveUrl ?? null,
       sortOrder: detail.sortOrder,
     });
+    setMedia(
+      (detail.media ?? []).map((m) => ({
+        id: m.id,
+        type: m.type,
+        url: m.url,
+        title: m.title,
+        isFeatured: m.isFeatured,
+        isSecondary: m.isSecondary,
+        sortOrder: m.sortOrder,
+      })),
+    );
   }, [detail, form]);
 
   useEffect(() => {
     if (open && isEdit && detail) resetToDetail();
-    else if (open && !isEdit) form.reset(defaultValues);
+    else if (open && !isEdit) {
+      form.reset(defaultValues);
+      setMedia([]);
+    }
   }, [open, isEdit, detail, resetToDetail, form, defaultValues]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -589,6 +618,13 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                   )}
                 </form.AppField>
               </FieldGroup>
+
+              {/* Media gallery */}
+              <GalleryManager
+                value={media}
+                onChange={setMedia}
+                disabled={pending}
+              />
             </FieldSet>
           </OverlayFormBody>
         </ScrollArea>

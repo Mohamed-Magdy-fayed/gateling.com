@@ -29,5 +29,11 @@ export default {
     notFoundTitle: "Case Study Not Found",
     notFoundDescription: "This case study may not be published yet.",
     testimonialHeading: "What the client said",
+    mediaGalleryHeading: "Media",
+    previousSlide: "Previous",
+    nextSlide: "Next",
+    watchVideo: "Watch video",
+    featuredLabel: "Featured",
+    secondaryLabel: "Secondary",
   },
 } as const;

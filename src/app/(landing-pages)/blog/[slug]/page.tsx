@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-
 import { LinkButton } from "@/components/general/link-button";
+import { MediaSection } from "@/components/general/media-section";
 import { Badge } from "@/components/ui/badge";
 import {
   Container,
@@ -38,7 +38,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
       authors: [post.authorName],
-      ...(post.coverImageUrl ? { images: [{ url: post.coverImageUrl }] } : {}),
+      ...(() => {
+        const img =
+          post.media?.find((m) => m.isFeatured)?.url ?? post.coverImageUrl;
+        return img ? { images: [{ url: img }] } : {};
+      })(),
     },
   };
 }
@@ -59,11 +63,12 @@ async function BlogDetailContent({ params }: Props) {
     locale === "ar" ? (post.excerptAr ?? post.excerpt) : post.excerpt;
   const content =
     locale === "ar" ? (post.contentAr ?? post.content) : post.content;
+  const authorName =
+    locale === "ar" ? (post.authorNameAr ?? post.authorName) : post.authorName;
+  const tags =
+    locale === "ar" && post.tagsAr?.length ? post.tagsAr : (post.tags ?? []);
 
-  const readingTime = Math.max(
-    1,
-    Math.ceil(content.split(/\s+/).length / 200),
-  );
+  const readingTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -75,7 +80,10 @@ async function BlogDetailContent({ params }: Props) {
       name: post.authorName,
     },
     datePublished: post.publishedAt?.toISOString(),
-    image: post.coverImageUrl ?? undefined,
+    image:
+      post.media?.find((m) => m.isFeatured)?.url ??
+      post.coverImageUrl ??
+      undefined,
     publisher: {
       "@type": "Organization",
       "@id": "https://gateling.com/#org",
@@ -98,14 +106,14 @@ async function BlogDetailContent({ params }: Props) {
             transitionTypes={["nav-back"]}
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
-            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            <ArrowLeftIcon className="h-3.5 w-3.5 rtl:-scale-x-100" />
             {t("publicPages.blogDetailPage.backToBlog")}
           </Link>
 
           <div className="mt-6 space-y-4">
-            {post.tags && post.tags.length > 0 && (
+            {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
+                {tags.map((tag) => (
                   <Badge key={tag} variant="secondary">
                     {tag}
                   </Badge>
@@ -128,7 +136,7 @@ async function BlogDetailContent({ params }: Props) {
               )}
               <span>
                 {t("publicPages.blogDetailPage.byAuthor", {
-                  author: post.authorName,
+                  author: authorName,
                 })}
               </span>
               <span>
@@ -141,7 +149,13 @@ async function BlogDetailContent({ params }: Props) {
         </Container>
       </HeroContainer>
 
-      {post.coverImageUrl && (
+      {post.media && post.media.length > 0 ? (
+        <div className="border-border/40 border-b py-6">
+          <Container>
+            <MediaSection items={post.media} />
+          </Container>
+        </div>
+      ) : post.coverImageUrl ? (
         <div className="border-border/40 overflow-hidden border-b">
           <Container>
             <div className="relative aspect-video overflow-hidden rounded-xl">
@@ -155,12 +169,12 @@ async function BlogDetailContent({ params }: Props) {
             </div>
           </Container>
         </div>
-      )}
+      ) : null}
 
       <Section variant="feature">
         <Container size="narrow">
-          <div
-            className="blog-prose"
+          <article
+            className="blog-prose prose prose-neutral max-w-none dark:prose-invert"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: developer-controlled CMS content
             dangerouslySetInnerHTML={{ __html: content }}
           />

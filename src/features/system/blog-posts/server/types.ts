@@ -1,4 +1,4 @@
-import type { BlogPost } from "@/drizzle/schema";
+import type { BlogPost, BlogPostMedia } from "@/drizzle/schema";
 
 export type BlogPostRow = Pick<
   BlogPost,
@@ -17,3 +17,5 @@ export type BlogPostRow = Pick<
   | "createdAt"
   | "updatedAt"
 >;
+
+export type BlogPostDetail = BlogPost & { media: BlogPostMedia[] };

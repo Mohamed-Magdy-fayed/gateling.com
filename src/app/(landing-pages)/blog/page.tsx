@@ -64,13 +64,16 @@ export default async function BlogPage() {
                   locale === "ar"
                     ? (post.excerptAr ?? post.excerpt)
                     : post.excerpt;
+                const cardImageUrl =
+                  post.media?.find((m) => m.isFeatured)?.url ??
+                  post.coverImageUrl;
                 return (
                   <ContentCard key={post.id} className="group relative p-0">
                     <Link href={`/blog/${post.slug}`} className="block">
-                      {post.coverImageUrl && (
+                      {cardImageUrl && (
                         <div className="relative aspect-video overflow-hidden rounded-t-xl">
                           <Image
-                            src={post.coverImageUrl}
+                            src={cardImageUrl}
                             alt={title}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-105"

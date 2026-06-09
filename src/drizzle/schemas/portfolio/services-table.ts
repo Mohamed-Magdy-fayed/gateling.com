@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -16,6 +17,7 @@ import {
   updatedAt,
   updatedBy,
 } from "@/drizzle/schemas/helpers";
+import { ServiceMediaTable } from "./service-media-table";
 
 export const ServicesTable = pgTable(
   "services",
@@ -31,6 +33,7 @@ export const ServicesTable = pgTable(
     featuresAr: jsonb().$type<string[]>(),
     icon: varchar({ length: 64 }).notNull().default("Zap"),
     features: jsonb().$type<string[]>().notNull().default([]),
+    coverImageUrl: varchar({ length: 1024 }),
     sortOrder: integer().notNull().default(0),
     isActive: boolean().notNull().default(true),
     createdBy,
@@ -42,6 +45,10 @@ export const ServicesTable = pgTable(
   },
   (table) => [index("services_active_idx").on(table.isActive)],
 );
+
+export const servicesRelations = relations(ServicesTable, ({ many }) => ({
+  media: many(ServiceMediaTable),
+}));
 
 export type Service = typeof ServicesTable.$inferSelect;
 export type NewService = typeof ServicesTable.$inferInsert;

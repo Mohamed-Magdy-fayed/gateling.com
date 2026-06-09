@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   index,
   pgEnum,
@@ -16,6 +17,7 @@ import {
   updatedAt,
   updatedBy,
 } from "@/drizzle/schemas/helpers";
+import { BlogPostMediaTable } from "./blog-post-media-table";
 
 export const blogPostStatusValues = ["draft", "published"] as const;
 export type BlogPostStatus = (typeof blogPostStatusValues)[number];
@@ -39,7 +41,9 @@ export const BlogPostsTable = pgTable(
     authorName: varchar({ length: 255 })
       .notNull()
       .default("Gateling Solutions"),
+    authorNameAr: varchar({ length: 255 }),
     tags: varchar({ length: 128 }).array(),
+    tagsAr: varchar({ length: 128 }).array(),
     status: blogPostStatusEnum().notNull().default("draft"),
     publishedAt: timestamp({ withTimezone: true }),
     createdBy,
@@ -54,6 +58,10 @@ export const BlogPostsTable = pgTable(
     index("blog_posts_slug_idx").on(table.slug),
   ],
 );
+
+export const blogPostsRelations = relations(BlogPostsTable, ({ many }) => ({
+  media: many(BlogPostMediaTable),
+}));
 
 export type BlogPost = typeof BlogPostsTable.$inferSelect;
 export type NewBlogPost = typeof BlogPostsTable.$inferInsert;

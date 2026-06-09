@@ -13,6 +13,7 @@ import {
   updateBlogPost,
 } from "./mutations";
 import {
+  getBlogPostById,
   getPublishedBlogPostBySlug,
   listBlogPosts,
   listPublishedBlogPosts,
@@ -28,6 +29,9 @@ export const blogPostsRouter = createTRPCRouter({
   publicGetBySlug: baseProcedure
     .input(z.object({ slug: z.string() }))
     .query(({ ctx, input }) => getPublishedBlogPostBySlug(ctx, input.slug)),
+  getById: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(({ ctx, input }) => getBlogPostById(ctx, input.id)),
   list: protectedProcedure
     .input(listBlogPostsInput)
     .query(({ ctx, input }) => listBlogPosts(ctx, input)),

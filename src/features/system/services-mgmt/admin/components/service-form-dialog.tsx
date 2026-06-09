@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2Icon,
   PlusIcon,
@@ -9,10 +9,11 @@ import {
   XIcon,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useCallback, useEffect, useId, useMemo } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { type GalleryItem, GalleryManager } from "@/components/forms/gallery-manager";
 import { useAppForm } from "@/components/forms/hooks";
 import {
   OverlayFormBody,
@@ -51,6 +52,7 @@ const formSchema = z.object({
   fullDescription: z.string().trim().max(2048).optional().nullable(),
   fullDescriptionAr: z.string().trim().max(2048).optional().nullable(),
   icon: z.string().trim().min(1).max(64),
+  coverImageUrl: z.string().max(1024).optional().nullable(),
   features: z.array(z.string().trim().min(1)),
   featuresAr: z.array(z.string()).optional().nullable(),
   sortOrder: z.number().int().min(0),
@@ -81,6 +83,29 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
   const formId = useId();
   const isEdit = service != null;
 
+  const [media, setMedia] = useState<GalleryItem[]>([]);
+
+  const { data: serviceDetail } = useQuery({
+    ...trpc.servicesMgmt.getById.queryOptions({ id: service?.id ?? "" }),
+    enabled: open && isEdit && !!service?.id,
+  });
+
+  useEffect(() => {
+    if (serviceDetail?.media) {
+      setMedia(
+        serviceDetail.media.map((m) => ({
+          id: m.id,
+          type: m.type,
+          url: m.url,
+          title: m.title,
+          isFeatured: m.isFeatured,
+          isSecondary: m.isSecondary,
+          sortOrder: m.sortOrder,
+        })),
+      );
+    }
+  }, [serviceDetail]);
+
   const createMut = useMutation(trpc.servicesMgmt.create.mutationOptions());
   const updateMut = useMutation(trpc.servicesMgmt.update.mutationOptions());
   const pending = createMut.isPending || updateMut.isPending;
@@ -95,6 +120,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
       fullDescription: null,
       fullDescriptionAr: null,
       icon: "Zap",
+      coverImageUrl: null,
       features: [""],
       featuresAr: [""],
       sortOrder: 0,
@@ -115,8 +141,18 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
           shortDescriptionAr: value.shortDescriptionAr || null,
           fullDescription: value.fullDescription || null,
           fullDescriptionAr: value.fullDescriptionAr || null,
+          coverImageUrl: value.coverImageUrl || null,
           features: value.features.filter(Boolean),
           featuresAr: featuresArFiltered.length > 0 ? featuresArFiltered : null,
+          media: media.map((m, i) => ({
+            id: m.id,
+            type: m.type,
+            url: m.url,
+            title: m.title ?? null,
+            isFeatured: m.isFeatured,
+            isSecondary: m.isSecondary,
+            sortOrder: i,
+          })),
         };
         if (isEdit && service) {
           await toast
@@ -156,17 +192,21 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
       fullDescription: service.fullDescription ?? null,
       fullDescriptionAr: service.fullDescriptionAr ?? null,
       icon: service.icon,
+      coverImageUrl: service.coverImageUrl ?? null,
       features: features.length > 0 ? features : [""],
-      featuresAr:
-        featuresAr && featuresAr.length > 0 ? featuresAr : [""],
+      featuresAr: featuresAr && featuresAr.length > 0 ? featuresAr : [""],
       sortOrder: service.sortOrder,
       isActive: service.isActive,
     });
   }, [service, form]);
 
   useEffect(() => {
-    if (open && isEdit && service) resetToService();
-    else if (open && !isEdit) form.reset(defaultValues);
+    if (open && isEdit && service) {
+      resetToService();
+    } else if (open && !isEdit) {
+      form.reset(defaultValues);
+      setMedia([]);
+    }
   }, [open, isEdit, service, resetToService, form, defaultValues]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -406,6 +446,24 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     />
                   )}
                 </form.AppField>
+                <form.Field name="coverImageUrl">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>
+                        {String(t("services.coverImage"))}
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        value={(field.state.value as string) ?? ""}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value || null)
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="https://..."
+                      />
+                    </Field>
+                  )}
+                </form.Field>
                 <form.AppField name="sortOrder">
                   {(field) => (
                     <field.NumberField
@@ -419,6 +477,13 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                   <field.BooleanField label={String(t("services.isActive"))} />
                 )}
               </form.AppField>
+
+              {/* Media gallery */}
+              <GalleryManager
+                value={media}
+                onChange={setMedia}
+                disabled={pending}
+              />
             </FieldSet>
           </OverlayFormBody>
         </ScrollArea>

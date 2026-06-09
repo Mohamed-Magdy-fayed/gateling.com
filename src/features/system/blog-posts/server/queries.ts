@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 
-import { BlogPostsTable } from "@/drizzle/schema";
+import { BlogPostMediaTable, BlogPostsTable } from "@/drizzle/schema";
 import type { ListBlogPostsInput } from "./schemas";
 import {
   assertAdminRole,
@@ -9,28 +9,36 @@ import {
 } from "./shared";
 
 export async function listPublishedBlogPosts(ctx: TRPCContext) {
-  return ctx.db
-    .select({
-      id: BlogPostsTable.id,
-      title: BlogPostsTable.title,
-      titleAr: BlogPostsTable.titleAr,
-      slug: BlogPostsTable.slug,
-      excerpt: BlogPostsTable.excerpt,
-      excerptAr: BlogPostsTable.excerptAr,
-      authorName: BlogPostsTable.authorName,
-      tags: BlogPostsTable.tags,
-      publishedAt: BlogPostsTable.publishedAt,
-      coverImageUrl: BlogPostsTable.coverImageUrl,
-      content: BlogPostsTable.content,
-    })
-    .from(BlogPostsTable)
-    .where(
-      and(
-        eq(BlogPostsTable.status, "published"),
-        isNull(BlogPostsTable.deletedAt),
-      ),
-    )
-    .orderBy(desc(BlogPostsTable.publishedAt));
+  return ctx.db.query.BlogPostsTable.findMany({
+    where: and(
+      eq(BlogPostsTable.status, "published"),
+      isNull(BlogPostsTable.deletedAt),
+    ),
+    columns: {
+      id: true,
+      title: true,
+      titleAr: true,
+      slug: true,
+      excerpt: true,
+      excerptAr: true,
+      authorName: true,
+      authorNameAr: true,
+      tags: true,
+      tagsAr: true,
+      publishedAt: true,
+      coverImageUrl: true,
+      content: true,
+    },
+    with: { media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] } },
+    orderBy: [desc(BlogPostsTable.publishedAt)],
+  });
+}
+
+export async function getBlogPostById(ctx: TRPCContext, id: string) {
+  return ctx.db.query.BlogPostsTable.findFirst({
+    where: and(eq(BlogPostsTable.id, id), isNull(BlogPostsTable.deletedAt)),
+    with: { media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] } },
+  });
 }
 
 export async function getPublishedBlogPostBySlug(
@@ -43,6 +51,7 @@ export async function getPublishedBlogPostBySlug(
       eq(BlogPostsTable.status, "published"),
       isNull(BlogPostsTable.deletedAt),
     ),
+    with: { media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] } },
   });
 }
 
@@ -97,7 +106,9 @@ export async function listBlogPosts(
       excerptAr: BlogPostsTable.excerptAr,
       contentAr: BlogPostsTable.contentAr,
       authorName: BlogPostsTable.authorName,
+      authorNameAr: BlogPostsTable.authorNameAr,
       tags: BlogPostsTable.tags,
+      tagsAr: BlogPostsTable.tagsAr,
       status: BlogPostsTable.status,
       publishedAt: BlogPostsTable.publishedAt,
       coverImageUrl: BlogPostsTable.coverImageUrl,

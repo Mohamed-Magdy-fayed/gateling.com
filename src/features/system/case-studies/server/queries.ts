@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 
-import { CaseStudiesTable } from "@/drizzle/schema";
+import { CaseStudiesTable, CaseStudyMediaTable } from "@/drizzle/schema";
 import { localize } from "@/lib/i18n-content";
 import type { ListCaseStudiesInput } from "./schemas";
 import {
@@ -93,6 +93,7 @@ export async function listCaseStudies(
 export async function getCaseStudyById(ctx: TRPCContext, id: string) {
   return ctx.db.query.CaseStudiesTable.findFirst({
     where: and(eq(CaseStudiesTable.id, id), isNull(CaseStudiesTable.deletedAt)),
+    with: { media: { orderBy: [asc(CaseStudyMediaTable.sortOrder)] } },
   });
 }
 
@@ -152,6 +153,7 @@ export async function getPublishedCaseStudyBySlug(
       eq(CaseStudiesTable.status, "published"),
       isNull(CaseStudiesTable.deletedAt),
     ),
+    with: { media: { orderBy: [asc(CaseStudyMediaTable.sortOrder)] } },
   });
   if (!row) return undefined;
   return {

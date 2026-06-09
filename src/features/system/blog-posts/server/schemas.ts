@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { translationKey } from "@/features/core/i18n/global";
+import { mediaItemSchema } from "@/features/system/case-studies/server/schemas";
 
 const required = translationKey("forms.validation.required");
 const max255 = translationKey("forms.validation.max255");
@@ -25,7 +26,10 @@ export const blogPostMutationSchema = z.object({
     .min(1, required)
     .max(255, max255)
     .default("Gateling Solutions"),
+  authorNameAr: z.string().trim().max(255).optional().nullable(),
   tags: z.array(z.string().trim().max(128)).optional().default([]),
+  tagsAr: z.array(z.string().trim().max(128)).optional().default([]),
+  media: z.array(mediaItemSchema).default([]),
 });
 
 export const blogPostUpdateSchema = blogPostMutationSchema.extend({

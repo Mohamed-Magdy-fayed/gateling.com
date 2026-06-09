@@ -19,6 +19,7 @@ import {
   updatedAt,
   updatedBy,
 } from "@/drizzle/schemas/helpers";
+import { CaseStudyMediaTable } from "./case-study-media-table";
 import { TestimonialsTable } from "./testimonials-table";
 
 export const caseStudyStatusValues = [
@@ -74,6 +75,7 @@ export const CaseStudiesTable = pgTable(
 
 export const caseStudiesRelations = relations(CaseStudiesTable, ({ many }) => ({
   testimonials: many(TestimonialsTable),
+  media: many(CaseStudyMediaTable),
 }));
 
 export type CaseStudy = typeof CaseStudiesTable.$inferSelect;

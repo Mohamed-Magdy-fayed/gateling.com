@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { TestimonialsTable } from "@/drizzle/schema";
+import { TestimonialsTable, UsersTable } from "@/drizzle/schema";
 import { translationKey } from "@/features/core/i18n/global";
 import {
   baseProcedure,
@@ -77,8 +77,10 @@ export const testimonialsRouter = createTRPCRouter({
           avatarUrl: TestimonialsTable.avatarUrl,
           rating: TestimonialsTable.rating,
           sortOrder: TestimonialsTable.sortOrder,
+          userImageUrl: UsersTable.imageUrl,
         })
         .from(TestimonialsTable)
+        .leftJoin(UsersTable, eq(TestimonialsTable.userId, UsersTable.id))
         .where(
           and(
             eq(TestimonialsTable.isVisible, true),
@@ -90,7 +92,7 @@ export const testimonialsRouter = createTRPCRouter({
         id: row.id,
         clientName: row.clientName,
         company: row.company,
-        avatarUrl: row.avatarUrl,
+        avatarUrl: row.avatarUrl ?? row.userImageUrl,
         rating: row.rating,
         sortOrder: row.sortOrder,
         role: localize(row.role ?? null, row.roleAr, ctx.locale),

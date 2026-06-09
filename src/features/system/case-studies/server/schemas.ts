@@ -2,6 +2,18 @@ import { z } from "zod";
 
 import { translationKey } from "@/features/core/i18n/global";
 
+export const mediaItemSchema = z.object({
+  id: z.string().uuid().optional(),
+  type: z.enum(["image", "video"]),
+  url: z.string().min(1).max(1024),
+  title: z.string().max(255).optional().nullable(),
+  isFeatured: z.boolean().default(false),
+  isSecondary: z.boolean().default(false),
+  sortOrder: z.number().int().min(0).default(0),
+});
+
+export type MediaItemInput = z.infer<typeof mediaItemSchema>;
+
 const required = translationKey("forms.validation.required");
 const max255 = translationKey("forms.validation.max255");
 
@@ -46,6 +58,7 @@ export const caseStudyMutationSchema = z.object({
   coverImageUrl: z.string().max(1024).optional().nullable(),
   liveUrl: z.string().url().max(1024).optional().nullable(),
   sortOrder: z.number().int().min(0).default(0),
+  media: z.array(mediaItemSchema).default([]),
 });
 
 export const caseStudyUpdateSchema = caseStudyMutationSchema.extend({

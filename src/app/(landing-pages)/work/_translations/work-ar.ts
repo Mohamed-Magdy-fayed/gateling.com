@@ -27,5 +27,11 @@ export default {
     notFoundTitle: "دراسة الحالة غير موجودة",
     notFoundDescription: "قد لا تكون دراسة الحالة هذه منشورة بعد.",
     testimonialHeading: "ماذا قال العميل",
+    mediaGalleryHeading: "الوسائط",
+    previousSlide: "السابق",
+    nextSlide: "التالي",
+    watchVideo: "مشاهدة الفيديو",
+    featuredLabel: "مميز",
+    secondaryLabel: "ثانوي",
   },
 } as const;

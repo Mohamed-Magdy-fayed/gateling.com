@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import type { ComponentType } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
@@ -158,22 +159,41 @@ export default async function ServicesPage() {
             subheading={t("publicPages.servicesPage.servicesGridDescription")}
           />
           <Grid cols={2} className="mt-8">
-            {services.map((service) => (
-              <ContentCard key={service.id}>
-                <div className="mb-4">
-                  <ServiceIcon name={service.icon} />
-                </div>
-                <CardHeading className="mb-3">{service.title}</CardHeading>
-                <ProseText size="sm" className="mb-5">
-                  {service.shortDescription}
-                </ProseText>
-                <div className="space-y-2">
-                  {service.features.map((f) => (
-                    <CheckItem key={f}>{f}</CheckItem>
-                  ))}
-                </div>
-              </ContentCard>
-            ))}
+            {services.map((service) => {
+              const featuredImageUrl =
+                service.media?.find((m) => m.isFeatured)?.url ??
+                service.coverImageUrl;
+              return (
+                <ContentCard key={service.id} className="overflow-hidden p-0">
+                  {featuredImageUrl ? (
+                    <div className="relative aspect-video w-full overflow-hidden">
+                      <Image
+                        src={featuredImageUrl}
+                        alt={service.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="px-6 pt-6">
+                      <ServiceIcon name={service.icon} />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <CardHeading className="mb-3">{service.title}</CardHeading>
+                    <ProseText size="sm" className="mb-5">
+                      {service.shortDescription}
+                    </ProseText>
+                    <div className="space-y-2">
+                      {service.features.map((f) => (
+                        <CheckItem key={f}>{f}</CheckItem>
+                      ))}
+                    </div>
+                  </div>
+                </ContentCard>
+              );
+            })}
           </Grid>
         </Container>
       </Section>
