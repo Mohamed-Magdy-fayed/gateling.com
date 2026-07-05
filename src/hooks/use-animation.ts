@@ -10,6 +10,17 @@ export function useScrollAnimation(threshold = 0.1) {
     const element = elementRef.current;
     if (!element) return;
 
+    const rect = element.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setIsVisible(true);
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { LinkButton } from "@/components/general/link-button";
 import {
@@ -10,21 +11,32 @@ import {
   Section,
   SectionHeader,
 } from "@/components/ui/containers";
+import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getT } from "@/features/core/i18n/server";
+import { canonicalUrl } from "@/lib/json-ld";
 import { generateWhatsAppUrl } from "@/lib/phone";
 
-import { ContactForm } from "./_components/contact-form";
+import { ContactTabs } from "./_components/contact-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   return {
     title: t("publicPages.contactPage.metaTitle"),
     description: t("publicPages.contactPage.metaDescription"),
+    alternates: { canonical: canonicalUrl("/contact") },
   };
 }
 
-export default async function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; reschedule?: string }>;
+}) {
   const { t } = await getT();
+  const user = await getCurrentUser();
+  const { tab, reschedule } = await searchParams;
+  const initialTab = tab === "book" ? "book" : "message";
+
   const whatsappUrl = generateWhatsAppUrl(
     "+201000000000",
     t("publicPages.contactPage.whatsappMessage"),
@@ -53,7 +65,7 @@ export default async function ContactPage() {
       icon: "📅",
       label: t("publicPages.contactPage.meetingLabel"),
       value: t("publicPages.contactPage.meetingValue"),
-      href: undefined,
+      href: "/contact?tab=book",
     },
   ];
 
@@ -76,8 +88,23 @@ export default async function ContactPage() {
     },
   ];
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroContainer>
         <Container size="wide">
           <div className="grid gap-12 md:grid-cols-2">
@@ -94,7 +121,14 @@ export default async function ContactPage() {
                     <span className="mt-0.5 text-2xl">{item.icon}</span>
                     <div>
                       <p className="font-semibold">{item.label}</p>
-                      {item.href ? (
+                      {item.href?.startsWith("/") ? (
+                        <Link
+                          href={item.href}
+                          className="text-primary hover:underline text-sm"
+                        >
+                          {item.value}
+                        </Link>
+                      ) : item.href ? (
                         <a
                           href={item.href}
                           target="_blank"
@@ -119,8 +153,12 @@ export default async function ContactPage() {
               </ProseText>
             </div>
 
-            {/* Right: form */}
-            <ContactForm />
+            {/* Right: send a message / book a call */}
+            <ContactTabs
+              isSignedIn={user != null}
+              initialTab={initialTab}
+              rescheduleId={user != null ? (reschedule ?? null) : null}
+            />
           </div>
         </Container>
       </HeroContainer>

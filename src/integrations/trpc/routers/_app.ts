@@ -5,6 +5,7 @@ import { dashboardRouter } from "@/features/system/dashboard/server";
 import { uploadImage } from "@/integrations/firebase/storage";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import { blogPostsRouter } from "./blog-posts";
+import { bookingsRouter } from "./bookings";
 import { branchesRouter } from "./branches";
 import { caseStudiesRouter } from "./case-studies";
 import { clientFeedbackRouter } from "./client-feedback";
@@ -47,6 +48,7 @@ export const appRouter = createTRPCRouter({
       return { url };
     }),
 
+  bookings: bookingsRouter,
   branches: branchesRouter,
   blogPosts: blogPostsRouter,
   clientFeedback: clientFeedbackRouter,

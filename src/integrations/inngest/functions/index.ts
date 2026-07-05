@@ -1,4 +1,8 @@
+import { bookingTriageDigest } from "./booking-triage-digest";
 import { onBlogPostPublished } from "./on-blog-post-published";
+import { onBookingCancelled } from "./on-booking-cancelled";
+import { onBookingConfirmed } from "./on-booking-confirmed";
+import { onBookingRequested } from "./on-booking-requested";
 import { onCaseStudyPublished } from "./on-case-study-published";
 import { onLeadStatusChanged } from "./on-lead-status-changed";
 import { onLeadSubmitted } from "./on-lead-submitted";
@@ -12,4 +16,8 @@ export const functions = [
   onBlogPostPublished,
   onUserRegistered,
   onLeadStatusChanged,
+  onBookingConfirmed,
+  onBookingRequested,
+  onBookingCancelled,
+  bookingTriageDigest,
 ];

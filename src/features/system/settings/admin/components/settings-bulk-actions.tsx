@@ -76,9 +76,7 @@ export function SettingsBulkActions({
             </Button>
           }
         />
-        <TooltipContent>
-          {t("systemPages.settingsBulkEnable")}
-        </TooltipContent>
+        <TooltipContent>{t("systemPages.settingsBulkEnable")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger
@@ -95,9 +93,7 @@ export function SettingsBulkActions({
             </Button>
           }
         />
-        <TooltipContent>
-          {t("systemPages.settingsBulkDisable")}
-        </TooltipContent>
+        <TooltipContent>{t("systemPages.settingsBulkDisable")}</TooltipContent>
       </Tooltip>
     </>
   );

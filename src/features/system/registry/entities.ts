@@ -3,6 +3,7 @@ import {
   BookOpen,
   Briefcase,
   Building2,
+  CalendarClock,
   FileText,
   Inbox,
   Mail,
@@ -20,6 +21,7 @@ type EntityNavTranslationKey =
   | "navServices"
   | "navTestimonials"
   | "navLeads"
+  | "navBookings"
   | "navSubscribers"
   | "navUsers"
   | "navBranches"
@@ -31,6 +33,7 @@ type EntityBreadcrumbTranslationKey =
   | "breadcrumbServices"
   | "breadcrumbTestimonials"
   | "breadcrumbLeads"
+  | "breadcrumbBookings"
   | "breadcrumbSubscribers"
   | "breadcrumbUsers"
   | "breadcrumbBranches"
@@ -42,6 +45,7 @@ type EntityTitleKey =
   | "servicesTitle"
   | "testimonialsTitle"
   | "leadsTitle"
+  | "bookingsTitle"
   | "subscribersTitle"
   | "usersTitle"
   | "branchesTitle"
@@ -53,6 +57,7 @@ type EntityLeadKey =
   | "servicesLead"
   | "testimonialsLead"
   | "leadsLead"
+  | "bookingsLead"
   | "subscribersLead"
   | "usersLead"
   | "branchesLead"
@@ -182,6 +187,27 @@ export const SYSTEM_ENTITY_REGISTRY = [
     supportsBulkActions: false,
     filters: ["status", "source", "createdAt"],
     rowActions: ["info", "markContacted", "markQualified", "close", "delete"],
+    bulkActions: [],
+    showInDashboard: true,
+    seedProfiles: ["demo"],
+  },
+  {
+    slug: "bookings",
+    route: "/bookings",
+    screenKey: "bookings",
+    icon: CalendarClock,
+    navLabelKey: "navBookings",
+    breadcrumbLabelKey: "breadcrumbBookings",
+    titleKey: "bookingsTitle",
+    leadKey: "bookingsLead",
+    branchScope: "global",
+    infoView: "audit-only",
+    supportsImport: false,
+    supportsExport: true,
+    supportsRowSelection: false,
+    supportsBulkActions: false,
+    filters: ["status", "startsAt"],
+    rowActions: ["info", "confirm", "cancel", "complete", "noShow"],
     bulkActions: [],
     showInDashboard: true,
     seedProfiles: ["demo"],

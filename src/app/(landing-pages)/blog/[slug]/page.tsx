@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -34,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: canonicalUrl(`/blog/${slug}`) },
     openGraph: {
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
@@ -91,12 +93,22 @@ async function BlogDetailContent({ params }: Props) {
     },
   };
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Blog", path: "/blog" },
+    { name: title, path: `/blog/${post.slug}` },
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
 
       <HeroContainer>

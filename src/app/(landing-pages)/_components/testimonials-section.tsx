@@ -48,8 +48,49 @@ export async function TestimonialsSection() {
 
   if (testimonials.length === 0) return null;
 
+  const ratedCount = testimonials.filter((c) => c.rating).length;
+  const averageRating =
+    ratedCount > 0
+      ? testimonials.reduce((sum, c) => sum + (c.rating ?? 0), 0) / ratedCount
+      : null;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://gateling.com/#org",
+    ...(averageRating
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: averageRating,
+            bestRating: 5,
+            reviewCount: ratedCount,
+          },
+        }
+      : {}),
+    review: testimonials.map((client) => ({
+      "@type": "Review",
+      reviewBody: client.content,
+      author: { "@type": "Person", name: client.clientName },
+      ...(client.rating
+        ? {
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: client.rating,
+              bestRating: 5,
+            },
+          }
+        : {}),
+    })),
+  };
+
   return (
     <Section variant="alternate">
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.testimonialsSection.eyebrow")}

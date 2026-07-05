@@ -16,12 +16,14 @@ import {
   StatCard,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
+import { canonicalUrl } from "@/lib/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   return {
     title: t("publicPages.aboutPage.metaTitle"),
     description: t("publicPages.aboutPage.metaDescription"),
+    alternates: { canonical: canonicalUrl("/about") },
   };
 }
 

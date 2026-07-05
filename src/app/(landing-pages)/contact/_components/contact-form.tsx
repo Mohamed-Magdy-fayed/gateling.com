@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,11 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { trackGaEvent } from "@/lib/ga4";
 import { trackPixelEvent } from "@/lib/meta-pixel";
+import { readAttribution } from "@/lib/utm";
 
 export function ContactForm() {
   const { t } = useTranslation();
   const trpc = useTRPC();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -29,6 +33,9 @@ export function ContactForm() {
         trackPixelEvent("Lead", {
           content_name: "Contact Form",
           content_category: "Lead Generation",
+        });
+        trackGaEvent("generate_lead", {
+          content_name: "Contact Form",
         });
         toast.success(t("publicPages.contactPage.formSuccess"));
         setForm({ name: "", email: "", company: "", phone: "", message: "" });
@@ -51,7 +58,12 @@ export function ContactForm() {
       toast.error(t("publicPages.contactPage.formValidation"));
       return;
     }
-    mutation.mutate({ ...form, source: "contact-form" });
+    const attribution = readAttribution();
+    mutation.mutate({
+      ...form,
+      source: searchParams.get("source") ?? "contact-form",
+      ...attribution,
+    });
   }
 
   return (

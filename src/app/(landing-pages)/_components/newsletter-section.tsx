@@ -10,6 +10,8 @@ import { Container, Section, SectionHeader } from "@/components/ui/containers";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { trackGaEvent } from "@/lib/ga4";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 
 export function NewsletterSection() {
   const { t } = useTranslation();
@@ -23,6 +25,10 @@ export function NewsletterSection() {
           toast.info(t("publicPages.newsletter.alreadySubscribed"));
         } else {
           toast.success(t("publicPages.newsletter.success"));
+          trackPixelEvent("CompleteRegistration", {
+            content_name: "Newsletter",
+          });
+          trackGaEvent("sign_up", { method: "newsletter" });
         }
         setEmail("");
       },

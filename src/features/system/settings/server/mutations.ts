@@ -58,7 +58,14 @@ function assertEditableFields(
         message: "This setting cannot change value",
       });
     }
-    patch.value = input.value?.trim() || null;
+    const value = input.value?.trim() || null;
+    if (value && def.validateValue && !def.validateValue(value)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid value for this setting",
+      });
+    }
+    patch.value = value;
   }
 
   if (input.amount !== undefined) {

@@ -26,6 +26,11 @@ const submitLeadSchema = z.object({
   phone: z.string().trim().max(32).optional(),
   message: z.string().trim().min(10).max(4000),
   source: z.string().max(128).optional().default("contact-form"),
+  utmSource: z.string().trim().max(255).optional(),
+  utmMedium: z.string().trim().max(255).optional(),
+  utmCampaign: z.string().trim().max(255).optional(),
+  utmContent: z.string().trim().max(255).optional(),
+  referrer: z.string().trim().max(512).optional(),
 });
 
 const listLeadsInput = z.object({

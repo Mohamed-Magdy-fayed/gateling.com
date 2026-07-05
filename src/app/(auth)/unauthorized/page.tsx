@@ -1,8 +1,7 @@
 import { HomeIcon, ShieldBanIcon } from "lucide-react";
-import Link from "next/link";
 
+import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { getT } from "@/features/core/i18n/server";
 
 export default async function UnauthorizedPage() {
@@ -14,14 +13,10 @@ export default async function UnauthorizedPage() {
         {t("authTranslations.accessDenied")}
       </Badge>
       <ShieldBanIcon className="m-4" size={200} />
-      <Button
-        render={
-          <Link href="/">
-            <HomeIcon />
-            {t("authTranslations.backToHome")}
-          </Link>
-        }
-      />
+      <LinkButton href="/">
+        <HomeIcon />
+        {t("authTranslations.backToHome")}
+      </LinkButton>
     </div>
   );
 }

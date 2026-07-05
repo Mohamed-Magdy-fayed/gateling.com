@@ -62,6 +62,22 @@ export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
               </p>
             </div>
             <Separator />
+            <div>
+              <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
+                {t("leads.source")}
+              </p>
+              <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                <span>{lead.source ?? "—"}</span>
+                {lead.utmSource && <span>utm_source: {lead.utmSource}</span>}
+                {lead.utmMedium && <span>utm_medium: {lead.utmMedium}</span>}
+                {lead.utmCampaign && (
+                  <span>utm_campaign: {lead.utmCampaign}</span>
+                )}
+                {lead.utmContent && <span>utm_content: {lead.utmContent}</span>}
+                {lead.referrer && <span>referrer: {lead.referrer}</span>}
+              </div>
+            </div>
+            <Separator />
             <div className="text-muted-foreground text-xs">
               <span className="font-medium">
                 {t("leads.createdAt")}:

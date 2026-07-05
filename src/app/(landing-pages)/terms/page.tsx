@@ -1,6 +1,10 @@
 import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+import { canonicalUrl } from "@/lib/json-ld";
 
-export const metadata = { title: "Terms of Service" };
+export const metadata = {
+  title: "Terms of Service",
+  alternates: { canonical: canonicalUrl("/terms") },
+};
 
 export default function TermsPage() {
   return (

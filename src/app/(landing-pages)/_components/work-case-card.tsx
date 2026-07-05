@@ -26,9 +26,10 @@ export type WorkCase = {
 type Props = {
   cs: WorkCase;
   variant: "preview" | "full";
+  priority?: boolean;
 };
 
-export async function WorkCaseCard({ cs, variant }: Props) {
+export async function WorkCaseCard({ cs, variant, priority }: Props) {
   const { t } = await getT();
   const firstMetric = cs.results.metrics[0];
 
@@ -42,6 +43,7 @@ export async function WorkCaseCard({ cs, variant }: Props) {
                 src={cs.coverImageUrl}
                 alt={cs.client}
                 fill
+                priority={priority}
                 sizes="(max-width: 640px) 100vw, 50vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />

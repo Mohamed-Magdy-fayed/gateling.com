@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Briefcase,
   Building2,
+  CalendarClock,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Settings,
   Star,
   TableOfContentsIcon,
+  UserIcon,
   Users,
 } from "lucide-react";
 
@@ -22,6 +24,7 @@ type NavTranslationKey =
   | "navServices"
   | "navTestimonials"
   | "navLeads"
+  | "navBookings"
   | "navSubscribers"
   | "navUsers"
   | "navBranches"
@@ -36,6 +39,7 @@ type BreadcrumbTranslationKey =
   | "breadcrumbServices"
   | "breadcrumbTestimonials"
   | "breadcrumbLeads"
+  | "breadcrumbBookings"
   | "breadcrumbSubscribers"
   | "breadcrumbUsers"
   | "breadcrumbBranches"
@@ -117,6 +121,14 @@ export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
     breadcrumbTranslationKey: "breadcrumbLeads",
   },
   {
+    key: "bookings",
+    href: "/bookings",
+    pathPrefixes: ["/bookings"],
+    Icon: CalendarClock,
+    navTranslationKey: "navBookings",
+    breadcrumbTranslationKey: "breadcrumbBookings",
+  },
+  {
     key: "subscribers",
     href: "/subscribers",
     pathPrefixes: ["/subscribers"],
@@ -147,6 +159,14 @@ export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
     Icon: Settings,
     navTranslationKey: "navSettings",
     breadcrumbTranslationKey: "breadcrumbSettings",
+  },
+  {
+    key: "my-account",
+    href: "/my-account",
+    pathPrefixes: ["/my-account"],
+    Icon: UserIcon,
+    navTranslationKey: null,
+    breadcrumbTranslationKey: null,
   },
 ];
 

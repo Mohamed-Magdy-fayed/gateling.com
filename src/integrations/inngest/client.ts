@@ -26,3 +26,18 @@ export const userRegisteredEvent = eventType("user/registered", {
 export const leadStatusChangedEvent = eventType("lead/status-changed", {
   schema: z.object({ leadId: z.string(), newStatus: z.string() }),
 });
+
+export const bookingConfirmedEvent = eventType("booking/confirmed", {
+  schema: z.object({ bookingId: z.string(), startsAt: z.string() }),
+});
+
+export const bookingRequestedEvent = eventType("booking/requested", {
+  schema: z.object({ bookingId: z.string() }),
+});
+
+export const bookingCancelledEvent = eventType("booking/cancelled", {
+  schema: z.object({
+    bookingId: z.string(),
+    cancelledBy: z.enum(["customer", "admin"]),
+  }),
+});

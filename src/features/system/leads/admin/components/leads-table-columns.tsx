@@ -99,6 +99,26 @@ export function buildLeadColumns(opts: {
       ),
     },
     {
+      accessorKey: "source",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("leads.source")}
+        />
+      ),
+      meta: { label: t("leads.source"), filterVariant: "text" },
+      cell: ({ row }) => (
+        <div className="flex flex-col text-sm">
+          <span>{row.original.source ?? "—"}</span>
+          {row.original.utmCampaign && (
+            <span className="text-muted-foreground text-xs">
+              {row.original.utmCampaign}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
       accessorKey: "createdAt",
       header: ({ column }) => (
         <DataTableColumnHeader

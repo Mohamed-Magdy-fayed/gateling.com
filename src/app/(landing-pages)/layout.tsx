@@ -1,6 +1,7 @@
 import { ViewTransition } from "react";
 
 import { HydrateClient } from "@/integrations/trpc/server";
+import { AttributionCapture } from "./_layout/attribution-capture";
 import { PublicFooter } from "./_layout/footer";
 import { PublicHeader } from "./_layout/header";
 import { PublicLandingMobileTabBar } from "./_layout/mobile-tab-bar";
@@ -13,6 +14,7 @@ export default function LandingPagesLayout({
 }) {
   return (
     <HydrateClient>
+      <AttributionCapture />
       <PublicHeader />
       <ViewTransition
         enter={{

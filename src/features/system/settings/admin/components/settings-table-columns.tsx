@@ -78,10 +78,7 @@ export function buildSettingColumns(opts: {
     {
       id: "description",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.description")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.description")} />
       ),
       meta: { label: t("forms.description") },
       cell: ({ row }) => (
@@ -129,10 +126,7 @@ export function buildSettingColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("common.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("common.createdAt")} />
       ),
       meta: { label: t("common.createdAt") },
       cell: ({ row }) =>

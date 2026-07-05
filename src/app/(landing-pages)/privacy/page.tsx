@@ -1,6 +1,10 @@
 import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+import { canonicalUrl } from "@/lib/json-ld";
 
-export const metadata = { title: "Privacy Policy" };
+export const metadata = {
+  title: "Privacy Policy",
+  alternates: { canonical: canonicalUrl("/privacy") },
+};
 
 export default function PrivacyPage() {
   return (

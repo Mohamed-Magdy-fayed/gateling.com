@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { SettingsTable } from "@/drizzle/schema";
 import {
@@ -23,15 +23,27 @@ import {
 
 export const settingsRouter = createTRPCRouter({
   getPublicValues: baseProcedure.query(async ({ ctx }) => {
-    const row = await ctx.db.query.SettingsTable.findFirst({
+    const rows = await ctx.db.query.SettingsTable.findMany({
       where: and(
-        eq(SettingsTable.code, SYSTEM_SETTING_CODE.FACEBOOK_PIXEL_ID),
+        inArray(SettingsTable.code, [
+          SYSTEM_SETTING_CODE.FACEBOOK_PIXEL_ID,
+          SYSTEM_SETTING_CODE.GA4_MEASUREMENT_ID,
+        ]),
         eq(SettingsTable.isActive, true),
       ),
-      columns: { value: true },
+      columns: { code: true, value: true },
     });
-    const raw = row?.value ?? null;
-    return { facebookPixelId: raw && /^\d+$/.test(raw) ? raw : null };
+    const pixelRaw =
+      rows.find((row) => row.code === SYSTEM_SETTING_CODE.FACEBOOK_PIXEL_ID)
+        ?.value ?? null;
+    const ga4Raw =
+      rows.find((row) => row.code === SYSTEM_SETTING_CODE.GA4_MEASUREMENT_ID)
+        ?.value ?? null;
+    return {
+      facebookPixelId: pixelRaw && /^\d+$/.test(pixelRaw) ? pixelRaw : null,
+      ga4MeasurementId:
+        ga4Raw && /^G-[A-Z0-9]+$/i.test(ga4Raw) ? ga4Raw : null,
+    };
   }),
 
   list: protectedProcedure

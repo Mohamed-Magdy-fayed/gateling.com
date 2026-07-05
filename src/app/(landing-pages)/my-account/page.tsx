@@ -18,6 +18,8 @@ import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 
+import { MyBookings } from "./_components/my-bookings";
+
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   return {
@@ -148,6 +150,19 @@ export default async function MyAccountPage() {
               })}
             </div>
           )}
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <SectionHeader
+            eyebrow={t("publicPages.myAccountPage.bookingsSectionEyebrow")}
+            heading={t("publicPages.myAccountPage.bookingsSectionHeading")}
+            subheading={t(
+              "publicPages.myAccountPage.bookingsSectionSubheading",
+            )}
+          />
+          <MyBookings />
         </Container>
       </Section>
 

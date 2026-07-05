@@ -54,6 +54,7 @@ const EMPLOYEE_BLOCKED_SCREENS = new Set<ScreenKey>([
   "services",
   "testimonials",
   "leads",
+  "bookings",
   "blog-posts",
 ]);
 

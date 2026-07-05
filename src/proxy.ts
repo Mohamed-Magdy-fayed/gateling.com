@@ -22,6 +22,8 @@ const publicRoutes = [
   "/work/",
   "/blog/",
   "/feedback",
+  "/robots.txt",
+  "/sitemap.xml",
 ];
 
 export async function proxy(request: NextRequest) {
@@ -46,6 +48,10 @@ async function middlewareAuth(request: NextRequest) {
     if (isAuthRoute || isPublicRoute) {
       return NextResponse.next();
     }
+    const screen = getProtectedScreenDefinitionByPathname(pathname);
+    if (!screen) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL("/sign-in", request.url));
   } else {
     if (isAuthRoute) {
@@ -54,8 +60,10 @@ async function middlewareAuth(request: NextRequest) {
       return NextResponse.next();
     } else {
       const screen = getProtectedScreenDefinitionByPathname(pathname);
+      if (!screen) {
+        return NextResponse.next();
+      }
       if (
-        !screen ||
         !hasPermission(session.user, "screens", "view", {
           screenKey: screen.key,
         })
@@ -70,6 +78,6 @@ async function middlewareAuth(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next)(?!api)(?!unauthorized)(?!$)(?![^?]*.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next)(?!api)(?!unauthorized)(?!$)(?![^?]*.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt|xml)).*)",
   ],
 };

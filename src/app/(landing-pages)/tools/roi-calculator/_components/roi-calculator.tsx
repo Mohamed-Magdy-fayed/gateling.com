@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { trackGaEvent } from "@/lib/ga4";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 
 function formatCurrency(amount: number, currency: "EGP" | "USD") {
   const formatter = new Intl.NumberFormat(
@@ -130,6 +132,14 @@ export function RoiCalculator() {
           href="/contact?source=roi-calculator"
           size="lg"
           className="mt-4"
+          onClick={() => {
+            trackPixelEvent("InitiateCheckout", {
+              content_name: "ROI Calculator CTA",
+            });
+            trackGaEvent("generate_lead", {
+              content_name: "ROI Calculator CTA",
+            });
+          }}
         >
           Build This Automation For Us
         </LinkButton>

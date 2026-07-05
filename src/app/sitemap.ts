@@ -52,23 +52,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const caller = await api();
 
-  type CaseStudyRow = Awaited<
-    ReturnType<typeof caller.caseStudies.list>
-  >["rows"][number];
-  type BlogPostRow = Awaited<
-    ReturnType<typeof caller.blogPosts.list>
-  >["rows"][number];
-
   const [caseStudiesResult, blogPostsResult] = await Promise.allSettled([
-    caller.caseStudies.list({ status: "published", page: 1, perPage: 100 }),
-    caller.blogPosts.list({ status: "published", page: 1, perPage: 100 }),
+    caller.caseStudies.publicList(),
+    caller.blogPosts.publicList(),
   ]);
 
   const caseStudyRoutes: MetadataRoute.Sitemap =
     caseStudiesResult.status === "fulfilled"
-      ? caseStudiesResult.value.rows.map((cs: CaseStudyRow) => ({
+      ? caseStudiesResult.value.map((cs) => ({
           url: `${base}/work/${cs.slug}`,
-          lastModified: cs.updatedAt ? new Date(cs.updatedAt) : new Date(),
+          lastModified: new Date(),
           changeFrequency: "monthly" as const,
           priority: 0.8,
         }))
@@ -76,9 +69,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogRoutes: MetadataRoute.Sitemap =
     blogPostsResult.status === "fulfilled"
-      ? blogPostsResult.value.rows.map((post: BlogPostRow) => ({
+      ? blogPostsResult.value.map((post) => ({
           url: `${base}/blog/${post.slug}`,
-          lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+          lastModified: post.publishedAt ? new Date(post.publishedAt) : new Date(),
           changeFrequency: "monthly" as const,
           priority: 0.7,
         }))

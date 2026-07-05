@@ -18,6 +18,8 @@ export default {
     meetingValue: "Choose a slot — 30-min deep dive",
     availabilityInfo:
       "Remote-first · MENA & Europe · Sun–Thu 10 AM–6 PM GMT+2 · English, Arabic",
+    tabMessage: "Send a message",
+    tabBookCall: "Book a call",
     faqTitle: "Frequently asked questions",
     faq1Q: "How soon will I hear back?",
     faq1A:
@@ -50,5 +52,52 @@ export default {
     ctaHeading: "Prefer to reach out directly?",
     ctaSubheading: "We're available by email, phone, and WhatsApp.",
     ctaButton: "Send Us a Message",
+  },
+  bookCallPage: {
+    heading: "Book a Call With Us",
+    subheading:
+      "Pick any open slot below and we'll talk about the system your business needs. All times are shown in your local timezone.",
+    timezoneNote: "Times shown in your timezone:",
+    loading: "Loading available times…",
+    bookingDisabled:
+      "Online booking is temporarily unavailable. Please send us a message instead.",
+    dateLabel: "Date",
+    timeLabel: "Time",
+    selectTimePlaceholder: "Select a time",
+    noSlotsForDay: "No open times on this day — try another one.",
+    selectDayFirst: "Select a day first",
+    selectedTimeLabel: "Selected time",
+    noteLabel: "Anything we should know? (optional)",
+    notePlaceholder: "A sentence or two about what you'd like to discuss…",
+    confirmButton: "Confirm booking",
+    bookingInProgress: "Booking…",
+    signInToBook: "Sign in to book this time",
+    signInHint: "You need an account so you can manage your booking later.",
+    bookedTitle: "Your call is booked!",
+    bookedMessage:
+      "We've sent a confirmation email with the details and the meeting link. You can manage this booking from your account page.",
+    goToMyAccount: "Go to My Account",
+    bookAnother: "Book another call",
+    slotTakenError:
+      "That time was just taken by someone else — please pick another slot.",
+    tooManyBookingsError:
+      "You already have the maximum number of upcoming bookings. Manage them from your account page first.",
+    genericError: "Something went wrong. Please try again.",
+    customTitle: "None of these times work?",
+    customSubtitle:
+      "Request a time that suits you and we'll do our best to make it happen. You'll get an email once it's confirmed.",
+    customTimeLabel: "Preferred date & time",
+    customNoteLabel: "What would you like to discuss?",
+    customNotePlaceholder:
+      "Tell us briefly what the call is about and any timing constraints…",
+    customSubmit: "Request this time",
+    customSubmitting: "Sending request…",
+    customSuccessTitle: "Request received!",
+    customSuccessMessage:
+      "We'll review your requested time and confirm it by email shortly.",
+    signInToRequest: "Sign in to request a custom time",
+    rescheduleBanner:
+      "You're picking a new time for your existing call — your old slot will be released once you confirm.",
+    rescheduleConfirmButton: "Confirm new time",
   },
 } as const;

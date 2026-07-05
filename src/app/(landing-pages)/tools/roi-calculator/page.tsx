@@ -10,6 +10,8 @@ import {
   SectionHeader,
 } from "@/components/ui/containers";
 
+import { canonicalUrl } from "@/lib/json-ld";
+
 import { RoiCalculator } from "./_components/roi-calculator";
 
 export const metadata: Metadata = {
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     "Business Automation ROI Calculator — How Much Is Manual Work Costing You?",
   description:
     "Calculate how much time and money your team loses to manual processes. See your potential savings with business automation. Free calculator.",
+  alternates: { canonical: canonicalUrl("/tools/roi-calculator") },
 };
 
 export default function RoiCalculatorPage() {

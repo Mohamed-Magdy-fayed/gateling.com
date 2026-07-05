@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { canonicalUrl } from "@/lib/json-ld";
 
 const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   Bot,
@@ -61,6 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("publicPages.servicesPage.metaTitle"),
     description: t("publicPages.servicesPage.metaDescription"),
+    alternates: { canonical: canonicalUrl("/services") },
   };
 }
 
@@ -123,8 +125,24 @@ export default async function ServicesPage() {
     },
   ];
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": services.map((service) => ({
+      "@type": "Service",
+      name: service.title,
+      description: service.shortDescription,
+      provider: { "@id": "https://gateling.com/#org" },
+      url: canonicalUrl("/services"),
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroContainer>
         <Container className="text-center">
           <PageHeading>{t("publicPages.servicesPage.heading")}</PageHeading>
@@ -159,7 +177,7 @@ export default async function ServicesPage() {
             subheading={t("publicPages.servicesPage.servicesGridDescription")}
           />
           <Grid cols={2} className="mt-8">
-            {services.map((service) => {
+            {services.map((service, index) => {
               const featuredImageUrl =
                 service.media?.find((m) => m.isFeatured)?.url ??
                 service.coverImageUrl;
@@ -171,6 +189,7 @@ export default async function ServicesPage() {
                         src={featuredImageUrl}
                         alt={service.title}
                         fill
+                        priority={index === 0}
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 50vw"
                       />

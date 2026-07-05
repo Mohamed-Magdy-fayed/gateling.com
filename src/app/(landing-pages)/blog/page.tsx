@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { canonicalUrl } from "@/lib/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   return {
     title: t("publicPages.blogPage.metaTitle"),
     description: t("publicPages.blogPage.metaDescription"),
+    alternates: { canonical: canonicalUrl("/blog") },
   };
 }
 
@@ -53,7 +55,7 @@ export default async function BlogPage() {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
-              {posts.map((post) => {
+              {posts.map((post, index) => {
                 const readingTime = Math.max(
                   1,
                   Math.ceil(post.content.split(/\s+/).length / 200),
@@ -76,6 +78,8 @@ export default async function BlogPage() {
                             src={cardImageUrl}
                             alt={title}
                             fill
+                            priority={index === 0}
+                            sizes="(max-width: 768px) 100vw, 50vw"
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>

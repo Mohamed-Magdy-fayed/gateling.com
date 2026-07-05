@@ -50,6 +50,27 @@
       "when": 1780988645153,
       "tag": "0006_noisy_squirrel_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783249680667,
+      "tag": "0007_misty_stone_men",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1783250194311,
+      "tag": "0008_dark_thing",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783276415870,
+      "tag": "0009_colorful_micromacro",
+      "breakpoints": true
     }
   ]
 }

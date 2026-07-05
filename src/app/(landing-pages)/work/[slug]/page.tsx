@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -38,9 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${cs.title} — ${cs.client}`,
     description: cs.results.summary || cs.problemStatement.slice(0, 155),
+    alternates: { canonical: canonicalUrl(`/work/${slug}`) },
     openGraph: (() => {
       const img = cs.media?.find((m) => m.isFeatured)?.url ?? cs.coverImageUrl;
-      return img ? { images: [{ url: img }] } : undefined;
+      return img
+        ? { type: "article", images: [{ url: img }] }
+        : { type: "article" };
     })(),
   };
 }
@@ -67,8 +71,53 @@ async function WorkDetailContent({ params }: Props) {
     ).toUpperCase();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: cs.title,
+    about: cs.industry,
+    description: cs.results.summary || cs.problemStatement,
+    image: cs.media?.find((m) => m.isFeatured)?.url ?? cs.coverImageUrl,
+    url: canonicalUrl(`/work/${cs.slug}`),
+    creator: { "@type": "Organization", "@id": "https://gateling.com/#org" },
+    ...(testimonials.length > 0
+      ? {
+          review: testimonials.map((rev) => ({
+            "@type": "Review",
+            reviewBody: rev.content,
+            author: { "@type": "Person", name: rev.clientName },
+            ...(rev.rating
+              ? {
+                  reviewRating: {
+                    "@type": "Rating",
+                    ratingValue: rev.rating,
+                    bestRating: 5,
+                  },
+                }
+              : {}),
+          })),
+        }
+      : {}),
+  };
+
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Work", path: "/work" },
+    { name: cs.title, path: `/work/${cs.slug}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
+
       {/* Hero: title, client, badge */}
       <HeroContainer>
         <Container size="narrow">

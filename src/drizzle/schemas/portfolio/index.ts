@@ -1,5 +1,7 @@
 export * from "./blog-post-media-table";
 export * from "./blog-posts-table";
+export * from "./booking-blackouts-table";
+export * from "./bookings-table";
 export * from "./case-studies-table";
 export * from "./case-study-media-table";
 export * from "./leads-table";

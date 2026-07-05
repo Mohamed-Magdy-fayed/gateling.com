@@ -47,6 +47,7 @@ export const testimonialsRouter = createTRPCRouter({
         content: TestimonialsTable.content,
         contentAr: TestimonialsTable.contentAr,
         avatarUrl: TestimonialsTable.avatarUrl,
+        rating: TestimonialsTable.rating,
         sortOrder: TestimonialsTable.sortOrder,
       })
       .from(TestimonialsTable)
@@ -57,6 +58,7 @@ export const testimonialsRouter = createTRPCRouter({
       clientName: row.clientName,
       company: row.company,
       avatarUrl: row.avatarUrl,
+      rating: row.rating,
       sortOrder: row.sortOrder,
       role: localize(row.role ?? null, row.roleAr, ctx.locale),
       content: localize(row.content, row.contentAr, ctx.locale),

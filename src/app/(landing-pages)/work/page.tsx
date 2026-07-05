@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { canonicalUrl } from "@/lib/json-ld";
 
 import { WorkCaseCard } from "../_components/work-case-card";
 
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("publicPages.workPage.metaTitle"),
     description: t("publicPages.workPage.metaDescription"),
+    alternates: { canonical: canonicalUrl("/work") },
   };
 }
 
@@ -47,8 +49,13 @@ export default async function WorkPage() {
             </ProseText>
           )}
           <Grid cols={2} gap="compact">
-            {cases.map((cs) => (
-              <WorkCaseCard key={cs.slug} cs={cs} variant="preview" />
+            {cases.map((cs, index) => (
+              <WorkCaseCard
+                key={cs.slug}
+                cs={cs}
+                variant="preview"
+                priority={index === 0}
+              />
             ))}
           </Grid>
         </Container>
