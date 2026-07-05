@@ -38,17 +38,17 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
   const publishMut = useMutation(
     trpc.blogPosts.publish.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("blogPosts.postPublished")));
+        toast.success(t("blogPosts.postPublished"));
         void qc.invalidateQueries(trpc.blogPosts.list.queryFilter());
       },
-      onError: () => toast.error(String(t("blogPosts.postSaveFailed"))),
+      onError: () => toast.error(t("blogPosts.postSaveFailed")),
     }),
   );
 
   const unpublishMut = useMutation(
     trpc.blogPosts.unpublish.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("blogPosts.postArchived")));
+        toast.success(t("blogPosts.postArchived"));
         void qc.invalidateQueries(trpc.blogPosts.list.queryFilter());
       },
     }),
@@ -62,7 +62,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -73,13 +73,13 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         {row.status === "draft" && (
           <DropdownMenuItem
@@ -87,7 +87,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
             onClick={() => publishMut.mutate({ id: row.id })}
           >
             <GlobeIcon className="size-3.5" />
-            {String(t("blogPosts.publishPost"))}
+            {t("blogPosts.publishPost")}
           </DropdownMenuItem>
         )}
         {row.status === "published" && (
@@ -96,7 +96,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
             onClick={() => unpublishMut.mutate({ id: row.id })}
           >
             <GlobeIcon className="size-3.5 opacity-50" />
-            {String(t("blogPosts.unpublishPost"))}
+            {t("blogPosts.unpublishPost")}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -104,7 +104,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

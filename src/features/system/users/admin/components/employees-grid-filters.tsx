@@ -25,7 +25,7 @@ export function EmployeesGridFilters({
       {branchesColumn && branchFilterOptions.length > 0 ? (
         <DataTableFacetedFilter
           column={branchesColumn}
-          title={String(t("systemPages.userAssignedBranches"))}
+          title={t("systemPages.userAssignedBranches")}
           options={branchFilterOptions}
         />
       ) : null}

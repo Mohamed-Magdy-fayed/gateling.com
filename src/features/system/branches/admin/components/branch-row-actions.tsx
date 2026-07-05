@@ -46,7 +46,7 @@ export function BranchRowActions({ row, setRowAction }: BranchRowActionsProps) {
       }
 
       toast.success(
-        String(t("authTranslations.branch.actions.setActiveBranch.success")),
+        t("authTranslations.branch.actions.setActiveBranch.success"),
       );
     });
   }
@@ -59,7 +59,7 @@ export function BranchRowActions({ row, setRowAction }: BranchRowActionsProps) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -70,27 +70,27 @@ export function BranchRowActions({ row, setRowAction }: BranchRowActionsProps) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={isPending}
           onClick={() => void setActiveBranch()}
         >
           <ListStartIcon className="size-3.5" />
-          {String(t("authTranslations.branch.switcher.setActive"))}
+          {t("authTranslations.branch.switcher.setActive")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

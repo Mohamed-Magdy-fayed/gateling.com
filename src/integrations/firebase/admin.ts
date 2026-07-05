@@ -1,20 +1,22 @@
 import "server-only";
 
-import * as admin from "firebase-admin";
+import { type App, cert, getApps, initializeApp } from "firebase-admin/app";
+import { getStorage } from "firebase-admin/storage";
 import { env } from "@/env/server";
 
-let app: admin.app.App | undefined;
+let app: App | undefined;
 
-function getFirebaseAdmin(): admin.app.App {
+function getFirebaseAdmin(): App {
   if (app) return app;
 
-  if (admin.apps.length > 0) {
-    app = admin.apps[0] as admin.app.App;
+  const existingApps = getApps();
+  if (existingApps.length > 0) {
+    app = existingApps[0];
     return app;
   }
 
-  app = admin.initializeApp({
-    credential: admin.credential.cert({
+  app = initializeApp({
+    credential: cert({
       projectId: env.FIREBASE_PROJECT_ID,
       clientEmail: env.FIREBASE_CLIENT_EMAIL,
       privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n").replace(
@@ -29,5 +31,5 @@ function getFirebaseAdmin(): admin.app.App {
 }
 
 export function getStorageBucket() {
-  return getFirebaseAdmin().storage().bucket();
+  return getStorage(getFirebaseAdmin()).bucket();
 }

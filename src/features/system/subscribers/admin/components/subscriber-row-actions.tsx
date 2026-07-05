@@ -32,10 +32,10 @@ export function SubscriberRowActions({ row, setRowAction }: Props) {
   const unsubscribeMut = useMutation(
     trpc.subscribers.unsubscribe.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("subscribers.unsubscribed")));
+        toast.success(t("subscribers.unsubscribed"));
         void qc.invalidateQueries(trpc.subscribers.list.queryFilter());
       },
-      onError: () => toast.error(String(t("subscribers.unsubscribeFailed"))),
+      onError: () => toast.error(t("subscribers.unsubscribeFailed")),
     }),
   );
 
@@ -47,7 +47,7 @@ export function SubscriberRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -60,7 +60,7 @@ export function SubscriberRowActions({ row, setRowAction }: Props) {
             onClick={() => unsubscribeMut.mutate({ id: row.id })}
           >
             <MailMinusIcon className="size-3.5" />
-            {String(t("subscribers.unsubscribe"))}
+            {t("subscribers.unsubscribe")}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -68,7 +68,7 @@ export function SubscriberRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

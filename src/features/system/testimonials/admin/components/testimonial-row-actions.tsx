@@ -39,7 +39,7 @@ export function TestimonialRowActions({ row, setRowAction }: Props) {
   const toggleMut = useMutation(
     trpc.testimonials.toggleVisibility.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("testimonials.visibilityUpdated")));
+        toast.success(t("testimonials.visibilityUpdated"));
         void qc.invalidateQueries(trpc.testimonials.list.queryFilter());
       },
     }),
@@ -53,7 +53,7 @@ export function TestimonialRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -64,13 +64,13 @@ export function TestimonialRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={toggleMut.isPending}
@@ -81,14 +81,14 @@ export function TestimonialRowActions({ row, setRowAction }: Props) {
           ) : (
             <EyeIcon className="size-3.5" />
           )}
-          {String(t("testimonials.toggleVisibility"))}
+          {t("testimonials.toggleVisibility")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

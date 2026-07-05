@@ -75,7 +75,7 @@ export function TestimonialsTablePage() {
             table={table}
             globalFilter={globalFilter}
             onGlobalFilterChange={(v) => setGlobalFilter(v)}
-            searchPlaceholder={String(t("dataTable.searchTestimonialsHint"))}
+            searchPlaceholder={t("dataTable.searchTestimonialsHint")}
           >
             <Tooltip>
               <TooltipTrigger

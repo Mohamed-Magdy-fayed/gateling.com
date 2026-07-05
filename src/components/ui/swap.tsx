@@ -2,267 +2,134 @@
 
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
-import { useAsRef } from "@/hooks/use-as-ref";
-import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
-import { useLazyRef } from "@/hooks/use-lazy-ref";
 import { cn } from "@/lib/utils";
+
+type SwapMode = "dark" | "rtl";
+type SwapAnimation = "fade" | "rotate" | "flip" | "scale";
+
+interface SwapContextValue {
+  mode: SwapMode;
+  animation: SwapAnimation;
+  forceTransition: boolean;
+}
+
+const SwapContext = React.createContext<SwapContextValue | null>(null);
+
+function useSwapContext() {
+  const ctx = React.useContext(SwapContext);
+  if (!ctx) throw new Error("`SwapOn`/`SwapOff` must be used within `Swap`");
+  return ctx;
+}
 
 interface DivProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function getDataState(swapped: boolean) {
-  return swapped ? "on" : "off";
+export interface SwapProps extends DivProps {
+  mode: SwapMode;
+  animation?: SwapAnimation;
+  /** Override next-themes disableTransitionOnChange suppression for this swap only */
+  forceTransition?: boolean;
 }
 
-interface StoreState {
-  swapped: boolean;
-}
+// SwapOn: hidden by default, visible when mode is active
+const swapOnClasses: Record<SwapMode, Record<SwapAnimation, string>> = {
+  dark: {
+    fade: "absolute opacity-0 dark:relative dark:opacity-100",
+    rotate:
+      "absolute opacity-0 rotate-180 dark:relative dark:opacity-100 dark:rotate-0 motion-reduce:rotate-0",
+    flip: "absolute opacity-0 [transform:rotateY(180deg)] dark:relative dark:opacity-100 dark:[transform:rotateY(0deg)] motion-reduce:[transform:rotateY(0deg)]",
+    scale:
+      "absolute opacity-0 scale-0 dark:relative dark:opacity-100 dark:scale-100",
+  },
+  rtl: {
+    fade: "absolute opacity-0 rtl:relative rtl:opacity-100",
+    rotate:
+      "absolute opacity-0 rotate-180 rtl:relative rtl:opacity-100 rtl:rotate-0 motion-reduce:rotate-0",
+    flip: "absolute opacity-0 [transform:rotateY(180deg)] rtl:relative rtl:opacity-100 rtl:[transform:rotateY(0deg)] motion-reduce:[transform:rotateY(0deg)]",
+    scale: "absolute opacity-0 scale-0 rtl:relative rtl:opacity-100 rtl:scale-100",
+  },
+};
 
-interface Store {
-  subscribe: (callback: () => void) => () => void;
-  getState: () => StoreState;
-  setState: <K extends keyof StoreState>(key: K, value: StoreState[K]) => void;
-  notify: () => void;
-}
+// SwapOff: visible by default, hidden when mode is active
+const swapOffClasses: Record<SwapMode, Record<SwapAnimation, string>> = {
+  dark: {
+    fade: "relative opacity-100 dark:absolute dark:opacity-0",
+    rotate:
+      "relative opacity-100 rotate-0 dark:absolute dark:opacity-0 dark:rotate-180 motion-reduce:dark:rotate-0",
+    flip: "relative opacity-100 [transform:rotateY(0deg)] dark:absolute dark:opacity-0 dark:[transform:rotateY(180deg)] motion-reduce:dark:[transform:rotateY(0deg)]",
+    scale:
+      "relative opacity-100 scale-100 dark:absolute dark:opacity-0 dark:scale-0",
+  },
+  rtl: {
+    fade: "relative opacity-100 rtl:absolute rtl:opacity-0",
+    rotate:
+      "relative opacity-100 rotate-0 rtl:absolute rtl:opacity-0 rtl:rotate-180 motion-reduce:rtl:rotate-0",
+    flip: "relative opacity-100 [transform:rotateY(0deg)] rtl:absolute rtl:opacity-0 rtl:[transform:rotateY(180deg)] motion-reduce:rtl:[transform:rotateY(0deg)]",
+    scale:
+      "relative opacity-100 scale-100 rtl:absolute rtl:opacity-0 rtl:scale-0",
+  },
+};
 
-const StoreContext = React.createContext<Store | null>(null);
-
-function useStore<T>(
-  selector: (state: StoreState) => T,
-  ogStore?: Store | null,
-): T {
-  const contextStore = React.useContext(StoreContext);
-
-  const store = ogStore ?? contextStore;
-
-  if (!store) {
-    throw new Error(`\`useStore\` must be used within \`Swap\``);
-  }
-
-  const getSnapshot = React.useCallback(
-    () => selector(store.getState()),
-    [store, selector],
-  );
-
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
-}
-
-interface SwapProps extends DivProps {
-  swapped?: boolean;
-  defaultSwapped?: boolean;
-  onSwappedChange?: (swapped: boolean) => void;
-  activationMode?: "click" | "hover";
-  animation?: "fade" | "rotate" | "flip" | "scale";
-  disabled?: boolean;
-}
-
-function Swap(props: SwapProps) {
-  const {
-    swapped: swappedProp,
-    defaultSwapped,
-    onSwappedChange,
-    activationMode = "click",
-    animation = "fade",
-    disabled,
-    asChild,
-    className,
-    onClick: onClickProp,
-    onMouseEnter: onMouseEnterProp,
-    onMouseLeave: onMouseLeaveProp,
-    onKeyDown: onKeyDownProp,
-    ...rootProps
-  } = props;
-
-  const listenersRef = useLazyRef(() => new Set<() => void>());
-  const stateRef = useLazyRef<StoreState>(() => ({
-    swapped: swappedProp ?? defaultSwapped ?? false,
-  }));
-
-  const propsRef = useAsRef({
-    activationMode,
-    animation,
-    disabled,
-    onSwappedChange,
-    onClick: onClickProp,
-    onMouseEnter: onMouseEnterProp,
-    onMouseLeave: onMouseLeaveProp,
-    onKeyDown: onKeyDownProp,
-  });
-
-  const isClickMode = activationMode === "click";
-
-  const store = React.useMemo<Store>(() => {
-    return {
-      subscribe: (cb) => {
-        listenersRef.current.add(cb);
-        return () => listenersRef.current.delete(cb);
-      },
-      getState: () => stateRef.current,
-      setState: (key, value) => {
-        if (Object.is(stateRef.current[key], value)) return;
-
-        if (key === "swapped" && typeof value === "boolean") {
-          stateRef.current.swapped = value;
-          propsRef.current.onSwappedChange?.(value);
-        } else {
-          stateRef.current[key] = value;
-        }
-
-        store.notify();
-      },
-      notify: () => {
-        for (const cb of listenersRef.current) {
-          cb();
-        }
-      },
-    };
-  }, [listenersRef, stateRef, propsRef]);
-
-  const swapped = useStore((state) => state.swapped, store);
-
-  useIsomorphicLayoutEffect(() => {
-    if (swappedProp !== undefined) {
-      store.setState("swapped", swappedProp);
-    }
-  }, [swappedProp]);
-
-  const onToggle = React.useCallback(() => {
-    if (propsRef.current.disabled) return;
-
-    store.setState("swapped", !store.getState().swapped);
-  }, [store, propsRef]);
-
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      propsRef.current.onClick?.(event);
-      if (event.defaultPrevented || propsRef.current.activationMode !== "click")
-        return;
-
-      onToggle();
-    },
-    [propsRef, onToggle],
-  );
-
-  const onMouseEnter = React.useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      propsRef.current.onMouseEnter?.(event);
-      if (
-        event.defaultPrevented ||
-        activationMode !== "hover" ||
-        propsRef.current.disabled
-      )
-        return;
-
-      store.setState("swapped", true);
-    },
-    [propsRef, activationMode, store],
-  );
-
-  const onMouseLeave = React.useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      propsRef.current.onMouseLeave?.(event);
-      if (
-        event.defaultPrevented ||
-        activationMode !== "hover" ||
-        propsRef.current.disabled
-      )
-        return;
-
-      store.setState("swapped", false);
-    },
-    [propsRef, activationMode, store],
-  );
-
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      propsRef.current.onKeyDown?.(event);
-      if (
-        event.defaultPrevented ||
-        propsRef.current.activationMode !== "click" ||
-        propsRef.current.disabled
-      )
-        return;
-
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        onToggle();
-      }
-    },
-    [propsRef, onToggle],
-  );
-
-  const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
-
+export function Swap({
+  mode,
+  animation = "fade",
+  forceTransition = false,
+  asChild,
+  className,
+  children,
+  ...props
+}: SwapProps) {
+  const Root = asChild ? SlotPrimitive.Slot : "div";
   return (
-    <StoreContext.Provider value={store}>
-      <RootPrimitive
-        role={isClickMode ? "button" : undefined}
-        aria-pressed={isClickMode ? swapped : undefined}
-        aria-disabled={disabled}
+    <SwapContext.Provider value={{ mode, animation, forceTransition }}>
+      <Root
         data-slot="swap"
         data-animation={animation}
-        data-state={getDataState(swapped)}
-        data-disabled={disabled ? "" : undefined}
-        tabIndex={isClickMode && !disabled ? 0 : undefined}
-        {...rootProps}
         className={cn(
-          "relative inline-flex cursor-pointer select-none items-center justify-center data-disabled:cursor-not-allowed data-disabled:opacity-50",
+          "relative inline-flex cursor-pointer select-none items-center justify-center",
           className,
         )}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        onKeyDown={onKeyDown}
-      />
-    </StoreContext.Provider>
+        {...props}
+      >
+        {children}
+      </Root>
+    </SwapContext.Provider>
   );
 }
 
-function SwapOn(props: DivProps) {
-  const { asChild, className, ...onProps } = props;
-
-  const swapped = useStore((state) => state.swapped);
-
-  const OnPrimitive = asChild ? SlotPrimitive.Slot : "div";
-
+export function SwapOn({ asChild, className, ...props }: DivProps) {
+  const { mode, animation, forceTransition } = useSwapContext();
+  const Root = asChild ? SlotPrimitive.Slot : "div";
   return (
-    <OnPrimitive
+    <Root
       data-slot="swap-on"
-      data-state={getDataState(swapped)}
-      {...onProps}
+      {...props}
       className={cn(
-        "transition-all duration-300 data-[state=off]:absolute data-[state=off]:opacity-0 data-[state=on]:opacity-100 motion-reduce:transition-none",
-        "[*[data-animation=rotate]_&]:data-[state=off]:rotate-180 [*[data-animation=rotate]_&]:data-[state=on]:rotate-0 motion-reduce:[*[data-animation=rotate]_&]:data-[state=off]:rotate-0",
-        "[*[data-animation=flip]_&]:data-[state=off]:transform-[rotateY(180deg)] [*[data-animation=flip]_&]:data-[state=on]:transform-[rotateY(0deg)] motion-reduce:[*[data-animation=flip]_&]:data-[state=off]:transform-[rotateY(0deg)]",
-        "[*[data-animation=scale]_&]:data-[state=off]:scale-0 [*[data-animation=scale]_&]:data-[state=on]:scale-100 motion-reduce:[*[data-animation=scale]_&]:data-[state=off]:scale-100",
+        forceTransition
+          ? "transition-all! duration-300!"
+          : "transition-all duration-300 motion-reduce:transition-none",
+        swapOnClasses[mode][animation],
         className,
       )}
     />
   );
 }
 
-function SwapOff(props: DivProps) {
-  const { asChild, className, ...offProps } = props;
-
-  const swapped = useStore((state) => state.swapped);
-
-  const OffPrimitive = asChild ? SlotPrimitive.Slot : "div";
-
+export function SwapOff({ asChild, className, ...props }: DivProps) {
+  const { mode, animation, forceTransition } = useSwapContext();
+  const Root = asChild ? SlotPrimitive.Slot : "div";
   return (
-    <OffPrimitive
+    <Root
       data-slot="swap-off"
-      data-state={getDataState(swapped)}
-      {...offProps}
+      {...props}
       className={cn(
-        "transition-all duration-300 data-[state=on]:absolute data-[state=off]:opacity-100 data-[state=on]:opacity-0 motion-reduce:transition-none",
-        "[*[data-animation=rotate]_&]:data-[state=off]:rotate-0 [*[data-animation=rotate]_&]:data-[state=on]:rotate-180 motion-reduce:[*[data-animation=rotate]_&]:data-[state=on]:rotate-0",
-        "[*[data-animation=flip]_&]:data-[state=off]:transform-[rotateY(0deg)] [*[data-animation=flip]_&]:data-[state=on]:transform-[rotateY(180deg)] motion-reduce:[*[data-animation=flip]_&]:data-[state=on]:transform-[rotateY(0deg)]",
-        "[*[data-animation=scale]_&]:data-[state=off]:scale-100 [*[data-animation=scale]_&]:data-[state=on]:scale-0 motion-reduce:[*[data-animation=scale]_&]:data-[state=on]:scale-100",
+        forceTransition
+          ? "transition-all! duration-300!"
+          : "transition-all duration-300 motion-reduce:transition-none",
+        swapOffClasses[mode][animation],
         className,
       )}
     />
   );
 }
-
-export { Swap, SwapOff, SwapOn, type SwapProps, useStore as useSwap };

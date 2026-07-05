@@ -32,8 +32,8 @@ export function ServiceInfoModal({ service, onOpenChange, open }: Props) {
           <div className="space-y-3 text-sm">
             <Badge variant={service.isActive ? "default" : "secondary"}>
               {service.isActive
-                ? String(t("common.active"))
-                : String(t("common.inactive"))}
+                ? t("common.active")
+                : t("common.inactive")}
             </Badge>
             <Separator />
             <p className="text-muted-foreground leading-relaxed">

@@ -205,10 +205,10 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
     <div className="space-y-4">
       <div className="space-y-1">
         <p className="text-sm font-medium">
-          {String(t("galleryManager.label" as never))}
+          {t("galleryManager.label" as never)}
         </p>
         <p className="text-muted-foreground text-xs">
-          {String(t("galleryManager.description" as never))}
+          {t("galleryManager.description" as never)}
         </p>
       </div>
 
@@ -242,12 +242,12 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                 <div className="flex flex-wrap gap-1">
                   {item.isFeatured && (
                     <Badge variant="default" className="text-xs">
-                      {String(t("galleryManager.featured" as never))}
+                      {t("galleryManager.featured" as never)}
                     </Badge>
                   )}
                   {item.isSecondary && (
                     <Badge variant="secondary" className="text-xs">
-                      {String(t("galleryManager.secondary" as never))}
+                      {t("galleryManager.secondary" as never)}
                     </Badge>
                   )}
                 </div>
@@ -305,7 +305,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                     variant="ghost"
                     onClick={() => move(index, -1)}
                     disabled={isDisabled || index === 0}
-                    title={String(t("galleryManager.moveUp" as never))}
+                    title={t("galleryManager.moveUp" as never)}
                   >
                     <ArrowUpIcon className="h-3 w-3" />
                   </Button>
@@ -315,7 +315,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                     variant="ghost"
                     onClick={() => move(index, 1)}
                     disabled={isDisabled || index === value.length - 1}
-                    title={String(t("galleryManager.moveDown" as never))}
+                    title={t("galleryManager.moveDown" as never)}
                   >
                     <ArrowDownIcon className="h-3 w-3" />
                   </Button>
@@ -326,7 +326,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                   variant="ghost"
                   onClick={() => remove(index)}
                   disabled={isDisabled}
-                  title={String(t("galleryManager.remove" as never))}
+                  title={t("galleryManager.remove" as never)}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2Icon className="h-3 w-3" />
@@ -361,7 +361,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
               ) : (
                 <ImagePlusIcon className="h-3.5 w-3.5" />
               )}
-              {String(t("galleryManager.addImage" as never))}
+              {t("galleryManager.addImage" as never)}
             </Button>
           </FileUploadTrigger>
         </FileUpload>
@@ -370,7 +370,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
       {/* Video URL input */}
       <div className="space-y-1.5">
         <Label htmlFor={videoInputId} className="text-xs">
-          {String(t("galleryManager.videoUrl" as never))}
+          {t("galleryManager.videoUrl" as never)}
         </Label>
         <div className="flex gap-2">
           <Input
@@ -400,12 +400,12 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
             disabled={isDisabled || !videoUrl.trim()}
           >
             <VideoIcon className="h-3.5 w-3.5" />
-            {String(t("galleryManager.addVideo" as never))}
+            {t("galleryManager.addVideo" as never)}
           </Button>
         </div>
         {videoError && (
           <p className="text-destructive text-xs">
-            {String(t("galleryManager.invalidVideoUrl" as never))}
+            {t("galleryManager.invalidVideoUrl" as never)}
           </p>
         )}
       </div>

@@ -42,30 +42,30 @@ export function buildLeadColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.name"))}
+          title={t("leads.name")}
         />
       ),
-      meta: { label: String(t("leads.name")), filterVariant: "text" },
+      meta: { label: t("leads.name"), filterVariant: "text" },
     },
     {
       accessorKey: "email",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.email"))}
+          title={t("leads.email")}
         />
       ),
-      meta: { label: String(t("leads.email")), filterVariant: "text" },
+      meta: { label: t("leads.email"), filterVariant: "text" },
     },
     {
       accessorKey: "company",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.company"))}
+          title={t("leads.company")}
         />
       ),
-      meta: { label: String(t("leads.company")) },
+      meta: { label: t("leads.company") },
       cell: ({ row }) => row.original.company ?? "—",
     },
     {
@@ -73,13 +73,13 @@ export function buildLeadColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.status"))}
+          title={t("leads.status")}
         />
       ),
-      meta: { label: String(t("leads.status")) },
+      meta: { label: t("leads.status") },
       cell: ({ row }) => (
         <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"}>
-          {String(t(`leads.statusValues.${row.original.status}`))}
+          {t(`leads.statusValues.${row.original.status}`)}
         </Badge>
       ),
     },
@@ -88,10 +88,10 @@ export function buildLeadColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.message"))}
+          title={t("leads.message")}
         />
       ),
-      meta: { label: String(t("leads.message")) },
+      meta: { label: t("leads.message") },
       cell: ({ row }) => (
         <span className="block max-w-[220px] truncate text-sm">
           {row.original.message}
@@ -103,10 +103,10 @@ export function buildLeadColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("leads.createdAt"))}
+          title={t("leads.createdAt")}
         />
       ),
-      meta: { label: String(t("leads.createdAt")) },
+      meta: { label: t("leads.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

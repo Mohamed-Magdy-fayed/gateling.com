@@ -117,9 +117,9 @@ export function BranchCreateFormDialog({
               <form.AppField name="shortCode">
                 {(field) => (
                   <field.StringField
-                    label={String(t("systemPages.branchesShortCode"))}
+                    label={t("systemPages.branchesShortCode")}
                     placeholder="CAI"
-                    description={String(t("systemPages.branchesShortCodeHint"))}
+                    description={t("systemPages.branchesShortCodeHint")}
                   />
                 )}
               </form.AppField>

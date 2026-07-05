@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BookOpen,
   Briefcase,
   Building2,
   FileText,
@@ -10,12 +9,14 @@ import {
   MessageSquare,
   Settings,
   Star,
-  UserCircle,
+  TableOfContentsIcon,
   Users,
 } from "lucide-react";
 
 type NavTranslationKey =
+  | null
   | "navDashboard"
+  | "navContent"
   | "navWork"
   | "navBlogPosts"
   | "navServices"
@@ -27,7 +28,9 @@ type NavTranslationKey =
   | "navSettings";
 
 type BreadcrumbTranslationKey =
+  | null
   | "breadcrumbDashboard"
+  | "breadcrumbContent"
   | "breadcrumbWork"
   | "breadcrumbBlogPosts"
   | "breadcrumbServices"
@@ -43,70 +46,73 @@ type SystemScreenRecord = {
   href: `/${string}`;
   pathPrefixes: readonly `/${string}`[];
   Icon: LucideIcon;
-  showInNav: boolean;
-  protected: boolean;
-  navTranslationKey: NavTranslationKey | null;
-  breadcrumbTranslationKey: BreadcrumbTranslationKey | null;
+  navTranslationKey: NavTranslationKey;
+  breadcrumbTranslationKey: BreadcrumbTranslationKey;
+  children?: readonly SystemScreenRecord[];
 };
 
-export const SYSTEM_SCREEN_DEFINITIONS = [
+export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
   {
     key: "dashboard",
     href: "/dashboard",
     pathPrefixes: ["/dashboard"],
     Icon: LayoutDashboard,
-    showInNav: true,
-    protected: true,
     navTranslationKey: "navDashboard",
     breadcrumbTranslationKey: "breadcrumbDashboard",
   },
   {
-    key: "work",
-    href: "/work-mgmt",
-    pathPrefixes: ["/work-mgmt"],
-    Icon: Briefcase,
-    showInNav: true,
-    protected: true,
-    navTranslationKey: "navWork",
-    breadcrumbTranslationKey: "breadcrumbWork",
-  },
-  {
-    key: "blogPosts",
-    href: "/blog-posts",
-    pathPrefixes: ["/blog-posts"],
-    Icon: FileText,
-    showInNav: true,
-    protected: true,
-    navTranslationKey: "navBlogPosts",
-    breadcrumbTranslationKey: "breadcrumbBlogPosts",
-  },
-  {
-    key: "services",
-    href: "/services-mgmt",
-    pathPrefixes: ["/services-mgmt"],
-    Icon: Inbox,
-    showInNav: true,
-    protected: true,
-    navTranslationKey: "navServices",
-    breadcrumbTranslationKey: "breadcrumbServices",
-  },
-  {
-    key: "testimonials",
-    href: "/testimonials",
-    pathPrefixes: ["/testimonials"],
-    Icon: Star,
-    showInNav: true,
-    protected: true,
-    navTranslationKey: "navTestimonials",
-    breadcrumbTranslationKey: "breadcrumbTestimonials",
+    key: "content",
+    href: "/content",
+    pathPrefixes: [
+      "/content",
+      "/work-mgmt",
+      "/blog-posts",
+      "/services-mgmt",
+      "/testimonials",
+    ],
+    Icon: TableOfContentsIcon,
+    navTranslationKey: "navContent",
+    breadcrumbTranslationKey: "breadcrumbContent",
+    children: [
+      {
+        key: "work",
+        href: "/work-mgmt",
+        pathPrefixes: ["/work-mgmt"],
+        Icon: Briefcase,
+        navTranslationKey: "navWork",
+        breadcrumbTranslationKey: "breadcrumbWork",
+      },
+      {
+        key: "blogPosts",
+        href: "/blog-posts",
+        pathPrefixes: ["/blog-posts"],
+        Icon: FileText,
+        navTranslationKey: "navBlogPosts",
+        breadcrumbTranslationKey: "breadcrumbBlogPosts",
+      },
+      {
+        key: "services",
+        href: "/services-mgmt",
+        pathPrefixes: ["/services-mgmt"],
+        Icon: Inbox,
+        navTranslationKey: "navServices",
+        breadcrumbTranslationKey: "breadcrumbServices",
+      },
+      {
+        key: "testimonials",
+        href: "/testimonials",
+        pathPrefixes: ["/testimonials"],
+        Icon: Star,
+        navTranslationKey: "navTestimonials",
+        breadcrumbTranslationKey: "breadcrumbTestimonials",
+      },
+    ],
   },
   {
     key: "leads",
     href: "/leads",
     pathPrefixes: ["/leads"],
     Icon: MessageSquare,
-    showInNav: true,
-    protected: true,
     navTranslationKey: "navLeads",
     breadcrumbTranslationKey: "breadcrumbLeads",
   },
@@ -115,8 +121,6 @@ export const SYSTEM_SCREEN_DEFINITIONS = [
     href: "/subscribers",
     pathPrefixes: ["/subscribers"],
     Icon: Mail,
-    showInNav: true,
-    protected: true,
     navTranslationKey: "navSubscribers",
     breadcrumbTranslationKey: "breadcrumbSubscribers",
   },
@@ -125,8 +129,6 @@ export const SYSTEM_SCREEN_DEFINITIONS = [
     href: "/users",
     pathPrefixes: ["/users"],
     Icon: Users,
-    showInNav: true,
-    protected: true,
     navTranslationKey: "navUsers",
     breadcrumbTranslationKey: "breadcrumbUsers",
   },
@@ -135,8 +137,6 @@ export const SYSTEM_SCREEN_DEFINITIONS = [
     href: "/branches",
     pathPrefixes: ["/branches"],
     Icon: Building2,
-    showInNav: false,
-    protected: true,
     navTranslationKey: "navBranches",
     breadcrumbTranslationKey: "breadcrumbBranches",
   },
@@ -145,32 +145,10 @@ export const SYSTEM_SCREEN_DEFINITIONS = [
     href: "/settings",
     pathPrefixes: ["/settings"],
     Icon: Settings,
-    showInNav: true,
-    protected: true,
     navTranslationKey: "navSettings",
     breadcrumbTranslationKey: "breadcrumbSettings",
   },
-  {
-    key: "blog",
-    href: "/blog",
-    pathPrefixes: ["/blog"],
-    Icon: BookOpen,
-    showInNav: false,
-    protected: false,
-    navTranslationKey: null,
-    breadcrumbTranslationKey: null,
-  },
-  {
-    key: "my-account",
-    href: "/my-account",
-    pathPrefixes: ["/my-account"],
-    Icon: UserCircle,
-    showInNav: false,
-    protected: true,
-    navTranslationKey: null,
-    breadcrumbTranslationKey: null,
-  },
-] as const satisfies readonly SystemScreenRecord[];
+];
 
 export type ScreenKey = (typeof SYSTEM_SCREEN_DEFINITIONS)[number]["key"];
 export type SystemScreenDefinition = (typeof SYSTEM_SCREEN_DEFINITIONS)[number];
@@ -184,21 +162,28 @@ export type SystemNavItem = {
   translationKey: NavTranslationKey;
   screenKey: ScreenKey;
   Icon: LucideIcon;
+  children?: readonly SystemNavItem[];
 };
 
-export const SYSTEM_NAV_ITEMS: readonly SystemNavItem[] =
-  SYSTEM_SCREEN_DEFINITIONS.flatMap((screen) =>
-    screen.showInNav && screen.navTranslationKey
-      ? [
-          {
-            href: screen.href,
-            translationKey: screen.navTranslationKey,
-            screenKey: screen.key,
-            Icon: screen.Icon,
-          },
-        ]
-      : [],
-  );
+export const SYSTEM_NAV_ITEMS: SystemNavItem[] =
+  SYSTEM_SCREEN_DEFINITIONS.flatMap((screen) => [
+    {
+      href: screen.href,
+      translationKey: screen.navTranslationKey,
+      screenKey: screen.key,
+      Icon: screen.Icon,
+      children: screen.children
+        ?.filter((child) => child !== null)
+        .map((child) => {
+          return {
+            href: child.href,
+            translationKey: child.navTranslationKey,
+            screenKey: child.key,
+            Icon: child.Icon,
+          };
+        }),
+    },
+  ]);
 
 function matchesPathPrefix(
   pathname: string,
@@ -215,17 +200,8 @@ export function getScreenDefinition(
   return SYSTEM_SCREEN_DEFINITIONS.find((screen) => screen.key === screenKey);
 }
 
-export function getScreenDefinitionByPathname(
-  pathname: string,
-): SystemScreenDefinition | undefined {
+export function getProtectedScreenDefinitionByPathname(pathname: string) {
   return SYSTEM_SCREEN_DEFINITIONS.find((screen) =>
     matchesPathPrefix(pathname, screen.pathPrefixes),
-  );
-}
-
-export function getProtectedScreenDefinitionByPathname(pathname: string) {
-  return SYSTEM_SCREEN_DEFINITIONS.find(
-    (screen) =>
-      screen.protected && matchesPathPrefix(pathname, screen.pathPrefixes),
   );
 }

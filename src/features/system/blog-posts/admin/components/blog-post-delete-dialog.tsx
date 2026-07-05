@@ -44,12 +44,12 @@ export function BlogPostDeleteDialog({
     try {
       await toast
         .promise(deleteMut.mutateAsync({ id: post.id }), {
-          loading: String(t("common.deleting")),
-          success: String(t("blogPosts.postDeleted")),
+          loading: t("common.deleting"),
+          success: t("blogPosts.postDeleted"),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("blogPosts.postDeleteFailed")),
+              : t("blogPosts.postDeleteFailed"),
         })
         .unwrap();
       await qc.invalidateQueries({ queryKey: trpc.blogPosts.pathKey() });
@@ -67,13 +67,13 @@ export function BlogPostDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("blogPosts.deletePostTitle"))}
+            {t("blogPosts.deletePostTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {post
               ? String(
-                  t("blogPosts.deletePostDescription", { title: post.title }),
-                )
+                t("blogPosts.deletePostDescription", { title: post.title }),
+              )
               : ""}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -96,8 +96,8 @@ export function BlogPostDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

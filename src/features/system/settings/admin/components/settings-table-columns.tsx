@@ -28,7 +28,7 @@ function stateLabel(
   isActive: boolean | null,
   t: Translate,
 ): string {
-  if (isActive === null) return String(t("systemPages.settingsIsActiveUnset"));
+  if (isActive === null) return t("systemPages.settingsIsActiveUnset");
   return String(
     t(
       isActive
@@ -56,10 +56,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.settingsCode"))}
+          title={t("systemPages.settingsCode")}
         />
       ),
-      meta: { label: String(t("systemPages.settingsCode")) },
+      meta: { label: t("systemPages.settingsCode") },
       cell: ({ row }) => (
         <span className="font-mono text-xs">{row.original.code}</span>
       ),
@@ -69,10 +69,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.settingsName"))}
+          title={t("systemPages.settingsName")}
         />
       ),
-      meta: { label: String(t("systemPages.settingsName")) },
+      meta: { label: t("systemPages.settingsName") },
       cell: ({ row }) => getSettingDisplayName(row.original.code, t),
     },
     {
@@ -80,10 +80,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.description"))}
+          title={t("forms.description")}
         />
       ),
-      meta: { label: String(t("forms.description")) },
+      meta: { label: t("forms.description") },
       cell: ({ row }) => (
         <Muted className="line-clamp-2 max-w-md text-xs leading-relaxed">
           {getSettingDisplayDescription(row.original.code, t)}
@@ -95,10 +95,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.settingsIsActive"))}
+          title={t("systemPages.settingsIsActive")}
         />
       ),
-      meta: { label: String(t("systemPages.settingsIsActive")) },
+      meta: { label: t("systemPages.settingsIsActive") },
       cell: ({ row }) => {
         const v = row.original.isActive;
         if (v === null) return "—";
@@ -114,10 +114,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.settingsValue"))}
+          title={t("systemPages.settingsValue")}
         />
       ),
-      meta: { label: String(t("systemPages.settingsValue")) },
+      meta: { label: t("systemPages.settingsValue") },
       cell: ({ row }) => {
         const value = row.original.value?.trim();
         if (!value) return "—";
@@ -131,10 +131,10 @@ export function buildSettingColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("common.createdAt"))}
+          title={t("common.createdAt")}
         />
       ),
-      meta: { label: String(t("common.createdAt")) },
+      meta: { label: t("common.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

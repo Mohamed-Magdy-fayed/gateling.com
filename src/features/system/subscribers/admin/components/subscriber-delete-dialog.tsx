@@ -44,12 +44,12 @@ export function SubscriberDeleteDialog({
     try {
       await toast
         .promise(deleteMut.mutateAsync({ id: subscriber.id }), {
-          loading: String(t("common.deleting")),
-          success: String(t("subscribers.subscriberDeleted")),
+          loading: t("common.deleting"),
+          success: t("subscribers.subscriberDeleted"),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("subscribers.subscriberDeleteFailed")),
+              : t("subscribers.subscriberDeleteFailed"),
         })
         .unwrap();
       await qc.invalidateQueries({ queryKey: trpc.subscribers.pathKey() });
@@ -67,10 +67,10 @@ export function SubscriberDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("subscribers.deleteSubscriberTitle"))}
+            {t("subscribers.deleteSubscriberTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {String(t("subscribers.deleteSubscriberDescription"))}
+            {t("subscribers.deleteSubscriberDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -92,8 +92,8 @@ export function SubscriberDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

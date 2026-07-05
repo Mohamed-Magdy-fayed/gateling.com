@@ -106,7 +106,7 @@ export function DataTableSliderFilter<TData, TValue>({
                 column.setFilterValue(undefined);
               }}
             >
-              {String(t("dataTable.clear"))}
+              {t("dataTable.clear")}
             </Button>
           ) : null}
         </div>
@@ -130,10 +130,10 @@ export function DataTableSliderFilter<TData, TValue>({
           />
           <div className="mt-2 flex items-center justify-between text-[0.65rem] text-muted-foreground">
             <span>
-              {String(t("dataTable.numberMin"))}: {value[0]}
+              {t("dataTable.numberMin")}: {value[0]}
             </span>
             <span>
-              {String(t("dataTable.numberMax"))}: {value[1]}
+              {t("dataTable.numberMax")}: {value[1]}
             </span>
           </div>
         </div>

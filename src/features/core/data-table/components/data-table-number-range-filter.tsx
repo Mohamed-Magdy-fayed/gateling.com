@@ -87,7 +87,7 @@ export function DataTableNumberRangeFilter<TData, TValue>({
         <div className="grid grid-cols-2 gap-2">
           <div className="grid gap-1">
             <Label className="text-[0.65rem] text-muted-foreground">
-              {String(t("dataTable.numberMin"))}
+              {t("dataTable.numberMin")}
             </Label>
             <Input
               inputMode="numeric"
@@ -98,7 +98,7 @@ export function DataTableNumberRangeFilter<TData, TValue>({
           </div>
           <div className="grid gap-1">
             <Label className="text-[0.65rem] text-muted-foreground">
-              {String(t("dataTable.numberMax"))}
+              {t("dataTable.numberMax")}
             </Label>
             <Input
               inputMode="numeric"
@@ -120,7 +120,7 @@ export function DataTableNumberRangeFilter<TData, TValue>({
               column.setFilterValue(undefined);
             }}
           >
-            {String(t("dataTable.clear"))}
+            {t("dataTable.clear")}
           </Button>
         ) : null}
       </PopoverContent>

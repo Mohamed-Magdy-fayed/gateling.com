@@ -1,33 +1,36 @@
 import { DirectionProvider } from "@base-ui/react";
 import Script from "next/script";
+import { ThemeProvider } from "next-themes";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getAuth, getBranches } from "@/features/core/auth/nextjs/actions";
 import { AuthProvider } from "@/features/core/auth/nextjs/components/auth-provider";
 import { BranchProvider } from "@/features/core/auth/nextjs/components/branch-provider";
-import { ThemeProvider } from "@/features/core/color-theme/client";
-import type { Theme } from "@/features/core/color-theme/server";
 import { TranslationProvider } from "@/features/core/i18n/client";
 import { TRPCReactProvider } from "@/integrations/trpc/client";
 import { api } from "@/integrations/trpc/server";
 
 type ProvidersProps = PropsWithChildren<{
   locale: string;
-  theme: Theme;
 }>;
 
-export async function Providers({ children, locale, theme }: ProvidersProps) {
+export async function Providers({ children, locale }: ProvidersProps) {
   const authState = await getAuth();
   const branchsState = authState.session?.user.id
     ? await getBranches(authState.session.user.id, {
-        includeAllBranches: authState.session.user.role === "admin",
-      })
+      includeAllBranches: authState.session.user.role === "admin",
+    })
     : null;
   const { facebookPixelId } = await (await api()).settings.getPublicValues();
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider
+      defaultTheme="system"
+      attribute="class"
+      enableSystem
+      disableTransitionOnChange
+    >
       {facebookPixelId && (
         <Script
           id="fb-pixel"

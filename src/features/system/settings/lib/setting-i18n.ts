@@ -10,7 +10,7 @@ type Translate = ReturnType<typeof useTranslation>["t"];
 export function getSettingDisplayName(code: string, t: Translate): string {
   const def = getSystemSettingDefinition(code);
   if (!def) return code;
-  return String(t(`systemPages.${def.nameKey}`));
+  return t(`systemPages.${def.nameKey}`);
 }
 
 export function getSettingDisplayDescription(
@@ -19,7 +19,7 @@ export function getSettingDisplayDescription(
 ): string {
   const def = getSystemSettingDefinition(code);
   if (!def) return "";
-  return String(t(`systemPages.${def.descriptionKey}`));
+  return t(`systemPages.${def.descriptionKey}`);
 }
 
 export function getSettingDefinitionOrThrow(

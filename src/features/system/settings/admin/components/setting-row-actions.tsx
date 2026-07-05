@@ -49,7 +49,7 @@ export function SettingRowActions({
     try {
       await toast
         .promise(setActiveMut.mutateAsync({ id: row.id, isActive }), {
-          loading: String(t("common.saving")),
+          loading: t("common.saving"),
           success: String(
             t(
               isActive
@@ -57,7 +57,7 @@ export function SettingRowActions({
                 : "systemPages.settingDisabled",
             ),
           ),
-          error: String(t("systemPages.settingsBulkActiveFailed")),
+          error: t("systemPages.settingsBulkActiveFailed"),
         })
         .unwrap();
 
@@ -77,7 +77,7 @@ export function SettingRowActions({
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -88,13 +88,13 @@ export function SettingRowActions({
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         {canToggleStatus ? (
           <DropdownMenuItem

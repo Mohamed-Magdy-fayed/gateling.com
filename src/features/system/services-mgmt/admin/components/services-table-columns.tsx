@@ -32,20 +32,20 @@ export function buildServiceColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("services.name"))}
+          title={t("services.name")}
         />
       ),
-      meta: { label: String(t("services.name")), filterVariant: "text" },
+      meta: { label: t("services.name"), filterVariant: "text" },
     },
     {
       accessorKey: "shortDescription",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("services.shortDescription"))}
+          title={t("services.shortDescription")}
         />
       ),
-      meta: { label: String(t("services.shortDescription")) },
+      meta: { label: t("services.shortDescription") },
       cell: ({ row }) => (
         <span className="block max-w-[240px] truncate text-sm">
           {row.original.shortDescription}
@@ -57,15 +57,15 @@ export function buildServiceColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("services.isActive"))}
+          title={t("services.isActive")}
         />
       ),
-      meta: { label: String(t("services.isActive")) },
+      meta: { label: t("services.isActive") },
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? "default" : "secondary"}>
           {row.original.isActive
-            ? String(t("common.active"))
-            : String(t("common.inactive"))}
+            ? t("common.active")
+            : t("common.inactive")}
         </Badge>
       ),
     },
@@ -74,10 +74,10 @@ export function buildServiceColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("services.sortOrder"))}
+          title={t("services.sortOrder")}
         />
       ),
-      meta: { label: String(t("services.sortOrder")) },
+      meta: { label: t("services.sortOrder") },
     },
     createEntityActionsColumn({
       t,

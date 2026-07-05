@@ -53,8 +53,9 @@ export const env = createEnv({
         );
 
         if (!hasDatabaseUrl && !hasSplitDatabaseConfig) {
+          console.log(hasDatabaseUrl, hasSplitDatabaseConfig);
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message:
               "Provide either DATABASE_URL or the full DB_HOST/DB_NAME/DB_PASSWORD/DB_PORT/DB_USER configuration.",
             path: ["DATABASE_URL"],

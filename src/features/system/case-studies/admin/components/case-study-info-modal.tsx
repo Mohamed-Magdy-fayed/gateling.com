@@ -59,7 +59,7 @@ export function CaseStudyInfoModal({ caseStudy, onOpenChange, open }: Props) {
           <div className="space-y-4 text-sm">
             <div className="flex flex-wrap gap-2">
               <Badge variant={STATUS_VARIANT[cs.status] ?? "secondary"}>
-                {String(t(`work.statusValues.${cs.status}`))}
+                {t(`work.statusValues.${cs.status}`)}
               </Badge>
               <Badge variant="outline">{cs.industry}</Badge>
               {cs.liveUrl && (
@@ -81,19 +81,19 @@ export function CaseStudyInfoModal({ caseStudy, onOpenChange, open }: Props) {
               <>
                 <div>
                   <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
-                    {String(t("work.problem"))}
+                    {t("work.problem")}
                   </p>
                   <p className="leading-relaxed">{detail.problemStatement}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
-                    {String(t("work.solution"))}
+                    {t("work.solution")}
                   </p>
                   <p className="leading-relaxed">{detail.solution}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
-                    {String(t("work.results"))}
+                    {t("work.results")}
                   </p>
                   {detail.results.metrics.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-3">
@@ -122,13 +122,13 @@ export function CaseStudyInfoModal({ caseStudy, onOpenChange, open }: Props) {
             <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
               <div>
                 <span className="font-medium">
-                  {String(t("common.createdAt"))}:
+                  {t("common.createdAt")}:
                 </span>{" "}
                 {cs.createdAt ? dateFmt.format(new Date(cs.createdAt)) : "—"}
               </div>
               <div>
                 <span className="font-medium">
-                  {String(t("work.sortOrder"))}:
+                  {t("work.sortOrder")}:
                 </span>{" "}
                 {cs.sortOrder}
               </div>

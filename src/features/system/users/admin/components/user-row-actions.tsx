@@ -39,7 +39,7 @@ export function UserRowActions({ row, setRowAction }: UserRowActionsProps) {
       variant="ghost"
       size="icon-sm"
       className="size-8"
-      aria-label={String(t("common.openMenu"))}
+      aria-label={t("common.openMenu")}
       data-testid={`user-row-actions-trigger-${row.id}`}
     >
       <MoreHorizontalIcon className="size-3.5" />
@@ -54,22 +54,22 @@ export function UserRowActions({ row, setRowAction }: UserRowActionsProps) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             void navigator.clipboard.writeText(row.id);
-            toast.success(String(t("dataTable.copyRowId")));
+            toast.success(t("dataTable.copyRowId"));
           }}
         >
           <CopyIcon className="size-3.5" />
-          {String(t("dataTable.copyRowId"))}
+          {t("dataTable.copyRowId")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -77,7 +77,7 @@ export function UserRowActions({ row, setRowAction }: UserRowActionsProps) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

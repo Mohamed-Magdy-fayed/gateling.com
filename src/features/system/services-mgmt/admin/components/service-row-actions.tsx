@@ -39,7 +39,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
   const activateMut = useMutation(
     trpc.servicesMgmt.activate.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("services.serviceActivated")));
+        toast.success(t("services.serviceActivated"));
         void qc.invalidateQueries(trpc.servicesMgmt.list.queryFilter());
       },
     }),
@@ -47,7 +47,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
   const deactivateMut = useMutation(
     trpc.servicesMgmt.deactivate.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("services.serviceDeactivated")));
+        toast.success(t("services.serviceDeactivated"));
         void qc.invalidateQueries(trpc.servicesMgmt.list.queryFilter());
       },
     }),
@@ -61,7 +61,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -72,13 +72,13 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         {row.isActive ? (
           <DropdownMenuItem
@@ -86,7 +86,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
             onClick={() => deactivateMut.mutate({ id: row.id })}
           >
             <PauseCircleIcon className="size-3.5" />
-            {String(t("services.deactivate"))}
+            {t("services.deactivate")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
@@ -94,7 +94,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
             onClick={() => activateMut.mutate({ id: row.id })}
           >
             <PlayCircleIcon className="size-3.5" />
-            {String(t("services.activate"))}
+            {t("services.activate")}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -102,7 +102,7 @@ export function ServiceRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

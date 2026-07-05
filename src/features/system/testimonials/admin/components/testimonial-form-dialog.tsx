@@ -97,18 +97,18 @@ export function TestimonialFormDialog({
             .promise(
               updateMut.mutateAsync({ id: testimonial.id, ...payload }),
               {
-                loading: String(t("common.saving")),
-                success: String(t("testimonials.testimonialUpdated")),
-                error: String(t("testimonials.testimonialSaveFailed")),
+                loading: t("common.saving"),
+                success: t("testimonials.testimonialUpdated"),
+                error: t("testimonials.testimonialSaveFailed"),
               },
             )
             .unwrap();
         } else {
           await toast
             .promise(createMut.mutateAsync(payload), {
-              loading: String(t("common.saving")),
-              success: String(t("testimonials.testimonialCreated")),
-              error: String(t("testimonials.testimonialSaveFailed")),
+              loading: t("common.saving"),
+              success: t("testimonials.testimonialCreated"),
+              error: t("testimonials.testimonialSaveFailed"),
             })
             .unwrap();
         }
@@ -180,7 +180,7 @@ export function TestimonialFormDialog({
                 <form.AppField name="clientName">
                   {(field) => (
                     <field.StringField
-                      label={String(t("testimonials.clientName"))}
+                      label={t("testimonials.clientName")}
                       placeholder={String(
                         t("testimonials.clientNamePlaceholder"),
                       )}
@@ -190,8 +190,8 @@ export function TestimonialFormDialog({
                 <form.AppField name="company">
                   {(field) => (
                     <field.StringField
-                      label={String(t("testimonials.company"))}
-                      placeholder={String(t("testimonials.companyPlaceholder"))}
+                      label={t("testimonials.company")}
+                      placeholder={t("testimonials.companyPlaceholder")}
                     />
                   )}
                 </form.AppField>
@@ -209,7 +209,7 @@ export function TestimonialFormDialog({
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
-                            {String(t("testimonials.role"))}
+                            {t("testimonials.role")}
                           </FieldLabel>
                           <Input
                             id={field.name}
@@ -218,7 +218,7 @@ export function TestimonialFormDialog({
                               field.handleChange(e.target.value || null)
                             }
                             onBlur={field.handleBlur}
-                            placeholder={String(t("testimonials.rolePlaceholder"))}
+                            placeholder={t("testimonials.rolePlaceholder")}
                           />
                         </Field>
                       )}
@@ -226,8 +226,8 @@ export function TestimonialFormDialog({
                     <form.AppField name="content">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("testimonials.content"))}
-                          placeholder={String(t("testimonials.contentPlaceholder"))}
+                          label={t("testimonials.content")}
+                          placeholder={t("testimonials.contentPlaceholder")}
                           rows={4}
                         />
                       )}
@@ -241,7 +241,7 @@ export function TestimonialFormDialog({
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
-                            {String(t("testimonials.role"))} (AR)
+                            {t("testimonials.role")} (AR)
                           </FieldLabel>
                           <Input
                             id={field.name}
@@ -258,7 +258,7 @@ export function TestimonialFormDialog({
                     <form.AppField name="contentAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("testimonials.content"))} (AR)`}
+                          label={`${t("testimonials.content")} (AR)`}
                           placeholder="نص التقييم بالعربية..."
                           rows={4}
                         />
@@ -273,7 +273,7 @@ export function TestimonialFormDialog({
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("testimonials.avatarUrl"))}
+                        {t("testimonials.avatarUrl")}
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -290,7 +290,7 @@ export function TestimonialFormDialog({
                 <form.AppField name="sortOrder">
                   {(field) => (
                     <field.NumberField
-                      label={String(t("testimonials.sortOrder"))}
+                      label={t("testimonials.sortOrder")}
                     />
                   )}
                 </form.AppField>
@@ -298,7 +298,7 @@ export function TestimonialFormDialog({
               <form.AppField name="isVisible">
                 {(field) => (
                   <field.BooleanField
-                    label={String(t("testimonials.isVisible"))}
+                    label={t("testimonials.isVisible")}
                   />
                 )}
               </form.AppField>
@@ -314,7 +314,7 @@ export function TestimonialFormDialog({
               disabled={pending}
             >
               <XIcon className="size-3.5" />
-              {String(t("common.cancel"))}
+              {t("common.cancel")}
             </Button>
             <OverlayFormSubmitButton formId={formId} disabled={pending}>
               {pending ? (
@@ -322,7 +322,7 @@ export function TestimonialFormDialog({
               ) : (
                 <SaveIcon className="size-3.5" />
               )}
-              {pending ? String(t("common.saving")) : String(t("common.save"))}
+              {pending ? t("common.saving") : t("common.save")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

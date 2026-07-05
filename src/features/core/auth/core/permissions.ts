@@ -53,6 +53,8 @@ const EMPLOYEE_BLOCKED_SCREENS = new Set<ScreenKey>([
   "subscribers",
   "services",
   "testimonials",
+  "leads",
+  "blog-posts",
 ]);
 
 export const rolesPermissions = {

@@ -31,11 +31,11 @@ export function buildEmployeeGridColumns(opts: {
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title={String(t("systemPages.userAssignedBranches"))}
+        title={t("systemPages.userAssignedBranches")}
       />
     ),
     meta: {
-      label: String(t("systemPages.userAssignedBranches")),
+      label: t("systemPages.userAssignedBranches"),
       filterVariant: "multiSelect",
       options: branchFilterOptions,
     },

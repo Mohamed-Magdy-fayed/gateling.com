@@ -39,17 +39,17 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
   const publishMut = useMutation(
     trpc.caseStudies.publish.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("work.workPublished")));
+        toast.success(t("work.workPublished"));
         void qc.invalidateQueries(trpc.caseStudies.list.queryFilter());
       },
-      onError: () => toast.error(String(t("work.workPublishFailed"))),
+      onError: () => toast.error(t("work.workPublishFailed")),
     }),
   );
 
   const archiveMut = useMutation(
     trpc.caseStudies.archive.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("work.workArchived")));
+        toast.success(t("work.workArchived"));
         void qc.invalidateQueries(trpc.caseStudies.list.queryFilter());
       },
     }),
@@ -63,7 +63,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -74,13 +74,13 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setRowAction({ row, variant: "edit" })}
         >
           <PencilIcon className="size-3.5" />
-          {String(t("common.edit"))}
+          {t("common.edit")}
         </DropdownMenuItem>
         {row.status !== "published" && (
           <DropdownMenuItem
@@ -88,7 +88,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
             onClick={() => publishMut.mutate({ id: row.id })}
           >
             <GlobeIcon className="size-3.5" />
-            {String(t("work.publishWork"))}
+            {t("work.publishWork")}
           </DropdownMenuItem>
         )}
         {row.status === "published" && (
@@ -97,7 +97,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
             onClick={() => archiveMut.mutate({ id: row.id })}
           >
             <ArchiveIcon className="size-3.5" />
-            {String(t("work.archiveWork"))}
+            {t("work.archiveWork")}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -105,7 +105,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

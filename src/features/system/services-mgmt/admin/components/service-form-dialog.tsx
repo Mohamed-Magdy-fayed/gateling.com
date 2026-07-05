@@ -160,17 +160,17 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
         if (isEdit && service) {
           await toast
             .promise(updateMut.mutateAsync({ id: service.id, ...payload }), {
-              loading: String(t("common.saving")),
-              success: String(t("services.serviceUpdated")),
-              error: String(t("services.serviceSaveFailed")),
+              loading: t("common.saving"),
+              success: t("services.serviceUpdated"),
+              error: t("services.serviceSaveFailed"),
             })
             .unwrap();
         } else {
           await toast
             .promise(createMut.mutateAsync(payload), {
-              loading: String(t("common.saving")),
-              success: String(t("services.serviceCreated")),
-              error: String(t("services.serviceSaveFailed")),
+              loading: t("common.saving"),
+              success: t("services.serviceCreated"),
+              error: t("services.serviceSaveFailed"),
             })
             .unwrap();
         }
@@ -226,7 +226,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
       <DialogContent className="flex max-h-[90dvh] max-w-2xl flex-col gap-0 p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>
-            {String(t(isEdit ? "services.editService" : "services.addService"))}
+            {t(isEdit ? "services.editService" : "services.addService")}
           </DialogTitle>
           <DialogDescription>
             {String(
@@ -257,7 +257,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
-                            {String(t("services.name"))}
+                            {t("services.name")}
                           </FieldLabel>
                           <Input
                             id={field.name}
@@ -271,7 +271,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                                 );
                             }}
                             onBlur={field.handleBlur}
-                            placeholder={String(t("services.namePlaceholder"))}
+                            placeholder={t("services.namePlaceholder")}
                           />
                         </Field>
                       )}
@@ -279,7 +279,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.AppField name="shortDescription">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("services.shortDescription"))}
+                          label={t("services.shortDescription")}
                           placeholder={String(
                             t("services.shortDescriptionPlaceholder"),
                           )}
@@ -290,7 +290,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.AppField name="fullDescription">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("services.fullDescription"))}
+                          label={t("services.fullDescription")}
                           placeholder={String(
                             t("services.fullDescriptionPlaceholder"),
                           )}
@@ -302,7 +302,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel>
-                            {String(t("services.features"))}
+                            {t("services.features")}
                           </FieldLabel>
                           <div className="space-y-2">
                             {field.state.value.map((_, index) => (
@@ -341,7 +341,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                               onClick={() => field.pushValue("")}
                             >
                               <PlusIcon className="me-1 size-3.5" />
-                              {String(t("services.addFeature"))}
+                              {t("services.addFeature")}
                             </Button>
                           </div>
                         </Field>
@@ -355,7 +355,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.AppField name="titleAr">
                       {(field) => (
                         <field.StringField
-                          label={`${String(t("services.name"))} (AR)`}
+                          label={`${t("services.name")} (AR)`}
                           placeholder="اسم الخدمة بالعربية..."
                         />
                       )}
@@ -363,7 +363,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.AppField name="shortDescriptionAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("services.shortDescription"))} (AR)`}
+                          label={`${t("services.shortDescription")} (AR)`}
                           placeholder="وصف مختصر بالعربية..."
                           rows={2}
                         />
@@ -372,7 +372,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                     <form.AppField name="fullDescriptionAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("services.fullDescription"))} (AR)`}
+                          label={`${t("services.fullDescription")} (AR)`}
                           placeholder="وصف تفصيلي بالعربية..."
                           rows={4}
                         />
@@ -382,7 +382,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel>
-                            {`${String(t("services.features"))} (AR)`}
+                            {`${t("services.features")} (AR)`}
                           </FieldLabel>
                           <div className="space-y-2">
                             {(field.state.value ?? []).map((_, index) => (
@@ -419,7 +419,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                               onClick={() => field.pushValue("")}
                             >
                               <PlusIcon className="me-1 size-3.5" />
-                              {String(t("services.addFeature"))}
+                              {t("services.addFeature")}
                             </Button>
                           </div>
                         </Field>
@@ -449,8 +449,8 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                 <form.AppField name="icon">
                   {(field) => (
                     <field.StringField
-                      label={String(t("services.icon"))}
-                      placeholder={String(t("services.iconPlaceholder"))}
+                      label={t("services.icon")}
+                      placeholder={t("services.iconPlaceholder")}
                     />
                   )}
                 </form.AppField>
@@ -458,7 +458,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("services.coverImage"))}
+                        {t("services.coverImage")}
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -475,14 +475,14 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
                 <form.AppField name="sortOrder">
                   {(field) => (
                     <field.NumberField
-                      label={String(t("services.sortOrder"))}
+                      label={t("services.sortOrder")}
                     />
                   )}
                 </form.AppField>
               </FieldGroup>
               <form.AppField name="isActive">
                 {(field) => (
-                  <field.BooleanField label={String(t("services.isActive"))} />
+                  <field.BooleanField label={t("services.isActive")} />
                 )}
               </form.AppField>
 
@@ -504,7 +504,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
               disabled={pending}
             >
               <XIcon className="size-3.5" />
-              {String(t("common.cancel"))}
+              {t("common.cancel")}
             </Button>
             <OverlayFormSubmitButton formId={formId} disabled={pending}>
               {pending ? (
@@ -512,7 +512,7 @@ export function ServiceFormDialog({ service, onOpenChange, open }: Props) {
               ) : (
                 <SaveIcon className="size-3.5" />
               )}
-              {pending ? String(t("common.saving")) : String(t("common.save"))}
+              {pending ? t("common.saving") : t("common.save")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

@@ -44,12 +44,12 @@ export function TestimonialDeleteDialog({
     try {
       await toast
         .promise(deleteMut.mutateAsync({ id: testimonial.id }), {
-          loading: String(t("common.deleting")),
-          success: String(t("testimonials.testimonialDeleted")),
+          loading: t("common.deleting"),
+          success: t("testimonials.testimonialDeleted"),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("testimonials.testimonialDeleteFailed")),
+              : t("testimonials.testimonialDeleteFailed"),
         })
         .unwrap();
       await qc.invalidateQueries({ queryKey: trpc.testimonials.pathKey() });
@@ -67,10 +67,10 @@ export function TestimonialDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("testimonials.deleteTestimonialTitle"))}
+            {t("testimonials.deleteTestimonialTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {String(t("testimonials.deleteTestimonialDescription"))}
+            {t("testimonials.deleteTestimonialDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -92,8 +92,8 @@ export function TestimonialDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

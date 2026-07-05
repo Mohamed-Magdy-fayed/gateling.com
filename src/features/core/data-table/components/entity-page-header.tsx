@@ -16,8 +16,8 @@ export function EntityPageHeader({ slug }: EntityPageHeaderProps) {
 
   return (
     <div className="space-y-1">
-      <H2>{String(t(`systemPages.${entity.titleKey}`))}</H2>
-      <Lead>{String(t(`systemPages.${entity.leadKey}`))}</Lead>
+      <H2>{t(`systemPages.${entity.titleKey}`)}</H2>
+      <Lead>{t(`systemPages.${entity.leadKey}`)}</Lead>
     </div>
   );
 }

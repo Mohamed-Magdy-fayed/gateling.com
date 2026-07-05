@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 function navLabelKey(
   translationKey: (typeof SYSTEM_NAV_ITEMS)[number]["translationKey"],
 ) {
-  return `systemPages.${translationKey}` as const;
+  return `systemPages.${translationKey ?? "navDashboard"}` as const;
 }
 
 export function SystemMobileTabBar({ user }: { user: User }) {
@@ -77,7 +77,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
 
   return (
     <MobileTabBar
-      ariaLabel={String(t("systemPages.mobileTabBarLabel"))}
+      ariaLabel={t("systemPages.mobileTabBarLabel")}
       columnCount={tabColumnCount}
     >
       {/* Column 1: Profile / Account */}
@@ -92,7 +92,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
         >
           <UserAvatar className="size-[1.35rem]" />
           <span className="line-clamp-2 text-center leading-tight">
-            {String(t("landing.tabAccount"))}
+            {t("landing.tabAccount")}
           </span>
         </SheetTrigger>
         <SheetContent className="gap-0" side="bottom" showCloseButton>
@@ -105,7 +105,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
             <SheetClose
               render={<Button className="mt-4 w-full" variant="outline" />}
             >
-              {String(t("common.close"))}
+              {t("common.close")}
             </SheetClose>
           </ScrollArea>
         </SheetContent>
@@ -120,7 +120,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
             href={href}
             icon={Icon}
             key={href}
-            label={String(t(navLabelKey(translationKey)))}
+            label={t(navLabelKey(translationKey))}
           />
         );
       })}
@@ -138,16 +138,16 @@ export function SystemMobileTabBar({ user }: { user: User }) {
             >
               <MenuIcon className="size-[1.35rem] shrink-0" aria-hidden />
               <span className="line-clamp-2 text-center leading-tight">
-                {String(t("systemPages.mobileTabMore"))}
+                {t("systemPages.mobileTabMore")}
               </span>
             </button>
           }
         />
         <SheetContent className="gap-0" side="bottom" showCloseButton>
           <SheetHeader className="border-b border-border pb-4 text-start">
-            <SheetTitle>{String(t("systemPages.mobileTabMore"))}</SheetTitle>
+            <SheetTitle>{t("systemPages.mobileTabMore")}</SheetTitle>
             <SheetDescription>
-              {String(t("systemPages.mobileMoreSheetDescription"))}
+              {t("systemPages.mobileMoreSheetDescription")}
             </SheetDescription>
           </SheetHeader>
           <ScrollArea className="flex max-h-[min(70dvh,28rem)] flex-col gap-2 p-4">
@@ -161,25 +161,25 @@ export function SystemMobileTabBar({ user }: { user: User }) {
                   className="size-5 shrink-0 text-muted-foreground"
                   aria-hidden
                 />
-                {String(t(navLabelKey(translationKey)))}
+                {t(navLabelKey(translationKey))}
               </Link>
             ))}
             <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/30 px-4 py-3">
               <span className="font-medium text-muted-foreground text-xs">
-                {String(t("themeToggle"))}
+                {t("themeToggle")}
               </span>
               <ThemeToggle />
             </div>
             <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/30 px-4 py-3">
               <span className="font-medium text-muted-foreground text-xs">
-                {String(t("languageToggle"))}
+                {t("languageToggle")}
               </span>
               <LanguageToggle />
             </div>
             <div className="flex items-center gap-2 border-t border-border pt-3">
               <SidebarTrigger />
               <span className="text-muted-foreground text-xs">
-                {String(t("systemPages.toggleSidebar"))}
+                {t("systemPages.toggleSidebar")}
               </span>
             </div>
             <LinkButton
@@ -187,12 +187,12 @@ export function SystemMobileTabBar({ user }: { user: User }) {
               href="/"
               variant="outline"
             >
-              {String(t("landing.tabHome"))}
+              {t("landing.tabHome")}
             </LinkButton>
             <SheetClose
               render={<Button className="w-full" variant="outline" />}
             >
-              {String(t("common.close"))}
+              {t("common.close")}
             </SheetClose>
           </ScrollArea>
         </SheetContent>

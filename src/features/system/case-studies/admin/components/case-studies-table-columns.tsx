@@ -42,42 +42,42 @@ export function buildCaseStudyColumns(opts: {
     {
       accessorKey: "title",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={String(t("work.name"))} />
+        <DataTableColumnHeader column={column} title={t("work.name")} />
       ),
-      meta: { label: String(t("work.name")), filterVariant: "text" },
+      meta: { label: t("work.name"), filterVariant: "text" },
     },
     {
       accessorKey: "client",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("work.client"))}
+          title={t("work.client")}
         />
       ),
-      meta: { label: String(t("work.client")), filterVariant: "text" },
+      meta: { label: t("work.client"), filterVariant: "text" },
     },
     {
       accessorKey: "industry",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("work.industry"))}
+          title={t("work.industry")}
         />
       ),
-      meta: { label: String(t("work.industry")), filterVariant: "text" },
+      meta: { label: t("work.industry"), filterVariant: "text" },
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("work.status"))}
+          title={t("work.status")}
         />
       ),
-      meta: { label: String(t("work.status")) },
+      meta: { label: t("work.status") },
       cell: ({ row }) => (
         <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"}>
-          {String(t(`work.statusValues.${row.original.status}`))}
+          {t(`work.statusValues.${row.original.status}`)}
         </Badge>
       ),
     },
@@ -86,20 +86,20 @@ export function buildCaseStudyColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("work.sortOrder"))}
+          title={t("work.sortOrder")}
         />
       ),
-      meta: { label: String(t("work.sortOrder")) },
+      meta: { label: t("work.sortOrder") },
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.createdAt"))}
+          title={t("forms.createdAt")}
         />
       ),
-      meta: { label: String(t("forms.createdAt")) },
+      meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

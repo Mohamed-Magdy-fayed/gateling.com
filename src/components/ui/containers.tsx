@@ -1,6 +1,8 @@
+"use client"
+
 import { CheckCircle2 } from "lucide-react";
 import type { ComponentType, HTMLAttributes } from "react";
-
+import { useScrollAnimation } from "@/hooks/use-animation";
 import { cn } from "@/lib/utils";
 
 // ─── Section ─────────────────────────────────────────────────────────────────
@@ -54,10 +56,16 @@ export function Container({
   children,
   ...props
 }: HTMLAttributes<HTMLDivElement> & { size?: ContainerSize }) {
+  const { elementRef, isVisible } = useScrollAnimation();
+
   return (
     <div
+      ref={elementRef}
       className={cn(
-        "container mx-auto px-4 md:px-8",
+        "container mx-auto px-4 md:px-8 lg:px-16 duration-1000 transition-all",
+        isVisible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-10",
         containerSizes[size],
         className,
       )}
@@ -129,7 +137,7 @@ export function HeroContainer({
       {...props}
     >
       {/* gradient backdrop */}
-      <div className="from-primary/8 via-background to-background pointer-events-none absolute inset-0 bg-linear-to-b" />
+      <div className="from-primary/8 via-background to-background pointer-events-none absolute inset-0 bg-linear-to-t" />
       {/* subtle dot grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.035]"
@@ -139,7 +147,40 @@ export function HeroContainer({
           backgroundSize: "24px 24px",
         }}
       />
-      <div className="relative z-10 py-12">{children}</div>
+      <div className="relative z-10 py-16">{children}</div>
+    </section>
+  );
+}
+
+// ─── SmallHeroContainer ─────────────────────────────────────────────────────────────
+// fixed hight h-80 with gradient + dot grid.
+// ALWAYS the first section on most public page — never use Section for a page hero.
+
+export function SmallHeroContainer({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLElement>) {
+  return (
+    <section
+      className={cn(
+        "relative flex min-h-full flex-col justify-center overflow-hidden md:min-h-80",
+        className,
+      )}
+      {...props}
+    >
+      {/* gradient backdrop */}
+      <div className="from-primary/8 via-background to-background pointer-events-none absolute inset-0 bg-linear-to-t" />
+      {/* subtle dot grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+      <div className="relative z-10 py-16">{children}</div>
     </section>
   );
 }

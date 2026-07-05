@@ -68,7 +68,7 @@ export function DataTableActionBar<TData>({
         variant="ghost"
         size="icon"
         type="button"
-        aria-label={String(t("dataTable.clearSelection"))}
+        aria-label={t("dataTable.clearSelection")}
         onClick={() => table.resetRowSelection()}
       >
         <XIcon className="size-3.5" />

@@ -137,7 +137,7 @@ export function SubscribersTablePage() {
             table={table}
             globalFilter={resolvedFilter}
             onGlobalFilterChange={setResolvedFilter}
-            searchPlaceholder={String(t("dataTable.searchSubscribersHint"))}
+            searchPlaceholder={t("dataTable.searchSubscribersHint")}
           >
             <DataTableViewOptions table={table} />
           </DataTableToolbar>

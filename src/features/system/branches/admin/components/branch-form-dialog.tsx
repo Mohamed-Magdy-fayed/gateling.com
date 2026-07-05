@@ -112,7 +112,7 @@ export function BranchFormDialog({
         await toast
 
           .promise(action, {
-            loading: String(t("common.saving")),
+            loading: t("common.saving"),
 
             success: String(
               t(
@@ -125,7 +125,7 @@ export function BranchFormDialog({
             error: (err) =>
               err instanceof Error
                 ? err.message
-                : String(t("systemPages.branchSaveFailed")),
+                : t("systemPages.branchSaveFailed"),
           })
 
           .unwrap();
@@ -197,7 +197,7 @@ export function BranchFormDialog({
                 <form.AppField name="shortCode">
                   {(field) => (
                     <field.StringField
-                      label={String(t("systemPages.branchesShortCode"))}
+                      label={t("systemPages.branchesShortCode")}
                       placeholder="CAI"
                       description={String(
                         t("systemPages.branchesShortCodeHint"),
@@ -210,7 +210,7 @@ export function BranchFormDialog({
                 <form.AppField name="nameEn">
                   {(field) => (
                     <field.StringField
-                      label={String(t("systemPages.branchesNameEn"))}
+                      label={t("systemPages.branchesNameEn")}
                       placeholder={String(
                         t("authTranslations.branch.create.namePlaceholder"),
                       )}
@@ -222,7 +222,7 @@ export function BranchFormDialog({
                 <form.AppField name="nameAr">
                   {(field) => (
                     <field.StringField
-                      label={String(t("systemPages.branchesNameAr"))}
+                      label={t("systemPages.branchesNameAr")}
                       placeholder={String(
                         t("authTranslations.branch.create.namePlaceholder"),
                       )}
@@ -234,7 +234,7 @@ export function BranchFormDialog({
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("systemPages.branchesAddressEn"))}
+                        {t("systemPages.branchesAddressEn")}
                       </FieldLabel>
 
                       <Textarea
@@ -254,7 +254,7 @@ export function BranchFormDialog({
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("systemPages.branchesAddressAr"))}
+                        {t("systemPages.branchesAddressAr")}
                       </FieldLabel>
 
                       <Textarea
@@ -273,7 +273,7 @@ export function BranchFormDialog({
                 <form.AppField name="phone">
                   {(field) => (
                     <field.MobileField
-                      label={String(t("systemPages.branchesPhone"))}
+                      label={t("systemPages.branchesPhone")}
                     />
                   )}
                 </form.AppField>
@@ -283,7 +283,7 @@ export function BranchFormDialog({
                     {(field) => (
                       <field.StringField
                         inputType="time"
-                        label={String(t("systemPages.branchesOpensAt"))}
+                        label={t("systemPages.branchesOpensAt")}
                       />
                     )}
                   </form.AppField>
@@ -292,7 +292,7 @@ export function BranchFormDialog({
                     {(field) => (
                       <field.StringField
                         inputType="time"
-                        label={String(t("systemPages.branchesClosesAt"))}
+                        label={t("systemPages.branchesClosesAt")}
                       />
                     )}
                   </form.AppField>
@@ -302,9 +302,9 @@ export function BranchFormDialog({
                   {(field) => (
                     <field.StringField
                       inputType="url"
-                      label={String(t("systemPages.branchesMapUrl"))}
+                      label={t("systemPages.branchesMapUrl")}
                       placeholder="https://maps.google.com/..."
-                      description={String(t("systemPages.branchesMapUrlHint"))}
+                      description={t("systemPages.branchesMapUrlHint")}
                     />
                   )}
                 </form.AppField>
@@ -337,10 +337,10 @@ export function BranchFormDialog({
               />
 
               {pending
-                ? String(t("common.saving"))
+                ? t("common.saving")
                 : isEdit
-                  ? String(t("common.save"))
-                  : String(t("common.create"))}
+                  ? t("common.save")
+                  : t("common.create")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

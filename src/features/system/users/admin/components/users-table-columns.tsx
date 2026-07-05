@@ -20,8 +20,8 @@ type Translate = ReturnType<typeof useTranslation>["t"];
 
 export function verifiedFilterOptions(t: Translate) {
   return [
-    { label: String(t("dataTable.verifiedYes")), value: "true" },
-    { label: String(t("dataTable.verifiedNo")), value: "false" },
+    { label: t("dataTable.verifiedYes"), value: "true" },
+    { label: t("dataTable.verifiedNo"), value: "false" },
   ];
 }
 
@@ -47,10 +47,10 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.name"))}
+          title={t("forms.name")}
         />
       ),
-      meta: { label: String(t("forms.name")), filterVariant: "text" },
+      meta: { label: t("forms.name"), filterVariant: "text" },
       filterFn: (row, _id, value) => {
         const q = String(value ?? "")
           .trim()
@@ -65,11 +65,11 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("dataTable.columnEmail"))}
+          title={t("dataTable.columnEmail")}
         />
       ),
       meta: {
-        label: String(t("dataTable.columnEmail")),
+        label: t("dataTable.columnEmail"),
         filterVariant: "text",
       },
       filterFn: (row, _id, value) => {
@@ -85,10 +85,10 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("dataTable.phone"))}
+          title={t("dataTable.phone")}
         />
       ),
-      meta: { label: String(t("dataTable.phone")), filterVariant: "text" },
+      meta: { label: t("dataTable.phone"), filterVariant: "text" },
       cell: ({ row }) => row.original.phone ?? "—",
       filterFn: (row, _id, value) => {
         const q = String(value ?? "")
@@ -102,9 +102,9 @@ export function buildUserGridColumns(opts: {
     {
       accessorKey: "age",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={String(t("forms.age"))} />
+        <DataTableColumnHeader column={column} title={t("forms.age")} />
       ),
-      meta: { label: String(t("forms.age")), filterVariant: "numberRange" },
+      meta: { label: t("forms.age"), filterVariant: "numberRange" },
       cell: ({ row }) => row.original.age ?? "—",
       filterFn: (row, _id, value) => {
         if (!isNumberRangeValue(value)) return true;
@@ -123,21 +123,21 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("dataTable.verified"))}
+          title={t("dataTable.verified")}
         />
       ),
       meta: {
-        label: String(t("dataTable.verified")),
+        label: t("dataTable.verified"),
         filterVariant: "multiSelect",
         options: verifiedOptions,
       },
       cell: ({ row }) =>
         row.original.emailVerifiedAt ? (
           <Badge variant="secondary">
-            {String(t("dataTable.verifiedYes"))}
+            {t("dataTable.verifiedYes")}
           </Badge>
         ) : (
-          <Badge variant="outline">{String(t("dataTable.verifiedNo"))}</Badge>
+          <Badge variant="outline">{t("dataTable.verifiedNo")}</Badge>
         ),
       filterFn: (row, _id, value) => {
         const arr = value as string[] | undefined;
@@ -151,10 +151,10 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.createdAt"))}
+          title={t("forms.createdAt")}
         />
       ),
-      meta: { label: String(t("forms.createdAt")), filterVariant: "dateRange" },
+      meta: { label: t("forms.createdAt"), filterVariant: "dateRange" },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))
@@ -170,11 +170,11 @@ export function buildUserGridColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("dataTable.lastSignIn"))}
+          title={t("dataTable.lastSignIn")}
         />
       ),
       meta: {
-        label: String(t("dataTable.lastSignIn")),
+        label: t("dataTable.lastSignIn"),
         filterVariant: "dateRange",
       },
       cell: ({ row }) =>

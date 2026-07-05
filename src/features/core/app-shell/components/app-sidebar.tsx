@@ -1,12 +1,10 @@
 "use client";
 
 import { ChevronsUpDownIcon } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GatelingLogo } from "@/components/ui/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -17,24 +15,20 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import type { User } from "@/drizzle/schema";
+import { useNavRender } from "@/features/core/app-shell/hooks/useNavRender";
 import { hasPermission } from "@/features/core/auth/core/permissions";
 import { AuthManager } from "@/features/core/auth/nextjs/components/auth-manager";
 import { BranchManager } from "@/features/core/auth/nextjs/components/branch-manager";
 import { useTranslation } from "@/features/core/i18n/client";
-
-import type { SystemNavItem } from "../lib/nav";
 import { SYSTEM_NAV_ITEMS } from "../lib/nav";
 
 type AppSidebarProps = {
   user: User;
 };
-
-function navLabelKey(translationKey: SystemNavItem["translationKey"]) {
-  return `systemPages.${translationKey}` as const;
-}
 
 function userInitials(user: User): string {
   const name = user.name?.trim();
@@ -50,7 +44,7 @@ function userInitials(user: User): string {
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname() ?? "/";
-  const { t, dir } = useTranslation();
+  const { dir } = useTranslation();
 
   const visibleNav = useMemo(
     () =>
@@ -63,6 +57,8 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const display = user.name?.trim() || user.email;
   const initials = userInitials(user);
 
+  const { renderSidebarItems, renderDropdownMenuForItem } = useNavRender();
+
   return (
     <Sidebar
       collapsible="icon"
@@ -71,20 +67,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
       dir={dir}
     >
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              tooltip={String(t("logoName"))}
-              render={<Link href="/" />}
-            >
-              <GatelingLogo className="text-primary" />
-              <span className="font-semibold text-primary">
-                {String(t("logoName"))}
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <BranchManager variant="sidebar" />
       </SidebarHeader>
 
@@ -92,10 +74,34 @@ export function AppSidebar({ user }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Sidebar (Collapsible) */}
+              {!user &&
+                Array.from({ length: SYSTEM_NAV_ITEMS.length }).map((item) => (
+                  <SidebarMenuSkeleton key={`${item}`} />
+                ))}
+              <div className="group-data-[collapsible=icon]:hidden space-y-1">
+                {renderSidebarItems(visibleNav, pathname)}
+              </div>
+              {/* Dropdown (Collapsed/rail) */}
+              <div className="hidden group-data-[collapsible=icon]:block">
+                {visibleNav
+                  .filter((navLink) => navLink.screenKey !== "general")
+                  .map((item) => renderDropdownMenuForItem(item, pathname))}
+              </div>
+            </SidebarMenu>
+            {/* <SidebarMenu>
               {visibleNav.map(({ href, translationKey, Icon }) => {
                 const active =
                   pathname === href || pathname.startsWith(`${href}/`);
-                const label = String(t(navLabelKey(translationKey)));
+                const label = t(navLabelKey(translationKey));
+                const hasChildren = visibleNav.some(
+                  (navItem) => navItem.children,
+                );
+
+                if (hasChildren) (
+
+                )
+
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton
@@ -109,7 +115,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
-            </SidebarMenu>
+            </SidebarMenu> */}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

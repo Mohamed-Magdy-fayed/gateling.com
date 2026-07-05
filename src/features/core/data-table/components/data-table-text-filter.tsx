@@ -80,7 +80,7 @@ export function DataTableTextFilter<TData, TValue>({
               column.setFilterValue(undefined);
             }}
           >
-            {String(t("dataTable.clear"))}
+            {t("dataTable.clear")}
           </Button>
         ) : null}
       </PopoverContent>

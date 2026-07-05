@@ -45,12 +45,12 @@ export function BranchDeleteDialog({
     try {
       await toast
         .promise(deleteMut.mutateAsync({ id: branch.id }), {
-          loading: String(t("common.deleting")),
-          success: String(t("systemPages.branchDeleted")),
+          loading: t("common.deleting"),
+          success: t("systemPages.branchDeleted"),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("systemPages.branchDeleteFailed")),
+              : t("systemPages.branchDeleteFailed"),
         })
         .unwrap();
       await queryClient.invalidateQueries({
@@ -70,15 +70,15 @@ export function BranchDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("systemPages.deleteBranchesTitle"))}
+            {t("systemPages.deleteBranchesTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {branch
               ? String(
-                  t("systemPages.deleteBranchesDescription", {
-                    name: branch.nameEn,
-                  }),
-                )
+                t("systemPages.deleteBranchesDescription", {
+                  name: branch.nameEn,
+                }),
+              )
               : ""}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -101,8 +101,8 @@ export function BranchDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

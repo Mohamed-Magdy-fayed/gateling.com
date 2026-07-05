@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import {
+  type ComponentProps,
   createContext,
   type ReactNode,
   useContext,
@@ -10,16 +11,17 @@ import {
   useTransition,
 } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Swap, SwapOff, SwapOn } from "@/components/ui/swap";
 import { mainTranslations } from "@/features/core/i18n/global";
 import { setLocaleCookie } from "@/features/core/i18n/server";
+import { cn } from "@/lib/utils";
 import { createI18n, type LanguageMessages, LOCALE_COOKIE_NAME } from "./lib";
 
 const TranslationContext = createContext({
   locale: "en",
   dir: "ltr" as "rtl" | "ltr",
-  setLocale: (_: string) => {},
+  setLocale: (_: string) => { },
   fallbackLocale: "en",
 });
 
@@ -88,18 +90,27 @@ export function useTranslation<
   };
 }
 
-export function LanguageToggle() {
+export function LanguageToggle({
+  className,
+  ...props
+}: ComponentProps<typeof Button>) {
   const { locale, setLocale } = useTranslation();
 
   return (
-    <Swap
-      className={buttonVariants({ variant: "ghost", size: "icon" })}
-      animation="flip"
-      onSwappedChange={(val) => setLocale(val ? "en" : "ar")}
-      swapped={locale === "en"}
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn(
+        "cursor-pointer hover:bg-accent! hover:text-accent-foreground! transition-all duration-300",
+        className,
+      )}
+      onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+      {...props}
     >
-      <SwapOn>AR</SwapOn>
-      <SwapOff>EN</SwapOff>
-    </Swap>
+      <Swap mode="rtl" animation="flip">
+        <SwapOn>EN</SwapOn>
+        <SwapOff>AR</SwapOff>
+      </Swap>
+    </Button>
   );
 }

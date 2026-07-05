@@ -63,44 +63,44 @@ export function EntityAuditInfoDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{String(t("systemPages.auditInfoTitle"))}</DialogTitle>
+          <DialogTitle>{t("systemPages.auditInfoTitle")}</DialogTitle>
           <DialogDescription>
-            {String(t("systemPages.auditInfoDescription"))}
+            {t("systemPages.auditInfoDescription")}
           </DialogDescription>
         </DialogHeader>
         <div className="divide-y divide-border">
           <AuditRow
-            label={String(t("dataTable.id"))}
+            label={t("dataTable.id")}
             value={<code className="text-[0.7rem]">{record.id}</code>}
           />
           <AuditRow
-            label={String(t("common.createdAt"))}
+            label={t("common.createdAt")}
             value={formatDate(record.createdAt)}
           />
           {record.createdBy !== undefined ? (
             <AuditRow
-              label={String(t("common.createdBy"))}
+              label={t("common.createdBy")}
               value={record.createdBy ?? dash}
             />
           ) : null}
           <AuditRow
-            label={String(t("common.updatedAt"))}
+            label={t("common.updatedAt")}
             value={formatDate(record.updatedAt)}
           />
           {record.updatedBy !== undefined ? (
             <AuditRow
-              label={String(t("common.updatedBy"))}
+              label={t("common.updatedBy")}
               value={record.updatedBy ?? dash}
             />
           ) : null}
           {record.deletedAt ? (
             <>
               <AuditRow
-                label={String(t("common.deletedAt"))}
+                label={t("common.deletedAt")}
                 value={formatDate(record.deletedAt)}
               />
               <AuditRow
-                label={String(t("common.deletedBy"))}
+                label={t("common.deletedBy")}
                 value={record.deletedBy ?? dash}
               />
             </>

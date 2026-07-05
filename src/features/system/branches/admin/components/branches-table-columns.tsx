@@ -33,10 +33,10 @@ export function buildBranchColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesShortCode"))}
+          title={t("systemPages.branchesShortCode")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesShortCode")) },
+      meta: { label: t("systemPages.branchesShortCode") },
       cell: ({ row }) => (
         <span className="font-mono text-xs">{row.original.shortCode}</span>
       ),
@@ -46,30 +46,30 @@ export function buildBranchColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesNameEn"))}
+          title={t("systemPages.branchesNameEn")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesNameEn")) },
+      meta: { label: t("systemPages.branchesNameEn") },
     },
     {
       accessorKey: "nameAr",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesNameAr"))}
+          title={t("systemPages.branchesNameAr")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesNameAr")) },
+      meta: { label: t("systemPages.branchesNameAr") },
     },
     {
       accessorKey: "phone",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesPhone"))}
+          title={t("systemPages.branchesPhone")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesPhone")) },
+      meta: { label: t("systemPages.branchesPhone") },
       cell: ({ row }) => row.original.phone ?? "—",
     },
     {
@@ -77,10 +77,10 @@ export function buildBranchColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesOwner"))}
+          title={t("systemPages.branchesOwner")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesOwner")) },
+      meta: { label: t("systemPages.branchesOwner") },
       cell: ({ row }) => row.original.ownerName ?? "—",
     },
     {
@@ -88,20 +88,20 @@ export function buildBranchColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("systemPages.branchesMemberCount"))}
+          title={t("systemPages.branchesMemberCount")}
         />
       ),
-      meta: { label: String(t("systemPages.branchesMemberCount")) },
+      meta: { label: t("systemPages.branchesMemberCount") },
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("common.createdAt"))}
+          title={t("common.createdAt")}
         />
       ),
-      meta: { label: String(t("common.createdAt")) },
+      meta: { label: t("common.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))
@@ -112,10 +112,10 @@ export function buildBranchColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("common.updatedAt"))}
+          title={t("common.updatedAt")}
         />
       ),
-      meta: { label: String(t("common.updatedAt")) },
+      meta: { label: t("common.updatedAt") },
       cell: ({ row }) =>
         row.original.updatedAt
           ? dateFmt.format(new Date(row.original.updatedAt))

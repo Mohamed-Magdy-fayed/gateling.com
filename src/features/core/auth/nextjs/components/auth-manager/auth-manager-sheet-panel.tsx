@@ -72,13 +72,13 @@ export function AuthManagerSheetPanel() {
         <Separator className="my-2" />
         <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/30 px-4 py-3">
           <span className="font-medium text-muted-foreground text-xs">
-            {String(t("themeToggle"))}
+            {t("themeToggle")}
           </span>
           <ThemeToggle />
         </div>
         <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/30 px-4 py-3">
           <span className="font-medium text-muted-foreground text-xs">
-            {String(t("languageToggle"))}
+            {t("languageToggle")}
           </span>
           <LanguageToggle />
         </div>
@@ -122,7 +122,7 @@ export function AuthManagerSheetPanel() {
             href={accountPage.href}
           >
             <AccountIcon className="size-5 shrink-0 text-muted-foreground" />
-            {String(t(accountPage.labelKey))}
+            {t(accountPage.labelKey)}
           </Link>
         </SheetAction>
         <SheetAction onClick={() => setOpenDialog("profile")}>

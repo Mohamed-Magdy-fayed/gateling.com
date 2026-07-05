@@ -25,7 +25,7 @@ export function UsersGridFilters({ table }: { table: Table<UserGridRow> }) {
       {ageColumn ? (
         <DataTableSliderFilter
           column={ageColumn}
-          title={String(t("forms.age"))}
+          title={t("forms.age")}
           min={0}
           max={100}
         />
@@ -33,20 +33,20 @@ export function UsersGridFilters({ table }: { table: Table<UserGridRow> }) {
       {verifiedColumn ? (
         <DataTableFacetedFilter
           column={verifiedColumn}
-          title={String(t("dataTable.verified"))}
+          title={t("dataTable.verified")}
           options={verifiedOpts}
         />
       ) : null}
       {createdAtColumn ? (
         <DataTableDateRangeFilter
           column={createdAtColumn}
-          title={String(t("forms.createdAt"))}
+          title={t("forms.createdAt")}
         />
       ) : null}
       {lastSignInAtColumn ? (
         <DataTableDateRangeFilter
           column={lastSignInAtColumn}
-          title={String(t("dataTable.lastSignIn"))}
+          title={t("dataTable.lastSignIn")}
         />
       ) : null}
     </>

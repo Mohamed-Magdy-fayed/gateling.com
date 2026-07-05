@@ -108,12 +108,12 @@ export function BranchManager({
     canViewAllBranches && (!hasActiveOrg || !activeBranch);
 
   const branchLabel = isAllBranchesView
-    ? String(t("authTranslations.branch.switcher.allBranches"))
+    ? t("authTranslations.branch.switcher.allBranches")
     : activeBranch
       ? locale === "ar"
         ? activeBranch.nameAr
         : activeBranch.nameEn
-      : String(t("authTranslations.branch.switcher.select"));
+      : t("authTranslations.branch.switcher.select");
 
   const triggerButton =
     variant === "sidebar" ? (

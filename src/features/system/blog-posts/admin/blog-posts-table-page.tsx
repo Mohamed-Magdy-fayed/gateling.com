@@ -145,7 +145,7 @@ export function BlogPostsTablePage() {
             table={table}
             globalFilter={resolvedFilter}
             onGlobalFilterChange={setResolvedFilter}
-            searchPlaceholder={String(t("dataTable.searchBlogHint"))}
+            searchPlaceholder={t("dataTable.searchBlogHint")}
           >
             <Tooltip>
               <TooltipTrigger

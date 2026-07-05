@@ -28,7 +28,7 @@ type AppShellLayoutProps = {
 };
 
 function navLabelKey(translationKey: SystemNavItem["translationKey"]) {
-  return `systemPages.${translationKey}` as const;
+  return `systemPages.${translationKey ?? "navDashboard"}` as const;
 }
 
 export function AppShellLayout({
@@ -56,7 +56,7 @@ export function AppShellLayout({
   }, [pathname, visibleNav]);
 
   const breadcrumbLabel = currentNav
-    ? String(t(navLabelKey(currentNav.translationKey)))
+    ? t(navLabelKey(currentNav.translationKey))
     : "";
 
   return (

@@ -5,7 +5,6 @@ import { Geist, Geist_Mono, Open_Sans } from "next/font/google";
 import { Suspense } from "react";
 
 import { Providers } from "@/app/_providers";
-import { getThemeCookie } from "@/features/core/color-theme/server";
 import { getLocaleCookie } from "@/features/core/i18n/server";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +85,6 @@ export default function RootLayout({
 
 async function Suspended({ children }: { children: React.ReactNode }) {
   const locale = await getLocaleCookie();
-  const theme = await getThemeCookie();
 
   return (
     <html
@@ -97,7 +95,6 @@ async function Suspended({ children }: { children: React.ReactNode }) {
         geistSans.variable,
         geistMono.variable,
         openSans.variable,
-        theme,
       )}
       suppressHydrationWarning
     >
@@ -109,7 +106,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body>
-        <Providers locale={locale} theme={theme}>
+        <Providers locale={locale}>
           {children}
         </Providers>
       </body>

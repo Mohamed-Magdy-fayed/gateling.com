@@ -12,6 +12,7 @@ import {
   ProseText,
   Section,
   SectionHeader,
+  SmallHeroContainer,
   StatCard,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
@@ -80,14 +81,14 @@ export default async function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <HeroContainer>
-        <Container size="narrow">
+      <SmallHeroContainer>
+        <Container size="wide">
           <PageHeading>{t("publicPages.aboutPage.heroTitle")}</PageHeading>
           <ProseText size="lg" className="mt-6">
             {t("publicPages.aboutPage.heroDescription")}
           </ProseText>
         </Container>
-      </HeroContainer>
+      </SmallHeroContainer>
 
       {/* Stats row */}
       <Section variant="alternate">

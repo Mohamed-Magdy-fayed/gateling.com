@@ -39,7 +39,7 @@ export function SettingsBulkActions({
     try {
       await toast
         .promise(setActiveMut.mutateAsync({ ids, isActive }), {
-          loading: String(t("common.saving")),
+          loading: t("common.saving"),
           success: String(
             t(
               isActive
@@ -47,7 +47,7 @@ export function SettingsBulkActions({
                 : "systemPages.settingsBulkDisabledSuccess",
             ),
           ),
-          error: String(t("systemPages.settingsBulkActiveFailed")),
+          error: t("systemPages.settingsBulkActiveFailed"),
         })
         .unwrap();
       await queryClient.invalidateQueries({
@@ -70,14 +70,14 @@ export function SettingsBulkActions({
               size="icon"
               disabled={setActiveMut.isPending}
               onClick={() => void bulkSetActive(true)}
-              aria-label={String(t("systemPages.settingsBulkEnable"))}
+              aria-label={t("systemPages.settingsBulkEnable")}
             >
               <CheckCircle2Icon className="size-3.5" />
             </Button>
           }
         />
         <TooltipContent>
-          {String(t("systemPages.settingsBulkEnable"))}
+          {t("systemPages.settingsBulkEnable")}
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -89,14 +89,14 @@ export function SettingsBulkActions({
               size="icon"
               disabled={setActiveMut.isPending}
               onClick={() => void bulkSetActive(false)}
-              aria-label={String(t("systemPages.settingsBulkDisable"))}
+              aria-label={t("systemPages.settingsBulkDisable")}
             >
               <PauseCircleIcon className="size-3.5" />
             </Button>
           }
         />
         <TooltipContent>
-          {String(t("systemPages.settingsBulkDisable"))}
+          {t("systemPages.settingsBulkDisable")}
         </TooltipContent>
       </Tooltip>
     </>

@@ -80,7 +80,7 @@ export function DataTableToolbar<T>({
   filterSlot,
 }: DataTableToolbarProps<T>) {
   const { t } = useTranslation();
-  const placeholder = searchPlaceholder ?? String(t("dataTable.searchRows"));
+  const placeholder = searchPlaceholder ?? t("dataTable.searchRows");
 
   const activeColumnFilterCount = table.getState().columnFilters.length;
   const activeFilterCount = activeColumnFilterCount + (globalFilter ? 1 : 0);
@@ -93,7 +93,7 @@ export function DataTableToolbar<T>({
 
   const resetButton = isFiltered ? (
     <ToolbarResetButton
-      label={String(t("dataTable.reset"))}
+      label={t("dataTable.reset")}
       onClick={resetFilters}
     />
   ) : null;
@@ -109,7 +109,7 @@ export function DataTableToolbar<T>({
             className="h-8 border-dashed px-2 text-xs"
           >
             <FilterIcon className="size-3.5" />
-            {String(t("dataTable.filters"))}
+            {t("dataTable.filters")}
             {activeFilterCount > 0 ? (
               <Badge
                 variant="secondary"

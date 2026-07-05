@@ -43,7 +43,7 @@ export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
           <div className="space-y-3 text-sm">
             <div className="flex flex-wrap gap-2">
               <Badge variant={STATUS_VARIANT[lead.status] ?? "secondary"}>
-                {String(t(`leads.statusValues.${lead.status}`))}
+                {t(`leads.statusValues.${lead.status}`)}
               </Badge>
               {lead.company && (
                 <span className="text-muted-foreground">{lead.company}</span>
@@ -55,7 +55,7 @@ export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
             <Separator />
             <div>
               <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
-                {String(t("leads.message"))}
+                {t("leads.message")}
               </p>
               <p className="leading-relaxed whitespace-pre-wrap">
                 {lead.message}
@@ -64,7 +64,7 @@ export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
             <Separator />
             <div className="text-muted-foreground text-xs">
               <span className="font-medium">
-                {String(t("leads.createdAt"))}:
+                {t("leads.createdAt")}:
               </span>{" "}
               {lead.createdAt ? dateFmt.format(new Date(lead.createdAt)) : "—"}
             </div>

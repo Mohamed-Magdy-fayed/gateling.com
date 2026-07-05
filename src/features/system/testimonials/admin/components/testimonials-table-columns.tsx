@@ -35,11 +35,11 @@ export function buildTestimonialColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("testimonials.clientName"))}
+          title={t("testimonials.clientName")}
         />
       ),
       meta: {
-        label: String(t("testimonials.clientName")),
+        label: t("testimonials.clientName"),
         filterVariant: "text",
       },
     },
@@ -48,20 +48,20 @@ export function buildTestimonialColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("testimonials.company"))}
+          title={t("testimonials.company")}
         />
       ),
-      meta: { label: String(t("testimonials.company")), filterVariant: "text" },
+      meta: { label: t("testimonials.company"), filterVariant: "text" },
     },
     {
       accessorKey: "role",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("testimonials.role"))}
+          title={t("testimonials.role")}
         />
       ),
-      meta: { label: String(t("testimonials.role")) },
+      meta: { label: t("testimonials.role") },
       cell: ({ row }) => row.original.role ?? "—",
     },
     {
@@ -69,15 +69,15 @@ export function buildTestimonialColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("testimonials.isVisible"))}
+          title={t("testimonials.isVisible")}
         />
       ),
-      meta: { label: String(t("testimonials.isVisible")) },
+      meta: { label: t("testimonials.isVisible") },
       cell: ({ row }) => (
         <Badge variant={row.original.isVisible ? "default" : "secondary"}>
           {row.original.isVisible
-            ? String(t("common.active"))
-            : String(t("common.inactive"))}
+            ? t("common.active")
+            : t("common.inactive")}
         </Badge>
       ),
     },
@@ -86,20 +86,20 @@ export function buildTestimonialColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("testimonials.sortOrder"))}
+          title={t("testimonials.sortOrder")}
         />
       ),
-      meta: { label: String(t("testimonials.sortOrder")) },
+      meta: { label: t("testimonials.sortOrder") },
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.createdAt"))}
+          title={t("forms.createdAt")}
         />
       ),
-      meta: { label: String(t("forms.createdAt")) },
+      meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

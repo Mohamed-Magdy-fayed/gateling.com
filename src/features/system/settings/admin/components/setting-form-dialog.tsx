@@ -98,15 +98,15 @@ export function SettingFormDialog({
     () => [
       {
         value: "",
-        label: String(t("systemPages.settingsIsActiveUnset")),
+        label: t("systemPages.settingsIsActiveUnset"),
       },
       {
         value: "true",
-        label: String(t("systemPages.settingsStateEnabled")),
+        label: t("systemPages.settingsStateEnabled"),
       },
       {
         value: "false",
-        label: String(t("systemPages.settingsStateDisabled")),
+        label: t("systemPages.settingsStateDisabled"),
       },
     ],
     [t],
@@ -151,12 +151,12 @@ export function SettingFormDialog({
               ...(definition.editable.amount ? { amount } : {}),
             }),
             {
-              loading: String(t("common.saving")),
-              success: String(t("systemPages.settingUpdated")),
+              loading: t("common.saving"),
+              success: t("systemPages.settingUpdated"),
               error: (err) =>
                 err instanceof Error
                   ? err.message
-                  : String(t("systemPages.settingSaveFailed")),
+                  : t("systemPages.settingSaveFailed"),
             },
           )
           .unwrap();
@@ -199,9 +199,9 @@ export function SettingFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
         <DialogHeader className="shrink-0 px-4 pt-4">
-          <DialogTitle>{String(t("systemPages.editSetting"))}</DialogTitle>
+          <DialogTitle>{t("systemPages.editSetting")}</DialogTitle>
           <DialogDescription>
-            {String(t("systemPages.editSettingDescription"))}
+            {t("systemPages.editSettingDescription")}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="min-h-0 flex-1 px-4 py-4">
@@ -213,19 +213,19 @@ export function SettingFormDialog({
             <div className="space-y-3 rounded-lg border bg-muted/30 p-3 text-sm">
               <div className="space-y-1">
                 <div className="font-medium text-foreground">
-                  {String(t("systemPages.settingsCode"))}
+                  {t("systemPages.settingsCode")}
                 </div>
                 <div className="font-mono text-xs">{setting.code}</div>
               </div>
               <div className="space-y-1">
                 <div className="font-medium text-foreground">
-                  {String(t("systemPages.settingsName"))}
+                  {t("systemPages.settingsName")}
                 </div>
                 <div>{displayName}</div>
               </div>
               <div className="space-y-1">
                 <div className="font-medium text-foreground">
-                  {String(t("forms.description"))}
+                  {t("forms.description")}
                 </div>
                 <Muted className="text-xs leading-relaxed">
                   {displayDescription}
@@ -238,7 +238,7 @@ export function SettingFormDialog({
                   <form.AppField name="isActive">
                     {(field) => (
                       <field.SelectField
-                        label={String(t("systemPages.settingsIsActive"))}
+                        label={t("systemPages.settingsIsActive")}
                         options={isActiveSelectOptions}
                       />
                     )}
@@ -248,7 +248,7 @@ export function SettingFormDialog({
                   <form.AppField name="value">
                     {(field) => (
                       <field.StringField
-                        label={String(t("systemPages.settingsValue"))}
+                        label={t("systemPages.settingsValue")}
                         placeholder={String(
                           t("systemPages.settingsValuePlaceholder"),
                         )}
@@ -260,7 +260,7 @@ export function SettingFormDialog({
                   <form.AppField name="amount">
                     {(field) => (
                       <field.StringField
-                        label={String(t("systemPages.settingsAmount"))}
+                        label={t("systemPages.settingsAmount")}
                         placeholder={String(
                           t("systemPages.settingsAmountPlaceholder"),
                         )}
@@ -294,7 +294,7 @@ export function SettingFormDialog({
               ) : (
                 <SaveIcon className="size-3.5" />
               )}
-              {pending ? String(t("common.saving")) : String(t("common.save"))}
+              {pending ? t("common.saving") : t("common.save")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

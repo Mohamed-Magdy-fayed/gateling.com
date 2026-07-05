@@ -35,37 +35,37 @@ export function buildBlogPostColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("blogPosts.postTitle"))}
+          title={t("blogPosts.postTitle")}
         />
       ),
-      meta: { label: String(t("blogPosts.postTitle")), filterVariant: "text" },
+      meta: { label: t("blogPosts.postTitle"), filterVariant: "text" },
     },
     {
       accessorKey: "authorName",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("blogPosts.author"))}
+          title={t("blogPosts.author")}
         />
       ),
-      meta: { label: String(t("blogPosts.author")), filterVariant: "text" },
+      meta: { label: t("blogPosts.author"), filterVariant: "text" },
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("blogPosts.status"))}
+          title={t("blogPosts.status")}
         />
       ),
-      meta: { label: String(t("blogPosts.status")) },
+      meta: { label: t("blogPosts.status") },
       cell: ({ row }) => (
         <Badge
           variant={
             row.original.status === "published" ? "default" : "secondary"
           }
         >
-          {String(t(`blogPosts.statusValues.${row.original.status}`))}
+          {t(`blogPosts.statusValues.${row.original.status}`)}
         </Badge>
       ),
     },
@@ -74,10 +74,10 @@ export function buildBlogPostColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("forms.createdAt"))}
+          title={t("forms.createdAt")}
         />
       ),
-      meta: { label: String(t("forms.createdAt")) },
+      meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

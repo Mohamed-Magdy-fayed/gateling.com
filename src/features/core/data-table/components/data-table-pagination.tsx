@@ -71,7 +71,7 @@ export function DataTablePagination<T>({ table }: DataTablePaginationProps<T>) {
             className="hidden lg:inline-flex"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            aria-label={String(t("dataTable.goToFirstPage"))}
+            aria-label={t("dataTable.goToFirstPage")}
           >
             <ChevronsLeftIcon className="size-3.5 rtl:rotate-180" />
           </Button>
@@ -80,7 +80,7 @@ export function DataTablePagination<T>({ table }: DataTablePaginationProps<T>) {
             size="icon-sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            aria-label={String(t("dataTable.goToPreviousPage"))}
+            aria-label={t("dataTable.goToPreviousPage")}
           >
             <ChevronLeftIcon className="size-3.5 rtl:rotate-180" />
           </Button>
@@ -89,7 +89,7 @@ export function DataTablePagination<T>({ table }: DataTablePaginationProps<T>) {
             size="icon-sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            aria-label={String(t("dataTable.goToNextPage"))}
+            aria-label={t("dataTable.goToNextPage")}
           >
             <ChevronRightIcon className="size-3.5 rtl:rotate-180" />
           </Button>
@@ -99,7 +99,7 @@ export function DataTablePagination<T>({ table }: DataTablePaginationProps<T>) {
             className="hidden lg:inline-flex"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            aria-label={String(t("dataTable.goToLastPage"))}
+            aria-label={t("dataTable.goToLastPage")}
           >
             <ChevronsRightIcon className="size-3.5 rtl:rotate-180" />
           </Button>

@@ -44,7 +44,7 @@ export function GatelingLogoLink({
       className={cn("inline-flex items-center gap-2 font-semibold", className)}
     >
       <GatelingLogo size={iconSize} className="text-primary" />
-      <span className="text-primary">{String(t("logoName"))}</span>
+      <span className="text-primary">{t("logoName")}</span>
     </Link>
   );
 }

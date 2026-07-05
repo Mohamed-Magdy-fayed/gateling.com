@@ -117,7 +117,7 @@ export function DataTableFacetedFilter<TData, TValue>({
               type="button"
               onClick={() => column.setFilterValue(undefined)}
             >
-              {String(t("dataTable.clearFilter", { title }))}
+              {t("dataTable.clearFilter", { title })}
             </Button>
           </div>
         ) : null}

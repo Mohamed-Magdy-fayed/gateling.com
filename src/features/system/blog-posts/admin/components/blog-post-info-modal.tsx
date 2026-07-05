@@ -38,7 +38,7 @@ export function BlogPostInfoModal({ post, onOpenChange, open }: Props) {
               <Badge
                 variant={post.status === "published" ? "default" : "secondary"}
               >
-                {String(t(`blogPosts.statusValues.${post.status}`))}
+                {t(`blogPosts.statusValues.${post.status}`)}
               </Badge>
               {(post.tags ?? []).map((tag) => (
                 <Badge key={tag} variant="outline">
@@ -54,7 +54,7 @@ export function BlogPostInfoModal({ post, onOpenChange, open }: Props) {
             <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
               <div>
                 <span className="font-medium">
-                  {String(t("common.createdAt"))}:
+                  {t("common.createdAt")}:
                 </span>{" "}
                 {post.createdAt
                   ? dateFmt.format(new Date(post.createdAt))

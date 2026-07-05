@@ -21,10 +21,10 @@ export function createEntityActionsColumn<T>(opts: {
     enableHiding: false,
     enableSorting: false,
     size,
-    meta: { label: String(t("common.actions")) },
+    meta: { label: t("common.actions") },
     header: () => (
       <span className="block text-xs font-medium text-muted-foreground">
-        {String(t("common.actions"))}
+        {t("common.actions")}
       </span>
     ),
     cell: ({ row }) => cell({ row }),

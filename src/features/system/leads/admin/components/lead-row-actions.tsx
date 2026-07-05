@@ -38,10 +38,10 @@ export function LeadRowActions({ row, setRowAction }: Props) {
   const updateStatus = useMutation(
     trpc.leads.updateStatus.mutationOptions({
       onSuccess: () => {
-        toast.success(String(t("leads.statusUpdated")));
+        toast.success(t("leads.statusUpdated"));
         void qc.invalidateQueries(trpc.leads.list.queryFilter());
       },
-      onError: () => toast.error(String(t("leads.statusUpdateFailed"))),
+      onError: () => toast.error(t("leads.statusUpdateFailed")),
     }),
   );
 
@@ -53,7 +53,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
             variant="ghost"
             size="icon-sm"
             className="size-8"
-            aria-label={String(t("common.openMenu"))}
+            aria-label={t("common.openMenu")}
           >
             <MoreHorizontalIcon className="size-3.5" />
           </Button>
@@ -64,7 +64,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "info" })}
         >
           <InfoIcon className="size-3.5" />
-          {String(t("common.info"))}
+          {t("common.info")}
         </DropdownMenuItem>
         {row.status === "new" && (
           <DropdownMenuItem
@@ -74,7 +74,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
             }
           >
             <PhoneIcon className="size-3.5" />
-            {String(t("leads.markContacted"))}
+            {t("leads.markContacted")}
           </DropdownMenuItem>
         )}
         {row.status === "contacted" && (
@@ -85,7 +85,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
             }
           >
             <CheckCircleIcon className="size-3.5" />
-            {String(t("leads.markQualified"))}
+            {t("leads.markQualified")}
           </DropdownMenuItem>
         )}
         {(row.status === "qualified" || row.status === "contacted") && (
@@ -96,7 +96,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
             }
           >
             <CheckCircleIcon className="size-3.5 opacity-50" />
-            {String(t("leads.close"))}
+            {t("leads.close")}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -104,7 +104,7 @@ export function LeadRowActions({ row, setRowAction }: Props) {
           onClick={() => setRowAction({ row, variant: "delete" })}
         >
           <Trash2Icon className="size-3.5 text-destructive" />
-          <span className="text-destructive">{String(t("common.delete"))}</span>
+          <span className="text-destructive">{t("common.delete")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -45,12 +45,12 @@ export function UserDeleteDialog({
     try {
       await toast
         .promise(delMut.mutateAsync({ ids }), {
-          loading: String(t("common.deleting")),
-          success: String(t("systemPages.userDeletedCount", { count })),
+          loading: t("common.deleting"),
+          success: t("systemPages.userDeletedCount", { count }),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("systemPages.userDeleteFailed")),
+              : t("systemPages.userDeleteFailed"),
         })
         .unwrap();
       await queryClient.invalidateQueries({ queryKey: trpc.users.pathKey() });
@@ -68,10 +68,10 @@ export function UserDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("systemPages.deleteUsersTitle"))}
+            {t("systemPages.deleteUsersTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {String(t("systemPages.deleteUsersDescription", { count }))}
+            {t("systemPages.deleteUsersDescription", { count })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -97,8 +97,8 @@ export function UserDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

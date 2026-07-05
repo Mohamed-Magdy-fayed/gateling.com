@@ -72,7 +72,7 @@ export function ServicesTablePage() {
             table={table}
             globalFilter={globalFilter}
             onGlobalFilterChange={(v) => setGlobalFilter(v)}
-            searchPlaceholder={String(t("dataTable.searchServicesHint"))}
+            searchPlaceholder={t("dataTable.searchServicesHint")}
           >
             <Tooltip>
               <TooltipTrigger

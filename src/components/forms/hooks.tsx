@@ -76,13 +76,13 @@ const useAppForm: typeof useAppFormBase = (opts) => {
             const raw = extractValidationErrorMessage(e);
             return raw
               ? translateFormErrorMessage(
-                  (key) => String(t(key as never)),
-                  raw,
-                  {
-                    locale,
-                    fallbackLocale: "en",
-                  },
-                )
+                (key) => t(key as never),
+                raw,
+                {
+                  locale,
+                  fallbackLocale: "en",
+                },
+              )
               : undefined;
           })
           .filter(Boolean)

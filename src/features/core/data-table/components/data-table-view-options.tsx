@@ -41,7 +41,7 @@ export function DataTableViewOptions<T>({
                   size="icon"
                   type="button"
                   className="size-8"
-                  aria-label={String(t("dataTable.toggleColumns"))}
+                  aria-label={t("dataTable.toggleColumns")}
                 >
                   <Settings2Icon className="size-3.5" />
                 </Button>
@@ -49,12 +49,12 @@ export function DataTableViewOptions<T>({
             />
           }
         />
-        <TooltipContent>{String(t("dataTable.toggleColumns"))}</TooltipContent>
+        <TooltipContent>{t("dataTable.toggleColumns")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           <DropdownMenuLabel>
-            {String(t("dataTable.toggleColumns"))}
+            {t("dataTable.toggleColumns")}
           </DropdownMenuLabel>
           {hideable.map((column) => (
             <DropdownMenuCheckboxItem

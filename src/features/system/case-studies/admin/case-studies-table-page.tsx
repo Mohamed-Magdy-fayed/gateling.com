@@ -149,7 +149,7 @@ export function CaseStudiesTablePage() {
             table={table}
             globalFilter={resolvedFilter}
             onGlobalFilterChange={setResolvedFilter}
-            searchPlaceholder={String(t("dataTable.searchWorkHint"))}
+            searchPlaceholder={t("dataTable.searchWorkHint")}
           >
             <Tooltip>
               <TooltipTrigger

@@ -123,27 +123,27 @@ export function DataTableDateRangeFilter<TData, TValue>({
   const presets = [
     {
       key: "today",
-      label: String(t("dataTable.presetToday")),
+      label: t("dataTable.presetToday"),
       onClick: () => applyPreset(today, today),
     },
     {
       key: "yesterday",
-      label: String(t("dataTable.presetYesterday")),
+      label: t("dataTable.presetYesterday"),
       onClick: () => applyPreset(yesterday, yesterday),
     },
     {
       key: "last7",
-      label: String(t("dataTable.presetLast7Days")),
+      label: t("dataTable.presetLast7Days"),
       onClick: () => applyPreset(addDays(today, -6), today),
     },
     {
       key: "last30",
-      label: String(t("dataTable.presetLast30Days")),
+      label: t("dataTable.presetLast30Days"),
       onClick: () => applyPreset(addDays(today, -29), today),
     },
     {
       key: "thisMonth",
-      label: String(t("dataTable.presetThisMonth")),
+      label: t("dataTable.presetThisMonth"),
       onClick: () => {
         const now = new Date();
         applyPreset(

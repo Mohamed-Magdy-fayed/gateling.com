@@ -40,8 +40,8 @@ export function TestimonialInfoModal({
           <div className="space-y-3 text-sm">
             <Badge variant={testimonial.isVisible ? "default" : "secondary"}>
               {testimonial.isVisible
-                ? String(t("common.active"))
-                : String(t("common.inactive"))}
+                ? t("common.active")
+                : t("common.inactive")}
             </Badge>
             <Separator />
             <p className="text-foreground/80 italic leading-relaxed">

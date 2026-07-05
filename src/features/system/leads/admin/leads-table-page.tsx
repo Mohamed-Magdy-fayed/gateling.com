@@ -135,7 +135,7 @@ export function LeadsTablePage() {
             table={table}
             globalFilter={resolvedFilter}
             onGlobalFilterChange={setResolvedFilter}
-            searchPlaceholder={String(t("dataTable.searchLeadsHint"))}
+            searchPlaceholder={t("dataTable.searchLeadsHint")}
           >
             <DataTableViewOptions table={table} />
           </DataTableToolbar>

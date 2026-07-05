@@ -54,7 +54,7 @@ export function UsersBulkActions({ table }: { table: Table<UserGridRow> }) {
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("systemPages.bulkVerifyFailed")),
+              : t("systemPages.bulkVerifyFailed"),
         })
         .unwrap();
       await queryClient.invalidateQueries({
@@ -79,13 +79,13 @@ export function UsersBulkActions({ table }: { table: Table<UserGridRow> }) {
               type="button"
               disabled={verifyMut.isPending}
               onClick={() => void bulkVerify(true)}
-              aria-label={String(t("systemPages.bulkVerify"))}
+              aria-label={t("systemPages.bulkVerify")}
             >
               <MailCheckIcon className="size-3.5" />
             </Button>
           }
         />
-        <TooltipContent>{String(t("systemPages.bulkVerify"))}</TooltipContent>
+        <TooltipContent>{t("systemPages.bulkVerify")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger
@@ -96,13 +96,13 @@ export function UsersBulkActions({ table }: { table: Table<UserGridRow> }) {
               type="button"
               disabled={verifyMut.isPending}
               onClick={() => void bulkVerify(false)}
-              aria-label={String(t("systemPages.bulkUnverify"))}
+              aria-label={t("systemPages.bulkUnverify")}
             >
               <MailXIcon className="size-3.5" />
             </Button>
           }
         />
-        <TooltipContent>{String(t("systemPages.bulkUnverify"))}</TooltipContent>
+        <TooltipContent>{t("systemPages.bulkUnverify")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger
@@ -113,13 +113,13 @@ export function UsersBulkActions({ table }: { table: Table<UserGridRow> }) {
               type="button"
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => setDeleteOpen(true)}
-              aria-label={String(t("common.delete"))}
+              aria-label={t("common.delete")}
             >
               <Trash2Icon className="size-3.5" />
             </Button>
           }
         />
-        <TooltipContent>{String(t("common.delete"))}</TooltipContent>
+        <TooltipContent>{t("common.delete")}</TooltipContent>
       </Tooltip>
       <UserDeleteDialog
         open={deleteOpen}

@@ -156,9 +156,9 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
           resultsAr:
             arMetrics.length > 0 || value.resultsArSummary?.trim()
               ? {
-                  summary: value.resultsArSummary ?? "",
-                  metrics: arMetrics,
-                }
+                summary: value.resultsArSummary ?? "",
+                metrics: arMetrics,
+              }
               : null,
           media: media.map((m, i) => ({
             id: m.id,
@@ -173,17 +173,17 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
         if (isEdit && caseStudy) {
           await toast
             .promise(updateMut.mutateAsync({ id: caseStudy.id, ...payload }), {
-              loading: String(t("common.saving")),
-              success: String(t("work.workUpdated")),
-              error: String(t("work.workSaveFailed")),
+              loading: t("common.saving"),
+              success: t("work.workUpdated"),
+              error: t("work.workSaveFailed"),
             })
             .unwrap();
         } else {
           await toast
             .promise(createMut.mutateAsync(payload), {
-              loading: String(t("common.saving")),
-              success: String(t("work.workCreated")),
-              error: String(t("work.workSaveFailed")),
+              loading: t("common.saving"),
+              success: t("work.workCreated"),
+              error: t("work.workSaveFailed"),
             })
             .unwrap();
         }
@@ -263,7 +263,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
       <DialogContent className="flex max-h-[90dvh] max-w-2xl flex-col gap-0 p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>
-            {String(t(isEdit ? "work.editWork" : "work.addWork"))}
+            {t(isEdit ? "work.editWork" : "work.addWork")}
           </DialogTitle>
           <DialogDescription>
             {String(
@@ -293,7 +293,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
-                            {String(t("work.name"))}
+                            {t("work.name")}
                           </FieldLabel>
                           <Input
                             id={field.name}
@@ -307,7 +307,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                                 );
                             }}
                             onBlur={field.handleBlur}
-                            placeholder={String(t("work.namePlaceholder"))}
+                            placeholder={t("work.namePlaceholder")}
                           />
                         </Field>
                       )}
@@ -316,16 +316,16 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                       <form.AppField name="client">
                         {(field) => (
                           <field.StringField
-                            label={String(t("work.client"))}
-                            placeholder={String(t("work.clientPlaceholder"))}
+                            label={t("work.client")}
+                            placeholder={t("work.clientPlaceholder")}
                           />
                         )}
                       </form.AppField>
                       <form.AppField name="industry">
                         {(field) => (
                           <field.StringField
-                            label={String(t("work.industry"))}
-                            placeholder={String(t("work.industryPlaceholder"))}
+                            label={t("work.industry")}
+                            placeholder={t("work.industryPlaceholder")}
                           />
                         )}
                       </form.AppField>
@@ -333,8 +333,8 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="problemStatement">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("work.problem"))}
-                          placeholder={String(t("work.problemPlaceholder"))}
+                          label={t("work.problem")}
+                          placeholder={t("work.problemPlaceholder")}
                           rows={4}
                         />
                       )}
@@ -342,8 +342,8 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="solution">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("work.solution"))}
-                          placeholder={String(t("work.solutionPlaceholder"))}
+                          label={t("work.solution")}
+                          placeholder={t("work.solutionPlaceholder")}
                           rows={4}
                         />
                       )}
@@ -352,7 +352,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.Field name="resultsMetrics" mode="array">
                       {(field) => (
                         <Field>
-                          <FieldLabel>{String(t("work.results"))}</FieldLabel>
+                          <FieldLabel>{t("work.results")}</FieldLabel>
                           <div className="space-y-2">
                             {field.state.value.map((_, index) => (
                               // biome-ignore lint/suspicious/noArrayIndexKey: TanStack Form array fields have no stable ID
@@ -410,7 +410,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                               }
                             >
                               <PlusIcon className="me-1 size-3.5" />
-                              {String(t("work.addMetric"))}
+                              {t("work.addMetric")}
                             </Button>
                           </div>
                         </Field>
@@ -419,7 +419,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="resultsSummary">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("work.resultsSummary"))}
+                          label={t("work.resultsSummary")}
                           placeholder={String(
                             t("work.resultsSummaryPlaceholder"),
                           )}
@@ -436,7 +436,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="titleAr">
                       {(field) => (
                         <field.StringField
-                          label={`${String(t("work.name"))} (AR)`}
+                          label={`${t("work.name")} (AR)`}
                           placeholder="اسم المشروع بالعربية..."
                         />
                       )}
@@ -445,7 +445,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                       <form.AppField name="clientAr">
                         {(field) => (
                           <field.StringField
-                            label={`${String(t("work.client"))} (AR)`}
+                            label={`${t("work.client")} (AR)`}
                             placeholder="اسم العميل بالعربية..."
                           />
                         )}
@@ -453,7 +453,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                       <form.AppField name="industryAr">
                         {(field) => (
                           <field.StringField
-                            label={`${String(t("work.industry"))} (AR)`}
+                            label={`${t("work.industry")} (AR)`}
                             placeholder="القطاع بالعربية..."
                           />
                         )}
@@ -462,7 +462,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="problemStatementAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("work.problem"))} (AR)`}
+                          label={`${t("work.problem")} (AR)`}
                           placeholder="وصف المشكلة بالعربية..."
                           rows={4}
                         />
@@ -471,7 +471,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     <form.AppField name="solutionAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("work.solution"))} (AR)`}
+                          label={`${t("work.solution")} (AR)`}
                           placeholder="وصف الحل بالعربية..."
                           rows={4}
                         />
@@ -482,7 +482,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel>
-                            {`${String(t("work.results"))} (AR)`}
+                            {`${t("work.results")} (AR)`}
                           </FieldLabel>
                           <div className="space-y-2">
                             {(field.state.value ?? []).map((_, index) => (
@@ -537,7 +537,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                               }
                             >
                               <PlusIcon className="me-1 size-3.5" />
-                              {String(t("work.addMetric"))}
+                              {t("work.addMetric")}
                             </Button>
                           </div>
                         </Field>
@@ -545,7 +545,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                     </form.Field>
                     <Field>
                       <FieldLabel>
-                        {`${String(t("work.resultsSummary"))} (AR)`}
+                        {`${t("work.resultsSummary")} (AR)`}
                       </FieldLabel>
                       <form.Field name="resultsArSummary">
                         {(field) => (
@@ -572,14 +572,14 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("work.slug"))}
+                        {t("work.slug")}
                       </FieldLabel>
                       <Input
                         id={field.name}
                         value={field.state.value as string}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder={String(t("work.slugPlaceholder"))}
+                        placeholder={t("work.slugPlaceholder")}
                         className="font-mono text-sm"
                       />
                     </Field>
@@ -589,7 +589,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("work.coverImage"))}
+                        {t("work.coverImage")}
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -621,7 +621,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
                 </form.Field>
                 <form.AppField name="sortOrder">
                   {(field) => (
-                    <field.NumberField label={String(t("work.sortOrder"))} />
+                    <field.NumberField label={t("work.sortOrder")} />
                   )}
                 </form.AppField>
               </FieldGroup>
@@ -644,7 +644,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
               disabled={pending}
             >
               <XIcon className="size-3.5" />
-              {String(t("common.cancel"))}
+              {t("common.cancel")}
             </Button>
             <OverlayFormSubmitButton formId={formId} disabled={pending}>
               {pending ? (
@@ -652,7 +652,7 @@ export function CaseStudyFormDialog({ caseStudy, onOpenChange, open }: Props) {
               ) : (
                 <SaveIcon className="size-3.5" />
               )}
-              {pending ? String(t("common.saving")) : String(t("common.save"))}
+              {pending ? t("common.saving") : t("common.save")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

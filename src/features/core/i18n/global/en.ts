@@ -424,6 +424,7 @@ export default {
     mobileMoreSheetDescription:
       "Additional pages, sidebar, theme, and language.",
     navDashboard: "Dashboard",
+    navContent: "Content",
     navWork: "Work",
     navBlogPosts: "Blog",
     navServices: "Services",
@@ -434,6 +435,7 @@ export default {
     navBranches: "Branches",
     navSettings: "Settings",
     breadcrumbDashboard: "Dashboard",
+    breadcrumbContent: "Content",
     breadcrumbWork: "Case Studies",
     breadcrumbBlogPosts: "Blog Posts",
     breadcrumbServices: "Services",

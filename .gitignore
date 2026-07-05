@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# claude code - personal machine-specific overrides
+.claude/settings.local.json

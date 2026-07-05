@@ -1,5 +1,6 @@
 import { ViewTransition } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { HydrateClient } from "@/integrations/trpc/server";
 import { PublicFooter } from "./_layout/footer";
 import { PublicHeader } from "./_layout/header";
 import { PublicLandingMobileTabBar } from "./_layout/mobile-tab-bar";
@@ -11,31 +12,26 @@ export default function LandingPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex relative h-svh flex-col">
-      <ScrollArea
-        slot="main"
-        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+    <HydrateClient>
+      <PublicHeader />
+      <ViewTransition
+        enter={{
+          "nav-forward": "nav-forward",
+          "nav-back": "nav-back",
+          default: "none",
+        }}
+        exit={{
+          "nav-forward": "nav-forward",
+          "nav-back": "nav-back",
+          default: "none",
+        }}
+        default="none"
       >
-        <PublicHeader />
-        <ViewTransition
-          enter={{
-            "nav-forward": "nav-forward",
-            "nav-back": "nav-back",
-            default: "none",
-          }}
-          exit={{
-            "nav-forward": "nav-forward",
-            "nav-back": "nav-back",
-            default: "none",
-          }}
-          default="none"
-        >
-          {children}
-        </ViewTransition>
-        <PublicFooter />
-      </ScrollArea>
+        {children}
+      </ViewTransition>
+      <PublicFooter />
       <PublicLandingMobileTabBar />
       <WhatsAppFloatButton />
-    </div>
+    </HydrateClient>
   );
 }

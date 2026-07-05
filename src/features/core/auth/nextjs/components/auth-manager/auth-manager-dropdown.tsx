@@ -65,7 +65,7 @@ export function AuthManagerDropdown({
         <DropdownMenuGroup>
           <DropdownMenuItem render={<Link href={accountPage.href} />}>
             <AccountIcon />
-            {String(t(accountPage.labelKey))}
+            {t(accountPage.labelKey)}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onOpenDialog("profile")}>
             <UserIcon />

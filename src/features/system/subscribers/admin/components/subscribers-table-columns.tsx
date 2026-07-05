@@ -35,25 +35,25 @@ export function buildSubscriberColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("subscribers.email"))}
+          title={t("subscribers.email")}
         />
       ),
-      meta: { label: String(t("subscribers.email")), filterVariant: "text" },
+      meta: { label: t("subscribers.email"), filterVariant: "text" },
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("subscribers.status"))}
+          title={t("subscribers.status")}
         />
       ),
-      meta: { label: String(t("subscribers.status")) },
+      meta: { label: t("subscribers.status") },
       cell: ({ row }) => (
         <Badge
           variant={row.original.status === "active" ? "default" : "secondary"}
         >
-          {String(t(`subscribers.statusValues.${row.original.status}`))}
+          {t(`subscribers.statusValues.${row.original.status}`)}
         </Badge>
       ),
     },
@@ -62,10 +62,10 @@ export function buildSubscriberColumns(opts: {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={String(t("subscribers.createdAt"))}
+          title={t("subscribers.createdAt")}
         />
       ),
-      meta: { label: String(t("subscribers.createdAt")) },
+      meta: { label: t("subscribers.createdAt") },
       cell: ({ row }) =>
         row.original.createdAt
           ? dateFmt.format(new Date(row.original.createdAt))

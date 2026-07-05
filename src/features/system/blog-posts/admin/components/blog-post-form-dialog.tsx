@@ -141,17 +141,17 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
         if (isEdit && post) {
           await toast
             .promise(updateMut.mutateAsync({ id: post.id, ...payload }), {
-              loading: String(t("common.saving")),
-              success: String(t("blogPosts.postUpdated")),
-              error: String(t("blogPosts.postSaveFailed")),
+              loading: t("common.saving"),
+              success: t("blogPosts.postUpdated"),
+              error: t("blogPosts.postSaveFailed"),
             })
             .unwrap();
         } else {
           await toast
             .promise(createMut.mutateAsync(payload), {
-              loading: String(t("common.saving")),
-              success: String(t("blogPosts.postCreated")),
-              error: String(t("blogPosts.postSaveFailed")),
+              loading: t("common.saving"),
+              success: t("blogPosts.postCreated"),
+              error: t("blogPosts.postSaveFailed"),
             })
             .unwrap();
         }
@@ -201,7 +201,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
       <DialogContent className="flex max-h-[90dvh] max-w-2xl flex-col gap-0 p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>
-            {String(t(isEdit ? "blogPosts.editPost" : "blogPosts.addPost"))}
+            {t(isEdit ? "blogPosts.editPost" : "blogPosts.addPost")}
           </DialogTitle>
           <DialogDescription>
             {String(
@@ -232,7 +232,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
-                            {String(t("blogPosts.postTitle"))}
+                            {t("blogPosts.postTitle")}
                           </FieldLabel>
                           <Input
                             id={field.name}
@@ -256,7 +256,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     <form.AppField name="excerpt">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("blogPosts.excerpt"))}
+                          label={t("blogPosts.excerpt")}
                           placeholder={String(
                             t("blogPosts.excerptPlaceholder"),
                           )}
@@ -267,7 +267,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     <form.AppField name="content">
                       {(field) => (
                         <field.TextareaField
-                          label={String(t("blogPosts.content"))}
+                          label={t("blogPosts.content")}
                           placeholder={String(
                             t("blogPosts.contentPlaceholder"),
                           )}
@@ -283,7 +283,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     <form.AppField name="titleAr">
                       {(field) => (
                         <field.StringField
-                          label={`${String(t("blogPosts.postTitle"))} (AR)`}
+                          label={`${t("blogPosts.postTitle")} (AR)`}
                           placeholder="عنوان المقال بالعربية..."
                         />
                       )}
@@ -291,7 +291,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     <form.AppField name="excerptAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("blogPosts.excerpt"))} (AR)`}
+                          label={`${t("blogPosts.excerpt")} (AR)`}
                           placeholder="ملخص المقال بالعربية..."
                           rows={3}
                         />
@@ -300,7 +300,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                     <form.AppField name="contentAr">
                       {(field) => (
                         <field.TextareaField
-                          label={`${String(t("blogPosts.content"))} (AR)`}
+                          label={`${t("blogPosts.content")} (AR)`}
                           placeholder="محتوى المقال بالعربية..."
                           rows={8}
                         />
@@ -315,14 +315,14 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("blogPosts.slug"))}
+                        {t("blogPosts.slug")}
                       </FieldLabel>
                       <Input
                         id={field.name}
                         value={field.state.value as string}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder={String(t("blogPosts.slugPlaceholder"))}
+                        placeholder={t("blogPosts.slugPlaceholder")}
                         className="font-mono text-sm"
                       />
                     </Field>
@@ -331,8 +331,8 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                 <form.AppField name="authorName">
                   {(field) => (
                     <field.StringField
-                      label={String(t("blogPosts.author"))}
-                      placeholder={String(t("blogPosts.authorPlaceholder"))}
+                      label={t("blogPosts.author")}
+                      placeholder={t("blogPosts.authorPlaceholder")}
                     />
                   )}
                 </form.AppField>
@@ -340,7 +340,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        {String(t("blogPosts.coverImage"))}
+                        {t("blogPosts.coverImage")}
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -374,7 +374,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
               disabled={pending}
             >
               <XIcon className="size-3.5" />
-              {String(t("common.cancel"))}
+              {t("common.cancel")}
             </Button>
             <OverlayFormSubmitButton formId={formId} disabled={pending}>
               {pending ? (
@@ -382,7 +382,7 @@ export function BlogPostFormDialog({ post, onOpenChange, open }: Props) {
               ) : (
                 <SaveIcon className="size-3.5" />
               )}
-              {pending ? String(t("common.saving")) : String(t("common.save"))}
+              {pending ? t("common.saving") : t("common.save")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>

@@ -18,8 +18,8 @@ export function AuthManagerHeaderTrigger({
   const { t } = useTranslation();
 
   const accountLabel = isAuthenticated
-    ? String(t("landing.headerAccountMenu"))
-    : String(t("landing.headerAccountMenu"));
+    ? t("landing.headerAccountMenu")
+    : t("landing.headerAccountMenu");
 
   const trigger = (
     <Button

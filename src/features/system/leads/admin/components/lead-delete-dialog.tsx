@@ -44,12 +44,12 @@ export function LeadDeleteDialog({
     try {
       await toast
         .promise(deleteMut.mutateAsync({ id: lead.id }), {
-          loading: String(t("common.deleting")),
-          success: String(t("leads.leadDeleted")),
+          loading: t("common.deleting"),
+          success: t("leads.leadDeleted"),
           error: (err) =>
             err instanceof Error
               ? err.message
-              : String(t("leads.leadDeleteFailed")),
+              : t("leads.leadDeleteFailed"),
         })
         .unwrap();
       await qc.invalidateQueries({ queryKey: trpc.leads.pathKey() });
@@ -67,10 +67,10 @@ export function LeadDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {String(t("leads.deleteLeadTitle"))}
+            {t("leads.deleteLeadTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {String(t("leads.deleteLeadDescription"))}
+            {t("leads.deleteLeadDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -92,8 +92,8 @@ export function LeadDeleteDialog({
               <Trash2Icon className="size-3.5" />
             )}
             {pending
-              ? String(t("common.deleting"))
-              : String(t("common.delete"))}
+              ? t("common.deleting")
+              : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

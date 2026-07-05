@@ -112,7 +112,7 @@ export function UserFormDialog({
     validators: { onSubmit: userFormSchema },
     onSubmit: async ({ value }) => {
       if (assignsBranches && value.branchIds.length === 0) {
-        toast.error(String(t("systemPages.userBranchesRequired")));
+        toast.error(t("systemPages.userBranchesRequired"));
         return;
       }
 
@@ -141,7 +141,7 @@ export function UserFormDialog({
             error: (err) =>
               err instanceof Error
                 ? err.message
-                : String(t("systemPages.userSaveFailed")),
+                : t("systemPages.userSaveFailed"),
           })
           .unwrap();
         await queryClient.invalidateQueries({
@@ -202,31 +202,31 @@ export function UserFormDialog({
                 <form.AppField name="name">
                   {(f) => (
                     <f.StringField
-                      label={String(t("forms.name"))}
-                      placeholder={String(t("forms.namePlaceholder"))}
+                      label={t("forms.name")}
+                      placeholder={t("forms.namePlaceholder")}
                       autoFocus
                     />
                   )}
                 </form.AppField>
                 <form.AppField name="email">
                   {(f) => (
-                    <f.EmailField label={String(t("dataTable.columnEmail"))} />
+                    <f.EmailField label={t("dataTable.columnEmail")} />
                   )}
                 </form.AppField>
                 <form.AppField name="phone">
                   {(f) => (
-                    <f.MobileField label={String(t("dataTable.phone"))} />
+                    <f.MobileField label={t("dataTable.phone")} />
                   )}
                 </form.AppField>
                 <form.AppField name="age">
-                  {(f) => <f.NumberField label={String(t("forms.age"))} />}
+                  {(f) => <f.NumberField label={t("forms.age")} />}
                 </form.AppField>
                 {assignsBranches ? (
                   <form.AppField name="branchIds">
                     {(f) => (
                       <f.SelectField
                         multiple
-                        label={String(t("systemPages.userAssignedBranches"))}
+                        label={t("systemPages.userAssignedBranches")}
                         placeholder={String(
                           t("systemPages.userAssignedBranchesPlaceholder"),
                         )}
@@ -260,10 +260,10 @@ export function UserFormDialog({
                 className={pending ? "size-3.5 animate-spin" : "size-3.5"}
               />
               {pending
-                ? String(t("common.saving"))
+                ? t("common.saving")
                 : isEdit
-                  ? String(t("common.save"))
-                  : String(t("common.create"))}
+                  ? t("common.save")
+                  : t("common.create")}
             </OverlayFormSubmitButton>
           </OverlayFormFooterActions>
         </DialogFooter>
