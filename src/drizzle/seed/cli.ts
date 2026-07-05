@@ -51,6 +51,16 @@ const commands = {
       await clearDb();
     },
   },
+  "case-study-ba2olak": {
+    description:
+      "Insert the ba2olak delivery-app case study as a draft (idempotent, safe on any environment).",
+    action: async () => {
+      const { seedBa2olakCaseStudy } = await import(
+        "@/drizzle/seed/add-case-study-ba2olak"
+      );
+      await seedBa2olakCaseStudy();
+    },
+  },
   help: {
     description: "Show this help message.",
     action: async () => {
