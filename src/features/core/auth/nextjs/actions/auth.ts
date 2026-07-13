@@ -24,7 +24,10 @@ import {
 } from "@/features/core/auth/core/session";
 import { validateInput } from "@/features/core/auth/nextjs/actions/helpers";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
-import { getPostAuthRedirect } from "@/features/core/auth/nextjs/lib/post-auth-redirect";
+import {
+  getPostAuthRedirect,
+  isSafeReturnTo,
+} from "@/features/core/auth/nextjs/lib/post-auth-redirect";
 import { signInSchema, signUpSchema } from "@/features/core/auth/schemas";
 import type {
   AuthState,
@@ -100,6 +103,7 @@ export async function signInAction(
 
 export async function signUpAction(
   rawData: unknown,
+  returnTo?: string,
 ): Promise<TypedResponse<{ user: Pick<User, "id" | "name" | "role"> }>> {
   const { t } = await getT();
   const { email, name, password, phone } = await validateInput(
@@ -154,12 +158,26 @@ export async function signUpAction(
     });
 
   await createUserSession(result.user, await cookies());
-  redirect(getPostAuthRedirect(result.user));
+  redirect(getPostAuthRedirect(result.user, returnTo));
 }
 
-export async function oAuthSignIn(provider: OAuthProvider) {
+const OAUTH_RETURN_TO_COOKIE = "oAuthReturnTo";
+
+export async function oAuthSignIn(provider: OAuthProvider, returnTo?: string) {
+  const cookieStore = await cookies();
+
+  if (isSafeReturnTo(returnTo)) {
+    cookieStore.set(OAUTH_RETURN_TO_COOKIE, returnTo, {
+      secure: true,
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 10,
+      path: "/",
+    });
+  }
+
   const oAuthClient = getOAuthClient(provider);
-  redirect(oAuthClient.createAuthUrl(await cookies()));
+  redirect(oAuthClient.createAuthUrl(cookieStore));
 }
 
 export async function signOutAction(): Promise<TypedResponse<void>> {

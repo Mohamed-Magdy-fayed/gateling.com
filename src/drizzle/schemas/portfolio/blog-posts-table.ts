@@ -17,6 +17,7 @@ import {
   updatedAt,
   updatedBy,
 } from "@/drizzle/schemas/helpers";
+import { BlogPostBlocksTable } from "./blog-post-blocks-table";
 import { BlogPostMediaTable } from "./blog-post-media-table";
 
 export const blogPostStatusValues = ["draft", "published"] as const;
@@ -61,6 +62,7 @@ export const BlogPostsTable = pgTable(
 
 export const blogPostsRelations = relations(BlogPostsTable, ({ many }) => ({
   media: many(BlogPostMediaTable),
+  blocks: many(BlogPostBlocksTable),
 }));
 
 export type BlogPost = typeof BlogPostsTable.$inferSelect;

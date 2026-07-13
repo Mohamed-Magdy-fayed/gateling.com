@@ -301,6 +301,7 @@ export async function beginPasskeyRegistrationAction(): Promise<RegistrationOpti
 export async function completePasskeyAuthenticationAction(
   rawEmail: z.infer<typeof z.email>,
   rawAssertion: z.infer<typeof authResponseSchema>,
+  returnTo?: string,
 ): Promise<TypedResponse<PartialUser>> {
   const { t } = await getT();
   const email = await validateInput(z.email(), rawEmail);
@@ -438,7 +439,7 @@ export async function completePasskeyAuthenticationAction(
 
   await createUserSession(user, await cookies());
 
-  redirect(getPostAuthRedirect(user));
+  redirect(getPostAuthRedirect(user, returnTo));
 }
 
 export async function completePasskeyRegistrationAction(

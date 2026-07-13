@@ -22,6 +22,7 @@ import { getPostAuthRedirect } from "@/features/core/auth/nextjs/lib/post-auth-r
 import type { PartialUser } from "@/features/core/auth/types";
 
 const OAUTH_POPUP_MODE_COOKIE = "oAuthPopupMode";
+const OAUTH_RETURN_TO_COOKIE = "oAuthReturnTo";
 
 export async function GET(
   request: NextRequest,
@@ -115,7 +116,10 @@ export async function GET(
     redirect("/sign-in");
   }
 
-  redirect(getPostAuthRedirect(authenticatedUser));
+  const returnTo = cookieJar.get(OAUTH_RETURN_TO_COOKIE)?.value;
+  cookieJar.delete(OAUTH_RETURN_TO_COOKIE);
+
+  redirect(getPostAuthRedirect(authenticatedUser, returnTo));
 }
 
 function getOAuthCompleteUrl({

@@ -26,9 +26,10 @@ export type MediaItem = {
   sortOrder: number;
 };
 
-function toEmbedUrl(url: string): string {
+export function toEmbedUrl(url: string): string {
   try {
     const u = new URL(url);
+    if (!/^https?:$/i.test(u.protocol)) return "";
     if (u.hostname.includes("youtube.com")) {
       const v = u.searchParams.get("v");
       if (v) return `https://www.youtube.com/embed/${v}?rel=0`;
@@ -52,9 +53,11 @@ function toEmbedUrl(url: string): string {
       if (match?.[1]) return `https://www.tiktok.com/embed/v2/${match[1]}`;
     }
   } catch {
-    // pass through
+    return "";
   }
-  return url;
+  // No recognized host pattern matched (or an unsupported host) — never
+  // pass an arbitrary string through to an iframe `src`.
+  return "";
 }
 
 function MediaDisplay({

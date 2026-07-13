@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/containers";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getT } from "@/features/core/i18n/server";
+import { HydrateClient, prefetch, trpc } from "@/integrations/trpc/server";
 import { canonicalUrl } from "@/lib/json-ld";
 import { generateWhatsAppUrl } from "@/lib/phone";
 
@@ -33,9 +34,12 @@ export default async function ContactPage({
   searchParams: Promise<{ tab?: string; reschedule?: string }>;
 }) {
   const { t } = await getT();
-  const user = await getCurrentUser();
+  const [user] = await Promise.all([
+    getCurrentUser(),
+    prefetch(trpc.bookings.getAvailability.queryOptions()),
+  ]);
   const { tab, reschedule } = await searchParams;
-  const initialTab = tab === "book" ? "book" : "message";
+  const initialTab = tab === "message" ? "message" : "book";
 
   const whatsappUrl = generateWhatsAppUrl(
     "+201000000000",
@@ -154,11 +158,13 @@ export default async function ContactPage({
             </div>
 
             {/* Right: send a message / book a call */}
-            <ContactTabs
-              isSignedIn={user != null}
-              initialTab={initialTab}
-              rescheduleId={user != null ? (reschedule ?? null) : null}
-            />
+            <HydrateClient>
+              <ContactTabs
+                isSignedIn={user != null}
+                initialTab={initialTab}
+                rescheduleId={user != null ? (reschedule ?? null) : null}
+              />
+            </HydrateClient>
           </div>
         </Container>
       </HeroContainer>

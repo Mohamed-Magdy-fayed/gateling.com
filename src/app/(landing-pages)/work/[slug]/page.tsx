@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, ViewTransition } from "react";
+import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { LinkButton } from "@/components/general/link-button";
 import { MediaSection } from "@/components/general/media-section";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,7 @@ import {
   SectionHeader,
   StatCard,
 } from "@/components/ui/containers";
-import { getT } from "@/features/core/i18n/server";
+import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
 
@@ -52,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 async function WorkDetailContent({ params }: Props) {
   const { slug } = await params;
   const { t } = await getT();
+  const locale = await getLocaleCookie();
   const caller = await api();
   const cs = await caller.caseStudies
     .publicGetBySlug({ slug })
@@ -82,21 +84,21 @@ async function WorkDetailContent({ params }: Props) {
     creator: { "@type": "Organization", "@id": "https://gateling.com/#org" },
     ...(testimonials.length > 0
       ? {
-          review: testimonials.map((rev) => ({
-            "@type": "Review",
-            reviewBody: rev.content,
-            author: { "@type": "Person", name: rev.clientName },
-            ...(rev.rating
-              ? {
-                  reviewRating: {
-                    "@type": "Rating",
-                    ratingValue: rev.rating,
-                    bestRating: 5,
-                  },
-                }
-              : {}),
-          })),
-        }
+        review: testimonials.map((rev) => ({
+          "@type": "Review",
+          reviewBody: rev.content,
+          author: { "@type": "Person", name: rev.clientName },
+          ...(rev.rating
+            ? {
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: rev.rating,
+                bestRating: 5,
+              },
+            }
+            : {}),
+        })),
+      }
       : {}),
   };
 
@@ -119,7 +121,7 @@ async function WorkDetailContent({ params }: Props) {
       />
 
       {/* Hero: title, client, badge */}
-      <HeroContainer>
+      <HeroContainer imageUrl={cs.coverImageUrl ?? undefined}>
         <Container size="narrow">
           <Link
             href="/work"
@@ -155,19 +157,29 @@ async function WorkDetailContent({ params }: Props) {
           <div className="grid gap-10 lg:grid-cols-[1.7fr,1fr]">
             {/* Left: narrative content */}
             <div className="space-y-10">
-              <div>
-                <h2 className="mb-4 text-2xl font-bold">
-                  {t("publicPages.workDetailPage.challengeHeading")}
-                </h2>
-                <ProseText>{cs.problemStatement}</ProseText>
-              </div>
+              {cs.blocks && cs.blocks.length > 0 ? (
+                <BlockRenderer
+                  blocks={cs.blocks}
+                  locale={locale === "ar" ? "ar" : "en"}
+                />
+              ) : (
+                // legacy fallback, remove once all case studies are migrated to blocks
+                <>
+                  <div>
+                    <h2 className="mb-4 text-2xl font-bold">
+                      {t("publicPages.workDetailPage.challengeHeading")}
+                    </h2>
+                    <ProseText>{cs.problemStatement}</ProseText>
+                  </div>
 
-              <div>
-                <h2 className="mb-4 text-2xl font-bold">
-                  {t("publicPages.workDetailPage.solutionHeading")}
-                </h2>
-                <ProseText>{cs.solution}</ProseText>
-              </div>
+                  <div>
+                    <h2 className="mb-4 text-2xl font-bold">
+                      {t("publicPages.workDetailPage.solutionHeading")}
+                    </h2>
+                    <ProseText>{cs.solution}</ProseText>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Right: media section or fallback cover image */}

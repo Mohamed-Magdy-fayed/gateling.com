@@ -8,6 +8,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
   const { t } = useTranslation();
   const trpc = useTRPC();
   const qc = useQueryClient();
+  const router = useRouter();
 
   const publishMut = useMutation(
     trpc.blogPosts.publish.mutationOptions({
@@ -76,7 +78,7 @@ export function BlogPostRowActions({ row, setRowAction }: Props) {
           {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setRowAction({ row, variant: "edit" })}
+          onClick={() => router.push(`/blog-posts/${row.id}/edit`)}
         >
           <PencilIcon className="size-3.5" />
           {t("common.edit")}

@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, ne } from "drizzle-orm";
 
-import { CaseStudiesTable, CaseStudyMediaTable } from "@/drizzle/schema";
+import {
+  CaseStudiesTable,
+  CaseStudyBlocksTable,
+  CaseStudyMediaTable,
+} from "@/drizzle/schema";
+import type { BlockItemInput } from "@/features/system/shared/content-blocks";
 import {
   caseStudyPublishedEvent,
   inngest,
@@ -17,8 +22,12 @@ import {
   type TRPCContext,
 } from "./shared";
 
+type DbOrTx = Parameters<
+  Parameters<TRPCContext["db"]["transaction"]>[0]
+>[0];
+
 async function upsertCaseStudyMedia(
-  db: TRPCContext["db"],
+  db: DbOrTx,
   caseStudyId: string,
   media: MediaItemInput[],
   actorId: string,
@@ -36,6 +45,30 @@ async function upsertCaseStudyMedia(
       isFeatured: item.isFeatured,
       isSecondary: item.isSecondary,
       sortOrder: item.sortOrder ?? idx,
+      createdBy: actorId,
+    })),
+  );
+}
+
+async function upsertCaseStudyBlocks(
+  db: DbOrTx,
+  caseStudyId: string,
+  blocks: BlockItemInput[],
+  actorId: string,
+) {
+  await db
+    .delete(CaseStudyBlocksTable)
+    .where(eq(CaseStudyBlocksTable.parentId, caseStudyId));
+  if (blocks.length === 0) return;
+  await db.insert(CaseStudyBlocksTable).values(
+    blocks.map((item, idx) => ({
+      parentId: caseStudyId,
+      type: item.type,
+      sortOrder: item.sortOrder ?? idx,
+      contentEn: item.contentEn ?? null,
+      contentAr: item.contentAr ?? null,
+      data: item.data ?? null,
+      mediaId: item.mediaId ?? null,
       createdBy: actorId,
     })),
   );
@@ -75,19 +108,23 @@ export async function createCaseStudy(
   assertAdminRole(session.user.role);
   await assertUniqueSlug(ctx, input.slug);
 
-  const { media, ...data } = input;
-  const [row] = await ctx.db
-    .insert(CaseStudiesTable)
-    .values({
-      ...data,
-      coverImageUrl: data.coverImageUrl ?? null,
-      liveUrl: data.liveUrl ?? null,
-      createdBy: session.user.id,
-    })
-    .returning({ id: CaseStudiesTable.id });
+  const { media, blocks, ...data } = input;
+  const id = await ctx.db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(CaseStudiesTable)
+      .values({
+        ...data,
+        coverImageUrl: data.coverImageUrl ?? null,
+        liveUrl: data.liveUrl ?? null,
+        createdBy: session.user.id,
+      })
+      .returning({ id: CaseStudiesTable.id });
 
-  await upsertCaseStudyMedia(ctx.db, row.id, media, session.user.id);
-  return { id: row.id };
+    await upsertCaseStudyMedia(tx, row.id, media, session.user.id);
+    await upsertCaseStudyBlocks(tx, row.id, blocks, session.user.id);
+    return row.id;
+  });
+  return { id };
 }
 
 export async function updateCaseStudy(
@@ -110,18 +147,21 @@ export async function updateCaseStudy(
 
   await assertUniqueSlug(ctx, input.slug, input.id);
 
-  const { id, media, ...data } = input;
-  await ctx.db
-    .update(CaseStudiesTable)
-    .set({
-      ...data,
-      coverImageUrl: data.coverImageUrl ?? null,
-      liveUrl: data.liveUrl ?? null,
-      updatedBy: session.user.id,
-    })
-    .where(eq(CaseStudiesTable.id, id));
+  const { id, media, blocks, ...data } = input;
+  await ctx.db.transaction(async (tx) => {
+    await tx
+      .update(CaseStudiesTable)
+      .set({
+        ...data,
+        coverImageUrl: data.coverImageUrl ?? null,
+        liveUrl: data.liveUrl ?? null,
+        updatedBy: session.user.id,
+      })
+      .where(eq(CaseStudiesTable.id, id));
 
-  await upsertCaseStudyMedia(ctx.db, id, media, session.user.id);
+    await upsertCaseStudyMedia(tx, id, media, session.user.id);
+    await upsertCaseStudyBlocks(tx, id, blocks, session.user.id);
+  });
   return { updated: true };
 }
 

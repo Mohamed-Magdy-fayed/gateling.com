@@ -39,7 +39,8 @@ export function SignUpForm() {
       onSubmit: signUpSchema,
     },
     onSubmit: ({ value }) => {
-      toast.promise(signUpAction(value), {
+      const returnTo = searchParams.get("returnTo") ?? undefined;
+      toast.promise(signUpAction(value, returnTo), {
         loading: t("authTranslations.signUp.submitting"),
         success: (res) =>
           !res.isError
@@ -51,8 +52,9 @@ export function SignUpForm() {
   });
 
   async function handleOAuthClick(provider: OAuthProvider) {
+    const returnTo = searchParams.get("returnTo") ?? undefined;
     startTransition(() => {
-      oAuthSignIn(provider);
+      oAuthSignIn(provider, returnTo);
     });
   }
 

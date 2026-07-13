@@ -61,6 +61,26 @@ const commands = {
       await seedBa2olakCaseStudy();
     },
   },
+  "articles-delivery-vertical": {
+    description:
+      "Insert the delivery-vertical article pair (perfect-scenario + solution-we-built) as drafts (idempotent).",
+    action: async () => {
+      const { seedDeliveryVerticalArticles } = await import(
+        "@/drizzle/seed/add-articles-delivery-vertical"
+      );
+      await seedDeliveryVerticalArticles();
+    },
+  },
+  "migrate-content-to-blocks": {
+    description:
+      "One-time data migration: backfill blog_post_blocks/case_study_blocks from legacy content columns (idempotent).",
+    action: async () => {
+      const { migrateContentToBlocks } = await import(
+        "@/drizzle/seed/migrate-content-to-blocks"
+      );
+      await migrateContentToBlocks();
+    },
+  },
   help: {
     description: "Show this help message.",
     action: async () => {
@@ -86,6 +106,7 @@ function printHelp() {
   console.log("  npm run seed -- performance");
   console.log("  npm run seed:all");
   console.log("  npm run seed:clear");
+  console.log("  npm run seed -- migrate-content-to-blocks");
 }
 
 async function run() {

@@ -120,6 +120,10 @@ export function PublicFooter() {
       { name: t("publicPages.footer.navContact"), href: "/contact" },
       { name: t("publicPages.footer.navServices"), href: "/services" },
       { name: t("publicPages.footer.navWork"), href: "/work" },
+      {
+        name: t("publicPages.footer.navSolutionsDelivery"),
+        href: "/solutions/delivery",
+      },
     ],
     company: [
       { name: t("publicPages.footer.navAbout"), href: "/about" },

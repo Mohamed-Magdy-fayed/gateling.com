@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { LinkButton } from "@/components/general/link-button";
 import { MediaSection } from "@/components/general/media-section";
 import { Badge } from "@/components/ui/badge";
@@ -185,11 +186,19 @@ async function BlogDetailContent({ params }: Props) {
 
       <Section variant="feature">
         <Container size="narrow">
-          <article
-            className="blog-prose prose prose-neutral max-w-none dark:prose-invert"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: developer-controlled CMS content
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          {post.blocks && post.blocks.length > 0 ? (
+            <BlockRenderer
+              blocks={post.blocks}
+              locale={locale === "ar" ? "ar" : "en"}
+            />
+          ) : (
+            // legacy fallback, remove once all posts are migrated to blocks
+            <article
+              className="blog-prose prose prose-neutral max-w-none dark:prose-invert"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: developer-controlled CMS content, legacy fallback
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          )}
         </Container>
       </Section>
 

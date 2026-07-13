@@ -7,6 +7,7 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,6 @@ import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
 import {
   buildCaseStudyColumns,
   CaseStudyDeleteDialog,
-  CaseStudyFormDialog,
   CaseStudyInfoModal,
   type CaseStudyRowActionVariant,
 } from "./components";
@@ -45,6 +45,7 @@ type RowAction = {
 
 export function CaseStudiesTablePage() {
   const trpc = useTRPC();
+  const router = useRouter();
   const { t, locale } = useTranslation();
   const addLabel = `${t("common.add")} ${t("systemPages.workTitle")}`;
 
@@ -65,7 +66,6 @@ export function CaseStudiesTablePage() {
     getEntityColumnPinning(),
   );
   const [rowAction, setRowAction] = useState<RowAction>(null);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const listInput = useMemo(
     () => ({
@@ -158,7 +158,7 @@ export function CaseStudiesTablePage() {
                     type="button"
                     size="icon"
                     className="size-8"
-                    onClick={() => setCreateOpen(true)}
+                    onClick={() => router.push("/work-mgmt/new/edit")}
                     aria-label={addLabel}
                   >
                     <PlusIcon className="size-3.5" />
@@ -173,14 +173,6 @@ export function CaseStudiesTablePage() {
         footer={<DataTablePagination table={table} />}
       />
 
-      <CaseStudyFormDialog open={createOpen} onOpenChange={setCreateOpen} />
-      <CaseStudyFormDialog
-        open={rowAction?.variant === "edit"}
-        onOpenChange={(open) => {
-          if (!open) closeRowAction();
-        }}
-        caseStudy={rowAction?.variant === "edit" ? rowAction.row : null}
-      />
       <CaseStudyInfoModal
         open={rowAction?.variant === "info"}
         onOpenChange={(open) => {
