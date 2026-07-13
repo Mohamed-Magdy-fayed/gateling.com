@@ -979,7 +979,6 @@ export default {
       viewWork: "اطلع على دراسات الحالة",
     },
     ...servicesAr,
-    ...aboutAr,
     ...workAr,
     blogPage: {
       metaTitle: "المدونة — رؤى أتمتة الأعمال والبرمجيات المخصصة | بُوَيْب",
@@ -1084,4 +1083,5 @@ export default {
     },
   }),
   ...authAr,
+  ...aboutAr,
 } as const satisfies LanguageMessages;

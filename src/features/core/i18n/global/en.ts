@@ -999,7 +999,6 @@ export default {
       viewWork: "See the case studies",
     },
     ...servicesEn,
-    ...aboutEn,
     ...workEn,
     blogPage: {
       metaTitle:
@@ -1111,4 +1110,5 @@ export default {
     },
   }),
   ...authEn,
+  ...aboutEn,
 } as const satisfies LanguageMessages;
