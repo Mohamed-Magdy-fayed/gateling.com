@@ -3,11 +3,9 @@ import { expect, test } from "@playwright/test";
 /**
  * Verification script for Phase 4.7 (content-blocks model).
  *
- * This repo has no committed Playwright config yet. To run:
- *   npm i -D @playwright/test && npx playwright install
- *   npx playwright test e2e/content-blocks.spec.ts --config=<your config>
- * with a `webServer` block pointing at `npm run dev` (or `next start`) and
- * `baseURL` set to that server, per playbooks/playwright.md.
+ * Run with: npx playwright test e2e/content-blocks.spec.ts
+ * (playwright.config.ts at the repo root boots the dev server and sets
+ * baseURL, per playbooks/playwright.md).
  *
  * Coverage:
  *  - Public rendering: BlockRenderer output reachable via role/test-id

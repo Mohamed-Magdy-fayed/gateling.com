@@ -1,6 +1,6 @@
 export default {
   feedbackPage: {
-    metaTitle: "Share Your Experience | Gateling Solutions",
+    metaTitle: "Share Your Experience",
     metaDescription:
       "Tell us how our solution transformed your business. Your story helps other companies understand what's possible.",
     pageTitle: "Share Your Experience",

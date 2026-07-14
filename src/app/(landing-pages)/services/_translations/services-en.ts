@@ -1,7 +1,6 @@
 export default {
   servicesPage: {
-    metaTitle:
-      "Custom Software & Business Automation Services | Gateling Solutions",
+    metaTitle: "Custom Software & Business Automation Services",
     metaDescription:
       "Strategy, design, and engineering in one partner. Custom software, process automation, and AI integration for businesses in Egypt & MENA.",
     heading: "Strategy, Design & Engineering in One Partner",
@@ -11,9 +10,9 @@ export default {
       "From mapping service blueprints to deploying production code, here is the cross-disciplinary toolkit we use to ship reliable products end to end.",
     heroPrimary: "Book a call",
     heroSecondary: "Browse projects",
-    introTitle: "Strategy, Design & Engineering in One Partner",
+    introTitle: "A Cross-Disciplinary Toolkit for Every Build",
     introDescription:
-      "Each engagement blends product thinking with deep implementation. Explore the core service areas and the tools we rely on when leading builds for founders, agencies, and SME teams.",
+      "Explore the core service areas and the tools we rely on when leading builds for founders, agencies, and SME teams.",
     servicesGridTitle: "Where we plug into your team",
     servicesGridDescription:
       "Each discipline stays hands-on from discovery through launch so strategy and execution stay linked.",

@@ -1,7 +1,6 @@
 export default {
   workPage: {
-    metaTitle:
-      "Case Studies — Real Results for Real Businesses | Gateling Solutions",
+    metaTitle: "Case Studies — Real Results for Real Businesses",
     metaDescription:
       "See how we helped a cafe automate callouts, a school digitize enrollment, and an atelier manage multi-branch rentals. Real impact, measurable results.",
     heading: "Work We've Built — Real Results for Real Businesses",

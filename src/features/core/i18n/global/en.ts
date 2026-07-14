@@ -1012,8 +1012,7 @@ export default {
     ...servicesEn,
     ...workEn,
     blogPage: {
-      metaTitle:
-        "Blog — Business Automation & Custom Software Insights | Gateling Solutions",
+      metaTitle: "Blog — Business Automation & Custom Software Insights",
       metaDescription:
         "Insights on automating your business, building custom software, and integrating AI. For growing businesses in Egypt and MENA.",
       heading: "Insights on Building Software That Actually Matters",
@@ -1048,7 +1047,7 @@ export default {
     ...deliverySolutionsEn,
     feedbackPage: feedbackEn.feedbackPage,
     myAccountPage: {
-      metaTitle: "My Account | Gateling Solutions",
+      metaTitle: "My Account",
       metaDescription: "View your submitted inquiries and track their status.",
       heading: "Welcome back",
       headingWithName: "Welcome back, {name}",

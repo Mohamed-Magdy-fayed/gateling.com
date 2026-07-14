@@ -1,7 +1,6 @@
 export default {
   solutionsDeliveryPage: {
-    metaTitle:
-      "Delivery App Development for Remote & Underserved Areas | Gateling Solutions",
+    metaTitle: "Delivery App Development for Remote & Underserved Areas",
     metaDescription:
       "Custom delivery marketplace apps for small towns and remote neighborhoods — cash on delivery, WhatsApp login, bilingual Arabic-first. See how we built ba2olak.",
     heading:

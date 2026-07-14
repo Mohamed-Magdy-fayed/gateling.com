@@ -20,6 +20,16 @@ import { useOauthProviderIcon } from "@/features/core/auth/nextjs/components/use
 import { signUpSchema } from "@/features/core/auth/schemas";
 import { useTranslation } from "@/features/core/i18n/client";
 
+function isNextRedirectError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
+}
+
 export function SignUpForm() {
   const { t } = useTranslation();
 
@@ -40,13 +50,23 @@ export function SignUpForm() {
     },
     onSubmit: ({ value }) => {
       const returnTo = searchParams.get("returnTo") ?? undefined;
-      toast.promise(signUpAction(value, returnTo), {
-        loading: t("authTranslations.signUp.submitting"),
-        success: (res) =>
-          !res.isError
-            ? t("authTranslations.signUp.welcome", { name: res.user.name })
-            : t("error", { error: res.message }),
-        error: (error) => t("error", { error: error.message }),
+      const loadingToast = toast.loading(t("authTranslations.signUp.submitting"));
+      startTransition(async () => {
+        try {
+          await signUpAction(value, returnTo);
+        } catch (error) {
+          // signUpAction redirects on success, which Next.js implements by
+          // throwing a special error — let that one propagate so the
+          // navigation actually happens, only toast on a real failure.
+          if (isNextRedirectError(error)) throw error;
+          toast.error(
+            t("error", {
+              error: error instanceof Error ? error.message : String(error),
+            }),
+          );
+        } finally {
+          toast.dismiss(loadingToast);
+        }
       });
     },
   });

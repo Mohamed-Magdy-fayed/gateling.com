@@ -15,7 +15,7 @@ const results: CaseStudyResults = {
     { label: "Languages supported", value: "2" },
   ],
   summary:
-    "TODO: replace with real launch metrics before publishing (orders processed, drivers onboarded, delivery areas covered).",
+    "ba2olak has just launched. We'll update this page with real usage numbers — orders processed, drivers onboarded, delivery areas covered — as they come in, rather than publish projected figures now.",
 };
 
 const resultsAr: CaseStudyResults = {
@@ -25,7 +25,7 @@ const resultsAr: CaseStudyResults = {
     { label: "اللغات المدعومة", value: "2" },
   ],
   summary:
-    "TODO: استبدل هذا بمقاييس الإطلاق الفعلية قبل النشر (عدد الطلبات، السائقون المسجلون، مناطق التوصيل المغطاة).",
+    "بقولك أطلقت للتو. سنحدّث هذه الصفحة بأرقام الاستخدام الفعلية — عدد الطلبات، السائقون المسجلون، مناطق التوصيل المغطاة — أولاً بأول، بدلاً من نشر أرقام تقديرية الآن.",
 };
 
 export async function seedBa2olakCaseStudy() {

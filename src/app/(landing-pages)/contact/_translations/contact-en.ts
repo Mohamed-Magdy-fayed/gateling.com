@@ -102,8 +102,7 @@ export default {
     },
   },
   contactPage: {
-    metaTitle:
-      "Get in Touch — Custom Software & Automation | Gateling Solutions",
+    metaTitle: "Get in Touch — Custom Software & Automation",
     metaDescription:
       "Tell us your biggest business problem. We'll design a custom solution and give you a free consultation. Egypt, MENA & worldwide.",
     heading: "Tell Us About the System Your Team Needs",
