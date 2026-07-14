@@ -278,79 +278,41 @@
   }
 }
 
-/* ─── View Transitions ─────────────────────────────────── */
+/* ─── Scroll reveal (CSS-only, no JS/hydration required) ──── */
+/* Visible by default so SSR output and browsers without native
+   scroll-driven animation support never hide real content. */
 
-/* Header stays fixed and above sliding content */
-::view-transition-group(site-header) {
-  animation: none;
-  z-index: 100;
-}
-::view-transition-old(site-header) {
-  display: none;
-}
-::view-transition-new(site-header) {
-  animation: none;
-}
-
-:root {
-  --vt-exit: 150ms;
-  --vt-enter: 210ms;
-}
-
-/* Forward nav: old slides left out, new slides in from right */
-::view-transition-old(.nav-forward) {
-  --slide-offset: -60px;
-  animation:
-    var(--vt-exit) ease-in both vt-fade reverse,
-    400ms ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-forward) {
-  --slide-offset: 60px;
-  animation:
-    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-    400ms ease-in-out both vt-slide;
-}
-
-/* Back nav: old slides right out, new slides in from left */
-::view-transition-old(.nav-back) {
-  --slide-offset: 60px;
-  animation:
-    var(--vt-exit) ease-in both vt-fade reverse,
-    400ms ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-back) {
-  --slide-offset: -60px;
-  animation:
-    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-    400ms ease-in-out both vt-slide;
-}
-
-@keyframes vt-fade {
-  from {
-    filter: blur(3px);
-    opacity: 0;
-  }
-  to {
-    filter: blur(0);
+@layer utilities {
+  .scroll-reveal {
     opacity: 1;
+    translate: 0 0;
   }
 }
 
-@keyframes vt-slide {
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: scroll-reveal-fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 25%;
+  }
+}
+
+@keyframes scroll-reveal-fade-up {
   from {
-    translate: var(--slide-offset);
+    opacity: 0;
+    translate: 0 2.5rem;
   }
   to {
-    translate: 0;
+    opacity: 1;
+    translate: 0 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s;
-    animation-delay: 0s;
+  .scroll-reveal {
+    animation: none;
+    opacity: 1;
+    translate: 0 0;
   }
 }
 

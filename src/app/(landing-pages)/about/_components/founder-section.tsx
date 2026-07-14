@@ -1,38 +1,22 @@
-﻿"use client";
-
-import { Users } from "lucide-react";
 import Image from "next/image";
 import { H2, H3, P } from "@/components/ui/typography";
-import { useTranslation } from "@/features/core/i18n/client";
-import { useScrollAnimation } from "@/hooks/use-animation";
+import { getT } from "@/features/core/i18n/server";
 
-export function AboutFounderSection() {
-    const { t } = useTranslation();
-    const founderAnimation = useScrollAnimation();
+export async function AboutFounderSection() {
+    const { t } = await getT();
 
     return (
         <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
-                    <div
-                        ref={founderAnimation.elementRef}
-                        className={`text-center mb-16 transition-all duration-1000 ${founderAnimation.isVisible
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-10"
-                            }`}
-                    >
+                    <div className="text-center mb-16 scroll-reveal">
                         <H2 className="mb-4">{t("about.founder.title")}</H2>
                         <P className="text-muted-foreground max-w-2xl mx-auto">
                             {t("about.founder.description")}
                         </P>
                     </div>
 
-                    <div
-                        className={`grid md:grid-cols-2 gap-12 items-center transition-all duration-1000 delay-300 ${founderAnimation.isVisible
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-10"
-                            }`}
-                    >
+                    <div className="grid md:grid-cols-2 gap-12 items-center scroll-reveal">
                         <div className="text-center md:text-left">
                             <Image
                                 width={512}

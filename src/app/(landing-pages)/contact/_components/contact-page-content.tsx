@@ -1,5 +1,3 @@
-"use client";
-
 import type { LucideIcon } from "lucide-react";
 import {
     ArrowRight,
@@ -24,11 +22,9 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { H1, H2, H3, Lead, P } from "@/components/ui/typography";
-import { useEffect, useState } from "react";
-import { useTranslation } from "@/features/core/i18n/client";
-import { useScrollAnimation } from "@/hooks/use-animation";
+import { getT } from "@/features/core/i18n/server";
 
-import { ContactTabs } from "./contact-tabs";
+import { ContactFormCard } from "./contact-form-card";
 
 type Props = {
     isSignedIn: boolean;
@@ -40,13 +36,8 @@ function contactFormHref(tab: "message" | "book") {
     return `/contact?tab=${tab}#contact-form`;
 }
 
-export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Props) {
-    const { t } = useTranslation();
-    const [tab, setTab] = useState<"message" | "book">(initialTab);
-
-    useEffect(() => {
-        setTab(initialTab);
-    }, [initialTab]);
+export async function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Props) {
+    const { t } = await getT();
 
     type ContactMethod = {
         icon: LucideIcon;
@@ -128,21 +119,11 @@ export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Pro
         },
     ];
 
-    const heroAnimation = useScrollAnimation();
-    const methodsAnimation = useScrollAnimation();
-    const formAnimation = useScrollAnimation();
-    const actionsAnimation = useScrollAnimation();
-    const faqAnimation = useScrollAnimation();
-
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
             <section className="py-20 bg-linear-to-br from-orange-50 to-white dark:from-stone-900 dark:to-stone-800">
-                <div
-                    ref={heroAnimation.elementRef}
-                    className={`container mx-auto px-4 text-center transition-all duration-1000 ${heroAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                        }`}
-                >
+                <div className="container mx-auto px-4 text-center scroll-reveal">
                     <Badge variant="secondary" className="mb-4 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
                         {t('publicPages.contact.hero.badge')}
                     </Badge>
@@ -168,19 +149,14 @@ export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Pro
             {/* Contact Methods */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div
-                        ref={methodsAnimation.elementRef}
-                        className={`text-center mb-16 transition-all duration-1000 ${methodsAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                            }`}
-                    >
+                    <div className="text-center mb-16 scroll-reveal">
                         <H2 className="mb-4">{t('publicPages.contact.methods.title')}</H2>
                         <P className="text-muted-foreground max-w-2xl mx-auto">
                             {t('publicPages.contact.methods.description')}
                         </P>
                     </div>
 
-                    <div className={`grid md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-1000 delay-300 ${methodsAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                        }`}>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 scroll-reveal">
                         {contactMethods.map((method, index) => {
                             const isExternal = Boolean(method.external);
 
@@ -219,30 +195,18 @@ export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Pro
                 <div className="container mx-auto px-4">
                     <div className="grid lg:grid-cols-2 gap-12 items-start">
                         {/* Form */}
-                        <div
-                            ref={formAnimation.elementRef}
-                            className={`transition-all duration-1000 ${formAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                                }`}
-                        >
-                            <Card className="shadow-lg">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl">{t('publicPages.contact.form.title')}</CardTitle>
-                                    <CardDescription>{t('publicPages.contact.form.description')}</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ContactTabs
-                                        isSignedIn={isSignedIn}
-                                        tab={tab}
-                                        onTabChange={setTab}
-                                        rescheduleId={rescheduleId}
-                                    />
-                                </CardContent>
-                            </Card>
+                        <div className="scroll-reveal">
+                            <ContactFormCard
+                                isSignedIn={isSignedIn}
+                                initialTab={initialTab}
+                                rescheduleId={rescheduleId}
+                                formTitle={t('publicPages.contact.form.title')}
+                                formDescription={t('publicPages.contact.form.description')}
+                            />
                         </div>
 
                         {/* Contact Info & Quick Actions */}
-                        <div className={`space-y-8 transition-all duration-1000 delay-300 ${formAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                            }`}>
+                        <div className="space-y-8 scroll-reveal">
                             {/* Contact Information */}
                             <Card>
                                 <CardHeader>
@@ -275,11 +239,7 @@ export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Pro
                             </Card>
 
                             {/* Quick Actions */}
-                            <div
-                                ref={actionsAnimation.elementRef}
-                                className={`transition-all duration-1000 ${actionsAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                                    }`}
-                            >
+                            <div className="scroll-reveal">
                                 <H3 className="mb-4">{t('publicPages.contact.quickActions.title')}</H3>
                                 <div className="space-y-4">
                                     {quickActions.map((action, index) => (
@@ -319,19 +279,14 @@ export function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Pro
             {/* FAQ Section */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div
-                        ref={faqAnimation.elementRef}
-                        className={`text-center mb-16 transition-all duration-1000 ${faqAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                            }`}
-                    >
+                    <div className="text-center mb-16 scroll-reveal">
                         <H2 className="mb-4">{t('publicPages.contact.faq.title')}</H2>
                         <P className="text-muted-foreground max-w-2xl mx-auto">
                             {t('publicPages.contact.faq.description')}
                         </P>
                     </div>
 
-                    <div className={`max-w-3xl mx-auto space-y-6 transition-all duration-1000 delay-300 ${faqAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                        }`}>
+                    <div className="max-w-3xl mx-auto space-y-6 scroll-reveal">
                         {([1, 2, 3, 4] as const).map((faqIndex) => (
                             <Card key={faqIndex} className="hover:shadow-md transition-shadow duration-300">
                                 <CardHeader>

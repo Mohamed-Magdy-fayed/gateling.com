@@ -1,5 +1,3 @@
-"use client";
-
 import { AboutCtaSection } from "./_components/cta-section";
 import { AboutFounderSection } from "./_components/founder-section";
 import { AboutHeroSection } from "./_components/hero-section";

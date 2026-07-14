@@ -8,7 +8,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense, ViewTransition } from "react";
 import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { LinkButton } from "@/components/general/link-button";
 import { MediaSection } from "@/components/general/media-section";
@@ -125,7 +124,6 @@ async function WorkDetailContent({ params }: Props) {
         <Container size="narrow">
           <Link
             href="/work"
-            transitionTypes={["nav-back"]}
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeftIcon className="h-3.5 w-3.5 rtl:-scale-x-100" />
@@ -183,24 +181,22 @@ async function WorkDetailContent({ params }: Props) {
             </div>
 
             {/* Right: media section or fallback cover image */}
-            <ViewTransition name={`case-${cs.slug}`}>
-              <div className="sticky top-24 self-start">
-                {cs.media && cs.media.length > 0 ? (
-                  <MediaSection items={cs.media} />
-                ) : cs.coverImageUrl ? (
-                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
-                    <Image
-                      src={cs.coverImageUrl}
-                      alt={cs.title}
-                      width={960}
-                      height={540}
-                      priority
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </ViewTransition>
+            <div className="sticky top-24 self-start">
+              {cs.media && cs.media.length > 0 ? (
+                <MediaSection items={cs.media} />
+              ) : cs.coverImageUrl ? (
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm">
+                  <Image
+                    src={cs.coverImageUrl}
+                    alt={cs.title}
+                    width={960}
+                    height={540}
+                    priority
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : null}
+            </div>
           </div>
         </Container>
       </Section>
@@ -328,9 +324,5 @@ async function WorkDetailContent({ params }: Props) {
 }
 
 export default async function WorkDetailPage({ params }: Props) {
-  return (
-    <Suspense>
-      <WorkDetailContent params={params} />
-    </Suspense>
-  );
+  return <WorkDetailContent params={params} />;
 }

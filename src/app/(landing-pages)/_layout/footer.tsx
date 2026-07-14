@@ -1,21 +1,10 @@
-"use client";
-
-import { useMutation } from "@tanstack/react-query";
-import { Mail, MailIcon, MapPin, Phone, SendIcon } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { toast } from "sonner";
-import { z } from "zod";
 
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { GatelingLogoLink } from "@/components/ui/logo";
-import { useTranslation } from "@/features/core/i18n/client";
-import { useTRPC } from "@/integrations/trpc/client";
+import { getT } from "@/features/core/i18n/server";
+
+import { FooterNewsletterForm } from "./footer-newsletter-form";
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -84,36 +73,8 @@ const socialLinks = [
   { name: "Instagram", href: APP_CONFIG.instagram, icon: InstagramIcon },
 ];
 
-export function PublicFooter() {
-  const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const trpc = useTRPC();
-
-  const mutation = useMutation(
-    trpc.subscribers.subscribe.mutationOptions({
-      onSuccess: (data) => {
-        if (data.alreadyActive) {
-          toast.info(t("publicPages.newsletter.alreadySubscribed"));
-        } else {
-          toast.success(t("publicPages.newsletter.success"));
-        }
-        setEmail("");
-      },
-      onError: () => {
-        toast.error(t("publicPages.newsletter.error"));
-      },
-    }),
-  );
-
-  function handleSubscribe(e: React.FormEvent) {
-    e.preventDefault();
-    const result = z.string().email().safeParse(email);
-    if (!result.success) {
-      toast.error(t("publicPages.newsletter.invalidEmail"));
-      return;
-    }
-    mutation.mutate({ email });
-  }
+export async function PublicFooter() {
+  const { t } = await getT();
 
   const navigation = {
     workTogether: [
@@ -265,29 +226,7 @@ export function PublicFooter() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {t("publicPages.footer.newsletterDescription")}
                 </p>
-                <form onSubmit={handleSubscribe} className="mt-3">
-                  <InputGroup>
-                    <InputGroupAddon align="inline-start">
-                      <MailIcon />
-                    </InputGroupAddon>
-                    <InputGroupInput
-                      type="email"
-                      placeholder={t("publicPages.newsletter.placeholder")}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={mutation.isPending}
-                    />
-                    <InputGroupAddon align="inline-end">
-                      <InputGroupButton
-                        type="submit"
-                        variant="ghost"
-                        disabled={mutation.isPending}
-                      >
-                        <SendIcon />
-                      </InputGroupButton>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </form>
+                <FooterNewsletterForm />
               </div>
             </div>
           </div>

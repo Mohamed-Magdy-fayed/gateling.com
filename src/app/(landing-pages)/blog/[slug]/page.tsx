@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { LinkButton } from "@/components/general/link-button";
 import { MediaSection } from "@/components/general/media-section";
@@ -116,7 +115,6 @@ async function BlogDetailContent({ params }: Props) {
         <Container size="narrow">
           <Link
             href="/blog"
-            transitionTypes={["nav-back"]}
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeftIcon className="h-3.5 w-3.5 rtl:-scale-x-100" />
@@ -218,9 +216,5 @@ async function BlogDetailContent({ params }: Props) {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
-  return (
-    <Suspense>
-      <BlogDetailContent params={params} />
-    </Suspense>
-  );
+  return <BlogDetailContent params={params} />;
 }

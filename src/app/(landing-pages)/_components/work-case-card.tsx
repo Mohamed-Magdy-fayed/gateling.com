@@ -1,7 +1,6 @@
 import { ArrowRightIcon, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ViewTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -37,18 +36,16 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
     return (
       <ContentCard className="group flex flex-col overflow-hidden p-0 hover:-translate-y-1 hover:shadow-lg">
         {cs.coverImageUrl ? (
-          <ViewTransition name={`case-${cs.slug}`}>
-            <div className="relative aspect-video w-full overflow-hidden">
-              <Image
-                src={cs.coverImageUrl}
-                alt={cs.client}
-                fill
-                priority={priority}
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-          </ViewTransition>
+          <div className="relative aspect-video w-full overflow-hidden">
+            <Image
+              src={cs.coverImageUrl}
+              alt={cs.client}
+              fill
+              priority={priority}
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
         ) : (
           <div className="aspect-video w-full bg-muted/40 flex items-center justify-center">
             <span className="text-muted-foreground text-sm">{cs.industry}</span>
@@ -72,7 +69,6 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
           <div className="mt-4 flex items-center justify-between gap-2">
             <Link
               href={`/work/${cs.slug}`}
-              transitionTypes={["nav-forward"]}
               className="flex items-center gap-1 text-sm font-medium text-primary"
             >
               <span>{t("common.readMore")}</span>
@@ -140,7 +136,6 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
       <div className="mt-5">
         <Link
           href={`/work/${cs.slug}`}
-          transitionTypes={["nav-forward"]}
           className="inline-flex items-center gap-1 text-sm font-medium text-primary"
         >
           {t("common.readMore")}

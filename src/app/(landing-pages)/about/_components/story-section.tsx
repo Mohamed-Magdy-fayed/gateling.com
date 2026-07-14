@@ -1,13 +1,9 @@
-﻿"use client";
-
 import { CheckCircle } from "lucide-react";
 import { H2, H3, P } from "@/components/ui/typography";
-import { useScrollAnimation } from "@/hooks/use-animation";
-import { useTranslation } from "@/features/core/i18n/client";
+import { getT } from "@/features/core/i18n/server";
 
-export function AboutStorySection() {
-    const { t } = useTranslation();
-    const storyAnimation = useScrollAnimation();
+export async function AboutStorySection() {
+    const { t } = await getT();
 
     const reasons = [
         t("about.whyChooseUs.exceptionalSupport"),
@@ -21,25 +17,14 @@ export function AboutStorySection() {
         <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
-                    <div
-                        ref={storyAnimation.elementRef}
-                        className={`text-center mb-16 transition-all duration-1000 ${storyAnimation.isVisible
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-10"
-                            }`}
-                    >
+                    <div className="text-center mb-16 scroll-reveal">
                         <H2 className="mb-6">{t("about.story.title")}</H2>
                         <P className="text-muted-foreground text-lg leading-relaxed">
                             {t("about.story.description")}
                         </P>
                     </div>
 
-                    <div
-                        className={`grid md:grid-cols-2 gap-12 items-center transition-all duration-1000 delay-300 ${storyAnimation.isVisible
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-10"
-                            }`}
-                    >
+                    <div className="grid md:grid-cols-2 gap-12 items-center scroll-reveal">
                         <div>
                             <H3 className="mb-4">{t("about.mission.title")}</H3>
                             <P className="text-muted-foreground mb-6">

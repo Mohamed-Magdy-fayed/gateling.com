@@ -1,5 +1,3 @@
-import { ViewTransition } from "react";
-
 import { getPublicChatSettings } from "@/features/system/settings/server/public-settings";
 import { HydrateClient } from "@/integrations/trpc/server";
 import { AttributionCapture } from "./_layout/attribution-capture";
@@ -19,21 +17,7 @@ export default async function LandingPagesLayout({
     <HydrateClient>
       <AttributionCapture />
       <PublicHeader />
-      <ViewTransition
-        enter={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        exit={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        default="none"
-      >
-        {children}
-      </ViewTransition>
+      {children}
       <PublicFooter />
       <PublicLandingMobileTabBar />
       <WhatsAppFloatButton whatsappNumber={whatsappNumber} />

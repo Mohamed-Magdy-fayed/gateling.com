@@ -1,5 +1,3 @@
-﻿"use client";
-
 import {
     GraduationCap,
     Handshake,
@@ -9,8 +7,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H2, P } from "@/components/ui/typography";
-import { useScrollAnimation } from "@/hooks/use-animation";
-import { useTranslation } from "@/features/core/i18n/client";
+import { getT } from "@/features/core/i18n/server";
 
 const valuesList = [
     { key: "innovation", Icon: Lightbulb },
@@ -20,32 +17,20 @@ const valuesList = [
     { key: "integrity", Icon: Shield },
 ] as const;
 
-export function AboutValuesSection() {
-    const { t } = useTranslation();
-    const valuesAnimation = useScrollAnimation();
+export async function AboutValuesSection() {
+    const { t } = await getT();
 
     return (
         <section className="py-20">
             <div className="container mx-auto px-4">
-                <div
-                    ref={valuesAnimation.elementRef}
-                    className={`text-center mb-16 transition-all duration-1000 ${valuesAnimation.isVisible
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                        }`}
-                >
+                <div className="text-center mb-16 scroll-reveal">
                     <H2 className="mb-4">{t("about.values.title")}</H2>
                     <P className="text-muted-foreground max-w-2xl mx-auto">
                         {t("about.values.description")}
                     </P>
                 </div>
 
-                <div
-                    className={`grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 transition-all duration-1000 delay-300 ${valuesAnimation.isVisible
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                        }`}
-                >
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 scroll-reveal">
                     {valuesList.map(({ key, Icon }) => {
                         return (
                             <Card

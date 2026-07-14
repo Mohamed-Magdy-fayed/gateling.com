@@ -1,5 +1,3 @@
-﻿"use client";
-
 import {
     Award,
     BookOpen,
@@ -9,14 +7,12 @@ import {
     Users,
 } from "lucide-react";
 import { H3, P } from "@/components/ui/typography";
-import { useScrollAnimation } from "@/hooks/use-animation";
-import { useTranslation } from "@/features/core/i18n/client";
+import { getT } from "@/features/core/i18n/server";
 
 const statIcons: LucideIcon[] = [Building, Users, BookOpen, Globe, Award];
 
-export function AboutStatsSection() {
-    const { t } = useTranslation();
-    const statsAnimation = useScrollAnimation();
+export async function AboutStatsSection() {
+    const { t } = await getT();
 
     const stats = [
         {
@@ -44,13 +40,7 @@ export function AboutStatsSection() {
     return (
         <section className="py-20">
             <div className="container mx-auto px-4">
-                <div
-                    ref={statsAnimation.elementRef}
-                    className={`grid md:grid-cols-2 lg:grid-cols-5 gap-8 transition-all duration-1000 delay-200 ${statsAnimation.isVisible
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                        }`}
-                >
+                <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 scroll-reveal">
                     {stats.map((stat, index) => {
                         const Icon = statIcons[index] ?? Building;
                         return (

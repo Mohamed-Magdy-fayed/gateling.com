@@ -1,24 +1,14 @@
-﻿"use client";
-
 import { LinkButton } from "@/components/general/link-button";
 import { H2, P } from "@/components/ui/typography";
-import { useTranslation } from "@/features/core/i18n/client";
-import { useScrollAnimation } from "@/hooks/use-animation";
+import { getT } from "@/features/core/i18n/server";
 
-export function AboutCtaSection() {
-    const { t } = useTranslation();
-    const ctaAnimation = useScrollAnimation();
+export async function AboutCtaSection() {
+    const { t } = await getT();
 
     return (
         <section className="py-20">
             <div className="container mx-auto px-4 text-center">
-                <div
-                    ref={ctaAnimation.elementRef}
-                    className={`max-w-3xl mx-auto transition-all duration-1000 ${ctaAnimation.isVisible
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                        }`}
-                >
+                <div className="max-w-3xl mx-auto scroll-reveal">
                     <H2 className="mb-6">{t("about.cta.title")}</H2>
                     <P className="text-muted-foreground mb-8">
                         {t("about.cta.description")}
