@@ -1,6 +1,10 @@
 import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 
-import { BlogPostMediaTable, BlogPostsTable } from "@/drizzle/schema";
+import {
+  BlogPostBlocksTable,
+  BlogPostMediaTable,
+  BlogPostsTable,
+} from "@/drizzle/schema";
 import type { ListBlogPostsInput } from "./schemas";
 import {
   assertAdminRole,
@@ -37,7 +41,10 @@ export async function listPublishedBlogPosts(ctx: TRPCContext) {
 export async function getBlogPostById(ctx: TRPCContext, id: string) {
   return ctx.db.query.BlogPostsTable.findFirst({
     where: and(eq(BlogPostsTable.id, id), isNull(BlogPostsTable.deletedAt)),
-    with: { media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] } },
+    with: {
+      media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] },
+      blocks: { orderBy: [asc(BlogPostBlocksTable.sortOrder)] },
+    },
   });
 }
 
@@ -51,7 +58,10 @@ export async function getPublishedBlogPostBySlug(
       eq(BlogPostsTable.status, "published"),
       isNull(BlogPostsTable.deletedAt),
     ),
-    with: { media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] } },
+    with: {
+      media: { orderBy: [asc(BlogPostMediaTable.sortOrder)] },
+      blocks: { orderBy: [asc(BlogPostBlocksTable.sortOrder)] },
+    },
   });
 }
 

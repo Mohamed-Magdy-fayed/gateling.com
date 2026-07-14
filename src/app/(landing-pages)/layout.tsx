@@ -1,5 +1,6 @@
 import { ViewTransition } from "react";
 
+import { getPublicChatSettings } from "@/features/system/settings/server/public-settings";
 import { HydrateClient } from "@/integrations/trpc/server";
 import { AttributionCapture } from "./_layout/attribution-capture";
 import { PublicFooter } from "./_layout/footer";
@@ -7,11 +8,13 @@ import { PublicHeader } from "./_layout/header";
 import { PublicLandingMobileTabBar } from "./_layout/mobile-tab-bar";
 import { WhatsAppFloatButton } from "./_layout/whatsapp-float-button";
 
-export default function LandingPagesLayout({
+export default async function LandingPagesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { whatsappNumber } = await getPublicChatSettings();
+
   return (
     <HydrateClient>
       <AttributionCapture />
@@ -33,7 +36,7 @@ export default function LandingPagesLayout({
       </ViewTransition>
       <PublicFooter />
       <PublicLandingMobileTabBar />
-      <WhatsAppFloatButton />
+      <WhatsAppFloatButton whatsappNumber={whatsappNumber} />
     </HydrateClient>
   );
 }

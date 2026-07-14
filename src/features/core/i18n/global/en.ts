@@ -3,6 +3,7 @@ import aboutEn from "@/app/(landing-pages)/about/_translations/about-en";
 import contactEn from "@/app/(landing-pages)/contact/_translations/contact-en";
 import feedbackEn from "@/app/(landing-pages)/feedback/_translations/feedback-en";
 import servicesEn from "@/app/(landing-pages)/services/_translations/services-en";
+import deliverySolutionsEn from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-en";
 import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
 import { dt, type LanguageMessages } from "../lib";
@@ -599,6 +600,17 @@ export default {
     settingName00012: "GA4 Measurement ID",
     settingDesc00012:
       "Google Analytics 4 Measurement ID for site analytics and conversion tracking (format: G-XXXXXXXXXX).",
+    settingName00013: "WaPilot Instance ID",
+    settingDesc00013:
+      "WaPilot instance ID used to send website chat messages over WhatsApp.",
+    settingName00014: "WaPilot API Token",
+    settingDesc00014: "WaPilot API token used to authenticate send requests.",
+    settingName00015: "WaPilot Webhook Secret",
+    settingDesc00015:
+      "Shared secret appended to the WaPilot webhook URL (?secret=...) to authenticate incoming replies.",
+    settingName00016: "Chat Widget",
+    settingDesc00016:
+      "Enables the on-site WhatsApp chat widget. When inactive, the floating button falls back to a wa.me link.",
     settingStatePricesShown: "Active",
     settingStatePricesHidden: "Inactive",
     settingsShowPricesState: "Toggle active",
@@ -825,6 +837,66 @@ export default {
     moveDown: "Move down",
     invalidVideoUrl: "Paste a YouTube, Facebook, or TikTok video URL.",
   },
+  blocks: {
+    sectionTitle: "Content blocks",
+    sectionDescription:
+      "Build the body of this article/case study from ordered content blocks — headings, paragraphs, media, and more.",
+    emptyState: 'No blocks yet. Use "Add block" to start writing.',
+    addBlock: "Add block",
+    removeBlock: "Remove block",
+    livePreview: "Live preview",
+    contentEn: "Content (EN)",
+    contentAr: "Content (AR)",
+    upload: "Upload",
+    uploadFailed: "Upload failed. Please try again.",
+    autosaving: "Saving…",
+    autosavedAt: "Autosaved at {time}",
+    notSavedYet: "Not saved yet — changes autosave every 2 seconds.",
+    typeHeading: "Heading",
+    typeParagraph: "Paragraph",
+    typeList: "List",
+    typeQuote: "Quote",
+    typeImage: "Image",
+    typeVideo: "Video",
+    typeGallery: "Gallery",
+    typeBeforeAfter: "Before / After",
+    typeDevicePlayer: "Device player",
+    typeStats: "Stats",
+    typeComparison: "Comparison table",
+    typeRoiEmbed: "ROI calculator",
+    typeCallout: "Callout",
+    typeCta: "Call to action",
+    headingLevel: "Heading level",
+    paragraphPlaceholder: "Write a paragraph…",
+    quoteCite: "Attribution (optional)",
+    listOrdered: "Numbered list",
+    imageUrl: "Image URL",
+    imageAlt: "Alt text",
+    imageCaption: "Caption",
+    videoUrl: "Video URL (YouTube / Vimeo / Facebook / TikTok)",
+    videoCaption: "Caption",
+    image: "Image",
+    video: "Video",
+    addGalleryItem: "Add gallery item",
+    beforeImage: '"Before" image',
+    afterImage: '"After" image',
+    beforeLabel: '"Before" label',
+    afterLabel: '"After" label',
+    deviceType: "Device frame",
+    devicePhone: "Phone",
+    deviceBrowser: "Browser",
+    addStat: "Add stat",
+    addComparisonRow: "Add row",
+    roiEmbedDescription:
+      "Renders the live ROI calculator from /tools/roi-calculator. No fields to configure.",
+    calloutVariant: "Style",
+    calloutInfo: "Info",
+    calloutWarning: "Warning",
+    calloutSuccess: "Success",
+    calloutDanger: "Danger",
+    ctaHref: "Link URL",
+    ctaLabel: "Button label",
+  },
   oauthComplete: {
     successTitle: "Account connected",
     errorTitle: "Connection failed",
@@ -859,6 +931,7 @@ export default {
       resourcesTitle: "Resources",
       navServices: "Services",
       navWork: "Our Work",
+      navSolutionsDelivery: "Delivery App Solutions",
       navBlog: "Blog",
       navAbout: "About",
       navContact: "Contact",
@@ -937,11 +1010,9 @@ export default {
       viewWork: "See the case studies",
     },
     ...servicesEn,
-    ...aboutEn,
     ...workEn,
     blogPage: {
-      metaTitle:
-        "Blog — Business Automation & Custom Software Insights | Gateling Solutions",
+      metaTitle: "Blog — Business Automation & Custom Software Insights",
       metaDescription:
         "Insights on automating your business, building custom software, and integrating AI. For growing businesses in Egypt and MENA.",
       heading: "Insights on Building Software That Actually Matters",
@@ -973,9 +1044,10 @@ export default {
       secondaryLabel: "Secondary",
     },
     ...contactEn,
+    ...deliverySolutionsEn,
     feedbackPage: feedbackEn.feedbackPage,
     myAccountPage: {
-      metaTitle: "My Account | Gateling Solutions",
+      metaTitle: "My Account",
       metaDescription: "View your submitted inquiries and track their status.",
       heading: "Welcome back",
       headingWithName: "Welcome back, {name}",
@@ -1048,4 +1120,5 @@ export default {
     },
   }),
   ...authEn,
+  ...aboutEn,
 } as const satisfies LanguageMessages;

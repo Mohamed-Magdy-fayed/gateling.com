@@ -76,54 +76,54 @@ export default async function ServicesPage() {
     title: string;
     items: string;
   }[] = [
-    {
-      Icon: Laptop,
-      title: t("publicPages.servicesPage.toolGroupInterfaceTitle"),
-      items: t("publicPages.servicesPage.toolGroupInterfaceItems"),
-    },
-    {
-      Icon: Layers,
-      title: t("publicPages.servicesPage.toolGroupFrontendTitle"),
-      items: t("publicPages.servicesPage.toolGroupFrontendItems"),
-    },
-    {
-      Icon: Router,
-      title: t("publicPages.servicesPage.toolGroupBackendTitle"),
-      items: t("publicPages.servicesPage.toolGroupBackendItems"),
-    },
-    {
-      Icon: Wrench,
-      title: t("publicPages.servicesPage.toolGroupDevopsTitle"),
-      items: t("publicPages.servicesPage.toolGroupDevopsItems"),
-    },
-  ];
+      {
+        Icon: Laptop,
+        title: t("publicPages.servicesPage.toolGroupInterfaceTitle"),
+        items: t("publicPages.servicesPage.toolGroupInterfaceItems"),
+      },
+      {
+        Icon: Layers,
+        title: t("publicPages.servicesPage.toolGroupFrontendTitle"),
+        items: t("publicPages.servicesPage.toolGroupFrontendItems"),
+      },
+      {
+        Icon: Router,
+        title: t("publicPages.servicesPage.toolGroupBackendTitle"),
+        items: t("publicPages.servicesPage.toolGroupBackendItems"),
+      },
+      {
+        Icon: Wrench,
+        title: t("publicPages.servicesPage.toolGroupDevopsTitle"),
+        items: t("publicPages.servicesPage.toolGroupDevopsItems"),
+      },
+    ];
 
   const timelineSteps: {
     Icon: ComponentType<LucideProps>;
     title: string;
     description: string;
   }[] = [
-    {
-      Icon: Compass,
-      title: t("publicPages.servicesPage.timelineStep1Title"),
-      description: t("publicPages.servicesPage.timelineStep1Description"),
-    },
-    {
-      Icon: PenTool,
-      title: t("publicPages.servicesPage.timelineStep2Title"),
-      description: t("publicPages.servicesPage.timelineStep2Description"),
-    },
-    {
-      Icon: Hammer,
-      title: t("publicPages.servicesPage.timelineStep3Title"),
-      description: t("publicPages.servicesPage.timelineStep3Description"),
-    },
-    {
-      Icon: Rocket,
-      title: t("publicPages.servicesPage.timelineStep4Title"),
-      description: t("publicPages.servicesPage.timelineStep4Description"),
-    },
-  ];
+      {
+        Icon: Compass,
+        title: t("publicPages.servicesPage.timelineStep1Title"),
+        description: t("publicPages.servicesPage.timelineStep1Description"),
+      },
+      {
+        Icon: PenTool,
+        title: t("publicPages.servicesPage.timelineStep2Title"),
+        description: t("publicPages.servicesPage.timelineStep2Description"),
+      },
+      {
+        Icon: Hammer,
+        title: t("publicPages.servicesPage.timelineStep3Title"),
+        description: t("publicPages.servicesPage.timelineStep3Description"),
+      },
+      {
+        Icon: Rocket,
+        title: t("publicPages.servicesPage.timelineStep4Title"),
+        description: t("publicPages.servicesPage.timelineStep4Description"),
+      },
+    ];
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -59,11 +59,25 @@ SEO for case study detail:
 
 ## Blog Post Structure
 
-`content` field: Markdown string. Rendered with a Markdown renderer on the public page.
+**Body content is a normalized block model** (`blog_post_blocks` / `case_study_blocks`
+tables), not the legacy `content`/`contentAr` HTML columns or the `problemStatement`/
+`solution` text columns — see `docs/decisions/adr-0001-content-blocks-model.md`. Each
+row is one ordered block (`heading | paragraph | list | quote | image | video | gallery |
+before_after | device_player | stats | comparison | roi_embed | callout | cta`) with a
+`data` jsonb bag typed per-type in `src/features/system/shared/content-blocks.ts`. The
+public renderer (`src/components/blocks/block-renderer.tsx`) maps blocks → React
+components — **no `dangerouslySetInnerHTML`** for the block path. The legacy HTML/text
+columns are deprecated but not yet dropped: existing rows were backfilled into
+`paragraph` blocks by `src/drizzle/seed/migrate-content-to-blocks.ts` (already run
+locally), and both public detail pages fall back to the legacy HTML render only when
+a post/case-study has zero blocks. Authoring happens in the full-page block editor
+(`/blog-posts/[id]/edit`, `/work-mgmt/[id]/edit`), not the old modal dialogs (now
+unused — candidates for deletion once the block editor is confirmed to fully replace
+them).
 
 Public blog post sections:
 1. Hero: title, cover image, author, publishedAt
-2. Content: rendered Markdown
+2. Content: `BlockRenderer` over ordered `blog_post_blocks` (legacy HTML fallback if unmigrated)
 3. Sidebar CTA: "Working on a similar challenge?" → contact form
 4. Subscribe nudge: newsletter inline form
 5. Related posts: 2 other published posts
@@ -81,6 +95,24 @@ Each service on the public `/services` page shows:
 - Short description
 - Feature list (from `features` jsonb: `string[]`)
 - CTA button → `/contact`
+
+## Solution Pillar Pages (per-vertical, commercial intent)
+
+One thin hub page per vertical (recommended for the top 1-2 verticals only, not every
+industry) at `/solutions/<vertical>` — e.g. `src/app/(landing-pages)/solutions/delivery/`.
+Aggregates the vertical's published case study + article pair rather than duplicating
+content. Pattern:
+- Problem-focused H1, embeds the case study (results metrics, live URL) and links both
+  articles of the pair (see Blog Post Structure — perfect-scenario / solution-we-built).
+- JSON-LD: `Service` (provider `#org`), `FAQPage` (vertical FAQ), `BreadcrumbList`.
+- CTA links use `?source=solutions-<vertical>` for lead attribution.
+- i18n: page-local `_translations/<vertical>-en.ts` / `-ar.ts` exporting a
+  `solutions<Vertical>Page` namespace, imported + spread into
+  `src/features/core/i18n/global/en.ts` / `ar.ts` (same convention as every other
+  landing page).
+- Registered in `src/app/sitemap.ts` static routes and linked from the public footer nav.
+- Only build the page once the vertical's article pair is actually published — it links
+  live public URLs, not drafts.
 
 ## OG Image Strategy
 

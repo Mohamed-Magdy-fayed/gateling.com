@@ -91,14 +91,17 @@ export function SectionHeader({
 export function HeroContainer({
   className,
   children,
+  imageUrl,
   ...props
-}: HTMLAttributes<HTMLElement>) {
+}: HTMLAttributes<HTMLElement> & { imageUrl?: string }) {
   return (
     <section
       className={cn(
-        "relative flex min-h-full flex-col justify-center overflow-hidden md:min-h-[calc(100dvh-4rem)]",
+        "relative flex min-h-full flex-col justify-center overflow-hidden py-4 md:py-8 lg:py-12",
+        imageUrl && "bg-bottom bg-cover bg-no-repeat",
         className,
       )}
+      style={{ backgroundImage: `url(${imageUrl})` }}
       {...props}
     >
       {/* gradient backdrop */}

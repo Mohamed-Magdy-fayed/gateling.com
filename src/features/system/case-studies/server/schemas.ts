@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { translationKey } from "@/features/core/i18n/global";
+import { blocksArraySchema } from "@/features/system/shared/content-blocks";
 
 export const mediaItemSchema = z.object({
   id: z.string().uuid().optional(),
@@ -59,6 +60,7 @@ export const caseStudyMutationSchema = z.object({
   liveUrl: z.string().url().max(1024).optional().nullable(),
   sortOrder: z.number().int().min(0).default(0),
   media: z.array(mediaItemSchema).default([]),
+  blocks: blocksArraySchema,
 });
 
 export const caseStudyUpdateSchema = caseStudyMutationSchema.extend({

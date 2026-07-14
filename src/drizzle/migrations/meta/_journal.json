@@ -71,6 +71,20 @@
       "when": 1783276415870,
       "tag": "0009_colorful_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783279097659,
+      "tag": "0010_spicy_living_tribunal",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1783970573638,
+      "tag": "0011_open_dagger",
+      "breakpoints": true
     }
   ]
 }

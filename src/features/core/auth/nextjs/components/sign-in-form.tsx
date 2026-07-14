@@ -90,12 +90,14 @@ export function SignInForm() {
         toast.error(t("authTranslations.passkeys.auth.error.generic"));
         return;
       }
-      await completePasskeyAuthenticationAction(email, assertion);
+      const returnTo = searchParams.get("returnTo") ?? undefined;
+      await completePasskeyAuthenticationAction(email, assertion, returnTo);
     });
   }
 
   async function handleOAuthClick(provider: OAuthProvider) {
-    await oAuthSignIn(provider);
+    const returnTo = searchParams.get("returnTo") ?? undefined;
+    await oAuthSignIn(provider, returnTo);
   }
 
   async function handleContinueEmail() {

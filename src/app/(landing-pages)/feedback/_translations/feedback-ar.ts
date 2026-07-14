@@ -1,6 +1,6 @@
 export default {
   feedbackPage: {
-    metaTitle: "شاركنا تجربتك | بُوَيْب",
+    metaTitle: "شاركنا تجربتك",
     metaDescription:
       "أخبرنا كيف غيّر حلّنا أعمالك. قصتك تساعد الشركات الأخرى على فهم ما هو ممكن.",
     pageTitle: "شاركنا تجربتك",

@@ -7,6 +7,7 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,6 @@ import type { BlogPostRow } from "@/integrations/trpc/routers/blog-posts";
 
 import {
   BlogPostDeleteDialog,
-  BlogPostFormDialog,
   BlogPostInfoModal,
   type BlogPostRowActionVariant,
   buildBlogPostColumns,
@@ -42,6 +42,7 @@ type RowAction = { row: BlogPostRow; variant: BlogPostRowActionVariant } | null;
 
 export function BlogPostsTablePage() {
   const trpc = useTRPC();
+  const router = useRouter();
   const { t, locale } = useTranslation();
   const addLabel = `${t("common.add")} ${t("systemPages.blogPostsTitle")}`;
 
@@ -62,7 +63,6 @@ export function BlogPostsTablePage() {
     getEntityColumnPinning(),
   );
   const [rowAction, setRowAction] = useState<RowAction>(null);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const listInput = useMemo(
     () => ({
@@ -154,7 +154,7 @@ export function BlogPostsTablePage() {
                     type="button"
                     size="icon"
                     className="size-8"
-                    onClick={() => setCreateOpen(true)}
+                    onClick={() => router.push("/blog-posts/new/edit")}
                     aria-label={addLabel}
                   >
                     <PlusIcon className="size-3.5" />
@@ -167,14 +167,6 @@ export function BlogPostsTablePage() {
           </DataTableToolbar>
         }
         footer={<DataTablePagination table={table} />}
-      />
-      <BlogPostFormDialog open={createOpen} onOpenChange={setCreateOpen} />
-      <BlogPostFormDialog
-        open={rowAction?.variant === "edit"}
-        onOpenChange={(open) => {
-          if (!open) closeRowAction();
-        }}
-        post={rowAction?.variant === "edit" ? rowAction.row : null}
       />
       <BlogPostInfoModal
         open={rowAction?.variant === "info"}

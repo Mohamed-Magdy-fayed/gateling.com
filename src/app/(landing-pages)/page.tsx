@@ -11,7 +11,7 @@ import { ValuePropositionSection } from "./_components/value-proposition-section
 import { WorkPreviewSection } from "./_components/work-preview-section";
 
 export const metadata: Metadata = {
-  title: "Gateling Solutions — Software Engineering & Product Design Studio",
+  title: "Software Engineering & Product Design Studio",
   description:
     "We partner with founders and operations leads to build custom platforms that clear the manual chaos, keep teams unified, and base every decision on live data. Egypt & MENA.",
   alternates: { canonical: canonicalUrl("/") },

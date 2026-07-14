@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { eq, inArray } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 
 import { SettingsTable } from "@/drizzle/schema";
 import {
@@ -13,6 +14,7 @@ import type {
   SettingSetActiveInput,
   SettingUpdateInput,
 } from "./schemas";
+import { getPublicSettingsTag } from "./public-settings";
 import {
   assertAdminRole,
   getRequiredSession,
@@ -125,6 +127,7 @@ export async function updateSetting(
       })
       .where(eq(SettingsTable.id, input.id));
 
+    revalidateTag(getPublicSettingsTag(), "max");
     return { updated: true };
   } catch (err) {
     throw handleDatabaseError(err);
@@ -166,6 +169,7 @@ export async function setSettingActive(
     })
     .where(eq(SettingsTable.id, input.id));
 
+  revalidateTag(getPublicSettingsTag(), "max");
   return { updated: true };
 }
 
@@ -206,5 +210,6 @@ export async function bulkSetSettingsActive(
     })
     .where(inArray(SettingsTable.id, input.ids));
 
+  revalidateTag(getPublicSettingsTag(), "max");
   return { updated: true };
 }

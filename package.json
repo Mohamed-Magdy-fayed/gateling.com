@@ -25,7 +25,8 @@
     "migrate:legacy:dry": "tsx scripts/migrations/migrate-legacy.ts -- --dry-run",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
@@ -77,6 +78,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",

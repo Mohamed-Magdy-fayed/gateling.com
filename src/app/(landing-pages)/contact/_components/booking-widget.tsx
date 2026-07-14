@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import { CalendarClockIcon, CheckCircle2Icon, GlobeIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -30,6 +30,7 @@ import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { trackGaEvent } from "@/lib/ga4";
 import { trackCustomPixelEvent, trackPixelEvent } from "@/lib/meta-pixel";
+import { readAndClearBookingDraft, saveBookingDraft } from "./booking-draft";
 
 const SIGN_IN_RETURN_TO = encodeURIComponent("/contact?tab=book");
 const SIGN_IN_URL = `/sign-in?returnTo=${SIGN_IN_RETURN_TO}`;
@@ -178,6 +179,25 @@ export function BookingWidget({
       });
     },
   });
+
+  // One-time restore of the in-progress selection saved before the user was
+  // sent to sign in, so returning from auth doesn't lose their picks.
+  const hasRestoredDraft = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional one-time restore, not a reactive sync
+  useEffect(() => {
+    if (!isSignedIn || hasRestoredDraft.current) return;
+    hasRestoredDraft.current = true;
+
+    const draft = readAndClearBookingDraft();
+    if (!draft) return;
+
+    if (draft.selectedDay) setSelectedDay(draft.selectedDay);
+    if (draft.selectedSlot) setSelectedSlot(draft.selectedSlot);
+    if (draft.note) setNote(draft.note);
+    if (draft.customPreferredAt)
+      customForm.setFieldValue("preferredAt", draft.customPreferredAt);
+    if (draft.customNote) customForm.setFieldValue("note", draft.customNote);
+  }, [isSignedIn]);
 
   const timeFormatter = useMemo(
     () =>
@@ -374,7 +394,13 @@ export function BookingWidget({
             </>
           ) : (
             <>
-              <LinkButton href={SIGN_IN_URL} className="w-full">
+              <LinkButton
+                href={SIGN_IN_URL}
+                className="w-full"
+                onClick={() =>
+                  saveBookingDraft({ selectedDay, selectedSlot, note })
+                }
+              >
                 {t("publicPages.bookCallPage.signInToBook")}
               </LinkButton>
               <ProseText size="sm">
@@ -449,7 +475,16 @@ export function BookingWidget({
                 </customForm.Subscribe>
               </form>
             ) : (
-              <LinkButton href={SIGN_IN_URL} className="mt-6">
+              <LinkButton
+                href={SIGN_IN_URL}
+                className="mt-6"
+                onClick={() =>
+                  saveBookingDraft({
+                    customPreferredAt: customForm.getFieldValue("preferredAt"),
+                    customNote: customForm.getFieldValue("note"),
+                  })
+                }
+              >
                 {t("publicPages.bookCallPage.signInToRequest")}
               </LinkButton>
             )}

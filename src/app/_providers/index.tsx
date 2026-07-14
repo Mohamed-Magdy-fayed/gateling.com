@@ -4,27 +4,27 @@ import { ThemeProvider } from "next-themes";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getAuth, getBranches } from "@/features/core/auth/nextjs/actions";
+import { getBranches } from "@/features/core/auth/nextjs/actions";
 import { AuthProvider } from "@/features/core/auth/nextjs/components/auth-provider";
 import { BranchProvider } from "@/features/core/auth/nextjs/components/branch-provider";
+import { getCachedAuth } from "@/features/core/auth/nextjs/request-cache";
 import { TranslationProvider } from "@/features/core/i18n/client";
+import { getPublicTrackingSettings } from "@/features/system/settings/server/public-settings";
 import { TRPCReactProvider } from "@/integrations/trpc/client";
-import { api } from "@/integrations/trpc/server";
 
 type ProvidersProps = PropsWithChildren<{
   locale: string;
 }>;
 
 export async function Providers({ children, locale }: ProvidersProps) {
-  const authState = await getAuth();
+  const authState = await getCachedAuth();
   const branchsState = authState.session?.user.id
     ? await getBranches(authState.session.user.id, {
       includeAllBranches: authState.session.user.role === "admin",
     })
     : null;
-  const { facebookPixelId, ga4MeasurementId } = await (
-    await api()
-  ).settings.getPublicValues();
+  const { facebookPixelId, ga4MeasurementId } =
+    await getPublicTrackingSettings();
 
   return (
     <ThemeProvider

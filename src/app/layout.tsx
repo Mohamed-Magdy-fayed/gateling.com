@@ -90,8 +90,9 @@ async function Suspended({ children }: { children: React.ReactNode }) {
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
+      data-scroll-behavior="smooth"
       className={cn(
-        "antialiased font-sans",
+        "antialiased font-sans scroll-smooth",
         geistSans.variable,
         geistMono.variable,
         openSans.variable,

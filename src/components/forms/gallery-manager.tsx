@@ -199,6 +199,14 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
     );
   }
 
+  function updateUrl(index: number, url: string) {
+    onChange(
+      value.map((item, i) =>
+        i === index ? { ...item, url: url } : item,
+      ),
+    );
+  }
+
   const isDisabled = disabled || uploadingCount > 0;
 
   return (
@@ -256,6 +264,15 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
                   onChange={(e) => updateTitle(index, e.target.value)}
                   placeholder={String(
                     t("galleryManager.titlePlaceholder" as never),
+                  )}
+                  className="h-7 text-xs"
+                  disabled={isDisabled}
+                />
+                <Input
+                  value={item.url ?? ""}
+                  onChange={(e) => updateUrl(index, e.target.value)}
+                  placeholder={String(
+                    t("galleryManager.urlPlaceholder" as never),
                   )}
                   className="h-7 text-xs"
                   disabled={isDisabled}

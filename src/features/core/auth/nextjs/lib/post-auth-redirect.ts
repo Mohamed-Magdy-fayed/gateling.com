@@ -4,9 +4,16 @@ import { SYSTEM_NAV_ITEMS } from "@/features/system/registry";
 
 const EMPLOYEE_HOME_HREF = "/leads";
 
+export function isSafeReturnTo(returnTo: string | undefined): returnTo is string {
+  if (!returnTo) return false;
+  if (!returnTo.startsWith("/")) return false;
+  if (returnTo.startsWith("//") || returnTo.startsWith("/\\")) return false;
+  return true;
+}
+
 export function getPostAuthRedirect(user: PartialUser, returnTo?: string) {
   if (user.role === "customer") {
-    if (returnTo?.startsWith("/feedback/")) return returnTo;
+    if (isSafeReturnTo(returnTo)) return returnTo;
     return "/my-account";
   }
 

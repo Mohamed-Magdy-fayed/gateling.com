@@ -3,14 +3,14 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AppShellLayout } from "@/features/core/app-shell";
-import { getAuth } from "@/features/core/auth/nextjs/actions";
+import { getCachedAuth } from "@/features/core/auth/nextjs/request-cache";
 
 export default async function SystemPagesLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const auth = await getAuth();
+  const auth = await getCachedAuth();
   if (!auth.isAuthenticated) redirect("/sign-in");
   if (auth.session.user.role === "customer") redirect("/my-account");
 

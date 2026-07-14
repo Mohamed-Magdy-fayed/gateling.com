@@ -9,6 +9,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
   const { t } = useTranslation();
   const trpc = useTRPC();
   const qc = useQueryClient();
+  const router = useRouter();
 
   const publishMut = useMutation(
     trpc.caseStudies.publish.mutationOptions({
@@ -77,7 +79,7 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
           {t("common.info")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setRowAction({ row, variant: "edit" })}
+          onClick={() => router.push(`/work-mgmt/${row.id}/edit`)}
         >
           <PencilIcon className="size-3.5" />
           {t("common.edit")}
