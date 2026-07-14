@@ -91,7 +91,7 @@ async function Suspended({ children }: { children: React.ReactNode }) {
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={cn(
-        "antialiased font-sans",
+        "antialiased font-sans scroll-smooth",
         geistSans.variable,
         geistMono.variable,
         openSans.variable,

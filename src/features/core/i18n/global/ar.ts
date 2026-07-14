@@ -588,6 +588,17 @@ export default {
     settingName00012: "معرّف قياس GA4",
     settingDesc00012:
       "معرّف قياس Google Analytics 4 لتحليلات الموقع وتتبع التحويلات (الصيغة: G-XXXXXXXXXX).",
+    settingName00013: "معرّف WaPilot",
+    settingDesc00013:
+      "معرّف نسخة WaPilot المستخدم لإرسال رسائل دردشة الموقع عبر واتساب.",
+    settingName00014: "رمز WaPilot API",
+    settingDesc00014: "رمز WaPilot API المستخدم لتوثيق طلبات الإرسال.",
+    settingName00015: "سر Webhook الخاص بـ WaPilot",
+    settingDesc00015:
+      "سر مشترك يُضاف إلى رابط الـ Webhook الخاص بـ WaPilot (?secret=...) لتوثيق الردود الواردة.",
+    settingName00016: "أداة الدردشة",
+    settingDesc00016:
+      "تفعيل أداة دردشة واتساب داخل الموقع. عند التعطيل يعود الزر العائم إلى رابط wa.me.",
     settingStatePricesShown: "نشط",
     settingStatePricesHidden: "غير نشط",
     settingsShowPricesState: "تبديل الحالة",
@@ -824,7 +835,7 @@ export default {
     uploadFailed: "فشل الرفع. حاول مرة أخرى.",
     autosaving: "جارِ الحفظ…",
     autosavedAt: "تم الحفظ التلقائي في {time}",
-    notSavedYet: "لم يتم الحفظ بعد — يتم الحفظ التلقائي كل ثانيتين.",
+    notSavedYet: "لم يتم الحفظ بعد.",
     typeHeading: "عنوان",
     typeParagraph: "فقرة",
     typeList: "قائمة",

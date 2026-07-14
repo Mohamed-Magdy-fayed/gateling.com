@@ -97,8 +97,8 @@ export function HeroContainer({
   return (
     <section
       className={cn(
-        "relative flex min-h-full flex-col justify-center overflow-hidden md:min-h-[calc(100dvh-4rem)]",
-        imageUrl && "bg-center bg-cover bg-no-repeat",
+        "relative flex min-h-full flex-col justify-center overflow-hidden py-4 md:py-8 lg:py-12",
+        imageUrl && "bg-bottom bg-cover bg-no-repeat",
         className,
       )}
       style={{ backgroundImage: `url(${imageUrl})` }}

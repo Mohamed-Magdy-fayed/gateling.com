@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/features/core/i18n/client";
@@ -10,16 +10,16 @@ import { ContactForm } from "./contact-form";
 
 type Props = {
   isSignedIn: boolean;
-  initialTab: "message" | "book";
+  tab: "message" | "book";
+  onTabChange: (tab: "message" | "book") => void;
   rescheduleId: string | null;
 };
 
-export function ContactTabs({ isSignedIn, initialTab, rescheduleId }: Props) {
+export function ContactTabs({ isSignedIn, tab, onTabChange, rescheduleId }: Props) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState(initialTab);
 
   return (
-    <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
+    <Tabs value={tab} onValueChange={(value) => onTabChange(value as typeof tab)}>
       <TabsList variant="line">
         <TabsTrigger value="book">
           {t("publicPages.contactPage.tabBookCall")}

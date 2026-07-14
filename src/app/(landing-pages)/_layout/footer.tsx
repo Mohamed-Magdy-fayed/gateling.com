@@ -69,8 +69,8 @@ function InstagramIcon({ className }: { className?: string }) {
 const APP_CONFIG = {
   name: "Gateling Solutions",
   email: "info@gateling.com",
-  phoneDisplay: "201123862218",
-  phoneDial: "+20112386221",
+  phoneDisplay: "+201123862218",
+  phoneDial: "+201123862218",
   facebook: "https://www.facebook.com/mohamedmagdyfayed",
   youtube: "https://www.youtube.com/@mohamedfayed",
   linkedin: "https://www.linkedin.com/in/mohamedmagdyfayed/",

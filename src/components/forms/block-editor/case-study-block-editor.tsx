@@ -243,17 +243,6 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
     ],
   );
 
-  // Debounced autosave (~2s) whenever meaningful state changes. `save`
-  // intentionally omitted from deps — see blog-post-block-editor.tsx.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: save is derived from the listed deps
-  useEffect(() => {
-    if (!scalars.title.trim() || !scalars.slug.trim()) return;
-    const timer = setTimeout(() => {
-      void save(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [scalars, media, blocks]);
-
   async function handlePublish() {
     if (!recordId) {
       await save(true);

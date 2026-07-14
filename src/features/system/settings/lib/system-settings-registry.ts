@@ -23,6 +23,10 @@ export const SYSTEM_SETTING_CODE = {
   BOOKING_MAX_DAYS_AHEAD: "00010",
   BOOKING_MEETING_LINK: "00011",
   GA4_MEASUREMENT_ID: "00012",
+  WAPILOT_INSTANCE_ID: "00013",
+  WAPILOT_API_TOKEN: "00014",
+  WAPILOT_WEBHOOK_SECRET: "00015",
+  CHAT_WIDGET_ENABLED: "00016",
 } as const;
 
 export type SystemSettingCode =
@@ -41,6 +45,10 @@ export const SYSTEM_SETTING_CODES: SystemSettingCode[] = [
   SYSTEM_SETTING_CODE.BOOKING_MAX_DAYS_AHEAD,
   SYSTEM_SETTING_CODE.BOOKING_MEETING_LINK,
   SYSTEM_SETTING_CODE.GA4_MEASUREMENT_ID,
+  SYSTEM_SETTING_CODE.WAPILOT_INSTANCE_ID,
+  SYSTEM_SETTING_CODE.WAPILOT_API_TOKEN,
+  SYSTEM_SETTING_CODE.WAPILOT_WEBHOOK_SECRET,
+  SYSTEM_SETTING_CODE.CHAT_WIDGET_ENABLED,
 ];
 
 export type SystemSettingDefinition = {
@@ -58,7 +66,11 @@ export type SystemSettingDefinition = {
     | "settingName00009"
     | "settingName00010"
     | "settingName00011"
-    | "settingName00012";
+    | "settingName00012"
+    | "settingName00013"
+    | "settingName00014"
+    | "settingName00015"
+    | "settingName00016";
   descriptionKey:
     | "settingDesc00001"
     | "settingDesc00002"
@@ -71,7 +83,11 @@ export type SystemSettingDefinition = {
     | "settingDesc00009"
     | "settingDesc00010"
     | "settingDesc00011"
-    | "settingDesc00012";
+    | "settingDesc00012"
+    | "settingDesc00013"
+    | "settingDesc00014"
+    | "settingDesc00015"
+    | "settingDesc00016";
   descriptionEn: string;
   editable: {
     isActive?: boolean;
@@ -206,6 +222,45 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
     editable: { isActive: true, value: true },
     seed: { isActive: false, value: null },
     validateValue: (value) => /^G-[A-Z0-9]+$/i.test(value),
+  },
+  {
+    code: SYSTEM_SETTING_CODE.WAPILOT_INSTANCE_ID,
+    label: "integration",
+    nameKey: "settingName00013",
+    descriptionKey: "settingDesc00013",
+    descriptionEn:
+      "WaPilot instance ID used to send website chat messages over WhatsApp.",
+    editable: { isActive: true, value: true },
+    seed: { isActive: false, value: null },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.WAPILOT_API_TOKEN,
+    label: "integration",
+    nameKey: "settingName00014",
+    descriptionKey: "settingDesc00014",
+    descriptionEn: "WaPilot API token used to authenticate send requests.",
+    editable: { isActive: true, value: true },
+    seed: { isActive: false, value: null },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.WAPILOT_WEBHOOK_SECRET,
+    label: "integration",
+    nameKey: "settingName00015",
+    descriptionKey: "settingDesc00015",
+    descriptionEn:
+      "Shared secret appended to the WaPilot webhook URL (?secret=...) to authenticate incoming replies.",
+    editable: { isActive: true, value: true },
+    seed: { isActive: false, value: null },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.CHAT_WIDGET_ENABLED,
+    label: "policy",
+    nameKey: "settingName00016",
+    descriptionKey: "settingDesc00016",
+    descriptionEn:
+      "Enables the on-site WhatsApp chat widget. When inactive, the floating button falls back to a wa.me link.",
+    editable: { isActive: true },
+    seed: { isActive: false },
   },
 ];
 

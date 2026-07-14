@@ -11,7 +11,6 @@ import {
   Settings,
   Star,
   TableOfContentsIcon,
-  UserIcon,
   Users,
 } from "lucide-react";
 
@@ -159,14 +158,6 @@ export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
     Icon: Settings,
     navTranslationKey: "navSettings",
     breadcrumbTranslationKey: "breadcrumbSettings",
-  },
-  {
-    key: "my-account",
-    href: "/my-account",
-    pathPrefixes: ["/my-account"],
-    Icon: UserIcon,
-    navTranslationKey: null,
-    breadcrumbTranslationKey: null,
   },
 ];
 

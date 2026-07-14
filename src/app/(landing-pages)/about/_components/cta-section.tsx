@@ -2,8 +2,8 @@
 
 import { LinkButton } from "@/components/general/link-button";
 import { H2, P } from "@/components/ui/typography";
-import { useScrollAnimation } from "@/hooks/use-animation";
 import { useTranslation } from "@/features/core/i18n/client";
+import { useScrollAnimation } from "@/hooks/use-animation";
 
 export function AboutCtaSection() {
     const { t } = useTranslation();
@@ -20,10 +20,12 @@ export function AboutCtaSection() {
                         }`}
                 >
                     <H2 className="mb-6">{t("about.cta.title")}</H2>
-                    <P className="text-muted-foreground mb-8">{t("about.cta.description")}</P>
+                    <P className="text-muted-foreground mb-8">
+                        {t("about.cta.description")}
+                    </P>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <LinkButton
-                            href="/contact"
+                            href="/contact?tab=book#contact-form"
                             size="lg"
                             className="hover:scale-105 transition-transform duration-300"
                         >

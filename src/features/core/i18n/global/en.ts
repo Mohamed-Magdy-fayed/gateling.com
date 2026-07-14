@@ -600,6 +600,17 @@ export default {
     settingName00012: "GA4 Measurement ID",
     settingDesc00012:
       "Google Analytics 4 Measurement ID for site analytics and conversion tracking (format: G-XXXXXXXXXX).",
+    settingName00013: "WaPilot Instance ID",
+    settingDesc00013:
+      "WaPilot instance ID used to send website chat messages over WhatsApp.",
+    settingName00014: "WaPilot API Token",
+    settingDesc00014: "WaPilot API token used to authenticate send requests.",
+    settingName00015: "WaPilot Webhook Secret",
+    settingDesc00015:
+      "Shared secret appended to the WaPilot webhook URL (?secret=...) to authenticate incoming replies.",
+    settingName00016: "Chat Widget",
+    settingDesc00016:
+      "Enables the on-site WhatsApp chat widget. When inactive, the floating button falls back to a wa.me link.",
     settingStatePricesShown: "Active",
     settingStatePricesHidden: "Inactive",
     settingsShowPricesState: "Toggle active",

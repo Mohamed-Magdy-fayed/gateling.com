@@ -8,8 +8,8 @@
       "Bash(npx playwright test*)"
     ],
     "deny": [
-      "mcp__claude-in-chrome",
-      "mcp__Claude_Preview"
+      // "mcp__claude-in-chrome",
+      // "mcp__Claude_Preview"
     ]
   }
 }
