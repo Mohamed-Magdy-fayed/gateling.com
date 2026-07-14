@@ -127,7 +127,7 @@ export default {
     heading: "ابقَ على اطلاع",
     description:
       "ملاحظات بناء عرضية وتحليلات إطلاق ورؤى من وراء الكواليس من مشاريعنا — مباشرة لبريدك.",
-    placeholder: "بريدك@الإلكتروني.com",
+    placeholder: "بريدك الالكتروني",
     subscribe: "اشترك",
     subscribing: "جاري الاشتراك...",
     alreadySubscribed: "أنت مشترك بالفعل!",

@@ -40,6 +40,7 @@ type ScalarState = {
   resultsArSummary: string;
   coverImageUrl: string;
   liveUrl: string;
+  sortOrder: number;
 };
 
 const emptyScalars: ScalarState = {
@@ -58,6 +59,7 @@ const emptyScalars: ScalarState = {
   resultsArSummary: "",
   coverImageUrl: "",
   liveUrl: "",
+  sortOrder: 0,
 };
 
 function slugify(text: string) {
@@ -98,6 +100,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
   const slugId = useId();
   const coverImageId = useId();
   const liveUrlId = useId();
+  const sortOrderId = useId();
 
   const { data: caseStudy } = useQuery({
     ...trpc.caseStudies.getById.queryOptions({ id }),
@@ -133,6 +136,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
       resultsArSummary: caseStudy.resultsAr?.summary ?? "",
       coverImageUrl: caseStudy.coverImageUrl ?? "",
       liveUrl: caseStudy.liveUrl ?? "",
+      sortOrder: caseStudy.sortOrder,
     });
     setMedia(
       caseStudy.media.map((m) => ({
@@ -185,7 +189,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
         : null,
       coverImageUrl: scalars.coverImageUrl || null,
       liveUrl: scalars.liveUrl || null,
-      sortOrder: caseStudy?.sortOrder ?? 0,
+      sortOrder: scalars.sortOrder,
       media: media.map((m, i) => ({
         id: m.id,
         type: m.type,
@@ -546,6 +550,22 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
                     setScalars((s) => ({ ...s, liveUrl: e.target.value }))
                   }
                   placeholder="https://myapp.gateling.com/"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={sortOrderId}>
+                  {t("work.sortOrder")}
+                </FieldLabel>
+                <Input
+                  id={sortOrderId}
+                  type="number"
+                  value={scalars.sortOrder}
+                  onChange={(e) =>
+                    setScalars((s) => ({
+                      ...s,
+                      sortOrder: Number(e.target.value) || 0,
+                    }))
+                  }
                 />
               </Field>
             </FieldGroup>
