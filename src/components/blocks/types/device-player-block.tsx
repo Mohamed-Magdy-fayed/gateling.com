@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { toEmbedUrl } from "@/components/general/media-section";
+import { toEmbedUrl } from "@/components/general/embed-url";
 import type { BlockDataByType } from "@/features/system/shared/content-blocks";
 import { cn } from "@/lib/utils";
 import type { BlockRendererItemProps } from "../block-renderer";
