@@ -1,7 +1,13 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GlobeIcon, Loader2Icon, SaveIcon } from "lucide-react";
+import {
+  GlobeIcon,
+  Loader2Icon,
+  PlusIcon,
+  SaveIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -62,6 +68,21 @@ const emptyScalars: ScalarState = {
   sortOrder: 0,
 };
 
+type MetricRow = { uid: string; value: string; label: string };
+
+function makeMetric(value = "", label = ""): MetricRow {
+  return { uid: crypto.randomUUID(), value, label };
+}
+
+/** Trim rows and drop any that are missing a value or label. */
+function toCleanMetrics(
+  rows: MetricRow[],
+): { value: string; label: string }[] {
+  return rows
+    .map((m) => ({ value: m.value.trim(), label: m.label.trim() }))
+    .filter((m) => m.value.length > 0 && m.label.length > 0);
+}
+
 function slugify(text: string) {
   return text
     .toLowerCase()
@@ -110,6 +131,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
   const [scalars, setScalars] = useState<ScalarState>(emptyScalars);
   const [media, setMedia] = useState<GalleryItem[]>([]);
   const [blocks, setBlocks] = useState<EditorBlock[]>([]);
+  const [metrics, setMetrics] = useState<MetricRow[]>(() => [makeMetric()]);
   const [status, setStatus] = useState<"draft" | "published" | "archived">(
     "draft",
   );
@@ -150,6 +172,11 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
       })),
     );
     setBlocks(toEditorBlocks(caseStudy.blocks as BlockItemInput[] | undefined));
+    setMetrics(
+      caseStudy.results.metrics.length
+        ? caseStudy.results.metrics.map((m) => makeMetric(m.value, m.label))
+        : [makeMetric()],
+    );
     setStatus(
       caseStudy.status === "published" || caseStudy.status === "archived"
         ? caseStudy.status
@@ -177,9 +204,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
       solutionAr: scalars.solutionAr || null,
       results: {
         summary: scalars.resultsSummary,
-        metrics: caseStudy?.results.metrics.length
-          ? caseStudy.results.metrics
-          : [{ label: "N/A", value: "N/A" }],
+        metrics: toCleanMetrics(metrics),
       },
       resultsAr: scalars.resultsArSummary
         ? {
@@ -201,7 +226,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
       })),
       blocks: blocks.map((b, i) => ({ ...b, sortOrder: i })),
     }),
-    [scalars, media, blocks, caseStudy],
+    [scalars, media, blocks, metrics, caseStudy],
   );
 
   const save = useCallback(
@@ -215,6 +240,12 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
         !scalars.solution.trim() ||
         !scalars.resultsSummary.trim()
       ) {
+        return;
+      }
+      // At least one full metric is required (schema enforces min 1) — surface
+      // it on a manual save so the button click isn't a silent no-op.
+      if (toCleanMetrics(metrics).length === 0) {
+        if (!silent) toast.error(t("work.metricRequired"));
         return;
       }
       const payload = buildPayload();
@@ -236,6 +267,7 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
     },
     [
       scalars,
+      metrics,
       buildPayload,
       recordId,
       updateMut,
@@ -415,6 +447,78 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
                         }))
                       }
                     />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("work.results")}</FieldLabel>
+                    <div className="space-y-2">
+                      {metrics.map((m) => (
+                        <div key={m.uid} className="flex items-start gap-2">
+                          <Input
+                            aria-label={t("work.resultsMetricValue")}
+                            placeholder={t(
+                              "work.resultsMetricValuePlaceholder",
+                            )}
+                            value={m.value}
+                            maxLength={64}
+                            className="w-28 shrink-0"
+                            onChange={(e) =>
+                              setMetrics((rows) =>
+                                rows.map((r) =>
+                                  r.uid === m.uid
+                                    ? { ...r, value: e.target.value }
+                                    : r,
+                                ),
+                              )
+                            }
+                          />
+                          <Input
+                            aria-label={t("work.resultsMetricLabel")}
+                            placeholder={t(
+                              "work.resultsMetricLabelPlaceholder",
+                            )}
+                            value={m.label}
+                            maxLength={128}
+                            className="flex-1"
+                            onChange={(e) =>
+                              setMetrics((rows) =>
+                                rows.map((r) =>
+                                  r.uid === m.uid
+                                    ? { ...r, label: e.target.value }
+                                    : r,
+                                ),
+                              )
+                            }
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("work.removeMetric")}
+                            disabled={metrics.length === 1}
+                            onClick={() =>
+                              setMetrics((rows) =>
+                                rows.length > 1
+                                  ? rows.filter((r) => r.uid !== m.uid)
+                                  : rows,
+                              )
+                            }
+                          >
+                            <Trash2Icon className="size-3.5" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setMetrics((rows) => [...rows, makeMetric()])
+                        }
+                      >
+                        <PlusIcon className="size-3.5" />
+                        {t("work.addMetric")}
+                      </Button>
+                    </div>
                   </Field>
                 </FieldGroup>
               </TabsContent>

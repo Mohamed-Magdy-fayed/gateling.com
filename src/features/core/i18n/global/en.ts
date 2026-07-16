@@ -229,6 +229,7 @@ export default {
     resultsMetricValuePlaceholder: "e.g. 70%",
     addMetric: "Add metric",
     removeMetric: "Remove",
+    metricRequired: "Add at least one result metric (value and label).",
     resultsSummary: "Summary",
     resultsSummaryPlaceholder: "1-2 sentence outcome statement.",
     slug: "URL slug",

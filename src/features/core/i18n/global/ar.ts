@@ -223,6 +223,7 @@ export default {
     resultsMetricValuePlaceholder: "مثال: 70%",
     addMetric: "إضافة مقياس",
     removeMetric: "إزالة",
+    metricRequired: "أضف مقياس نتيجة واحدًا على الأقل (القيمة والتسمية).",
     resultsSummary: "ملخص",
     resultsSummaryPlaceholder: "جملة أو جملتان تصفان النتيجة.",
     slug: "رابط URL",
