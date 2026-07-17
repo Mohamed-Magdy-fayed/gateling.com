@@ -6,6 +6,7 @@ import {
   protectedProcedure,
 } from "@/integrations/trpc/init";
 
+import { createFeedbackAccessLink } from "./feedback-access";
 import {
   archiveCaseStudy,
   createCaseStudy,
@@ -54,4 +55,9 @@ export const caseStudiesRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(caseStudyDeleteSchema)
     .mutation(({ ctx, input }) => deleteCaseStudy(ctx, input.id)),
+  createFeedbackAccessLink: protectedProcedure
+    .input(z.object({ caseStudyId: z.string().uuid() }))
+    .mutation(({ ctx, input }) =>
+      createFeedbackAccessLink(ctx, input.caseStudyId),
+    ),
 });

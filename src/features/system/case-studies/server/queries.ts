@@ -97,13 +97,16 @@ export async function listCaseStudies(
 }
 
 export async function getCaseStudyById(ctx: TRPCContext, id: string) {
-  return ctx.db.query.CaseStudiesTable.findFirst({
+  const row = await ctx.db.query.CaseStudiesTable.findFirst({
     where: and(eq(CaseStudiesTable.id, id), isNull(CaseStudiesTable.deletedAt)),
     with: {
       media: { orderBy: [asc(CaseStudyMediaTable.sortOrder)] },
       blocks: { orderBy: [asc(CaseStudyBlocksTable.sortOrder)] },
     },
   });
+  // tRPC/react-query reject `undefined` — return null so callers can render a
+  // "not found" state (e.g. an edit URL with a stale id after a reseed).
+  return row ?? null;
 }
 
 export async function listPublishedCaseStudies(ctx: TRPCContext) {

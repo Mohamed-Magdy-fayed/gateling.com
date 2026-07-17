@@ -15,6 +15,7 @@ export const userTokenTypeValues = [
   "password_reset",
   "device_trust",
   "otp",
+  "magic_link",
 ] as const;
 export type UserTokenType = (typeof userTokenTypeValues)[number];
 export const userTokenTypeEnum = pgEnum("user_token_type", userTokenTypeValues);

@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import { db } from "@/drizzle";
 import {
   BlogPostMediaTable,
@@ -5,6 +7,7 @@ import {
   BranchesTable,
   BranchMembershipsTable,
   CaseStudiesTable,
+  CaseStudyBlocksTable,
   CaseStudyMediaTable,
   type CaseStudyResults,
   ServiceMediaTable,
@@ -14,6 +17,7 @@ import {
   UsersTable,
 } from "@/drizzle/schema";
 import { hashPassword } from "@/features/core/auth/core/passwordHasher";
+import { buildCaseStudyBlockRows } from "./case-study-blocks";
 
 import {
   SEED_ADMIN_EMAIL,
@@ -25,12 +29,17 @@ import {
   SEED_CLIENT_EMAN_EMAIL,
   SEED_CLIENT_EMAN_ID,
   SEED_CLIENT_EMAN_PASSWORD,
+  SEED_CLIENT_EMAN_PHONE,
   SEED_CLIENT_HANY_EMAIL,
   SEED_CLIENT_HANY_ID,
   SEED_CLIENT_HANY_PASSWORD,
   SEED_CLIENT_HUSSEIN_EMAIL,
   SEED_CLIENT_HUSSEIN_ID,
   SEED_CLIENT_HUSSEIN_PASSWORD,
+  SEED_CLIENT_WAEL_EMAIL,
+  SEED_CLIENT_WAEL_ID,
+  SEED_CLIENT_WAEL_PASSWORD,
+  SEED_CLIENT_WAEL_PHONE,
   SEED_SYSTEM_ACTOR,
   type SeedProfileName,
 } from "./constants";
@@ -51,51 +60,36 @@ export type SeedScenarioResult = {
 export async function seedScenario(
   config: SeedScenarioConfig,
 ): Promise<SeedScenarioResult> {
+  // Idempotent, non-destructive seed: existing data is never wiped. Every entity
+  // is matched on its natural key (fixed IDs, unique emails / slugs / short
+  // codes) and inserted only when missing, so a re-run finds the seed data
+  // already present and skips it without errors.
   const { adminUser, adminCredential, mainBranch } = await db.transaction(
     async (tx) => {
-      const adminUser = await tx
-        .insert(UsersTable)
-        .values({
-          id: SEED_ADMIN_ID,
-          createdBy: SEED_SYSTEM_ACTOR,
-          email: SEED_ADMIN_EMAIL,
-          emailVerifiedAt: new Date(),
-          name: "Mohamed Magdy",
-          role: "admin",
-        })
-        .returning()
-        .then((data) => data[0]);
+      const adminUser = await ensureSeedUser(tx, {
+        id: SEED_ADMIN_ID,
+        email: SEED_ADMIN_EMAIL,
+        name: "Mohamed Magdy",
+        role: "admin",
+        phone: null,
+      });
 
-      const passwordHash = await hashPassword(
-        SEED_ADMIN_PASSWORD,
+      const adminCredential = await ensureUserCredential(
+        tx,
         adminUser.id,
+        SEED_ADMIN_PASSWORD,
       );
 
-      const adminCredential = await tx
-        .insert(UserCredentialsTable)
+      const mainBranch = await ensureMainBranch(tx, adminUser.id);
+
+      await tx
+        .insert(BranchMembershipsTable)
         .values({
           userId: adminUser.id,
-          passwordHash,
-          passwordSalt: adminUser.id,
+          branchId: mainBranch.id,
+          isCurrent: true,
         })
-        .returning()
-        .then((data) => data[0]);
-
-      const [mainBranch] = await tx
-        .insert(BranchesTable)
-        .values({
-          shortCode: "MAIN",
-          nameEn: "Main Branch",
-          nameAr: "الفرع الرئيسي",
-          ownerId: adminUser.id,
-        })
-        .returning();
-
-      await tx.insert(BranchMembershipsTable).values({
-        userId: adminUser.id,
-        branchId: mainBranch.id,
-        isCurrent: true,
-      });
+        .onConflictDoNothing();
 
       if (config.seedPortfolioContent) {
         await seedPortfolioContent(tx, SEED_SYSTEM_ACTOR);
@@ -117,10 +111,142 @@ export async function seedScenario(
 
 type DbTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+/**
+ * Select-or-insert a user by its fixed seed id. Returns the existing row when
+ * present so a re-run is a no-op. If a different unique field (email/phone)
+ * already holds the row, that row is reused instead of failing.
+ */
+async function ensureSeedUser(
+  tx: DbTx,
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: "admin" | "customer";
+    phone: string | null;
+  },
+): Promise<typeof UsersTable.$inferSelect> {
+  const existing = await tx
+    .select()
+    .from(UsersTable)
+    .where(eq(UsersTable.id, user.id))
+    .limit(1);
+  if (existing[0]) return existing[0];
+
+  const inserted = await tx
+    .insert(UsersTable)
+    .values({
+      id: user.id,
+      createdBy: SEED_SYSTEM_ACTOR,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      emailVerifiedAt: new Date(),
+      role: user.role,
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return inserted[0];
+
+  const byEmail = await tx
+    .select()
+    .from(UsersTable)
+    .where(eq(UsersTable.email, user.email))
+    .limit(1);
+  if (byEmail[0]) return byEmail[0];
+
+  throw new Error(`Failed to upsert seed user ${user.email}`);
+}
+
+/** Select-or-insert password credentials for a user (unique on userId). */
+async function ensureUserCredential(
+  tx: DbTx,
+  userId: string,
+  password: string,
+): Promise<typeof UserCredentialsTable.$inferSelect> {
+  const existing = await tx
+    .select()
+    .from(UserCredentialsTable)
+    .where(eq(UserCredentialsTable.userId, userId))
+    .limit(1);
+  if (existing[0]) return existing[0];
+
+  const passwordHash = await hashPassword(password, userId);
+  const inserted = await tx
+    .insert(UserCredentialsTable)
+    .values({
+      userId,
+      passwordHash,
+      passwordSalt: userId,
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return inserted[0];
+
+  const again = await tx
+    .select()
+    .from(UserCredentialsTable)
+    .where(eq(UserCredentialsTable.userId, userId))
+    .limit(1);
+  if (again[0]) return again[0];
+
+  throw new Error(`Failed to upsert credential for user ${userId}`);
+}
+
+/** Select-or-insert the MAIN branch (unique on shortCode). */
+async function ensureMainBranch(
+  tx: DbTx,
+  ownerId: string,
+): Promise<typeof BranchesTable.$inferSelect> {
+  const existing = await tx
+    .select()
+    .from(BranchesTable)
+    .where(eq(BranchesTable.shortCode, "MAIN"))
+    .limit(1);
+  if (existing[0]) return existing[0];
+
+  const inserted = await tx
+    .insert(BranchesTable)
+    .values({
+      shortCode: "MAIN",
+      nameEn: "Main Branch",
+      nameAr: "الفرع الرئيسي",
+      ownerId,
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (inserted[0]) return inserted[0];
+
+  const again = await tx
+    .select()
+    .from(BranchesTable)
+    .where(eq(BranchesTable.shortCode, "MAIN"))
+    .limit(1);
+  if (again[0]) return again[0];
+
+  throw new Error("Failed to upsert MAIN branch");
+}
+
 async function seedPortfolioContent(
   tx: DbTx,
   createdBy: string,
 ): Promise<void> {
+  // Media / blocks / testimonials rows carry no natural unique key (only an
+  // auto-generated id), so re-inserting them would silently duplicate rather
+  // than conflict. Anchor idempotency on a stable case-study slug: if it exists,
+  // the portfolio was already seeded (atomically, in one transaction) — skip.
+  const alreadySeeded = await tx
+    .select({ id: CaseStudiesTable.id })
+    .from(CaseStudiesTable)
+    .where(eq(CaseStudiesTable.slug, "atelier-alaa-el-kasry"))
+    .limit(1);
+  if (alreadySeeded.length > 0) {
+    console.log(
+      "↩️  Portfolio seed data already present — skipping portfolio content.",
+    );
+    return;
+  }
+
   const svcRows = await tx
     .insert(ServicesTable)
     .values([
@@ -398,7 +524,47 @@ async function seedPortfolioContent(
       "الموزعون في المنطقة يشاركون الآن رابطاً موثوقاً واحداً ثنائي اللغة لتسويق منتجاتهم.",
   };
 
-  const [atelier, cafe, megz, arabian] = await tx
+  const ba2olakResults: CaseStudyResults = {
+    metrics: [
+      { label: "Platforms shipped", value: "Web + Mobile" },
+      { label: "Order status stages", value: "6" },
+      { label: "Languages supported", value: "2" },
+    ],
+    summary:
+      "ba2olak launched as one Expo app serving both customers and riders, bringing phone-ordered, cash-on-delivery grocery runs to underserved areas.",
+  };
+
+  const ba2olakResultsAr: CaseStudyResults = {
+    metrics: [
+      { label: "منصات تم إطلاقها", value: "ويب + موبايل" },
+      { label: "مراحل حالة الطلب", value: "6" },
+      { label: "اللغات المدعومة", value: "2" },
+    ],
+    summary:
+      "أُطلق بقولك كتطبيق Expo واحد يخدم العملاء والسائقين، ليصل بطلبات البقالة عبر الهاتف والدفع كاش عند الاستلام إلى المناطق غير المخدومة.",
+  };
+
+  const emanzResults: CaseStudyResults = {
+    metrics: [
+      { label: "Languages (RTL)", value: "2" },
+      { label: "Payment paths", value: "2" },
+      { label: "Orders with ad attribution", value: "100%" },
+    ],
+    summary:
+      "A bilingual conversion funnel that turns Meta ad clicks into booked, paid courses, with deduplicated Pixel + CAPI tracking on every order.",
+  };
+
+  const emanzResultsAr: CaseStudyResults = {
+    metrics: [
+      { label: "اللغات (RTL)", value: "2" },
+      { label: "مسارات الدفع", value: "2" },
+      { label: "طلبات بإسناد إعلاني", value: "100%" },
+    ],
+    summary:
+      "قمع تحويل ثنائي اللغة يحوّل نقرات إعلانات ميتا إلى دورات محجوزة ومدفوعة، مع تتبّع Pixel + CAPI بلا تكرار على كل طلب.",
+  };
+
+  const [atelier, cafe, megz, arabian, ba2olak, emanz] = await tx
     .insert(CaseStudiesTable)
     .values([
       {
@@ -502,6 +668,55 @@ async function seedPortfolioContent(
         status: "published",
         publishedAt: new Date(),
         sortOrder: 3,
+        createdBy,
+      },
+      {
+        title: "ba2olak: A Delivery Marketplace for Egypt's Underserved Areas",
+        titleAr: "بقولك: منصة توصيل للمناطق غير المخدومة في مصر",
+        slug: "ba2olak",
+        client: "ba2olak",
+        clientAr: "بقولك",
+        industry: "Delivery / Marketplace",
+        industryAr: "توصيل / سوق إلكتروني",
+        problemStatement:
+          "Grocery and market delivery in Egypt is concentrated in dense urban areas — established delivery apps rarely reach smaller towns and remote neighborhoods, so residents there still have to walk to multiple stores, queue, and carry goods home themselves.",
+        problemStatementAr:
+          "خدمات توصيل البقالة والسوق في مصر مركّزة في المناطق الحضرية الكثيفة — تطبيقات التوصيل الكبرى نادراً ما تصل إلى المدن الصغيرة والأحياء النائية، فما زال سكانها مضطرين للمشي بين عدة محلات والانتظار في الطوابير وحمل مشترياتهم بأنفسهم.",
+        solution:
+          "Built a bilingual (Arabic-first) web + mobile marketplace where customers order grocery and market items from their phone and a ba2olak rider shops for the items in real stores and delivers to the door, cash on delivery. One Expo app serves both the customer and rider roles, backed by a crowd-sourced, AI-deduplicated bilingual catalog, WhatsApp OTP auth, and an admin dashboard for dispatch and catalog moderation.",
+        solutionAr:
+          "بناء منصة ويب وموبايل ثنائية اللغة (عربي أولاً) يطلب من خلالها العميل أصناف البقالة والسوق من هاتفه، ويقوم سائق بقولك بشراء الأصناف من محلات حقيقية وتوصيلها للباب، مع الدفع كاش عند الاستلام. تطبيق واحد مبني بـ Expo يخدم كلاً من دور العميل ودور السائق، مدعوماً بكتالوج ثنائي اللغة يُبنى من مساهمات المستخدمين ويُنقّى بالذكاء الاصطناعي، ومصادقة عبر واتساب OTP، ولوحة تحكم إدارية لتوزيع الطلبات ومراجعة الكتالوج.",
+        liveUrl: "https://ba2olak.gateling.com",
+        results: ba2olakResults,
+        resultsAr: ba2olakResultsAr,
+        status: "published",
+        publishedAt: new Date(),
+        sortOrder: 4,
+        createdBy,
+      },
+      {
+        title:
+          "Emanz Academy: A Bilingual Meta-Ads Booking Funnel for English Courses",
+        titleAr:
+          "أكاديمية إيمانز: قمع حجز ثنائي اللغة لإعلانات ميتا لدورات الإنجليزية",
+        slug: "emanz",
+        client: "Emanz Academy",
+        clientAr: "أكاديمية إيمانز",
+        industry: "Education",
+        industryAr: "تعليم",
+        problemStatement:
+          "Emanz Academy was driving traffic from Meta ads but had no conversion funnel to catch it. Bookings happened manually over chat, there was no online payment, and ad spend couldn't be tied to actual course sign-ups or revenue.",
+        problemStatementAr:
+          "كانت أكاديمية إيمانز تجلب زيارات من إعلانات ميتا لكن دون قمع تحويل يلتقطها. كانت الحجوزات تتم يدوياً عبر المحادثة، ولا يوجد دفع إلكتروني، ولم يكن ممكناً ربط الإنفاق الإعلاني بالتسجيلات الفعلية أو الإيرادات.",
+        solution:
+          "Built a bilingual (AR/EN, RTL) landing-and-booking funnel: browse courses, book, and pay online with Paymob or reserve now and pay later. Every order stores its full ad attribution, with Meta Pixel + Conversions API (deduplicated by order id) and GA4, plus a runtime marketing admin to manage tracking without redeploys.",
+        solutionAr:
+          "بناء قمع هبوط وحجز ثنائي اللغة (عربي/إنجليزي، بتخطيط RTL): تصفّح الدورات، احجز، وادفع إلكترونياً عبر Paymob أو احجز الآن وادفع لاحقاً. يخزّن كل طلب إسناده الإعلاني الكامل، مع Meta Pixel وواجهة التحويلات (مع إزالة التكرار حسب معرّف الطلب) وGA4، إضافة إلى لوحة تسويق يمكن ضبطها وقت التشغيل دون إعادة نشر.",
+        results: emanzResults,
+        resultsAr: emanzResultsAr,
+        status: "published",
+        publishedAt: new Date(),
+        sortOrder: 5,
         createdBy,
       },
     ])
@@ -620,49 +835,97 @@ async function seedPortfolioContent(
     },
   ]);
 
-  // Client users must exist before testimonials that reference them via userId FK
-  const clientUsers = [
+  // Structured content blocks drive the public work-detail narrative
+  // (heading / paragraph / list / comparison table / stats / callout).
+  if (atelier && cafe && megz && arabian && ba2olak && emanz) {
+    await tx.insert(CaseStudyBlocksTable).values(
+      buildCaseStudyBlockRows(
+        {
+          atelier: atelier.id,
+          cafe: cafe.id,
+          megz: megz.id,
+          arabian: arabian.id,
+          ba2olak: ba2olak.id,
+          emanz: emanz.id,
+        },
+        createdBy,
+      ),
+    );
+  }
+
+  // Client users must exist before testimonials that reference them via userId FK.
+  // Eman is the client for both Megz Courses and Emanz Academy (one login);
+  // Wael Zaki is the ba2olak client. Phones power the feedback magic-link message.
+  const clientUsers: Array<{
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    phone: string | null;
+  }> = [
     {
       id: SEED_CLIENT_ALAA_ID,
       name: "Alaa El-Kasry",
       email: SEED_CLIENT_ALAA_EMAIL,
       password: SEED_CLIENT_ALAA_PASSWORD,
+      phone: null,
     },
     {
       id: SEED_CLIENT_HANY_ID,
       name: "Mohamed Hany",
       email: SEED_CLIENT_HANY_EMAIL,
       password: SEED_CLIENT_HANY_PASSWORD,
+      phone: null,
     },
     {
       id: SEED_CLIENT_EMAN_ID,
       name: "Eman Abd-Elrahman",
       email: SEED_CLIENT_EMAN_EMAIL,
       password: SEED_CLIENT_EMAN_PASSWORD,
+      phone: SEED_CLIENT_EMAN_PHONE,
     },
     {
       id: SEED_CLIENT_HUSSEIN_ID,
       name: "Hussein Farouk",
       email: SEED_CLIENT_HUSSEIN_EMAIL,
       password: SEED_CLIENT_HUSSEIN_PASSWORD,
+      phone: null,
+    },
+    {
+      id: SEED_CLIENT_WAEL_ID,
+      name: "Wael Zaki",
+      email: SEED_CLIENT_WAEL_EMAIL,
+      password: SEED_CLIENT_WAEL_PASSWORD,
+      phone: SEED_CLIENT_WAEL_PHONE,
     },
   ];
 
   for (const client of clientUsers) {
-    await tx.insert(UsersTable).values({
+    await ensureSeedUser(tx, {
       id: client.id,
-      createdBy: SEED_SYSTEM_ACTOR,
       email: client.email,
       name: client.name,
-      emailVerifiedAt: new Date(),
       role: "customer",
+      phone: client.phone,
     });
-    const passwordHash = await hashPassword(client.password, client.id);
-    await tx.insert(UserCredentialsTable).values({
-      userId: client.id,
-      passwordHash,
-      passwordSalt: client.id,
-    });
+    await ensureUserCredential(tx, client.id, client.password);
+  }
+
+  // Direct case-study → client-user link, used to request feedback (magic link).
+  const caseStudyClientLinks: Array<[{ id: string } | undefined, string]> = [
+    [atelier, SEED_CLIENT_ALAA_ID],
+    [cafe, SEED_CLIENT_HANY_ID],
+    [megz, SEED_CLIENT_EMAN_ID],
+    [arabian, SEED_CLIENT_HUSSEIN_ID],
+    [ba2olak, SEED_CLIENT_WAEL_ID],
+    [emanz, SEED_CLIENT_EMAN_ID],
+  ];
+  for (const [caseStudy, clientUserId] of caseStudyClientLinks) {
+    if (!caseStudy) continue;
+    await tx
+      .update(CaseStudiesTable)
+      .set({ clientUserId })
+      .where(eq(CaseStudiesTable.id, caseStudy.id));
   }
 
   await tx.insert(TestimonialsTable).values([

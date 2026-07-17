@@ -244,6 +244,9 @@ export default {
     sortOrder: "Sort order",
     addWork: "Add case study",
     editWork: "Edit case study",
+    editNotFound: "Case study not found",
+    editNotFoundHint:
+      "This case study no longer exists — the link may be out of date. Head back to the list and pick a current one.",
     addWorkDescription: "Create a new client success story.",
     editWorkDescription: "Update this case study's content and status.",
     workCreated: "Case study created.",
@@ -259,6 +262,32 @@ export default {
     publishWork: "Publish",
     archiveWork: "Archive",
     slugDuplicate: "A case study with this slug already exists.",
+    feedbackRequest: {
+      action: "Request feedback",
+      title: "Request client feedback",
+      description:
+        "Compose a WhatsApp message inviting {client} to review this project.",
+      generating: "Preparing the feedback link…",
+      generateFailed: "Could not prepare the link. Try again.",
+      noClientTitle: "No client account linked",
+      noClientHint:
+        "This case study isn't linked to a client login yet, so there's no one to sign in. Link a client account first, then request feedback.",
+      accountLabel: "Client account",
+      languageLabel: "Message language",
+      phoneLabel: "Client WhatsApp number",
+      phonePlaceholder: "e.g. +20 100 123 4567",
+      phoneHint:
+        "Include the country code. The link signs the client in automatically — no password needed.",
+      phoneRequired: "Enter the client's WhatsApp number first.",
+      messageLabel: "Message",
+      regenerate: "New link",
+      openWhatsApp: "Open WhatsApp",
+      copyMessage: "Copy message",
+      copied: "Copied to clipboard.",
+      copyFailed: "Could not copy — select and copy it manually.",
+      messageTemplate:
+        "Hi {name}! 👋\n\nThis is the Gateling Solutions team — it was a real pleasure building your project, and your feedback would mean a lot to us. 🙌\n\nJust tap the link below and it signs you in automatically (no password needed). You can add your photo, adjust your name, and leave a short review:\n{link}\n\nThe link is private to you, so please don't share it. Thank you so much! 🙏",
+    },
   },
   blogPosts: {
     title: "Blog Posts",

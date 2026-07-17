@@ -23,14 +23,16 @@ const commands = {
     },
   },
   baseline: {
-    description: "Reset and seed a minimal local bootstrap profile.",
+    description:
+      "Seed a minimal local bootstrap profile (idempotent — never clears, skips existing data).",
     action: async () => {
       const { runSeedProfile } = await import("@/drizzle/seed");
       await runSeedProfile("baseline");
     },
   },
   demo: {
-    description: "Reset and seed a curated demo profile.",
+    description:
+      "Seed a curated demo profile (idempotent — never clears, skips existing data).",
     action: async () => {
       const { runSeedProfile } = await import("@/drizzle/seed");
       await runSeedProfile("demo");
@@ -38,7 +40,7 @@ const commands = {
   },
   performance: {
     description:
-      "Reset and seed a large dataset for table and query stress tests.",
+      "Seed a large dataset for table and query stress tests (idempotent — never clears, skips existing data).",
     action: async () => {
       const { runSeedProfile } = await import("@/drizzle/seed");
       await runSeedProfile("performance");
@@ -49,16 +51,6 @@ const commands = {
     action: async () => {
       const { clearDb } = await import("@/drizzle/seed/clear-db");
       await clearDb();
-    },
-  },
-  "case-study-ba2olak": {
-    description:
-      "Insert the ba2olak delivery-app case study as a draft (idempotent, safe on any environment).",
-    action: async () => {
-      const { seedBa2olakCaseStudy } = await import(
-        "@/drizzle/seed/add-case-study-ba2olak"
-      );
-      await seedBa2olakCaseStudy();
     },
   },
   "articles-delivery-vertical": {

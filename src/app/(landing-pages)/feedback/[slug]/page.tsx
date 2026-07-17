@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
+import { LinkButton } from "@/components/general/link-button";
 import { Container, Section } from "@/components/ui/containers";
+import { H1, Lead } from "@/components/ui/typography";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
@@ -9,7 +11,10 @@ import feedbackAr from "../_translations/feedback-ar";
 import feedbackEn from "../_translations/feedback-en";
 import { FeedbackForm } from "./_components/feedback-form";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ linkExpired?: string }>;
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -20,11 +25,28 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function FeedbackPage({ params }: Props) {
+export default async function FeedbackPage({ params, searchParams }: Props) {
   const { slug } = await params;
 
   const session = await getCurrentUser();
   if (!session) {
+    // The client reached this page via an expired magic link — these accounts
+    // have no usable password, so a sign-in redirect would be a dead end.
+    const { linkExpired } = await searchParams;
+    if (linkExpired) {
+      const { t } = await getT();
+      return (
+        <Section>
+          <Container className="max-w-md space-y-5 text-center">
+            <H1>{t("publicPages.feedbackPage.linkExpiredTitle")}</H1>
+            <Lead>{t("publicPages.feedbackPage.linkExpiredMessage")}</Lead>
+            <LinkButton href="/contact" size="lg">
+              {t("publicPages.feedbackPage.linkExpiredCta")}
+            </LinkButton>
+          </Container>
+        </Section>
+      );
+    }
     redirect(`/sign-in?returnTo=/feedback/${slug}`);
   }
 

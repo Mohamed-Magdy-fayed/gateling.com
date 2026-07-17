@@ -127,6 +127,9 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
     ...trpc.caseStudies.getById.queryOptions({ id }),
     enabled: !isNew,
   });
+  // Query resolves to null when the id doesn't exist (e.g. a stale edit URL
+  // after a reseed). `undefined` still means loading.
+  const notFound = !isNew && caseStudy === null;
 
   const [scalars, setScalars] = useState<ScalarState>(emptyScalars);
   const [media, setMedia] = useState<GalleryItem[]>([]);
@@ -295,6 +298,22 @@ export function CaseStudyBlockEditor({ id }: { id: string }) {
     } catch {
       /* surfaced by toast */
     }
+  }
+
+  if (notFound) {
+    return (
+      <div className="pb-16">
+        <BackLink href="/work-mgmt" variant={"ghost"} />
+        <div className="mt-8 space-y-2 rounded-xl border p-8 text-center">
+          <h1 className="text-xl font-semibold">
+            {t("work.editNotFound")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("work.editNotFoundHint")}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

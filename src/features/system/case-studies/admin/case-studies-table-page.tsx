@@ -34,6 +34,7 @@ import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
 import {
   buildCaseStudyColumns,
   CaseStudyDeleteDialog,
+  CaseStudyFeedbackRequestDialog,
   CaseStudyInfoModal,
   type CaseStudyRowActionVariant,
 } from "./components";
@@ -179,6 +180,13 @@ export function CaseStudiesTablePage() {
           if (!open) closeRowAction();
         }}
         caseStudy={rowAction?.variant === "info" ? rowAction.row : null}
+      />
+      <CaseStudyFeedbackRequestDialog
+        open={rowAction?.variant === "feedback"}
+        onOpenChange={(open) => {
+          if (!open) closeRowAction();
+        }}
+        caseStudy={rowAction?.variant === "feedback" ? rowAction.row : null}
       />
       <CaseStudyDeleteDialog
         open={rowAction?.variant === "delete"}

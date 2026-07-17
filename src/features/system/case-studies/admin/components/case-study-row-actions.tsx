@@ -5,6 +5,7 @@ import {
   ArchiveIcon,
   GlobeIcon,
   InfoIcon,
+  MessageCircleIcon,
   MoreHorizontalIcon,
   PencilIcon,
   Trash2Icon,
@@ -24,7 +25,11 @@ import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
 
-export type CaseStudyRowActionVariant = "info" | "edit" | "delete";
+export type CaseStudyRowActionVariant =
+  | "info"
+  | "edit"
+  | "feedback"
+  | "delete";
 
 export type SetCaseStudyRowAction = (
   next: { row: CaseStudyRow; variant: CaseStudyRowActionVariant } | null,
@@ -83,6 +88,12 @@ export function CaseStudyRowActions({ row, setRowAction }: Props) {
         >
           <PencilIcon className="size-3.5" />
           {t("common.edit")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setRowAction({ row, variant: "feedback" })}
+        >
+          <MessageCircleIcon className="size-3.5" />
+          {t("work.feedbackRequest.action")}
         </DropdownMenuItem>
         {row.status !== "published" && (
           <DropdownMenuItem

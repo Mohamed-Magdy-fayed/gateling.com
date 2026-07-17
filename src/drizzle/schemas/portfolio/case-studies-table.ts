@@ -7,9 +7,11 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { UsersTable } from "@/drizzle/schemas/auth/users-table";
 import {
   createdAt,
   createdBy,
@@ -61,6 +63,10 @@ export const CaseStudiesTable = pgTable(
     status: caseStudyStatusEnum().notNull().default("draft"),
     publishedAt: timestamp({ withTimezone: true }),
     sortOrder: integer().notNull().default(0),
+    // The client's login account, used to request feedback (WhatsApp magic link).
+    clientUserId: uuid("client_user_id").references(() => UsersTable.id, {
+      onDelete: "set null",
+    }),
     createdBy,
     createdAt,
     updatedBy,
@@ -71,14 +77,22 @@ export const CaseStudiesTable = pgTable(
   (table) => [
     index("case_studies_status_idx").on(table.status),
     index("case_studies_slug_idx").on(table.slug),
+    index("case_studies_client_user_idx").on(table.clientUserId),
   ],
 );
 
-export const caseStudiesRelations = relations(CaseStudiesTable, ({ many }) => ({
-  testimonials: many(TestimonialsTable),
-  media: many(CaseStudyMediaTable),
-  blocks: many(CaseStudyBlocksTable),
-}));
+export const caseStudiesRelations = relations(
+  CaseStudiesTable,
+  ({ many, one }) => ({
+    testimonials: many(TestimonialsTable),
+    media: many(CaseStudyMediaTable),
+    blocks: many(CaseStudyBlocksTable),
+    clientUser: one(UsersTable, {
+      fields: [CaseStudiesTable.clientUserId],
+      references: [UsersTable.id],
+    }),
+  }),
+);
 
 export type CaseStudy = typeof CaseStudiesTable.$inferSelect;
 export type NewCaseStudy = typeof CaseStudiesTable.$inferInsert;
