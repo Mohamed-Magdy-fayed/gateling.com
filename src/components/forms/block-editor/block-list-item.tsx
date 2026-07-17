@@ -147,7 +147,13 @@ function BlockForm({
         />
       );
     case "roi_embed":
-      return <RoiEmbedBlockForm />;
+      return (
+        <RoiEmbedBlockForm
+          block={block as EditorBlock<"roi_embed">}
+          onChange={onChange as never}
+          disabled={disabled}
+        />
+      );
     case "callout":
       return (
         <CalloutBlockForm

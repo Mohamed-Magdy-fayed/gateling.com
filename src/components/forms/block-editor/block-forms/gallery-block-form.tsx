@@ -94,6 +94,29 @@ export function GalleryBlockForm({ block, onChange, disabled }: Props) {
               disabled={disabled}
               placeholder={String(t("blocks.imageCaption" as never))}
             />
+            {item.type === "video" && (
+              <Select
+                value={item.orientation ?? "landscape"}
+                onValueChange={(v) =>
+                  updateItem(index, {
+                    orientation: v as "landscape" | "portrait",
+                  })
+                }
+                disabled={disabled}
+              >
+                <SelectTrigger className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="landscape">
+                    {t("blocks.videoLandscape" as never)}
+                  </SelectItem>
+                  <SelectItem value="portrait">
+                    {t("blocks.videoPortrait" as never)}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <Button
             type="button"

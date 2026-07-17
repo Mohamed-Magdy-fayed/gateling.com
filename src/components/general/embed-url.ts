@@ -42,3 +42,22 @@ export function toEmbedUrl(url: string): string {
   // pass an arbitrary string through to an iframe `src`.
   return "";
 }
+
+/**
+ * Best-effort guess of a video's aspect orientation from its URL, so the
+ * gallery/player can size the frame correctly without a stored orientation
+ * field. Short-form formats (Reels, Shorts, TikTok) are vertical by design;
+ * everything else defaults to landscape. A stored/explicit orientation, where
+ * one exists, should take precedence over this heuristic.
+ */
+export function getVideoOrientation(url: string): "landscape" | "portrait" {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("tiktok.com")) return "portrait";
+    // YouTube Shorts, Facebook/Instagram Reels.
+    if (/\/(shorts|reels?)\//i.test(u.pathname)) return "portrait";
+  } catch {
+    return "landscape";
+  }
+  return "landscape";
+}

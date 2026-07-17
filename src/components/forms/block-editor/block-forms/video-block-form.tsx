@@ -2,6 +2,13 @@
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { EditorBlock } from "../block-defaults";
@@ -27,6 +34,35 @@ export function VideoBlockForm({ block, onChange, disabled }: Props) {
           disabled={disabled}
           placeholder="https://youtube.com/watch?v=..."
         />
+      </Field>
+
+      <Field>
+        <FieldLabel>{t("blocks.videoOrientation" as never)}</FieldLabel>
+        <Select
+          value={block.data.orientation ?? "landscape"}
+          onValueChange={(v) =>
+            onChange({
+              ...block,
+              data: {
+                ...block.data,
+                orientation: v as "landscape" | "portrait",
+              },
+            })
+          }
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="landscape">
+              {t("blocks.videoLandscape" as never)}
+            </SelectItem>
+            <SelectItem value="portrait">
+              {t("blocks.videoPortrait" as never)}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </Field>
 
       <Tabs defaultValue="en">

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { toEmbedUrl } from "@/components/general/embed-url";
+import { getVideoOrientation, toEmbedUrl } from "@/components/general/embed-url";
 import type { BlockDataByType } from "@/features/system/shared/content-blocks";
 import type { BlockRendererItemProps } from "../block-renderer";
 
@@ -13,11 +13,18 @@ export function GalleryBlock({ data }: Props) {
       {data.items.map((item, index) => {
         const embedUrl = item.type === "video" ? toEmbedUrl(item.url) : "";
         if (item.type === "video" && !embedUrl) return null;
+        const isPortrait =
+          item.type === "video" &&
+          (item.orientation
+            ? item.orientation === "portrait"
+            : getVideoOrientation(item.url) === "portrait");
         return (
           <div
             // biome-ignore lint/suspicious/noArrayIndexKey: static content list, no stable ID
             key={index}
-            className="relative aspect-video w-full overflow-hidden rounded-xl bg-muted"
+            className={`relative mx-auto w-full overflow-hidden rounded-xl bg-muted ${
+              isPortrait ? "aspect-[9/16] max-w-[280px]" : "aspect-video"
+            }`}
           >
             {item.type === "video" ? (
               <iframe

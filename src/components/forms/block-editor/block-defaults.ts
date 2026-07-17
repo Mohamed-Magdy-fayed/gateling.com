@@ -1,7 +1,8 @@
-import type {
-  BlockDataByType,
-  BlockItemInput,
-  BlockType,
+import {
+  type BlockDataByType,
+  type BlockItemInput,
+  type BlockType,
+  ROI_CALCULATOR_DEFAULTS,
 } from "@/features/system/shared/content-blocks";
 
 /** Local editor-side block shape: same as BlockItemInput but `data` narrowed per type. */
@@ -45,7 +46,7 @@ export function defaultBlockData<T extends BlockType>(
     device_player: { device: "browser", videoUrl: "" },
     stats: { items: [{ labelEn: "", value: "" }] },
     comparison: { rows: [] },
-    roi_embed: {},
+    roi_embed: { showCta: true, ...ROI_CALCULATOR_DEFAULTS },
     callout: { variant: "info" },
     cta: { labelEn: "", href: "" },
   };

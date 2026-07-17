@@ -44,13 +44,20 @@ export type BlockDataByType = {
     caption?: string;
     captionAr?: string;
   };
-  video: { url: string; poster?: string; caption?: string; captionAr?: string };
+  video: {
+    url: string;
+    poster?: string;
+    caption?: string;
+    captionAr?: string;
+    orientation?: "landscape" | "portrait";
+  };
   gallery: {
     items: Array<{
       url: string;
       type: "image" | "video";
       alt?: string;
       caption?: string;
+      orientation?: "landscape" | "portrait";
     }>;
   };
   before_after: {
@@ -79,9 +86,29 @@ export type BlockDataByType = {
       automatedAr?: string;
     }>;
   };
-  roi_embed: Record<string, never>;
+  roi_embed: {
+    /** Keep or remove the "Build This Automation For Us" call-to-action. */
+    showCta?: boolean;
+    /** Pre-filled starting values, tailored to the business in this work item. */
+    teamSize?: number;
+    hoursPerWeek?: number;
+    hourlyRate?: number;
+    currency?: "EGP" | "USD";
+  };
   callout: { variant: "info" | "warning" | "success" | "danger" };
   cta: { labelEn: string; labelAr?: string; href: string };
 };
 
 export type BlockType = keyof BlockDataByType;
+
+/**
+ * Default starting values for the ROI calculator. Shared by the public
+ * calculator, the roi_embed editor form, and block defaults so the fallback
+ * numbers stay in one place.
+ */
+export const ROI_CALCULATOR_DEFAULTS = {
+  teamSize: 5,
+  hoursPerWeek: 10,
+  hourlyRate: 100,
+  currency: "EGP",
+} as const satisfies NonNullable<BlockDataByType["roi_embed"]>;

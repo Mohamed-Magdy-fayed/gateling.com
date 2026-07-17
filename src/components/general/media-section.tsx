@@ -15,7 +15,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { toEmbedUrl } from "./embed-url";
+import { getVideoOrientation, toEmbedUrl } from "./embed-url";
 
 export type MediaItem = {
   id: string;
@@ -36,21 +36,32 @@ function MediaDisplay({
   priority?: boolean;
   className?: string;
 }) {
+  // Fixed 16:9 stage for every item so switching between portrait and
+  // landscape media never changes the container height (no layout jump,
+  // important because the work page renders this in a sticky column).
   if (item.type === "video") {
+    const isPortrait = getVideoOrientation(item.url) === "portrait";
     return (
       <div
         className={cn(
-          "relative aspect-video w-full overflow-hidden rounded-xl",
+          "relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-black",
           className,
         )}
       >
-        <iframe
-          src={toEmbedUrl(item.url)}
-          title={item.title ?? ""}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          allowFullScreen
-          className="absolute inset-0 h-full w-full border-0"
-        />
+        <div
+          className={cn(
+            "relative h-full",
+            isPortrait ? "aspect-[9/16]" : "aspect-video w-full",
+          )}
+        >
+          <iframe
+            src={toEmbedUrl(item.url)}
+            title={item.title ?? ""}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        </div>
       </div>
     );
   }
@@ -58,16 +69,27 @@ function MediaDisplay({
   return (
     <div
       className={cn(
-        "relative aspect-video w-full overflow-hidden rounded-xl",
+        "relative aspect-video w-full overflow-hidden rounded-xl bg-muted",
         className,
       )}
     >
+      {/* Ambient blurred fill so non-16:9 images sit on an intentional
+          backdrop instead of hard letterbox bars. */}
+      <Image
+        src={item.url}
+        alt=""
+        aria-hidden
+        fill
+        className="scale-110 object-cover opacity-40 blur-2xl"
+        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1200px"
+      />
+      {/* object-contain keeps the whole frame visible for any orientation. */}
       <Image
         src={item.url}
         alt={item.title ?? ""}
         fill
         priority={priority}
-        className="object-cover"
+        className="object-contain"
         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1200px"
       />
     </div>

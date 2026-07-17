@@ -12,22 +12,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/features/core/i18n/client";
+import { ROI_CALCULATOR_DEFAULTS } from "@/features/system/shared/content-blocks";
 import { trackGaEvent } from "@/lib/ga4";
 import { trackPixelEvent } from "@/lib/meta-pixel";
 
-function formatCurrency(amount: number, currency: "EGP" | "USD") {
+type RoiCurrency = "EGP" | "USD";
+
+type RoiCalculatorProps = {
+  /** When false, hides the "Build This Automation For Us" call-to-action. */
+  showCta?: boolean;
+  /** Starting values — used to tailor an embedded calculator to a business. */
+  teamSize?: number;
+  hoursPerWeek?: number;
+  hourlyRate?: number;
+  currency?: RoiCurrency;
+};
+
+/**
+ * Formats a currency amount using the numeral system of the active UI
+ * language (Latin for `en`, Arabic-Indic for `ar`) rather than the currency's
+ * home locale — so the English layout never renders Arabic-Indic digits.
+ */
+function formatCurrency(amount: number, currency: RoiCurrency, locale: string) {
   const formatter = new Intl.NumberFormat(
-    currency === "EGP" ? "ar-EG" : "en-US",
+    locale === "ar" ? "ar-EG" : "en-US",
     { style: "currency", currency, maximumFractionDigits: 0 },
   );
   return formatter.format(amount);
 }
 
-export function RoiCalculator() {
-  const [teamSize, setTeamSize] = useState(5);
-  const [hoursPerWeek, setHoursPerWeek] = useState(10);
-  const [hourlyRate, setHourlyRate] = useState(100);
-  const [currency, setCurrency] = useState<"EGP" | "USD">("EGP");
+export function RoiCalculator({
+  showCta = true,
+  teamSize: initialTeamSize = ROI_CALCULATOR_DEFAULTS.teamSize,
+  hoursPerWeek: initialHoursPerWeek = ROI_CALCULATOR_DEFAULTS.hoursPerWeek,
+  hourlyRate: initialHourlyRate = ROI_CALCULATOR_DEFAULTS.hourlyRate,
+  currency: initialCurrency = ROI_CALCULATOR_DEFAULTS.currency,
+}: RoiCalculatorProps = {}) {
+  const { locale } = useTranslation();
+  const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
+  const [teamSize, setTeamSize] = useState(initialTeamSize);
+  const [hoursPerWeek, setHoursPerWeek] = useState(initialHoursPerWeek);
+  const [hourlyRate, setHourlyRate] = useState(initialHourlyRate);
+  const [currency, setCurrency] = useState<RoiCurrency>(initialCurrency);
 
   const weeklyManualCost = teamSize * hoursPerWeek * hourlyRate;
   const annualManualCost = weeklyManualCost * 52;
@@ -97,7 +124,7 @@ export function RoiCalculator() {
               Annual cost of manual work
             </p>
             <p className="text-destructive mt-1 text-2xl font-bold">
-              {formatCurrency(annualManualCost, currency)}
+              {formatCurrency(annualManualCost, currency, locale)}
             </p>
           </div>
           <div>
@@ -105,7 +132,7 @@ export function RoiCalculator() {
               Potential annual savings (70% automation)
             </p>
             <p className="mt-1 text-2xl font-bold text-green-600">
-              {formatCurrency(automationSavings, currency)}
+              {formatCurrency(automationSavings, currency, locale)}
             </p>
           </div>
           <div>
@@ -113,7 +140,10 @@ export function RoiCalculator() {
               Hours reclaimed/year
             </p>
             <p className="text-primary mt-1 text-2xl font-bold">
-              {(teamSize * hoursPerWeek * 52 * 0.7).toLocaleString()} hrs
+              {(teamSize * hoursPerWeek * 52 * 0.7).toLocaleString(
+                numberLocale,
+              )}{" "}
+              hrs
             </p>
           </div>
         </div>
@@ -124,26 +154,28 @@ export function RoiCalculator() {
         </p>
       </div>
 
-      <div className="mt-8 text-center">
-        <p className="font-semibold">
-          Want to automate this for your business?
-        </p>
-        <LinkButton
-          href="/contact?source=roi-calculator"
-          size="lg"
-          className="mt-4"
-          onClick={() => {
-            trackPixelEvent("InitiateCheckout", {
-              content_name: "ROI Calculator CTA",
-            });
-            trackGaEvent("generate_lead", {
-              content_name: "ROI Calculator CTA",
-            });
-          }}
-        >
-          Build This Automation For Us
-        </LinkButton>
-      </div>
+      {showCta && (
+        <div className="mt-8 text-center">
+          <p className="font-semibold">
+            Want to automate this for your business?
+          </p>
+          <LinkButton
+            href="/contact?source=roi-calculator"
+            size="lg"
+            className="mt-4"
+            onClick={() => {
+              trackPixelEvent("InitiateCheckout", {
+                content_name: "ROI Calculator CTA",
+              });
+              trackGaEvent("generate_lead", {
+                content_name: "ROI Calculator CTA",
+              });
+            }}
+          >
+            Build This Automation For Us
+          </LinkButton>
+        </div>
+      )}
     </div>
   );
 }

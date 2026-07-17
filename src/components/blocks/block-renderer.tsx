@@ -76,7 +76,7 @@ function BlockSwitch({
     case "comparison":
       return <ComparisonBlock {...common} data={data as never} />;
     case "roi_embed":
-      return <RoiEmbedBlock />;
+      return <RoiEmbedBlock data={data as never} />;
     case "callout":
       return <CalloutBlock {...common} data={data as never} />;
     case "cta":
