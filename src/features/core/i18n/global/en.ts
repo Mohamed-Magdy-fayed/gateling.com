@@ -850,6 +850,7 @@ export default {
     description:
       "Add images or videos. Mark one as Featured (shown at the top) and optionally one as Secondary.",
     addImage: "Add image",
+    addMedia: "Add images / videos",
     addVideo: "Add video",
     videoUrl: "Video URL (YouTube / Facebook / TikTok)",
     videoUrlPlaceholder:
@@ -866,6 +867,10 @@ export default {
     moveUp: "Move up",
     moveDown: "Move down",
     invalidVideoUrl: "Paste a YouTube, Facebook, or TikTok video URL.",
+    uploadFailed: "Upload failed. Please try again.",
+    unsupportedType: "Only image and video files can be uploaded.",
+    imageTooLarge: "Images must be 15MB or smaller.",
+    videoTooLarge: "Videos must be 100MB or smaller.",
   },
   blocks: {
     sectionTitle: "Content blocks",
@@ -878,7 +883,11 @@ export default {
     contentEn: "Content (EN)",
     contentAr: "Content (AR)",
     upload: "Upload",
+    uploadVideo: "Upload video",
     uploadFailed: "Upload failed. Please try again.",
+    unsupportedType: "Only image and video files can be uploaded.",
+    imageTooLarge: "Images must be 15MB or smaller.",
+    videoTooLarge: "Videos must be 100MB or smaller.",
     autosaving: "Saving…",
     autosavedAt: "Autosaved at {time}",
     notSavedYet: "Not saved yet — changes autosave every 2 seconds.",

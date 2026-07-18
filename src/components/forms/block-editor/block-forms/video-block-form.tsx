@@ -1,5 +1,6 @@
 "use client";
 
+import { MediaUploadButton } from "@/components/forms/block-editor/media-upload-button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,14 +27,28 @@ export function VideoBlockForm({ block, onChange, disabled }: Props) {
     <div className="space-y-3">
       <Field>
         <FieldLabel>{t("blocks.videoUrl" as never)}</FieldLabel>
-        <Input
-          value={block.data.url}
-          onChange={(e) =>
-            onChange({ ...block, data: { ...block.data, url: e.target.value } })
-          }
-          disabled={disabled}
-          placeholder="https://youtube.com/watch?v=..."
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            value={block.data.url}
+            onChange={(e) =>
+              onChange({
+                ...block,
+                data: { ...block.data, url: e.target.value },
+              })
+            }
+            disabled={disabled}
+            placeholder="https://youtube.com/watch?v=..."
+            className="flex-1"
+          />
+          <MediaUploadButton
+            accept="video/*"
+            label={String(t("blocks.uploadVideo" as never))}
+            disabled={disabled}
+            onUploaded={(url) =>
+              onChange({ ...block, data: { ...block.data, url } })
+            }
+          />
+        </div>
       </Field>
 
       <Field>

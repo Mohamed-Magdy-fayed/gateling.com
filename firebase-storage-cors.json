@@ -1,0 +1,12 @@
+[
+  {
+    "origin": [
+      "https://gateling.com",
+      "https://www.gateling.com",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "PUT"],
+    "responseHeader": ["Content-Type", "x-goog-acl", "ETag"],
+    "maxAgeSeconds": 3600
+  }
+]

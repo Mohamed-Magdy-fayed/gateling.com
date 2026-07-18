@@ -21,6 +21,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import {
+  MAX_IMAGE_BYTES,
+  MAX_VIDEO_BYTES,
+  putFileToSignedUrl,
+} from "@/lib/upload-to-signed-url";
 import { cn } from "@/lib/utils";
 
 export type GalleryItem = {
@@ -56,6 +61,8 @@ function isValidVideoUrl(url: string): boolean {
   }
 }
 
+const MAX_UPLOAD_FILES = 12;
+
 export function GalleryManager({ value, onChange, disabled }: Props) {
   const { t } = useTranslation();
   const trpc = useTRPC();
@@ -65,8 +72,30 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
   const [videoError, setVideoError] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
 
-  const { mutateAsync: uploadImage } = useMutation(
-    trpc.uploadImage.mutationOptions(),
+  const { mutateAsync: createUploadUrl } = useMutation(
+    trpc.createUploadUrl.mutationOptions(),
+  );
+
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+      if (!isImage && !isVideo) {
+        return String(t("galleryManager.unsupportedType" as never));
+      }
+      const cap = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+      if (file.size > cap) {
+        return String(
+          t(
+            (isVideo
+              ? "galleryManager.videoTooLarge"
+              : "galleryManager.imageTooLarge") as never,
+          ),
+        );
+      }
+      return null;
+    },
+    [t],
   );
 
   const handleUpload = useCallback(
@@ -78,60 +107,54 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
         onError: (f: File, e: Error) => void;
       },
     ) => {
+      // Accumulate onto a running copy so a batch of files all land — appending
+      // each onto the closed-over `value` would keep only the last one.
+      let current = [...value];
       for (const file of files) {
         setUploadingCount((n) => n + 1);
         try {
-          options.onProgress(file, 20);
-          const base64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result;
-              if (typeof result !== "string") {
-                reject(new Error("read failed"));
-                return;
-              }
-              const [, encoded = ""] = result.split(",", 2);
-              resolve(encoded);
-            };
-            reader.onerror = () => reject(new Error("read failed"));
-            reader.readAsDataURL(file);
-          });
+          const isVideo = file.type.startsWith("video/");
+          options.onProgress(file, 5);
 
-          const payload = await uploadImage({
-            mimeType: file.type,
-            base64,
+          const target = await createUploadUrl({
+            contentType: file.type,
             folder: "gallery",
           });
 
-          if (!payload?.url) throw new Error("upload failed");
-
-          const url = payload.url.startsWith("http")
-            ? payload.url
-            : new URL(payload.url, window.location.origin).toString();
+          await putFileToSignedUrl(
+            target.uploadUrl,
+            target.headers,
+            file,
+            (percent) => options.onProgress(file, Math.max(5, percent)),
+          );
 
           options.onProgress(file, 100);
           options.onSuccess(file);
 
-          onChange([
-            ...value,
+          current = [
+            ...current,
             {
-              type: "image",
-              url,
+              type: isVideo ? "video" : "image",
+              url: target.publicUrl,
               title: null,
-              isFeatured: value.length === 0,
+              isFeatured: current.length === 0,
               isSecondary: false,
-              sortOrder: value.length,
+              sortOrder: current.length,
             },
-          ]);
-        } catch {
-          options.onError(file, new Error("upload failed"));
-          toast.error(t("galleryManager.invalidVideoUrl" as never));
+          ];
+          onChange(current);
+        } catch (err) {
+          options.onError(
+            file,
+            err instanceof Error ? err : new Error("upload failed"),
+          );
+          toast.error(t("galleryManager.uploadFailed" as never));
         } finally {
           setUploadingCount((n) => n - 1);
         }
       }
     },
-    [value, onChange, uploadImage, t],
+    [value, onChange, createUploadUrl, t],
   );
 
   function addVideo() {
@@ -359,10 +382,12 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
       {/* Add controls */}
       <div className="flex flex-wrap gap-2">
         <FileUpload
-          accept="image/*"
-          maxFiles={5}
-          maxSize={4 * 1024 * 1024}
+          accept="image/*,video/*"
+          multiple
+          maxFiles={MAX_UPLOAD_FILES}
           onUpload={handleUpload}
+          onFileValidate={validateFile}
+          onFileReject={(_file, message) => toast.error(message)}
           disabled={isDisabled}
         >
           <FileUploadTrigger asChild>
@@ -378,7 +403,7 @@ export function GalleryManager({ value, onChange, disabled }: Props) {
               ) : (
                 <ImagePlusIcon className="h-3.5 w-3.5" />
               )}
-              {t("galleryManager.addImage" as never)}
+              {t("galleryManager.addMedia" as never)}
             </Button>
           </FileUploadTrigger>
         </FileUpload>

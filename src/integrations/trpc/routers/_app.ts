@@ -2,7 +2,10 @@ import { z } from "zod";
 
 import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
 import { dashboardRouter } from "@/features/system/dashboard/server";
-import { uploadImage } from "@/integrations/firebase/storage";
+import {
+  createSignedUploadUrl,
+  uploadImage,
+} from "@/integrations/firebase/storage";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import { blogPostsRouter } from "./blog-posts";
 import { bookingsRouter } from "./bookings";
@@ -46,6 +49,17 @@ export const appRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const url = await uploadImage(input.base64, input.mimeType, input.folder);
       return { url };
+    }),
+
+  createUploadUrl: protectedProcedure
+    .input(
+      z.object({
+        contentType: z.string().min(1),
+        folder: z.string().min(1).default("uploads"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return createSignedUploadUrl(input.contentType, input.folder);
     }),
 
   bookings: bookingsRouter,

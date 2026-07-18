@@ -23,6 +23,69 @@ const EXTENSION_BY_MIME: Record<string, string> = {
 };
 
 /**
+ * MIME types accepted for direct (signed-URL) gallery uploads. Videos are only
+ * viable through the signed-URL path — pushing them base64 through the tRPC
+ * mutation would hit Vercel's ~4.5MB serverless request-body limit.
+ */
+const SIGNED_UPLOAD_EXTENSION_BY_MIME: Record<string, string> = {
+  ...EXTENSION_BY_MIME,
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
+  "video/ogg": ".ogv",
+};
+
+// Object ACL the browser must apply on PUT so the uploaded file is publicly
+// readable — matches the per-object `public: true` used by base64 uploads.
+const PUBLIC_READ_ACL = "public-read";
+const SIGNED_UPLOAD_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+export type SignedUploadTarget = {
+  uploadUrl: string;
+  publicUrl: string;
+  /** Headers the client MUST send on the PUT, verbatim — they are signed. */
+  headers: Record<string, string>;
+};
+
+/**
+ * Generate a short-lived v4 signed URL that lets the browser upload a single
+ * file straight to Firebase Storage (bypassing the serverless body limit).
+ *
+ * The signature covers the `Content-Type` and `x-goog-acl` headers, so the
+ * client must send exactly the returned `headers`. The bucket also needs a CORS
+ * rule allowing PUT + those request headers from the site origin.
+ */
+export async function createSignedUploadUrl(
+  contentType: string,
+  folder = "uploads",
+): Promise<SignedUploadTarget> {
+  const extension = SIGNED_UPLOAD_EXTENSION_BY_MIME[contentType];
+  if (!extension) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Unsupported file type",
+    });
+  }
+
+  const filename = `${folder}/${Date.now()}-${randomUUID()}${extension}`;
+  const file = getStorageBucket().file(filename);
+
+  const [uploadUrl] = await file.getSignedUrl({
+    version: "v4",
+    action: "write",
+    expires: Date.now() + SIGNED_UPLOAD_TTL_MS,
+    contentType,
+    extensionHeaders: { "x-goog-acl": PUBLIC_READ_ACL },
+  });
+
+  return {
+    uploadUrl,
+    publicUrl: file.publicUrl(),
+    headers: { "Content-Type": contentType, "x-goog-acl": PUBLIC_READ_ACL },
+  };
+}
+
+/**
  * Upload a base64-encoded image to Firebase Storage.
  * Returns the public download URL.
  *

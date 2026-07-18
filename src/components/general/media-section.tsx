@@ -40,6 +40,33 @@ function MediaDisplay({
   // landscape media never changes the container height (no layout jump,
   // important because the work page renders this in a sticky column).
   if (item.type === "video") {
+    const embedUrl = toEmbedUrl(item.url);
+
+    // Self-hosted clip (Firebase upload): `toEmbedUrl` returns "" for anything
+    // that isn't a recognized third-party host, so play it natively rather than
+    // feeding an empty src to an iframe.
+    if (!embedUrl) {
+      return (
+        <div
+          className={cn(
+            "relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-black",
+            className,
+          )}
+        >
+          <video
+            src={item.url}
+            title={item.title ?? ""}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-contain"
+          >
+            <track kind="captions" />
+          </video>
+        </div>
+      );
+    }
+
     const isPortrait = getVideoOrientation(item.url) === "portrait";
     return (
       <div
@@ -55,7 +82,7 @@ function MediaDisplay({
           )}
         >
           <iframe
-            src={toEmbedUrl(item.url)}
+            src={embedUrl}
             title={item.title ?? ""}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen

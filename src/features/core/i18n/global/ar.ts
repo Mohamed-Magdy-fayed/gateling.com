@@ -833,6 +833,7 @@ export default {
     description:
       "أضف صورًا أو مقاطع فيديو. ضع علامة 'مميز' على عنصر واحد (يظهر في الأعلى) وعنصر 'ثانوي' اختياريًا.",
     addImage: "إضافة صورة",
+    addMedia: "إضافة صور / فيديوهات",
     addVideo: "إضافة فيديو",
     videoUrl: "رابط الفيديو (YouTube / Facebook / TikTok)",
     videoUrlPlaceholder:
@@ -849,6 +850,10 @@ export default {
     moveUp: "تحريك لأعلى",
     moveDown: "تحريك لأسفل",
     invalidVideoUrl: "الصق رابط فيديو من YouTube أو Facebook أو TikTok.",
+    uploadFailed: "فشل الرفع. يرجى المحاولة مرة أخرى.",
+    unsupportedType: "يمكن رفع ملفات الصور والفيديو فقط.",
+    imageTooLarge: "يجب ألا يتجاوز حجم الصورة 15 ميجابايت.",
+    videoTooLarge: "يجب ألا يتجاوز حجم الفيديو 100 ميجابايت.",
   },
   blocks: {
     sectionTitle: "كتل المحتوى",
@@ -861,7 +866,11 @@ export default {
     contentEn: "المحتوى (إنجليزي)",
     contentAr: "المحتوى (عربي)",
     upload: "رفع",
+    uploadVideo: "رفع فيديو",
     uploadFailed: "فشل الرفع. حاول مرة أخرى.",
+    unsupportedType: "يمكن رفع ملفات الصور والفيديو فقط.",
+    imageTooLarge: "يجب ألا يتجاوز حجم الصورة 15 ميجابايت.",
+    videoTooLarge: "يجب ألا يتجاوز حجم الفيديو 100 ميجابايت.",
     autosaving: "جارِ الحفظ…",
     autosavedAt: "تم الحفظ التلقائي في {time}",
     notSavedYet: "لم يتم الحفظ بعد.",

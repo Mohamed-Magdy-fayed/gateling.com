@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { FileUpload, FileUploadTrigger } from "@/components/ui/file-upload";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import {
+  MAX_IMAGE_BYTES,
+  MAX_VIDEO_BYTES,
+  putFileToSignedUrl,
+} from "@/lib/upload-to-signed-url";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -18,10 +23,11 @@ type Props = {
 };
 
 /**
- * Single-file-in / single-file-out upload button reusing the same Firebase
- * upload mutation GalleryManager uses (`uploadImage`), but scoped to one
- * block field (`data.url`, `data.beforeUrl`, etc.) instead of a full
- * multi-item gallery manager.
+ * Single-file-in / single-file-out upload button. Uploads straight to Firebase
+ * Storage through a signed URL (the same path GalleryManager uses), so it
+ * handles both images and videos without hitting the serverless body limit.
+ * Scoped to one block field (`data.url`, `data.videoUrl`, etc.) rather than a
+ * full multi-item gallery.
  */
 export function MediaUploadButton({
   onUploaded,
@@ -33,8 +39,30 @@ export function MediaUploadButton({
   const trpc = useTRPC();
   const [uploading, setUploading] = useState(false);
 
-  const { mutateAsync: uploadImage } = useMutation(
-    trpc.uploadImage.mutationOptions(),
+  const { mutateAsync: createUploadUrl } = useMutation(
+    trpc.createUploadUrl.mutationOptions(),
+  );
+
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+      if (!isImage && !isVideo) {
+        return String(t("blocks.unsupportedType" as never));
+      }
+      const cap = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+      if (file.size > cap) {
+        return String(
+          t(
+            (isVideo
+              ? "blocks.videoTooLarge"
+              : "blocks.imageTooLarge") as never,
+          ),
+        );
+      }
+      return null;
+    },
+    [t],
   );
 
   const handleUpload = useCallback(
@@ -50,53 +78,43 @@ export function MediaUploadButton({
       if (!file) return;
       setUploading(true);
       try {
-        options.onProgress(file, 20);
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const result = reader.result;
-            if (typeof result !== "string") {
-              reject(new Error("read failed"));
-              return;
-            }
-            const [, encoded = ""] = result.split(",", 2);
-            resolve(encoded);
-          };
-          reader.onerror = () => reject(new Error("read failed"));
-          reader.readAsDataURL(file);
-        });
+        options.onProgress(file, 5);
 
-        const payload = await uploadImage({
-          mimeType: file.type,
-          base64,
+        const target = await createUploadUrl({
+          contentType: file.type,
           folder: "blocks",
         });
 
-        if (!payload?.url) throw new Error("upload failed");
-
-        const url = payload.url.startsWith("http")
-          ? payload.url
-          : new URL(payload.url, window.location.origin).toString();
+        await putFileToSignedUrl(
+          target.uploadUrl,
+          target.headers,
+          file,
+          (percent) => options.onProgress(file, Math.max(5, percent)),
+        );
 
         options.onProgress(file, 100);
         options.onSuccess(file);
-        onUploaded(url);
-      } catch {
-        options.onError(file, new Error("upload failed"));
+        onUploaded(target.publicUrl);
+      } catch (err) {
+        options.onError(
+          file,
+          err instanceof Error ? err : new Error("upload failed"),
+        );
         toast.error(t("blocks.uploadFailed" as never));
       } finally {
         setUploading(false);
       }
     },
-    [onUploaded, uploadImage, t],
+    [onUploaded, createUploadUrl, t],
   );
 
   return (
     <FileUpload
       accept={accept}
       maxFiles={1}
-      maxSize={4 * 1024 * 1024}
       onUpload={handleUpload}
+      onFileValidate={validateFile}
+      onFileReject={(_file, message) => toast.error(message)}
       disabled={disabled || uploading}
     >
       <FileUploadTrigger asChild>
