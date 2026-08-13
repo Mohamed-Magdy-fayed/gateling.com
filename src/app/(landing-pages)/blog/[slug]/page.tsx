@@ -32,19 +32,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = locale === "ar" ? (post.titleAr ?? post.title) : post.title;
   const description =
     locale === "ar" ? (post.excerptAr ?? post.excerpt) : post.excerpt;
+  const url = canonicalUrl(`/blog/${slug}`);
+  const image =
+    post.media?.find((m) => m.isFeatured)?.url ?? post.coverImageUrl;
   return {
     title,
     description,
-    alternates: { canonical: canonicalUrl(`/blog/${slug}`) },
+    alternates: { canonical: url },
     openGraph: {
       type: "article",
+      title,
+      description,
+      url,
       publishedTime: post.publishedAt?.toISOString(),
+      modifiedTime: post.updatedAt?.toISOString(),
       authors: [post.authorName],
-      ...(() => {
-        const img =
-          post.media?.find((m) => m.isFeatured)?.url ?? post.coverImageUrl;
-        return img ? { images: [{ url: img }] } : {};
-      })(),
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+      ...(image ? { images: [image] } : {}),
     },
   };
 }
@@ -72,16 +81,21 @@ async function BlogDetailContent({ params }: Props) {
 
   const readingTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
 
+  const url = canonicalUrl(`/blog/${post.slug}`);
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: title,
     description: excerpt,
+    inLanguage: locale === "ar" ? "ar" : "en",
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
     author: {
       "@type": "Organization",
-      name: post.authorName,
+      name: authorName,
     },
     datePublished: post.publishedAt?.toISOString(),
+    dateModified: (post.updatedAt ?? post.publishedAt)?.toISOString(),
     image:
       post.media?.find((m) => m.isFeatured)?.url ??
       post.coverImageUrl ??
