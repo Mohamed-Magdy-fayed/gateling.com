@@ -1,59 +1,40 @@
 import type { MetadataRoute } from "next";
 
 import { api } from "@/integrations/trpc/server";
+import { absoluteUrl } from "@/lib/json-ld";
+
+/**
+ * Public route set only. CMS/(system-pages), API, and token-gated routes
+ * (/feedback/:slug) are never enumerated here. Case studies and blog posts
+ * come from the `public*` tRPC procedures, which already filter to
+ * `status = "published"` and `deletedAt IS NULL`, so drafts stay out.
+ */
+type SitemapEntry = MetadataRoute.Sitemap[number];
+type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
+
+const staticRoute = (
+  path: string,
+  changeFrequency: ChangeFrequency,
+  priority: number,
+): SitemapEntry => ({
+  url: absoluteUrl(path),
+  lastModified: new Date(),
+  changeFrequency,
+  priority,
+});
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.BASE_URL ?? "https://gateling.com";
-
   const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: base,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${base}/services`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/work`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/tools/roi-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/solutions/delivery`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    staticRoute("/", "weekly", 1),
+    staticRoute("/services", "monthly", 0.9),
+    staticRoute("/work", "weekly", 0.9),
+    staticRoute("/blog", "weekly", 0.8),
+    staticRoute("/about", "monthly", 0.7),
+    staticRoute("/contact", "monthly", 0.8),
+    staticRoute("/tools/roi-calculator", "monthly", 0.7),
+    staticRoute("/solutions/delivery", "monthly", 0.8),
+    staticRoute("/privacy", "yearly", 0.3),
+    staticRoute("/terms", "yearly", 0.3),
   ];
 
   const caller = await api();
@@ -66,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const caseStudyRoutes: MetadataRoute.Sitemap =
     caseStudiesResult.status === "fulfilled"
       ? caseStudiesResult.value.map((cs) => ({
-          url: `${base}/work/${cs.slug}`,
+          url: absoluteUrl(`/work/${cs.slug}`),
           lastModified: new Date(),
           changeFrequency: "monthly" as const,
           priority: 0.8,
@@ -76,8 +57,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogRoutes: MetadataRoute.Sitemap =
     blogPostsResult.status === "fulfilled"
       ? blogPostsResult.value.map((post) => ({
-          url: `${base}/blog/${post.slug}`,
-          lastModified: post.publishedAt ? new Date(post.publishedAt) : new Date(),
+          url: absoluteUrl(`/blog/${post.slug}`),
+          lastModified: post.publishedAt
+            ? new Date(post.publishedAt)
+            : new Date(),
           changeFrequency: "monthly" as const,
           priority: 0.7,
         }))

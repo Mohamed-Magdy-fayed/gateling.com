@@ -63,6 +63,16 @@ const commands = {
       await seedDeliveryVerticalArticles();
     },
   },
+  "articles-atelier-vertical": {
+    description:
+      "Insert the atelier/dress-rental article pair (perfect-scenario + solution-we-built) as drafts (idempotent).",
+    action: async () => {
+      const { seedAtelierVerticalArticles } = await import(
+        "@/drizzle/seed/add-articles-atelier-vertical"
+      );
+      await seedAtelierVerticalArticles();
+    },
+  },
   "migrate-content-to-blocks": {
     description:
       "One-time data migration: backfill blog_post_blocks/case_study_blocks from legacy content columns (idempotent).",

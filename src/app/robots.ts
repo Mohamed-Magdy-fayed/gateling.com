@@ -1,17 +1,21 @@
 import type { MetadataRoute } from "next";
 
-export default function robots(): MetadataRoute.Robots {
-  const base = process.env.BASE_URL ?? "https://gateling.com";
+import { absoluteUrl } from "@/lib/json-ld";
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
+        // Private CMS, account, and API surfaces only. Public content routes
+        // (/work, /work/:slug, /blog, /blog/:slug) must stay crawlable — a
+        // `/work/` entry here previously blocked the live case studies.
         disallow: [
           "/dashboard",
-          "/work/",
           "/blog-posts",
+          "/bookings",
+          "/work-mgmt",
           "/services-mgmt",
           "/testimonials",
           "/leads",
@@ -24,6 +28,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: absoluteUrl("/sitemap.xml"),
   };
 }
