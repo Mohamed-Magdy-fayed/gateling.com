@@ -49,3 +49,7 @@ next-env.d.ts
 # raw Search Console exports — account data, not repo content.
 # The summarised snapshot lives in docs/seo-baseline-*.md instead.
 .seo-baseline/
+
+# Playwright run artifacts (failure screenshots, traces).
+test-results/
+playwright-report/
