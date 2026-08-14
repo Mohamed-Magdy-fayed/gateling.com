@@ -970,6 +970,12 @@ export default {
         "The page you're looking for doesn't exist or may have moved.",
       backToHome: "Back to Home",
     },
+    // Card affordances for `RelatedContentSection`. Shared across service and
+    // solution pages, so they live here rather than in one page's namespace.
+    relatedContent: {
+      readArticle: "Read the article",
+      readCaseStudy: "Read the case study",
+    },
     footer: {
       tagline: "Building software that solves real business problems.",
       description:

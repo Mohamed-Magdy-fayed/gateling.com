@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
+import { RelatedContentSection } from "@/components/general/related-content";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -20,6 +21,7 @@ import {
   StatCard,
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
+import { resolveRelatedArticles } from "@/features/public-catalog/lib/related-content";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
 import { cn } from "@/lib/utils";
@@ -43,43 +45,29 @@ async function SolutionsDeliveryContent() {
   const locale = await getLocaleCookie();
   const caller = await api();
 
-  const [caseStudy, articleA, articleB] = await Promise.all([
-    caller.caseStudies
-      .publicGetBySlug({ slug: CASE_STUDY_SLUG })
-      .catch(() => null),
-    caller.blogPosts
-      .publicGetBySlug({ slug: ARTICLE_A_SLUG })
-      .catch(() => null),
-    caller.blogPosts
-      .publicGetBySlug({ slug: ARTICLE_B_SLUG })
-      .catch(() => null),
-  ]);
-
   // This page's proof and article sections render only when their rows resolve.
   // That is deliberate — a pillar page must never link a slug that 404s — but it
   // also means a missing or unpublished row silently removes ~40% of the page.
-  // Surface it in the server log instead of letting it pass unnoticed.
-  for (const [slug, row] of [
-    [CASE_STUDY_SLUG, caseStudy],
-    [ARTICLE_A_SLUG, articleA],
-    [ARTICLE_B_SLUG, articleB],
-  ] as const) {
-    if (row == null) {
-      console.warn(
-        `[solutions/delivery] "${slug}" did not resolve — it is missing, ` +
-          `soft-deleted, or still a draft. Its section will not render.`,
-      );
-    }
-  }
+  // `resolveRelatedArticles` logs its own misses; the case study is warned about
+  // below.
+  const [caseStudy, articles] = await Promise.all([
+    caller.caseStudies
+      .publicGetBySlug({ slug: CASE_STUDY_SLUG })
+      .catch(() => null),
+    resolveRelatedArticles(
+      caller,
+      [ARTICLE_A_SLUG, ARTICLE_B_SLUG],
+      locale,
+      "solutions/delivery",
+    ),
+  ]);
 
-  const articles = [articleA, articleB]
-    .filter((post) => post != null)
-    .map((post) => ({
-      slug: post.slug,
-      title: locale === "ar" ? (post.titleAr ?? post.title) : post.title,
-      excerpt:
-        locale === "ar" ? (post.excerptAr ?? post.excerpt) : post.excerpt,
-    }));
+  if (caseStudy == null) {
+    console.warn(
+      `[solutions/delivery] "${CASE_STUDY_SLUG}" did not resolve — it is ` +
+        `missing, soft-deleted, or still a draft. Its section will not render.`,
+    );
+  }
 
   const faqItems = [
     {
@@ -267,38 +255,14 @@ async function SolutionsDeliveryContent() {
       )}
 
       {/* Articles */}
-      {articles.length > 0 && (
-        <Section variant="alternate">
-          <Container>
-            <SectionHeader
-              eyebrow={t("publicPages.solutionsDeliveryPage.articlesEyebrow")}
-              heading={t("publicPages.solutionsDeliveryPage.articlesHeading")}
-              subheading={t(
-                "publicPages.solutionsDeliveryPage.articlesSubheading",
-              )}
-            />
-            <div className="grid gap-6 md:grid-cols-2">
-              {articles.map((article, index) => (
-                <ContentCard key={article.slug} className="flex flex-col">
-                  <CardHeading>{article.title}</CardHeading>
-                  <ProseText size="sm" className="mt-3 flex-1">
-                    {article.excerpt}
-                  </ProseText>
-                  <LinkButton
-                    href={`/blog/${article.slug}`}
-                    variant="outline"
-                    className="mt-5 self-start"
-                  >
-                    {index === 0
-                      ? t("publicPages.solutionsDeliveryPage.articleARead")
-                      : t("publicPages.solutionsDeliveryPage.articleBRead")}
-                  </LinkButton>
-                </ContentCard>
-              ))}
-            </div>
-          </Container>
-        </Section>
-      )}
+      <RelatedContentSection
+        variant="alternate"
+        eyebrow={t("publicPages.solutionsDeliveryPage.articlesEyebrow")}
+        heading={t("publicPages.solutionsDeliveryPage.articlesHeading")}
+        subheading={t("publicPages.solutionsDeliveryPage.articlesSubheading")}
+        items={articles}
+        linkLabel={t("publicPages.relatedContent.readArticle")}
+      />
 
       {/* FAQ */}
       <Section variant="feature">

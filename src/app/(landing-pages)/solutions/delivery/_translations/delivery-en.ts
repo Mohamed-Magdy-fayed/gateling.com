@@ -36,8 +36,6 @@ export default {
     articlesHeading: "The Thinking Behind the Build",
     articlesSubheading:
       "Two perspectives on the same problem — what the ideal solution looks like, and exactly how we built it.",
-    articleARead: "Read the Article",
-    articleBRead: "Read the Case Study",
 
     faqEyebrow: "Common Questions",
     faqHeading: "Delivery App Development — FAQ",

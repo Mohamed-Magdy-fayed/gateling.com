@@ -73,6 +73,16 @@ const commands = {
       await seedAtelierVerticalArticles();
     },
   },
+  "service-pages": {
+    description:
+      "Backfill long-form service copy and add the Phase 1 service rows (idempotent).",
+    action: async () => {
+      const { seedServicePages } = await import(
+        "@/drizzle/seed/seed-service-pages"
+      );
+      await seedServicePages();
+    },
+  },
   "migrate-content-to-blocks": {
     description:
       "One-time data migration: backfill blog_post_blocks/case_study_blocks from legacy content columns (idempotent).",

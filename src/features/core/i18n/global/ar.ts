@@ -951,6 +951,10 @@ export default {
       description: "الصفحة التي تبحث عنها غير موجودة أو ربما تم نقلها.",
       backToHome: "العودة للرئيسية",
     },
+    relatedContent: {
+      readArticle: "اقرأ المقال",
+      readCaseStudy: "اقرأ دراسة الحالة",
+    },
     footer: {
       tagline: "نبني برمجيات تحل مشاكل الأعمال الحقيقية.",
       description:

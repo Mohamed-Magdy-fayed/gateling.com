@@ -1,25 +1,18 @@
 import {
-  Bot,
-  Code,
+  ArrowRightIcon,
   Compass,
-  Cpu,
-  Globe,
   Hammer,
   Laptop,
   Layers,
-  LayoutDashboard,
   type LucideProps,
-  Map as MapIcon,
   PenTool,
-  RefreshCw,
   Rocket,
   Router,
-  Settings,
   Wrench,
-  Zap,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import type { ComponentType } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
@@ -39,23 +32,7 @@ import {
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 import { canonicalUrl } from "@/lib/json-ld";
-
-const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
-  Bot,
-  Code,
-  Cpu,
-  Globe,
-  LayoutDashboard,
-  Map: MapIcon,
-  RefreshCw,
-  Settings,
-  Zap,
-};
-
-function ServiceIcon({ name }: { name: string }) {
-  const Icon = ICON_MAP[name] ?? Zap;
-  return <Icon className="text-primary h-10 w-10" />;
-}
+import { ServiceIcon } from "./_service-icon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -132,7 +109,9 @@ export default async function ServicesPage() {
       name: service.title,
       description: service.shortDescription,
       provider: { "@id": "https://gateling.com/#org" },
-      url: canonicalUrl("/services"),
+      // Each entry points at its own detail page, not the hub — otherwise
+      // every Service in the graph claims the same URL.
+      url: canonicalUrl(`/services/${service.slug}`),
     })),
   };
 
@@ -182,35 +161,51 @@ export default async function ServicesPage() {
                 service.media?.find((m) => m.isFeatured)?.url ??
                 service.coverImageUrl;
               return (
-                <ContentCard key={service.id} className="overflow-hidden p-0">
-                  {featuredImageUrl ? (
-                    <div className="relative aspect-video w-full overflow-hidden">
-                      <Image
-                        src={featuredImageUrl}
-                        alt={service.title}
-                        fill
-                        priority={index === 0}
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
+                // The whole card is the link to the detail page. Before Phase 1
+                // these cards were the only representation of a service and led
+                // nowhere, so /services was a dead end for both readers and
+                // crawlers.
+                <Link
+                  key={service.id}
+                  href={`/services/${service.slug}`}
+                  className="group block"
+                >
+                  <ContentCard className="flex h-full flex-col overflow-hidden p-0">
+                    {featuredImageUrl ? (
+                      <div className="relative aspect-video w-full overflow-hidden">
+                        <Image
+                          src={featuredImageUrl}
+                          alt={service.title}
+                          fill
+                          priority={index === 0}
+                          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </div>
+                    ) : (
+                      <div className="px-6 pt-6">
+                        <ServiceIcon name={service.icon} />
+                      </div>
+                    )}
+                    <div className="flex flex-1 flex-col p-6">
+                      <CardHeading className="group-hover:text-primary mb-3 transition-colors">
+                        {service.title}
+                      </CardHeading>
+                      <ProseText size="sm" className="mb-5">
+                        {service.shortDescription}
+                      </ProseText>
+                      <div className="space-y-2">
+                        {service.features.map((f) => (
+                          <CheckItem key={f}>{f}</CheckItem>
+                        ))}
+                      </div>
+                      <span className="text-primary mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
+                        {t("publicPages.servicesPage.cardCta")}
+                        <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" />
+                      </span>
                     </div>
-                  ) : (
-                    <div className="px-6 pt-6">
-                      <ServiceIcon name={service.icon} />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <CardHeading className="mb-3">{service.title}</CardHeading>
-                    <ProseText size="sm" className="mb-5">
-                      {service.shortDescription}
-                    </ProseText>
-                    <div className="space-y-2">
-                      {service.features.map((f) => (
-                        <CheckItem key={f}>{f}</CheckItem>
-                      ))}
-                    </div>
-                  </div>
-                </ContentCard>
+                  </ContentCard>
+                </Link>
               );
             })}
           </Grid>
