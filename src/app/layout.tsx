@@ -36,6 +36,7 @@ export const metadata: Metadata = {
   description:
     "We find the most painful points in your business and resolve them with custom software and AI. Serving cafes, schools, retail & events across Egypt and MENA.",
   metadataBase: new URL(process.env.BASE_URL ?? "https://gateling.com"),
+  icons: { icon: "/favicon.ico" },
   openGraph: {
     siteName: "Gateling Solutions",
     type: "website",
@@ -57,7 +58,7 @@ const jsonLd = {
       "@id": "https://gateling.com/#org",
       name: "Gateling Solutions",
       url: "https://gateling.com",
-      logo: "https://gateling.com/logo.png",
+      logo: "favicon.ico",
       email: "info@gateling.com",
     },
     {
