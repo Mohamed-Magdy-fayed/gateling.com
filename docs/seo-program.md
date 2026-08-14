@@ -36,7 +36,8 @@ in the same change (non-negotiable #4).
 |---|---|---|---|
 | 0 | Defects suppressing existing pages | `feat/seo-phase-0-defects` | **Done** — 1 item unresolved, see below |
 | 1 | `/services/[slug]` + internal link graph | `feat/seo-phase-1-service-pages` | **Done** — see below |
-| 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | Not started |
+| 1.5 | Locale in the URL → real 404s | `feat/seo-phase-1-5-locale-routing` | **Next** |
+| 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | Not started (after 1.5) |
 | 3 | SEO data model + admin control surface | `feat/seo-phase-3-admin-surface` | Not started |
 | 4 | Content engine (`write-project` skill) | `feat/seo-phase-4-content-engine` | Not started |
 | 5 | Atelier deep pass | `feat/seo-phase-5-atelier` | Not started |
@@ -98,8 +99,8 @@ CMS edits.
    `fullDescription`. Re-running is safe but pointless unless a row is added.
 2. **`/services/[slug]` inherits the soft-404 defect.** An unknown slug returns
    HTTP 200 with the 404 UI, exactly as `/blog/[slug]` and `/work/[slug]` do.
-   Same root cause, same single fix; still deprioritised while the baseline
-   reports zero soft 404s, but there are now three routes behind it, not two.
+   Three routes now sit behind one fix — which is why **Phase 1.5** was inserted
+   to take it on directly rather than leaving it deprioritised.
 3. **`_service-links.ts` is hand-curated and will drift.** It has no referential
    integrity with the database. Phase 3's SEO data model is the place to decide
    whether this becomes a real relation or stays editorial.
@@ -114,11 +115,73 @@ regresses to NULL, and the presence of outbound related links. The suite still
 shows the documented baseline failures — 3 tests (× desktop and mobile) in
 `content-blocks.spec.ts` and the homepage nav check — all unrelated to this phase.
 
+### Phase 1.5 — why it exists
+
+Inserted after Phase 1 (numbering preserved so existing references stay valid).
+
+The soft 404 on `/blog/[slug]`, `/work/[slug]` and now `/services/[slug]` has a
+single root cause, already confirmed by experiment in `docs/seo-blueprint.md`:
+`src/app/layout.tsx` awaits `getLocaleCookie()` to set `lang`/`dir`, which forces
+`<html>`/`<body>` inside a Suspense boundary, which makes Next flush a 200 shell
+before `notFound()` can set a status. The blueprint already names the fix — *get
+the locale read out of the root layout* — and notes the blocker: `dir="rtl"` must
+then come from somewhere else.
+
+Putting the locale in the URL is that somewhere else. `lang`/`dir` come from the
+route segment, the cookie read disappears, the root Suspense can go, and all
+three routes return real 404s. It is the same change, approached from the side
+that resolves the RTL objection.
+
+**Two decisions to make before writing code. Do not pick them silently.**
+
+1. **Does English get a prefix?** The recommendation is **no**: keep English at
+   the root (`/services`) and put Arabic at `/ar/services`, using a middleware
+   rewrite onto a single `app/[locale]/…` tree so the browser URL for English is
+   unchanged. The alternative — `/en/services` — moves every currently-indexed
+   URL and needs a full 301 map. With only 10 indexed pages there is little
+   equity to lose, so it is survivable, but it buys nothing.
+2. **This contradicts a standing rule.** "English-only for SEO. No `/ar` routes,
+   no hreflang" is written at the top of this file. Introducing `/ar/*` routes
+   means either adding hreflang + self-canonicals, or `noindex`-ing the Arabic
+   tree and keeping English canonical. Decide which, then **amend the standing
+   rule in the same change** — a rule the codebase contradicts is worse than no
+   rule.
+
+Scope warning: this touches every public route, every internal `href`, the
+sitemap, canonicals, `robots.ts`, and the locale switcher. It is an L-tier change
+and should not be bundled with Phase 2 content work.
+
 ---
 
 ## Session kickoff prompts
 
 Paste one of these into a fresh session. Each is self-contained.
+
+### Phase 1.5 — run this next
+
+```
+Read docs/seo-program.md and docs/seo-blueprint.md, then run Phase 1.5 on a new
+branch feat/seo-phase-1-5-locale-routing, branched from preview.
+
+Move locale state from the cookie into the URL so the root layout no longer
+awaits getLocaleCookie(). That lets <html>/<body> render outside the root
+Suspense boundary, which is the confirmed root cause of the soft 404 on
+/blog/[slug], /work/[slug] and /services/[slug] — all three must return a real
+HTTP 404 for an unknown slug when this is done.
+
+Before writing code, settle the two decisions recorded under "Phase 1.5 — why it
+exists": whether English is prefixed (recommendation: no — English at the root,
+Arabic at /ar, via a middleware rewrite onto one app/[locale]/… tree), and how
+the Arabic tree is treated for indexing (hreflang + self-canonical, or noindex
+with English canonical). Amend the "English-only for SEO. No /ar routes" standing
+rule in the same change to match whatever is chosen.
+
+Cover: the app/[locale] route tree and middleware rewrite, removing the root
+Suspense, locale-aware internal links and the locale switcher, sitemap and
+canonical URLs, robots.ts, and 301s for any URL whose public form changes. Flip
+the `test.fixme` soft-404 assertions in e2e/seo.spec.ts to real tests and add one
+per affected route.
+```
 
 ### Phase 1
 

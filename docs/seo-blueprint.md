@@ -177,6 +177,12 @@ can render outside any Suspense boundary. That has an Arabic UX tradeoff (`dir="
 no longer be known at server-render time without another mechanism), so it needs its own
 scoped change and a decision on how RTL is applied. Do not attempt it as a drive-by.
 
+**That mechanism is the locale in the URL**, and it is scheduled as Phase 1.5 — see
+`docs/seo-program.md`. With the locale as a route segment, `lang`/`dir` come from `params`,
+the cookie read disappears, the root Suspense can be removed, and all three affected routes
+(`/blog/[slug]`, `/work/[slug]`, `/services/[slug]`) return real 404s. The two open decisions
+— whether English is prefixed, and how the Arabic tree is indexed — are recorded there.
+
 ## Sitemap (`src/app/sitemap.ts`)
 
 Static routes: `/`, `/services`, `/work`, `/blog`, `/about`, `/contact`,
