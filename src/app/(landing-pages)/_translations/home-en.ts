@@ -3,8 +3,12 @@ export default {
     trustIndicator1: "10+ systems shipped",
     trustIndicator2: "100% came back for more phases",
     trustIndicator3: "Founder-led partnership",
-    headlinePart1: "In Gateling",
-    headlinePart2: "We design systems for teams chasing real growth",
+    // The two parts are concatenated into one <h1>. Keep the primary keyword
+    // ("custom software") in part 1 so the H1 and the page title share it —
+    // see docs/seo-blueprint.md. The brand lives in the title tag, the logo,
+    // and the Organization schema; it does not need to occupy the H1.
+    headlinePart1: "Custom software",
+    headlinePart2: "that works the way your business works",
     leadText:
       "We work with founders and operations leads to build custom platforms that clear the manual chaos, keep teams unified, and base every decision on live data.",
     benefit1:

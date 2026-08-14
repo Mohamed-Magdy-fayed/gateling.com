@@ -45,3 +45,7 @@ next-env.d.ts
 
 # claude code - personal machine-specific overrides
 .claude/settings.local.json
+
+# raw Search Console exports — account data, not repo content.
+# The summarised snapshot lives in docs/seo-baseline-*.md instead.
+.seo-baseline/

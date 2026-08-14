@@ -81,9 +81,11 @@ export async function PublicFooter() {
       { name: t("publicPages.footer.navContact"), href: "/contact" },
       { name: t("publicPages.footer.navServices"), href: "/services" },
       { name: t("publicPages.footer.navWork"), href: "/work" },
+      // The hub, not a single vertical: this link stays correct as verticals
+      // are added, and /solutions passes link equity down to each of them.
       {
-        name: t("publicPages.footer.navSolutionsDelivery"),
-        href: "/solutions/delivery",
+        name: t("publicPages.footer.navSolutions"),
+        href: "/solutions",
       },
     ],
     company: [

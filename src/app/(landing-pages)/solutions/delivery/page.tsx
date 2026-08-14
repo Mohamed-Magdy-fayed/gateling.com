@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   CardHeading,
   CheckItem,
@@ -53,6 +54,23 @@ async function SolutionsDeliveryContent() {
       .publicGetBySlug({ slug: ARTICLE_B_SLUG })
       .catch(() => null),
   ]);
+
+  // This page's proof and article sections render only when their rows resolve.
+  // That is deliberate — a pillar page must never link a slug that 404s — but it
+  // also means a missing or unpublished row silently removes ~40% of the page.
+  // Surface it in the server log instead of letting it pass unnoticed.
+  for (const [slug, row] of [
+    [CASE_STUDY_SLUG, caseStudy],
+    [ARTICLE_A_SLUG, articleA],
+    [ARTICLE_B_SLUG, articleB],
+  ] as const) {
+    if (row == null) {
+      console.warn(
+        `[solutions/delivery] "${slug}" did not resolve — it is missing, ` +
+          `soft-deleted, or still a draft. Its section will not render.`,
+      );
+    }
+  }
 
   const articles = [articleA, articleB]
     .filter((post) => post != null)
@@ -320,9 +338,30 @@ async function SolutionsDeliveryContent() {
   );
 }
 
+/**
+ * Hero-shaped placeholder. The whole page streams behind one boundary, so
+ * without a fallback the route paints nothing at all until the tRPC lookups
+ * resolve — a blank screen that reads as a broken page.
+ */
+function SolutionsDeliveryFallback() {
+  return (
+    <HeroContainer>
+      <Container size="narrow" className="text-center">
+        <Skeleton className="mx-auto h-12 w-3/4" />
+        <Skeleton className="mx-auto mt-4 h-6 w-full max-w-2xl" />
+        <Skeleton className="mx-auto mt-2 h-6 w-2/3" />
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Skeleton className="h-11 w-48 rounded-full" />
+          <Skeleton className="h-11 w-48 rounded-full" />
+        </div>
+      </Container>
+    </HeroContainer>
+  );
+}
+
 export default async function SolutionsDeliveryPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<SolutionsDeliveryFallback />}>
       <SolutionsDeliveryContent />
     </Suspense>
   );

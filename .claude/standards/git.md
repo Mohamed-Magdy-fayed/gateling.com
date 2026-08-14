@@ -1,10 +1,34 @@
 # Standard: Git, Branching, PRs & Versioning
 
-## Branching (trunk-based, short-lived branches)
+## Branching
 
-- `main` is always deployable. Work happens on short-lived branches: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `hotfix/<slug>`.
-- Branches live days, not weeks. Bigger than that → slice the work or hide it behind a flag and merge incrementally.
-- Hotfixes branch from production state, merge back to `main` immediately after.
+Three tiers. **Nothing goes from a feature branch straight to `main`.**
+
+```
+feat/<slug>  ──►  preview  ──►  main
+                (Vercel preview)  (production)
+```
+
+1. **Feature branches** — `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `hotfix/<slug>`.
+   **Branch from `preview`, not `main`** — `preview` is where work integrates, so branching
+   from `main` while `preview` holds unmerged work guarantees a conflict later. Short-lived:
+   days, not weeks. Bigger than that → slice the work or hide it behind a flag and merge
+   incrementally.
+   **Check `git branch --show-current` before your first commit.** Creating or switching
+   branches out-of-band is easy to miss, and commits landing on `preview` directly defeats
+   the whole flow.
+2. **`preview`** — a **permanent, never-deleted** integration branch. Vercel builds its
+   preview deployment from this branch, so the URL must stay stable. Feature branches merge
+   here first and get verified on the real preview deployment before going further.
+   Never force-push `preview`; never delete and recreate it — both break the Vercel
+   deployment history and any bookmarked preview URL.
+3. **`main`** — production. Only ever receives merges **from `preview`**, and only after
+   the preview deployment has been checked.
+
+- Hotfixes still branch from production state, but follow the same path — through `preview`,
+  not around it. If an incident genuinely cannot wait for a preview build, say so explicitly
+  in the summary per non-negotiable #6.
+- `main` is always deployable; `preview` is always mergeable to `main`.
 
 ## Commits
 
@@ -17,7 +41,10 @@
 - PR body per `templates/pull-request.md`: what, why, how verified, and any gate skipped.
 - Small PRs review well; >400 lines of real diff needs a reason (generated files don't count).
 - CI green before review is requested. Review findings addressed or explicitly disputed — never silently ignored.
-- Merge strategy: squash-merge feature branches (clean main history); the squash message follows commit conventions.
+- Merge strategy: **squash-merge feature branches into `preview`** (clean history); the squash
+  message follows commit conventions. `preview` → `main` is a **regular merge**, not a squash —
+  squashing there would rewrite commits that already exist on `preview` and cause every
+  subsequent merge to conflict.
 
 ## Versioning & releases
 

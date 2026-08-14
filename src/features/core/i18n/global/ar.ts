@@ -3,6 +3,7 @@ import aboutAr from "@/app/(landing-pages)/about/_translations/about-ar";
 import contactAr from "@/app/(landing-pages)/contact/_translations/contact-ar";
 import feedbackAr from "@/app/(landing-pages)/feedback/_translations/feedback-ar";
 import servicesAr from "@/app/(landing-pages)/services/_translations/services-ar";
+import solutionsIndexAr from "@/app/(landing-pages)/solutions/_translations/solutions-ar";
 import deliverySolutionsAr from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-ar";
 import workAr from "@/app/(landing-pages)/work/_translations/work-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
@@ -959,7 +960,7 @@ export default {
       resourcesTitle: "الموارد",
       navServices: "الخدمات",
       navWork: "أعمالنا",
-      navSolutionsDelivery: "حلول تطبيقات التوصيل",
+      navSolutions: "حلول حسب القطاع",
       navBlog: "المدونة",
       navAbout: "من نحن",
       navContact: "تواصل معنا",
@@ -1068,6 +1069,7 @@ export default {
       secondaryLabel: "ثانوي",
     },
     ...contactAr,
+    ...solutionsIndexAr,
     ...deliverySolutionsAr,
     feedbackPage: feedbackAr.feedbackPage,
     myAccountPage: {

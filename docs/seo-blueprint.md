@@ -13,12 +13,21 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 
 ## Per-Page SEO Targets
 
+> **Titles below exclude the brand.** The root template appends
+> ` | Gateling Solutions` to every page title. Writing the brand into a page
+> title yields "… | Gateling Solutions | Gateling Solutions". Only the root
+> layout's `title.default` carries the brand itself.
+
 ### Homepage `/`
-- **Title:** `Custom Software Development & Business Automation | Gateling Solutions`
-- **Description:** `We find the most painful points in your business and resolve them with custom software and AI. Serving cafes, schools, retail & events across Egypt and MENA.`
+- **Title:** `Custom Software Development & Business Automation`
+- **Description:** `Custom software and business automation for growing businesses in Egypt & MENA. We build platforms that clear manual chaos and put every decision on live data.`
 - **Primary keyword:** `custom software development Egypt`
 - **Secondary:** `business automation MENA`, `software for cafes schools retail`
-- **H1:** `Custom Software That Works the Way Your Business Works`
+- **H1:** `Custom software that works the way your business works`
+- The H1 is assembled from two spans (`hero.headlinePart1` + `headlinePart2`) in
+  `_components/hero-section.tsx`. Keep the primary keyword in part 1, and keep the
+  explicit `{" "}` between the spans — without it the rendered text content runs
+  the two halves together into one unreadable string.
 
 ### Services `/services`
 - **Title:** `Custom Software & Business Automation Services | Gateling Solutions`
@@ -116,11 +125,46 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 
 Same `Article` schema as case study.
 
+## Known issue: soft 404s on `/blog/[slug]` and `/work/[slug]`
+
+**Unresolved as of 2026-08-14.** An unknown slug renders the 404 UI but responds
+**HTTP 200**. Google classifies that as a soft 404: the URL is not indexed, but it
+consumes crawl budget and shows up under *Pages → Soft 404* in Search Console.
+
+Root cause — confirmed by experiment, not inferred:
+
+- `src/app/layout.tsx` returns `<Suspense><Suspended>{children}</Suspended></Suspense>`,
+  and `<html>`/`<body>` live *inside* `Suspended`. Every route therefore streams behind a
+  Suspense boundary with an effectively empty shell.
+- Next flushes that shell with `200` before any page code runs, so `notFound()` in the page
+  body — or in `generateMetadata` — renders the right UI but can no longer set the status.
+  A route that fails to *match* (e.g. `/totally-random-path`) still 404s correctly, because
+  that decision happens before rendering.
+
+Three fixes were tried and rejected:
+
+| Attempt | Result |
+|---|---|
+| `notFound()` in `generateMetadata` instead of `return {}` | Still 200 — metadata streams too |
+| `export const dynamic = "force-dynamic"` | Build error: *Route segment config "dynamic" is not compatible with `nextConfig.cacheComponents`* |
+| `await connection()` in `generateMetadata` | Build passes, route stays `◐`, still 200 |
+
+Removing the root Suspense *does* fix the status, but fails the build under
+`cacheComponents`: `Uncached data was accessed outside of <Suspense>` — because
+`Suspended` awaits `getLocaleCookie()`.
+
+**The real fix** is to get the locale cookie read out of the root layout so `<html>`/`<body>`
+can render outside any Suspense boundary. That has an Arabic UX tradeoff (`dir="rtl"` would
+no longer be known at server-render time without another mechanism), so it needs its own
+scoped change and a decision on how RTL is applied. Do not attempt it as a drive-by.
+
 ## Sitemap (`src/app/sitemap.ts`)
 
-Static routes: `/`, `/services`, `/work`, `/blog`, `/about`, `/contact`, `/tools/roi-calculator`
+Static routes: `/`, `/services`, `/work`, `/blog`, `/about`, `/contact`,
+`/tools/roi-calculator`, `/solutions`, `/privacy`, `/terms`
 
 Dynamic routes:
+- Every vertical in `src/app/(landing-pages)/solutions/_solutions.ts` → `/solutions/<slug>`
 - All published case studies: `/work/[slug]` with `lastModified: updatedAt`
 - All published blog posts: `/blog/[slug]` with `lastModified: updatedAt`
 
