@@ -62,10 +62,33 @@ longer duplicates the homepage title tag, metadata moved out of a metadata-only 
    was never run against production. `/solutions/delivery` therefore renders without its
    articles section (the new warning logs this on every request). Only 8 blog posts exist,
    all published. Belongs to Phase 6.
-3. **From the baseline, two cheap items added to Phase 2:** verify `www` → non-www is a 301
-   with correct canonicals (`www.gateling.com/` ranks separately at position 49), and decide
-   whether client subdomains (`tms.`, `emanz.`, `atelier.`) should be indexed at all — they
-   currently outrank the marketing site and expose login pages.
+3. **From the baseline, added to Phase 2:** verify `www` → non-www is a 301 with correct
+   canonicals — `www.gateling.com/` ranks separately at position 49.
+
+## Decision: client subdomains are not indexed (2026-08-14)
+
+`tms.gateling.com`, `atelier.gateling.com` and `emanz.gateling.com` currently rank — they
+pulled 23 impressions in the baseline window and produced the only non-homepage click,
+including on a login URL. **Owner's decision: they should not be indexed.**
+
+These are separate applications with their own deployments, so **the change cannot be made
+from this repo.** Each needs, in its own codebase:
+
+- `robots.txt` with `User-agent: * / Disallow: /` (in Next: a `robots.ts` returning
+  `{ rules: { userAgent: "*", disallow: "/" } }`), and
+- an `X-Robots-Tag: noindex, nofollow` response header, which is what actually removes
+  already-indexed URLs — `robots.txt` alone blocks crawling but does **not** deindex, and a
+  blocked page can still appear as a bare URL in results.
+
+Ordering matters: ship the `noindex` header **first** and let Google recrawl, *then* add the
+`Disallow`. Doing it the other way round blocks the crawler from ever seeing the `noindex`,
+and the URLs stay indexed indefinitely.
+
+Known repos: `atelier.` → `C:\Users\moham\OneDrive\Desktop\apps\atelier-management-system`;
+`tms.` → a separate `gateling-tms` project. `emanz.` not located yet.
+
+Tracked here because it is part of this program's outcome, but it is **not** work this repo
+can complete.
 
 ---
 
