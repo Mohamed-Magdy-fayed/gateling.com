@@ -48,5 +48,28 @@ export default {
     ctaDescription:
       "احجز استشارة مجانية 30 دقيقة — هنشخص المشكلة ونوصي بالمقاربة الصحيحة.",
     ctaButton: "احصل على استشارة مجانية",
+    cardCta: "شوف إزاي بتشتغل",
+  },
+  serviceDetailPage: {
+    backToServices: "كل الخدمات",
+    heroPrimary: "احصل على استشارة مجانية",
+    heroSecondary: "استعرض أعمالنا",
+    overviewHeading: "ماذا يعني ذلك عملياً",
+    includedHeading: "ما الذي يشمله",
+    includedSubheading: "كل تعاون في هذه الخدمة يغطي ما يلي بشكل أساسي.",
+    proofEyebrow: "الدليل",
+    proofHeading: "أين نفّذنا هذا من قبل",
+    proofSubheading: "مشاريع حقيقية سُلّمت لشركات في مصر والمنطقة.",
+    articlesEyebrow: "اقرأ المزيد",
+    articlesHeading: "التفكير وراء العمل",
+    articlesSubheading:
+      "كيف نتعامل مع المشكلات التي تحلها هذه الخدمة، بتفصيل أعمق.",
+    otherServicesHeading: "طرق أخرى نقدر نساعدك بها",
+    otherServicesSubheading:
+      "معظم المشاريع تجمع أكثر من واحدة من هذه الخدمات. ابدأ من أي نقطة.",
+    ctaHeading: "قل لنا ما الذي يبطئ عملك",
+    ctaSubheading:
+      "مكالمة مجانية 30 دقيقة. سنخبرك بما سنبنيه، وكم سيكلف، وما إذا كنت تحتاجه من الأساس.",
+    ctaButton: "احجز استشارة مجانية",
   },
 } as const;

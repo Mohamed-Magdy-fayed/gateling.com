@@ -219,6 +219,141 @@ test.describe("Public page availability", () => {
   });
 });
 
+test.describe("Service detail pages", () => {
+  /** Service paths the sitemap advertises. */
+  async function sitemapServicePaths(
+    request: import("@playwright/test").APIRequestContext,
+  ): Promise<string[]> {
+    const locs = await getSitemapLocs(request);
+    return locs
+      .map((u) => new URL(u).pathname)
+      .filter((p) => p.startsWith("/services/"))
+      .sort();
+  }
+
+  test("the sitemap lists service detail pages and each resolves", async ({
+    request,
+  }) => {
+    const paths = await sitemapServicePaths(request);
+    expect(paths.length, "the sitemap must list service pages").toBeGreaterThan(
+      0,
+    );
+
+    for (const path of paths) {
+      const res = await request.get(path);
+      expect(res.status(), `${path} should resolve 200`).toBe(200);
+    }
+  });
+
+  test("/services links exactly the services the sitemap lists", async ({
+    page,
+    request,
+  }) => {
+    // Both derive from servicesMgmt.publicList(). Before Phase 1 the cards on
+    // /services linked nowhere at all, so this asserts the hub actually passes
+    // link equity to every detail page.
+    const sitemapPaths = await sitemapServicePaths(request);
+
+    await page.goto("/services");
+    const linked = await page
+      .locator('a[href^="/services/"]')
+      .evaluateAll((els) =>
+        els.map((el) => new URL((el as HTMLAnchorElement).href).pathname),
+      );
+    expect([...new Set(linked)].sort()).toEqual(sitemapPaths);
+  });
+
+  test("has a self-referencing canonical and Open Graph tags", async ({
+    page,
+    request,
+  }) => {
+    const [path] = await sitemapServicePaths(request);
+    expect(path, "at least one service page must exist").toBeTruthy();
+    await page.goto(path);
+
+    const canonicalHref = await page
+      .locator('link[rel="canonical"]')
+      .getAttribute("href");
+    expect(canonicalHref, "a canonical link must be present").toBeTruthy();
+    expect(new URL(canonicalHref as string).pathname).toBe(path);
+    expect(hasDoubleSlashAfterOrigin(canonicalHref as string)).toBe(false);
+
+    for (const prop of ["og:title", "og:description", "og:url"]) {
+      const content = await page
+        .locator(`meta[property="${prop}"]`)
+        .getAttribute("content");
+      expect(content, `${prop} must be present`).toBeTruthy();
+    }
+  });
+
+  test("emits valid Service and BreadcrumbList JSON-LD", async ({
+    page,
+    request,
+  }) => {
+    const [path] = await sitemapServicePaths(request);
+    await page.goto(path);
+
+    const blocks = await page
+      .locator('script[type="application/ld+json"]')
+      .allTextContents();
+    const parsed = blocks.map((b) => JSON.parse(b) as Record<string, unknown>);
+
+    const service = parsed.find((p) => p["@type"] === "Service");
+    expect(service, "Service JSON-LD must be present").toBeTruthy();
+    expect(service?.name).toBeTruthy();
+    expect(service?.description).toBeTruthy();
+    expect(String(service?.url)).toBe(
+      new URL(path, "http://localhost:3000").toString(),
+    );
+    expect(hasDoubleSlashAfterOrigin(String(service?.url))).toBe(false);
+
+    const crumbs = parsed.find((p) => p["@type"] === "BreadcrumbList");
+    expect(crumbs, "BreadcrumbList JSON-LD must be present").toBeTruthy();
+    const items = crumbs?.itemListElement as Array<{ item: string }>;
+    expect(items.length).toBeGreaterThan(1);
+    for (const item of items) {
+      expect(hasDoubleSlashAfterOrigin(item.item)).toBe(false);
+    }
+  });
+
+  test("renders long-form body copy, not just the short description", async ({
+    page,
+    request,
+  }) => {
+    // A service whose fullDescription is still NULL falls back to the short
+    // description, which is far too thin to rank. Guard against shipping that.
+    const [path] = await sitemapServicePaths(request);
+    await page.goto(path);
+
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const main = (await page.locator("body").innerText()).length;
+    expect(main, "the page must carry substantive body copy").toBeGreaterThan(
+      1500,
+    );
+  });
+
+  test("links out to related content and sibling services", async ({
+    page,
+    request,
+  }) => {
+    // The whole point of Phase 1: every service page must feed the internal
+    // link graph rather than being another leaf node.
+    const [path] = await sitemapServicePaths(request);
+    await page.goto(path);
+
+    const siblings = await page.locator('a[href^="/services/"]').count();
+    expect(siblings, "must link sibling services").toBeGreaterThan(0);
+
+    const outbound = await page
+      .locator('a[href^="/work/"], a[href^="/blog/"]')
+      .count();
+    expect(
+      outbound,
+      "must link related case studies or articles",
+    ).toBeGreaterThan(0);
+  });
+});
+
 test.describe("Article metadata and structured data", () => {
   /** First published article linked from /blog. */
   async function firstArticlePath(page: import("@playwright/test").Page) {

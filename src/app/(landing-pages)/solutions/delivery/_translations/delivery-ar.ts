@@ -34,8 +34,6 @@ export default {
     articlesHeading: "التفكير الذي بُني عليه المشروع",
     articlesSubheading:
       "وجهتا نظر حول نفس المشكلة — كيف يبدو الحل المثالي، وكيف بنيناه بالضبط.",
-    articleARead: "اقرأ المقال",
-    articleBRead: "اقرأ دراسة الحالة",
 
     faqEyebrow: "أسئلة شائعة",
     faqHeading: "تطوير تطبيقات التوصيل — أسئلة شائعة",
