@@ -35,7 +35,7 @@ in the same change (non-negotiable #4).
 | Phase | Scope | Branch | Status |
 |---|---|---|---|
 | 0 | Defects suppressing existing pages | `feat/seo-phase-0-defects` | **Done** — 1 item unresolved, see below |
-| 1 | `/services/[slug]` + internal link graph | `feat/seo-phase-1-service-pages` | **Next** |
+| 1 | `/services/[slug]` + internal link graph | `feat/seo-phase-1-service-pages` | **Done** — see below |
 | 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | Not started |
 | 3 | SEO data model + admin control surface | `feat/seo-phase-3-admin-surface` | Not started |
 | 4 | Content engine (`write-project` skill) | `feat/seo-phase-4-content-engine` | Not started |
@@ -66,6 +66,45 @@ longer duplicates the homepage title tag, metadata moved out of a metadata-only 
    with correct canonicals (`www.gateling.com/` ranks separately at position 49), and decide
    whether client subdomains (`tms.`, `emanz.`, `atelier.`) should be indexed at all — they
    currently outrank the marketing site and expose login pages.
+
+### Phase 1 — what shipped
+
+`/services/[slug]` now exists, driven by the `services` table
+(`servicesMgmt.publicGetBySlug`). Each page carries long-form body copy, the
+feature list, Service + BreadcrumbList JSON-LD, canonical/OG/Twitter metadata,
+and a sitemap entry keyed off `updatedAt`. The `/services` cards were dead ends
+before this phase — every card is now one anchor to its detail page, and the
+`@graph` on `/services` points each Service at its own URL instead of all of them
+at the hub.
+
+Internal linking is the point of the phase: each detail page links out to curated
+case studies and articles (`services/_service-links.ts`), plus every sibling
+service. The related-content block was extracted to
+`components/general/related-content.tsx` with resolvers in
+`features/public-catalog/lib/related-content.ts`, and `/solutions/delivery` was
+migrated onto it — unresolved slugs are dropped and logged in one place now
+rather than per page.
+
+Long-form copy (EN + AR) for all seven services lives in
+`src/drizzle/seed/seed-service-pages.ts`, run with `npm run seed -- service-pages`.
+It is deliberately conservative: it writes `fullDescription` only while NULL, and
+inserts a service row only when its slug is absent, so re-running never clobbers
+CMS edits.
+
+### Phase 1 — carried forward
+
+1. **The seed must run against production before the new slugs resolve.**
+   `web-app-development`, `dashboards-and-reporting` and `system-integrations` do
+   not exist in the database until `npm run seed -- service-pages` runs, and the
+   four original services render short until their `fullDescription` is
+   backfilled. Confirm the `.env` target first — it points at production Neon.
+2. **`/services/[slug]` inherits the soft-404 defect.** An unknown slug returns
+   HTTP 200 with the 404 UI, exactly as `/blog/[slug]` and `/work/[slug]` do.
+   Same root cause, same single fix; still deprioritised while the baseline
+   reports zero soft 404s, but there are now three routes behind it, not two.
+3. **`_service-links.ts` is hand-curated and will drift.** It has no referential
+   integrity with the database. Phase 3's SEO data model is the place to decide
+   whether this becomes a real relation or stays editorial.
 
 ---
 

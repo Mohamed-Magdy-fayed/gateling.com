@@ -36,6 +36,25 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 - **Secondary:** `custom ERP Egypt`, `AI integration for business`, `workflow automation software`
 - **H1:** `Full-Stack Business Solutions — From Custom Apps to AI Automation`
 
+### Service Detail `/services/[slug]`
+- **Title:** Service `title` (uses the root template: `[title] | Gateling Solutions`)
+- **Description:** Service `shortDescription`
+- **OG image:** featured `service_media` row, falling back to `coverImageUrl`
+- **H1:** Service `title`
+- Body copy comes from `services.fullDescription` — plain text, blank line between
+  paragraphs, split on render. A row with a NULL `fullDescription` falls back to
+  `shortDescription`, which is far too thin to rank: backfill it via
+  `npm run seed -- service-pages` or the admin CMS.
+- Curated internal links per slug live in
+  `src/app/(landing-pages)/services/_service-links.ts`. Only published slugs may
+  be listed; an unresolved one is dropped from the page and logged.
+- Live slugs: `custom-software-development`, `business-process-automation`,
+  `ai-integration`, `digital-transformation-consulting`, `web-app-development`,
+  `dashboards-and-reporting`, `system-integrations`.
+- **Known defect:** an unknown slug renders the 404 UI with HTTP 200, the same
+  soft-404 issue `/blog/[slug]` and `/work/[slug]` have. See the soft-404 section
+  below — one root cause, one fix, all three routes.
+
 ### Work (case studies) `/work`
 - **Title:** `Case Studies — Real Results for Real Businesses | Gateling Solutions`
 - **Description:** `See how we helped a cafe automate callouts, a school digitize enrollment, and an atelier manage multi-branch rentals. Real impact, measurable results.`
@@ -165,6 +184,7 @@ Static routes: `/`, `/services`, `/work`, `/blog`, `/about`, `/contact`,
 
 Dynamic routes:
 - Every vertical in `src/app/(landing-pages)/solutions/_solutions.ts` → `/solutions/<slug>`
+- All active services: `/services/[slug]` with `lastModified: updatedAt`
 - All published case studies: `/work/[slug]` with `lastModified: updatedAt`
 - All published blog posts: `/blog/[slug]` with `lastModified: updatedAt`
 

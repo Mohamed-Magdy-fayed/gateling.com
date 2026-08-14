@@ -6,9 +6,9 @@ import { absoluteUrl } from "@/lib/json-ld";
 
 /**
  * Public route set only. CMS/(system-pages), API, and token-gated routes
- * (/feedback/:slug) are never enumerated here. Case studies and blog posts
- * come from the `public*` tRPC procedures, which already filter to
- * `status = "published"` and `deletedAt IS NULL`, so drafts stay out.
+ * (/feedback/:slug) are never enumerated here. Services, case studies and blog
+ * posts come from the `public*` tRPC procedures, which already filter to
+ * published/active and `deletedAt IS NULL`, so drafts stay out.
  */
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
@@ -45,10 +45,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const caller = await api();
 
-  const [caseStudiesResult, blogPostsResult] = await Promise.allSettled([
-    caller.caseStudies.publicList(),
-    caller.blogPosts.publicList(),
-  ]);
+  const [caseStudiesResult, blogPostsResult, servicesResult] =
+    await Promise.allSettled([
+      caller.caseStudies.publicList(),
+      caller.blogPosts.publicList(),
+      caller.servicesMgmt.publicList(),
+    ]);
+
+  // `publicList` already filters to `isActive` and `deletedAt IS NULL`, so a
+  // deactivated service drops out of the sitemap the same way its detail page
+  // starts 404ing.
+  const serviceRoutes: MetadataRoute.Sitemap =
+    servicesResult.status === "fulfilled"
+      ? servicesResult.value.map((service) => ({
+          url: absoluteUrl(`/services/${service.slug}`),
+          lastModified: service.updatedAt ?? new Date(),
+          changeFrequency: "monthly" as const,
+          priority: 0.8,
+        }))
+      : [];
 
   const caseStudyRoutes: MetadataRoute.Sitemap =
     caseStudiesResult.status === "fulfilled"
@@ -72,5 +87,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
       : [];
 
-  return [...staticRoutes, ...caseStudyRoutes, ...blogRoutes];
+  return [...staticRoutes, ...serviceRoutes, ...caseStudyRoutes, ...blogRoutes];
 }

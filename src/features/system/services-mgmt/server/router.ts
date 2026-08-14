@@ -102,6 +102,7 @@ export const servicesMgmtRouter = createTRPCRouter({
       coverImageUrl: row.coverImageUrl,
       sortOrder: row.sortOrder,
       media: row.media,
+      updatedAt: row.updatedAt,
       title: localize(row.title, row.titleAr, ctx.locale),
       shortDescription: localize(
         row.shortDescription,
@@ -111,6 +112,42 @@ export const servicesMgmtRouter = createTRPCRouter({
       features: localize(row.features, row.featuresAr, ctx.locale),
     }));
   }),
+  publicGetBySlug: baseProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const row = await ctx.db.query.ServicesTable.findFirst({
+        where: and(
+          eq(ServicesTable.slug, input.slug),
+          eq(ServicesTable.isActive, true),
+          isNull(ServicesTable.deletedAt),
+        ),
+        with: { media: { orderBy: [asc(ServiceMediaTable.sortOrder)] } },
+      });
+      // tRPC/react-query reject `undefined` — return null so the page can call
+      // notFound() on an unknown slug instead of throwing.
+      if (!row) return null;
+      return {
+        id: row.id,
+        slug: row.slug,
+        icon: row.icon,
+        coverImageUrl: row.coverImageUrl,
+        sortOrder: row.sortOrder,
+        media: row.media,
+        updatedAt: row.updatedAt,
+        title: localize(row.title, row.titleAr, ctx.locale),
+        shortDescription: localize(
+          row.shortDescription,
+          row.shortDescriptionAr,
+          ctx.locale,
+        ),
+        fullDescription: localize(
+          row.fullDescription,
+          row.fullDescriptionAr,
+          ctx.locale,
+        ),
+        features: localize(row.features, row.featuresAr, ctx.locale),
+      };
+    }),
   list: protectedProcedure.query(async ({ ctx }) => {
     assertAdmin(ctx.session?.user.role ?? "");
     return ctx.db.query.ServicesTable.findMany({

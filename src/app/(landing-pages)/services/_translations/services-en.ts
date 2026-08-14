@@ -49,5 +49,30 @@ export default {
     ctaDescription:
       "Book a free 30-minute consultation — we'll diagnose the problem and recommend the right approach.",
     ctaButton: "Get Free Consultation",
+    cardCta: "See how it works",
+  },
+  serviceDetailPage: {
+    backToServices: "All services",
+    heroPrimary: "Get a free consultation",
+    heroSecondary: "See our work",
+    overviewHeading: "What this actually means",
+    includedHeading: "What's included",
+    includedSubheading:
+      "Every engagement in this service covers the following as standard.",
+    proofEyebrow: "Proof",
+    proofHeading: "Where we've done this",
+    proofSubheading:
+      "Real projects delivered for businesses in Egypt and the wider region.",
+    articlesEyebrow: "Read more",
+    articlesHeading: "The thinking behind the work",
+    articlesSubheading:
+      "How we approach the problems this service solves, in more depth.",
+    otherServicesHeading: "Other ways we can help",
+    otherServicesSubheading:
+      "Most projects combine more than one of these. Start anywhere.",
+    ctaHeading: "Tell us what's slowing your business down",
+    ctaSubheading:
+      "A free 30-minute call. We'll tell you what we'd build, what it would cost, and whether you need it at all.",
+    ctaButton: "Book a free consultation",
   },
 } as const;
