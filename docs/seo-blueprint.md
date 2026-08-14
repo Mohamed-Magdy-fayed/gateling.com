@@ -51,9 +51,8 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 - Live slugs: `custom-software-development`, `business-process-automation`,
   `ai-integration`, `digital-transformation-consulting`, `web-app-development`,
   `dashboards-and-reporting`, `system-integrations`.
-- **Known defect:** an unknown slug renders the 404 UI with HTTP 200, the same
-  soft-404 issue `/blog/[slug]` and `/work/[slug]` have. See the soft-404 section
-  below — one root cause, one fix, all three routes.
+- An unknown slug returns a real **HTTP 404** as of Phase 1.5, via the slug check
+  in `src/proxy.ts`. See the soft-404 section below.
 
 ### Work (case studies) `/work`
 - **Title:** `Case Studies — Real Results for Real Businesses | Gateling Solutions`
@@ -144,44 +143,73 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 
 Same `Article` schema as case study.
 
-## Known issue: soft 404s on `/blog/[slug]` and `/work/[slug]`
+## Soft 404s on content detail routes — fixed in Phase 1.5
 
-**Unresolved as of 2026-08-14.** An unknown slug renders the 404 UI but responds
-**HTTP 200**. Google classifies that as a soft 404: the URL is not indexed, but it
-consumes crawl budget and shows up under *Pages → Soft 404* in Search Console.
+**Resolved 2026-08-14.** `/blog/[slug]`, `/work/[slug]` and `/services/[slug]` now
+return a real **HTTP 404** for an unknown slug.
 
-Root cause — confirmed by experiment, not inferred:
+### Root cause
 
-- `src/app/layout.tsx` returns `<Suspense><Suspended>{children}</Suspended></Suspense>`,
-  and `<html>`/`<body>` live *inside* `Suspended`. Every route therefore streams behind a
-  Suspense boundary with an effectively empty shell.
-- Next flushes that shell with `200` before any page code runs, so `notFound()` in the page
-  body — or in `generateMetadata` — renders the right UI but can no longer set the status.
-  A route that fails to *match* (e.g. `/totally-random-path`) still 404s correctly, because
-  that decision happens before rendering.
+Not the locale cookie, and not the root Suspense boundary specifically. It is inherent
+to streaming, and Next documents it directly
+(`node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/loading.md`,
+"Status Codes"):
 
-Three fixes were tried and rejected:
+> Because the response headers have already been sent to the client, the status code of
+> the response cannot be updated. […] The response body starts streaming when a Suspense
+> fallback renders […] or when a Server Component suspends under a `Suspense` boundary.
+> Place `notFound()` before those boundaries and before any `await` that may suspend.
 
-| Attempt | Result |
-|---|---|
-| `notFound()` in `generateMetadata` instead of `return {}` | Still 200 — metadata streams too |
-| `export const dynamic = "force-dynamic"` | Build error: *Route segment config "dynamic" is not compatible with `nextConfig.cacheComponents`* |
-| `await connection()` in `generateMetadata` | Build passes, route stays `◐`, still 200 |
+Every one of these routes awaits a database lookup before it can know the slug is
+unknown. Under `cacheComponents: true` that await **must** sit inside a Suspense
+boundary or the build fails with *"Uncached data was accessed outside of `<Suspense>`"*.
+So the body has always begun streaming by the time `notFound()` runs, and the status is
+already committed to 200.
 
-Removing the root Suspense *does* fix the status, but fails the build under
-`cacheComponents`: `Uncached data was accessed outside of <Suspense>` — because
-`Suspended` awaits `getLocaleCookie()`.
+Removing the root Suspense does not help: at least three dynamic dependencies sit above
+`notFound()` — `getLocaleCookie()` in `src/app/layout.tsx`, the page's own slug lookup,
+and `getCachedAuth()` + `getPublicTrackingSettings()` inside `Providers`, which renders
+`{children}`. Removing only the first leaves the other two.
 
-**The real fix** is to get the locale cookie read out of the root layout so `<html>`/`<body>`
-can render outside any Suspense boundary. That has an Arabic UX tradeoff (`dir="rtl"` would
-no longer be known at server-render time without another mechanism), so it needs its own
-scoped change and a decision on how RTL is applied. Do not attempt it as a drive-by.
+Attempts that were tried and do not work: `notFound()` in `generateMetadata`;
+`await connection()` in the page or the layout; resolving the slug at the page top
+level. `export const dynamic = "force-dynamic"` is rejected outright by `cacheComponents`.
 
-**That mechanism is the locale in the URL**, and it is scheduled as Phase 1.5 — see
-`docs/seo-program.md`. With the locale as a route segment, `lang`/`dir` come from `params`,
-the cookie read disappears, the root Suspense can be removed, and all three affected routes
-(`/blog/[slug]`, `/work/[slug]`, `/services/[slug]`) return real 404s. The two open decisions
-— whether English is prefixed, and how the Arabic tree is indexed — are recorded there.
+### Mitigation that already existed
+
+Next injects `<meta name="robots" content="noindex">` into a streamed not-found
+response, and its docs state this "does not lead to indexation". The 2026-08-14
+baseline recorded **zero** soft 404s in Search Console. The defect was real but its
+SEO cost was small — worth knowing before spending on it again.
+
+### The fix
+
+`src/proxy.ts` resolves the slug **before rendering starts** and, when it is definitely
+absent, rewrites to the not-found route with an explicit 404:
+
+```ts
+NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 })
+```
+
+Rewriting rather than returning a bare response preserves the URL, the styled
+not-found page, and the automatic `noindex` tag.
+
+`src/lib/published-slug.ts` holds the lookup. Points that matter if you touch it:
+
+- It re-implements each route's publication filter in raw SQL. **If it drifts from the
+  tRPC procedure it mirrors, the proxy will 404 a live page.** The
+  `every sitemap content URL still returns 200` test in `e2e/seo.spec.ts` is the guard.
+- Physical column names are quoted camelCase (`"deletedAt"`, `"isActive"`) — drizzle-kit
+  generates this schema with no `casing` option.
+- It **fails open**: any error or timeout returns `null`, and the proxy renders the page
+  normally. A false 404 on live content is far worse than a soft 404.
+- The timeout is a hang-guard (5s), not a latency budget. A tight budget makes the first
+  request to every cold instance fall open and serve the soft 404 this exists to remove.
+- The pool is deliberately not `max: 1`; that measured 5.8s under 20 concurrent requests
+  because every content request serializes through it.
+
+The check is wired into the existing auth proxy and only ever applies to a pass-through
+response, so an auth redirect or an `/unauthorized` rewrite still wins over a 404.
 
 ## Sitemap (`src/app/sitemap.ts`)
 

@@ -172,35 +172,58 @@ test.describe("Public page availability", () => {
   });
 
   test("an unknown slug renders the not-found page", async ({ page }) => {
-    // The 404 *UI* is correct today. The HTTP *status* is not — see the
-    // fixme below.
     const res = await page.goto("/blog/definitely-not-a-real-post");
     expect(res).not.toBeNull();
+    expect(res?.status()).toBe(404);
     await expect(page.getByText(/not found/i).first()).toBeVisible();
+
+    // Next marks a streamed not-found response `noindex`. The proxy rewrite
+    // must preserve that, not replace the page with a bare error body.
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/,
+    );
   });
 
-  // KNOWN DEFECT — soft 404. `notFound()` renders the not-found UI but the
-  // response status stays 200, because `cacheComponents: true` (next.config.ts)
-  // flushes a prerendered shell before the dynamic segment resolves. Verified
-  // that none of these fix it: resolving the slug at the page top level,
-  // `connection()` on the page, and `connection()` on the landing-pages layout.
-  // `dynamic = "force-dynamic"` is rejected outright by cacheComponents.
-  // Remaining options, each with a real trade-off for the owner to choose:
-  //   1. generateStaticParams + `dynamicParams = false` — real 404s, but newly
-  //      published CMS articles would 404 until the next deploy.
-  //   2. Disable `cacheComponents` — sitewide architectural change.
-  // Google treats soft 404s as wasted crawl budget and may index the error page.
-  test.fixme(
-    "an unknown slug returns HTTP 404, not a soft 404",
-    async ({ request }) => {
-      const res = await request.get("/blog/definitely-not-a-real-post");
+  // Soft 404 — fixed in Phase 1.5 by `src/proxy.ts`. `notFound()` alone cannot
+  // set the status: the page awaits its slug lookup inside a Suspense boundary
+  // (unavoidable under `cacheComponents: true`), so the body has already begun
+  // streaming and, per Next's docs, "the status code of the response cannot be
+  // updated". The proxy resolves the slug *before* rendering starts and rewrites
+  // to the not-found route with an explicit 404.
+  for (const [kind, path] of [
+    ["blog post", "/blog/definitely-not-a-real-post"],
+    ["case study", "/work/definitely-not-a-real-case-study"],
+    ["service", "/services/definitely-not-a-real-service"],
+  ] as const) {
+    test(`an unknown ${kind} slug returns HTTP 404`, async ({ request }) => {
+      const res = await request.get(path);
       expect(res.status()).toBe(404);
-    },
-  );
+    });
+  }
+
+  // The guard that matters most. `src/lib/published-slug.ts` re-implements each
+  // route's publication filter in raw SQL; if it ever drifts from the tRPC
+  // procedure it mirrors, the proxy starts 404ing live pages. Every URL the
+  // sitemap advertises must still resolve.
+  test("every sitemap content URL still returns 200", async ({ request }) => {
+    const paths = (await getSitemapLocs(request))
+      .map((u) => new URL(u).pathname)
+      .filter((p) => /^\/(blog|work|services)\/[^/]+$/.test(p));
+
+    // Guards the guard: an empty list would make this test vacuously pass.
+    expect(paths.length).toBeGreaterThan(0);
+
+    const failures: string[] = [];
+    for (const path of paths) {
+      const res = await request.get(path);
+      if (res.status() !== 200) failures.push(`${path} → ${res.status()}`);
+    }
+    expect(failures).toEqual([]);
+  });
 
   test("a draft article is not listed as published", async ({ request }) => {
-    // Until the soft-404 defect above is fixed, the meaningful invariant is
-    // that an unpublished article never appears in the sitemap or on /blog.
+    // An unpublished article must never appear in the sitemap or on /blog.
     const published = new Set(
       (await getSitemapLocs(request)).map((u) => new URL(u).pathname),
     );

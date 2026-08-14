@@ -36,7 +36,7 @@ in the same change (non-negotiable #4).
 |---|---|---|---|
 | 0 | Defects suppressing existing pages | `feat/seo-phase-0-defects` | **Done** — 1 item unresolved, see below |
 | 1 | `/services/[slug]` + internal link graph | `feat/seo-phase-1-service-pages` | **Done** — see below |
-| 1.5 | Locale in the URL → real 404s | `feat/seo-phase-1-5-locale-routing` | **Next** |
+| 1.5 | Real 404s via a proxy slug check | `feat/seo-phase-1-5-real-404s` | **Done** — see below |
 | 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | Not started (after 1.5) |
 | 3 | SEO data model + admin control surface | `feat/seo-phase-3-admin-surface` | Not started |
 | 4 | Content engine (`write-project` skill) | `feat/seo-phase-4-content-engine` | Not started |
@@ -55,10 +55,8 @@ longer duplicates the homepage title tag, metadata moved out of a metadata-only 
 
 ### Phase 0 — carried forward
 
-1. **Soft 404 unresolved.** `/blog/<unknown>` and `/work/<unknown>` return HTTP 200 with the
-   404 UI. Root cause and four rejected fixes are documented in `docs/seo-blueprint.md`.
-   **The baseline shows zero soft 404s reported by Google**, so this is deprioritised — but
-   re-check the Pages report each measurement.
+1. ~~**Soft 404 unresolved.**~~ **Fixed in Phase 1.5.** All three content detail routes now
+   return a real HTTP 404. See `docs/seo-blueprint.md` for the root cause and the fix.
 2. **The delivery article pair does not exist in the database.** `add-articles-delivery-vertical.ts`
    was never run against production. `/solutions/delivery` therefore renders without its
    articles section (the new warning logs this on every request). Only 8 blog posts exist,
@@ -97,10 +95,8 @@ CMS edits.
 1. **The seed has been run against production** (2026-08-14): 4 rows backfilled,
    3 created, and a second run wrote nothing. All seven services now have EN + AR
    `fullDescription`. Re-running is safe but pointless unless a row is added.
-2. **`/services/[slug]` inherits the soft-404 defect.** An unknown slug returns
-   HTTP 200 with the 404 UI, exactly as `/blog/[slug]` and `/work/[slug]` do.
-   Three routes now sit behind one fix — which is why **Phase 1.5** was inserted
-   to take it on directly rather than leaving it deprioritised.
+2. ~~**`/services/[slug]` inherits the soft-404 defect.**~~ Resolved in Phase 1.5,
+   together with `/blog/[slug]` and `/work/[slug]` — all three sat behind one fix.
 3. **`_service-links.ts` is hand-curated and will drift.** It has no referential
    integrity with the database. Phase 3's SEO data model is the place to decide
    whether this becomes a real relation or stays editorial.
@@ -115,41 +111,59 @@ regresses to NULL, and the presence of outbound related links. The suite still
 shows the documented baseline failures — 3 tests (× desktop and mobile) in
 `content-blocks.spec.ts` and the homepage nav check — all unrelated to this phase.
 
-### Phase 1.5 — why it exists
+### Phase 1.5 — what shipped
 
-Inserted after Phase 1 (numbering preserved so existing references stay valid).
+All three content detail routes (`/blog/[slug]`, `/work/[slug]`, `/services/[slug]`)
+now return a real **HTTP 404** for an unknown slug, verified against production data.
 
-The soft 404 on `/blog/[slug]`, `/work/[slug]` and now `/services/[slug]` has a
-single root cause, already confirmed by experiment in `docs/seo-blueprint.md`:
-`src/app/layout.tsx` awaits `getLocaleCookie()` to set `lang`/`dir`, which forces
-`<html>`/`<body>` inside a Suspense boundary, which makes Next flush a 200 shell
-before `notFound()` can set a status. The blueprint already names the fix — *get
-the locale read out of the root layout* — and notes the blocker: `dir="rtl"` must
-then come from somewhere else.
+`src/lib/published-slug.ts` resolves a slug against the database with one indexed
+`EXISTS` probe per route family, mirroring each route's publication filter. The check
+is wired into the existing auth proxy in `src/proxy.ts`, which rewrites to the
+not-found route with an explicit 404 when the slug is definitely absent — before
+rendering starts, which is the only point at which the status can still be set.
 
-Putting the locale in the URL is that somewhere else. `lang`/`dir` come from the
-route segment, the cookie read disappears, the root Suspense can go, and all
-three routes return real 404s. It is the same change, approached from the side
-that resolves the RTL objection.
+The `test.fixme` in `e2e/seo.spec.ts` is now three real per-route 404 tests, plus a
+`every sitemap content URL still returns 200` guard that fails if the SQL filters ever
+drift from the tRPC procedures they mirror.
 
-**Two decisions to make before writing code. Do not pick them silently.**
+Full root-cause writeup, and the operational notes that matter when touching the
+lookup (fail-open, timeout sizing, pool sizing, camelCase column names), are in
+`docs/seo-blueprint.md`.
 
-1. **Does English get a prefix?** The recommendation is **no**: keep English at
-   the root (`/services`) and put Arabic at `/ar/services`, using a middleware
-   rewrite onto a single `app/[locale]/…` tree so the browser URL for English is
-   unchanged. The alternative — `/en/services` — moves every currently-indexed
-   URL and needs a full 301 map. With only 10 indexed pages there is little
-   equity to lose, so it is survivable, but it buys nothing.
-2. **This contradicts a standing rule.** "English-only for SEO. No `/ar` routes,
-   no hreflang" is written at the top of this file. Introducing `/ar/*` routes
-   means either adding hreflang + self-canonicals, or `noindex`-ing the Arabic
-   tree and keeping English canonical. Decide which, then **amend the standing
-   rule in the same change** — a rule the codebase contradicts is worse than no
-   rule.
+### Phase 1.5 — why it is not the locale change that was planned
 
-Scope warning: this touches every public route, every internal `href`, the
-sitemap, canonicals, `robots.ts`, and the locale switcher. It is an L-tier change
-and should not be bundled with Phase 2 content work.
+This phase was originally scoped as "move the locale into the URL so the root layout
+stops awaiting `getLocaleCookie()`, so `<html>`/`<body>` leave the root Suspense, so
+`notFound()` can set a status." **That premise was wrong, and the work would not have
+fixed the 404s.** Recorded here so it is not re-derived:
+
+Streaming commits the status before `notFound()` runs, and under `cacheComponents: true`
+the page's own slug lookup *must* sit inside a Suspense boundary or the build fails. The
+locale cookie was one of at least three dynamic dependencies above `notFound()`; removing
+it leaves the page's DB lookup and `Providers`' auth/settings reads in place. Next's own
+docs name proxy as the mechanism for a real 404 status, which is what shipped instead.
+
+Effort came in at **M**, not the L that the locale rewrite would have been.
+
+### Phase 1.5 — carried forward
+
+1. **Locale in the URL is deferred, not done.** It has real independent value — Arabic
+   currently has no distinct URL and so can never rank, and removing the sitewide cookie
+   read is a prerequisite for the Phase 7 `use cache` work. It is simply not a soft-404
+   fix. Schedule it on its own merits.
+2. **Its two open decisions are already settled**, so a future phase need not re-litigate:
+   - **English is not prefixed.** English stays at the root; Arabic goes to `/ar/*` via a
+     proxy rewrite onto one `app/[locale]/…` tree. No currently-indexed URL moves, so no
+     301 map is needed.
+   - **The Arabic tree is `noindex` with an English canonical**, not hreflang +
+     self-canonical. Lowest risk, and it keeps the existing English-only posture.
+3. **The "English-only for SEO. No `/ar` routes" standing rule is unchanged** and was not
+   amended, because no `/ar` route shipped here — nothing in the codebase contradicts it.
+   When the locale phase lands, amend it to match decision 2 in that same change.
+4. **The proxy now performs a database read on every content detail request.** It is one
+   indexed probe on a unique column and fails open, but it is a new coupling between the
+   edge layer and the database. If Phase 7 makes these pages properly cacheable, revisit
+   whether the check can move into the cached render instead.
 
 ---
 
@@ -157,30 +171,39 @@ and should not be bundled with Phase 2 content work.
 
 Paste one of these into a fresh session. Each is self-contained.
 
-### Phase 1.5 — run this next
+### Phase 2 — run this next
+
+Use the Phase 2 prompt below.
+
+### Locale in the URL — deferred, prompt kept for when it is scheduled
 
 ```
-Read docs/seo-program.md and docs/seo-blueprint.md, then run Phase 1.5 on a new
-branch feat/seo-phase-1-5-locale-routing, branched from preview.
+Read docs/seo-program.md and docs/seo-blueprint.md, then move locale state from
+the cookie into the URL on a new branch feat/seo-locale-routing, branched from
+preview.
 
-Move locale state from the cookie into the URL so the root layout no longer
-awaits getLocaleCookie(). That lets <html>/<body> render outside the root
-Suspense boundary, which is the confirmed root cause of the soft 404 on
-/blog/[slug], /work/[slug] and /services/[slug] — all three must return a real
-HTTP 404 for an unknown slug when this is done.
+This is NOT a soft-404 fix — that was solved in Phase 1.5 by the slug check in
+src/proxy.ts, and the reasons the locale approach does not fix it are recorded
+under "Phase 1.5 — why it is not the locale change that was planned". Do the work
+for its own reasons: Arabic has no distinct URL today and so can never rank, and
+removing the sitewide getLocaleCookie() read is a prerequisite for the Phase 7
+`use cache` work.
 
-Before writing code, settle the two decisions recorded under "Phase 1.5 — why it
-exists": whether English is prefixed (recommendation: no — English at the root,
-Arabic at /ar, via a middleware rewrite onto one app/[locale]/… tree), and how
-the Arabic tree is treated for indexing (hreflang + self-canonical, or noindex
-with English canonical). Amend the "English-only for SEO. No /ar routes" standing
-rule in the same change to match whatever is chosen.
+Both design decisions are already settled — do not re-open them:
+  - English is NOT prefixed. English stays at the root, Arabic at /ar/*, via a
+    proxy rewrite onto one app/[locale]/… tree.
+  - The Arabic tree is noindex with an English canonical, not hreflang +
+    self-canonical.
+Amend the "English-only for SEO. No /ar routes" standing rule in the same change
+to match, since /ar routes will then exist.
 
-Cover: the app/[locale] route tree and middleware rewrite, removing the root
-Suspense, locale-aware internal links and the locale switcher, sitemap and
-canonical URLs, robots.ts, and 301s for any URL whose public form changes. Flip
-the `test.fixme` soft-404 assertions in e2e/seo.spec.ts to real tests and add one
-per affected route.
+Cover: the app/[locale] route tree and proxy rewrite, getT()/getLocaleCookie()
+callsites taking the locale from params, locale-aware internal links and the
+locale switcher, sitemap and canonical URLs, and robots.ts. No 301s should be
+needed, since no English URL changes form — verify that holds.
+
+Note the scale: ~65 internal href sites across 33+ files, plus 16 navigation
+calls, and every getT() caller. This is an L-tier change.
 ```
 
 ### Phase 1
