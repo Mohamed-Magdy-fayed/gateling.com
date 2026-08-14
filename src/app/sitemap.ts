@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { SOLUTION_VERTICALS } from "@/app/(landing-pages)/solutions/_solutions";
 import { api } from "@/integrations/trpc/server";
 import { absoluteUrl } from "@/lib/json-ld";
 
@@ -32,7 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     staticRoute("/about", "monthly", 0.7),
     staticRoute("/contact", "monthly", 0.8),
     staticRoute("/tools/roi-calculator", "monthly", 0.7),
-    staticRoute("/solutions/delivery", "monthly", 0.8),
+    staticRoute("/solutions", "monthly", 0.7),
+    // Driven off the registry so a new vertical can't ship without a sitemap
+    // entry — see `src/app/(landing-pages)/solutions/_solutions.ts`.
+    ...SOLUTION_VERTICALS.map((vertical) =>
+      staticRoute(`/solutions/${vertical.slug}`, "monthly", 0.8),
+    ),
     staticRoute("/privacy", "yearly", 0.3),
     staticRoute("/terms", "yearly", 0.3),
   ];

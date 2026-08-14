@@ -47,7 +47,7 @@ export async function HeroSection() {
               <PageHeading className="font-extrabold lg:text-6xl">
                 <span className="text-primary">
                   {t("publicPages.hero.headlinePart1")}
-                </span>
+                </span>{" "}
                 <span className="block">
                   {t("publicPages.hero.headlinePart2")}
                 </span>

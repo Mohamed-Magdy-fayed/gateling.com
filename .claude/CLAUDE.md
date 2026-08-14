@@ -62,6 +62,7 @@ research. Otherwise do the work yourself with the relevant standard loaded.
 ## Non-negotiables (apply to every code change)
 
 1. Pass the quality gates in `standards/quality-gates.md` before declaring done. Skipping a gate requires explicit user instruction and must be stated in the summary.
+1b. Branch flow is `feat/<slug>` → `preview` → `main` (`standards/git.md`). Never merge a feature branch directly into `main`; never delete or force-push `preview` — Vercel's preview deployment builds from it.
 2. Schema changes go through `/migration` — never hand-written SQL for structure, never `db:push`.
 3. Every architectural decision worth remembering becomes an ADR (`templates/adr.md`) in `docs/decisions/`.
 4. Update project memory (`docs/`) in the same change that makes it stale.

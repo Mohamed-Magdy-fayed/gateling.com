@@ -3,9 +3,13 @@
 export default {
     about: {
         hero: {
-            title: "Software Engineering & Product Design Studio",
+            // Was "Software Engineering & Product Design Studio" — the exact
+            // string the homepage used as its title tag, so the two pages
+            // competed for the same phrase. This H1 is now about who we are;
+            // the homepage owns the commercial "custom software" term.
+            title: "We Build Software That Solves Real Business Problems",
             description:
-                "We help founders and product teams plan, design, and launch thoughtful software that stays cohesive from first sketch to final deployment.",
+                "A founder-led studio in Cairo. We help founders and operations leads plan, design, and launch software that stays cohesive from first sketch to final deployment.",
         },
         stats: {
             launches: {

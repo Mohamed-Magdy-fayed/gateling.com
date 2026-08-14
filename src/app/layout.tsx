@@ -39,15 +39,14 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Gateling Solutions",
     type: "website",
-    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
   },
-  icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "icon", url: "/icon.png", type: "image/png" },
-  ],
+  // No `images` or `icons` entries here on purpose: `src/app/opengraph-image.tsx`
+  // and `src/app/icon.tsx` own those tags via Next's file conventions. The
+  // previous hardcoded `/og-default.png` and `/icon.png` pointed at files that
+  // were never added to `public/`, so every share preview and PNG icon 404'd.
 };
 
 const jsonLd = {
