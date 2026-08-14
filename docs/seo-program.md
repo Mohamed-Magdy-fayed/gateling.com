@@ -228,7 +228,9 @@ Read docs/seo-program.md, then run Phase 2 on a new branch feat/seo-phase-2-enti
 
 Add src/lib/seo.ts with a buildMetadata() helper and migrate public pages onto it. Extend
 the Organization @graph in app/layout.tsx with address, areaServed, contactPoint and founder
-→ Person. Add Person schema to /about. Switch /work/[slug] from CreativeWork to Article and
+→ Person. FIRST fix the known-invalid `logo: "favicon.ico"` in that same @graph — it is a
+relative URL that resolves to /blog/favicon.ico on article pages and 404s; public/logo.png
+exists and is the correct value. See the Root Layout note in docs/seo-blueprint.md. Add Person schema to /about. Switch /work/[slug] from CreativeWork to Article and
 add its missing twitter block. Flesh out /tools/roi-calculator with real copy + FAQPage.
 Also: verify www → non-www is a 301 with correct canonicals, and decide whether client
 subdomains should be indexed (see the baseline doc).

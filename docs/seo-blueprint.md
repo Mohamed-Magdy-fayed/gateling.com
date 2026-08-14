@@ -112,6 +112,17 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 }
 ```
 
+> **Known defect — `logo` is currently invalid.** `src/app/layout.tsx` ships
+> `logo: "favicon.ico"`, a *relative* URL. Structured-data consumers resolve it
+> against the page, so on `/blog/<slug>` it becomes `/blog/favicon.ico` and 404s.
+> Google's organization-logo guidance also expects an absolute URL and a raster
+> logo rather than a `.ico`. `public/logo.png` exists and the value above is the
+> correct one. Shipped knowingly (2026-08-14); **fix in Phase 2**, which already
+> owns the Organization `@graph`.
+
+Icons come from `metadata.icons` pointing at `public/favicon.ico`. The generated
+`src/app/icon.tsx` that Phase 0 added was removed in favour of the real file.
+
 ```json
 {
   "@context": "https://schema.org",
