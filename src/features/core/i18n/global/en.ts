@@ -3,6 +3,7 @@ import aboutEn from "@/app/(landing-pages)/about/_translations/about-en";
 import contactEn from "@/app/(landing-pages)/contact/_translations/contact-en";
 import feedbackEn from "@/app/(landing-pages)/feedback/_translations/feedback-en";
 import servicesEn from "@/app/(landing-pages)/services/_translations/services-en";
+import solutionsIndexEn from "@/app/(landing-pages)/solutions/_translations/solutions-en";
 import deliverySolutionsEn from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-en";
 import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
@@ -978,7 +979,7 @@ export default {
       resourcesTitle: "Resources",
       navServices: "Services",
       navWork: "Our Work",
-      navSolutionsDelivery: "Delivery App Solutions",
+      navSolutions: "Industry Solutions",
       navBlog: "Blog",
       navAbout: "About",
       navContact: "Contact",
@@ -1091,6 +1092,7 @@ export default {
       secondaryLabel: "Secondary",
     },
     ...contactEn,
+    ...solutionsIndexEn,
     ...deliverySolutionsEn,
     feedbackPage: feedbackEn.feedbackPage,
     myAccountPage: {
