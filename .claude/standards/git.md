@@ -10,8 +10,13 @@ feat/<slug>  ──►  preview  ──►  main
 ```
 
 1. **Feature branches** — `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `hotfix/<slug>`.
-   Branched from `main`. Short-lived: days, not weeks. Bigger than that → slice the work
-   or hide it behind a flag and merge incrementally.
+   **Branch from `preview`, not `main`** — `preview` is where work integrates, so branching
+   from `main` while `preview` holds unmerged work guarantees a conflict later. Short-lived:
+   days, not weeks. Bigger than that → slice the work or hide it behind a flag and merge
+   incrementally.
+   **Check `git branch --show-current` before your first commit.** Creating or switching
+   branches out-of-band is easy to miss, and commits landing on `preview` directly defeats
+   the whole flow.
 2. **`preview`** — a **permanent, never-deleted** integration branch. Vercel builds its
    preview deployment from this branch, so the URL must stay stable. Feature branches merge
    here first and get verified on the real preview deployment before going further.

@@ -15,7 +15,9 @@ in the same change (non-negotiable #4).
 ## Standing rules for every phase
 
 - **One branch per phase**, named in the table below. Flow is `feat/<slug>` → `preview` →
-  `main`. Never merge a feature branch straight into `main`.
+  `main`. Branch **from `preview`**, never merge a feature branch straight into `main`, and
+  run `git branch --show-current` before the first commit — it is easy to land commits on
+  `preview` by accident.
 - `npm run typecheck && npm run build` must pass. Baseline is known-dirty: **~236
   pre-existing lint errors and 3 fixture-slug e2e failures** on a clean tree. Compare against
   that; never claim a clean run.
