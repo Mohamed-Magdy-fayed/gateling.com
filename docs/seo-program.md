@@ -93,11 +93,9 @@ CMS edits.
 
 ### Phase 1 — carried forward
 
-1. **The seed must run against production before the new slugs resolve.**
-   `web-app-development`, `dashboards-and-reporting` and `system-integrations` do
-   not exist in the database until `npm run seed -- service-pages` runs, and the
-   four original services render short until their `fullDescription` is
-   backfilled. Confirm the `.env` target first — it points at production Neon.
+1. **The seed has been run against production** (2026-08-14): 4 rows backfilled,
+   3 created, and a second run wrote nothing. All seven services now have EN + AR
+   `fullDescription`. Re-running is safe but pointless unless a row is added.
 2. **`/services/[slug]` inherits the soft-404 defect.** An unknown slug returns
    HTTP 200 with the 404 UI, exactly as `/blog/[slug]` and `/work/[slug]` do.
    Same root cause, same single fix; still deprioritised while the baseline
@@ -105,6 +103,16 @@ CMS edits.
 3. **`_service-links.ts` is hand-curated and will drift.** It has no referential
    integrity with the database. Phase 3's SEO data model is the place to decide
    whether this becomes a real relation or stays editorial.
+4. **The three new services have no cover image or `service_media` rows.** Their
+   detail pages render the icon fallback and ship no OG image, so they will share
+   links without a preview card. Upload art through the admin CMS.
+
+Test coverage: six new cases in `e2e/seo.spec.ts` (`Service detail pages`) cover
+sitemap parity with `/services`, 200s on every listed slug, canonical + OG,
+Service/BreadcrumbList JSON-LD, a body-copy floor that fails if `fullDescription`
+regresses to NULL, and the presence of outbound related links. The suite still
+shows the documented baseline failures — 3 tests (× desktop and mobile) in
+`content-blocks.spec.ts` and the homepage nav check — all unrelated to this phase.
 
 ---
 
