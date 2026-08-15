@@ -240,26 +240,32 @@ the migration — **every sitemap URL carrying canonical + OG + Twitter tags**.
 
 ### Phase 2 — carried forward
 
-1. **`www` → non-www is a `307 Temporary`, not a 301. This is the one item Phase 2 could
-   not fix.** Measured 2026-08-14: `curl -sI https://www.gateling.com/` returns `307` with
-   `Location: https://gateling.com/`. The path is preserved correctly, so only the status
-   code is wrong — and a 307 tells Google the move is temporary, which is why
-   `www.gateling.com/` still ranks separately at position 49.
-
-   **Owner action, in the Vercel dashboard:** project → Settings → Domains →
-   `www.gateling.com` → change the redirect status code from **307 Temporary** to
-   **308 Permanent**. Google treats 308 as it does 301.
-
-   This cannot be done from the repo. Vercel resolves domain-level redirects *before* the
-   request reaches Next, so a `redirects()` rule with `has: [{ type: "host" }]` in
-   `next.config.ts` would never fire — it would be dead code. Verify after the change:
+1. ~~**`www` → non-www is a `307 Temporary`.**~~ **Resolved 2026-08-15.**
+   `www.gateling.com` now returns a **308 Permanent** to `https://gateling.com`, with the
+   path preserved (`/blog` → `/blog`). Verified live:
 
    ```bash
    curl -sI https://www.gateling.com/ | grep -Ei "^(HTTP|Location)"
    ```
 
-   **Canonicals were checked and need no work.** Every public page self-canonicals through
-   `absoluteUrl()` → `BASE_URL`, and production `BASE_URL` is the non-www origin.
+   This is a Vercel dashboard setting (Settings → Domains), **not** something the repo can
+   control: Vercel resolves domain-level redirects *before* the request reaches Next, so a
+   `redirects()` rule with `has: [{ type: "host" }]` in `next.config.ts` would be dead code.
+
+   > **The direction is load-bearing — do not invert it.** `gateling.com` must be the
+   > Production domain and `www` the redirect. During this change the two were briefly set
+   > the other way round, which broke three things at once: every page served from `www`
+   > still declared `canonical: https://gateling.com` (a canonical pointing at a redirect,
+   > which Google reads as a contradiction); the indexed non-www URLs, which hold all the
+   > site's ranking signal, would have had to be re-earned under a hostname sitting at
+   > position 49; and **passkey sign-in breaks**, because
+   > `src/features/core/auth/nextjs/actions/passkey.ts` derives both `EXPECTED_ORIGIN` and
+   > the WebAuthn RP ID from `BASE_URL` (`https://gateling.com`), so a `www` origin fails
+   > verification. `OAUTH_REDIRECT_URL_BASE` has the same exposure. Making `www` canonical
+   > would mean changing `BASE_URL` and re-verifying auth — a far larger change.
+
+   **Canonicals needed no work.** Every public page self-canonicals through `absoluteUrl()`
+   → `BASE_URL`, and production `BASE_URL` is the non-www origin.
 
 2. **Client subdomains: the decision is recorded above and unchanged.** What Phase 2 did
    inside this repo is add `rel="nofollow"` to the three outbound `liveUrl` link sites
@@ -268,11 +274,10 @@ the migration — **every sitemap URL carrying canonical + OG + Twitter tags**.
    client app's own repository. Confirmed 2026-08-14 that `tms.gateling.com/robots.txt`
    still serves `Allow: /` with its own sitemap, so none of it has been done yet.
 
-3. **The founder's LinkedIn URL is unverified.** `linkedin.com/in/mohamed-magdy-fayed/`
-   was supplied by the owner; LinkedIn returns HTTP `999` to automated requests, so it
-   could not be machine-checked. Note the previous footer value was
-   `linkedin.com/in/mohamedmagdyfayed` (no hyphens) — one of the two is wrong. Open the
-   shipped link once and confirm.
+3. ~~**The founder's LinkedIn URL is unverified.**~~ **Confirmed by the owner 2026-08-15**
+   as `linkedin.com/in/mohamed-magdy-fayed/`. LinkedIn returns HTTP `999` to automated
+   requests, so it can never be machine-checked — the old footer value
+   (`linkedin.com/in/mohamedmagdyfayed`, no hyphens) was the wrong one and is gone.
 
 4. **`clampHeadline()` truncates at 110 chars but is only applied to case studies.** Blog
    posts emit `headline` from the post title untouched. No current title is close to the
