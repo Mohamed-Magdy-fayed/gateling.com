@@ -11,6 +11,33 @@ Every public page (`(landing-pages)`) must export either:
 Always use the title template in root layout: `%s | Gateling Solutions`
 Never hardcode ` | Gateling Solutions` in a per-page title.
 
+### `buildMetadata()` is the only entry point
+
+Build that object with `buildMetadata()` from `src/lib/seo.ts` — do not hand-roll
+one. It derives the canonical and `og:url` from a single `path`, and emits the
+full `openGraph` and `twitter` blocks that 13 of 16 pages were missing before
+Phase 2.
+
+```ts
+export const metadata: Metadata = buildMetadata({
+  title: "About — Custom Software Specialists in Egypt & MENA",
+  description: "…",
+  path: "/about",
+});
+```
+
+`image` takes an absolute URL or a `public/` path; `type: "article"` unlocks
+`publishedTime`/`modifiedTime`/`authors`; `noindex: true` emits
+`noindex, nofollow` for private or token-gated routes. For content records, pass
+`featuredImage(record.media, record.coverImageUrl)` rather than re-inlining the
+featured-image lookup.
+
+The same module owns the JSON-LD entity ids — `ORG_ID`, `WEBSITE_ID`,
+`FOUNDER_ID`, and the `ORG_REF` shorthand. **Never write
+`"https://gateling.com/#org"` as a literal.** It was hardcoded in seven files;
+under the local `BASE_URL` those ids do not match the layout's, so the graph
+silently breaks in exactly the environment the e2e suite runs in.
+
 ## Per-Page SEO Targets
 
 > **Titles below exclude the brand.** The root template appends
@@ -62,9 +89,13 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 - **H1:** `Work We've Built — Real Results for Real Businesses`
 
 ### Case Study Detail `/work/[slug]`
-- **Title:** `[client]: [key result] | Gateling Solutions`
-- **Description:** First 155 chars of `problemStatement`
-- **OG image:** `coverImageUrl`
+- **Title:** the case study `title` verbatim (the root template appends the brand)
+- **Description:** `results.summary`, falling back to the first 155 chars of `problemStatement`
+- **OG image:** featured `case_study_media` row, falling back to `coverImageUrl`
+- The `title` column already follows the `[Client]: [Key Result]` pattern below,
+  so the page must **not** append `cs.client` to it. Doing so rendered
+  "Atelier Alaa El-Kasry: 70% Less Admin Time — Atelier Alaa El-Kasry"; fixed in
+  Phase 2.
 
 ### Blog `/blog`
 - **Title:** `Blog — Business Automation & Custom Software Insights | Gateling Solutions`
@@ -88,37 +119,107 @@ Never hardcode ` | Gateling Solutions` in a per-page title.
 - **Description:** `Tell us your biggest business problem. We'll design a custom solution and give you a free 30-minute consultation. Egypt, MENA & worldwide.`
 - **H1:** `Let's Build Your Next Competitive Advantage`
 
-### ROI Calculator `/tools/roi-calculator`
-- **Title:** `Business Automation ROI Calculator — How Much Is Manual Work Costing You?`
-- **Description:** `Calculate how much time and money your team loses to manual processes. See your potential savings with business automation. Free calculator.`
-- **H1:** `How Much Is Manual Work Costing Your Business?`
+### ROI Calculator `/tools/roi-calculator` — removed in Phase 2
+
+The page shipped roughly 60 words of prose around an interactive widget: one
+H1, a 22-word lead, a CTA heading, and no body copy, methodology, FAQ, or
+internal links beyond `/contact`. There was nothing on it to rank for, and
+filling it out would have meant writing a page's worth of copy for a tool with
+no search demand behind it.
+
+The calculator itself survives as the `roi_embed` content block
+(`src/components/blocks/roi-calculator.tsx`), which is where it earns its keep —
+embedded inside an article or case study that already ranks. The retired URL
+**308s to `/services`** via `next.config.ts`, because it had been advertised in
+the sitemap and crawled; deleting it outright would have added to the "Not
+found (404)" count instead of passing its signals on.
 
 ## JSON-LD Schemas
 
 ### Root Layout (all pages)
 
+Shipped as of Phase 2. Every value is derived from `BASE_URL` and
+`src/lib/company.ts` — nothing below is a literal in the source.
+
 ```json
 {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://gateling.com/#org",
   "name": "Gateling Solutions",
   "url": "https://gateling.com",
   "logo": "https://gateling.com/logo.png",
   "email": "info@gateling.com",
+  "telephone": "+201123862218",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Cairo",
+    "addressCountry": "EG"
+  },
+  "areaServed": [
+    { "@type": "Country", "name": "Egypt" },
+    { "@type": "Place", "name": "Middle East and North Africa" }
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "sales",
+    "email": "info@gateling.com",
+    "telephone": "+201123862218",
+    "availableLanguage": ["en", "ar"]
+  },
+  "founder": { "@id": "https://gateling.com/about#founder" },
   "sameAs": [
-    "https://linkedin.com/company/gateling",
-    "https://github.com/gateling"
+    "https://www.facebook.com/GatelingSolutions/",
+    "https://www.youtube.com/@gatelingsolutions",
+    "https://www.instagram.com/gatelingsolutions/"
   ]
 }
 ```
 
-> **Known defect — `logo` is currently invalid.** `src/app/layout.tsx` ships
-> `logo: "favicon.ico"`, a *relative* URL. Structured-data consumers resolve it
-> against the page, so on `/blog/<slug>` it becomes `/blog/favicon.ico` and 404s.
-> Google's organization-logo guidance also expects an absolute URL and a raster
-> logo rather than a `.ico`. `public/logo.png` exists and the value above is the
-> correct one. Shipped knowingly (2026-08-14); **fix in Phase 2**, which already
-> owns the Organization `@graph`.
+> **`sameAs` must only list profiles that exist.** An earlier draft of this
+> document proposed `linkedin.com/company/gateling` and `github.com/gateling`.
+> Neither exists — they were aspirational, and shipping them would have pointed
+> Google at 404s. The three above were verified to resolve on 2026-08-14, and
+> the YouTube channel was confirmed via oEmbed on the intro video. There is no
+> company LinkedIn page; the founder's personal LinkedIn lives on the Person
+> node instead, which is where it belongs.
+>
+> `src/lib/company.ts` is the single source for these. The footer renders the
+> same constants, so the rendered links and the graph cannot drift apart. Before
+> Phase 2 the footer's YouTube link 404'd and its Facebook/Instagram pointed at
+> personal accounts.
+
+> **Resolved — the `logo` defect.** The layout shipped `logo: "favicon.ico"`, a
+> *relative* URL that structured-data consumers resolve against the current
+> page, so on `/blog/<slug>` it requested `/blog/favicon.ico` and 404'd. Fixed
+> in Phase 2 to `absoluteUrl("/logo.png")`. Guarded by the
+> "logo is an absolute raster URL that resolves" test in `e2e/seo.spec.ts`.
+
+> **The homepage no longer emits a second Organization node.**
+> `_components/testimonials-section.tsx` used to declare `Organization` again,
+> reusing the same `@id` and attaching `aggregateRating` + `review[]` built from
+> our own testimonials. Self-serving review markup about the entity that
+> controls the page is against Google's review-snippet policy, and it left the
+> entity defined in two places. The markup is gone; the testimonials still
+> render.
+
+### Person (`/about`)
+
+Emitted by `about/_components/founder-section.tsx`, which already holds the
+name, role and bio. The Organization's `founder` points at this `@id`.
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://gateling.com/about#founder",
+  "name": "Mohamed Magdy",
+  "jobTitle": "Founder & CEO, Gateling Solutions",
+  "url": "https://gateling.com/about",
+  "worksFor": { "@id": "https://gateling.com/#org" },
+  "sameAs": ["https://www.linkedin.com/in/mohamed-magdy-fayed/"]
+}
+```
 
 Icons come from `metadata.icons` pointing at `public/favicon.ico`. The generated
 `src/app/icon.tsx` that Phase 0 added was removed in favour of the real file.
@@ -134,21 +235,31 @@ Icons come from `metadata.icons` pointing at `public/favicon.ico`. The generated
 
 ### Case Study Detail Page
 
+`Article` as of Phase 2 — it was `CreativeWork`, which is too abstract to earn
+any rich result. `headline` is clamped to 110 characters via `clampHeadline()`;
+Google truncates past that and flags it in the Rich Results Test.
+
 ```json
 {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "[case study title]",
-  "description": "[problemStatement]",
-  "image": "[coverImageUrl]",
+  "headline": "[case study title, ≤110 chars]",
+  "description": "[results.summary or problemStatement]",
+  "image": "[featured media or coverImageUrl]",
+  "url": "https://gateling.com/work/[slug]",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "[url]" },
+  "inLanguage": "en",
   "datePublished": "[publishedAt]",
-  "publisher": {
-    "@type": "Organization",
-    "name": "Gateling Solutions",
-    "url": "https://gateling.com"
-  }
+  "dateModified": "[updatedAt]",
+  "author": { "@id": "https://gateling.com/#org" },
+  "publisher": { "@id": "https://gateling.com/#org" }
 }
 ```
+
+The testimonials that used to hang off this node as `review[]` were removed.
+They are reviews of Gateling, not of the article, and the same self-serving
+review-markup policy applies. Dates are omitted rather than defaulted when the
+row has no `publishedAt` — a fabricated date is worse than a missing one.
 
 ### Blog Post Detail Page
 
@@ -225,7 +336,7 @@ response, so an auth redirect or an `/unauthorized` rewrite still wins over a 40
 ## Sitemap (`src/app/sitemap.ts`)
 
 Static routes: `/`, `/services`, `/work`, `/blog`, `/about`, `/contact`,
-`/tools/roi-calculator`, `/solutions`, `/privacy`, `/terms`
+`/solutions`, `/privacy`, `/terms`
 
 Dynamic routes:
 - Every vertical in `src/app/(landing-pages)/solutions/_solutions.ts` → `/solutions/<slug>`

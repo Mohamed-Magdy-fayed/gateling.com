@@ -24,6 +24,7 @@ import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { resolveRelatedArticles } from "@/features/public-catalog/lib/related-content";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata, ORG_REF } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 const CASE_STUDY_SLUG = "ba2olak";
@@ -33,11 +34,11 @@ const LEAD_SOURCE = "solutions-delivery";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.solutionsDeliveryPage.metaTitle"),
     description: t("publicPages.solutionsDeliveryPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/solutions/delivery") },
-  };
+    path: "/solutions/delivery",
+  });
 }
 
 async function SolutionsDeliveryContent() {
@@ -93,7 +94,7 @@ async function SolutionsDeliveryContent() {
     "@type": "Service",
     name: "Delivery App Development for Underserved Areas",
     description: t("publicPages.solutionsDeliveryPage.metaDescription"),
-    provider: { "@id": "https://gateling.com/#org" },
+    provider: ORG_REF,
     areaServed: "EG",
     url: canonicalUrl("/solutions/delivery"),
   };
@@ -240,7 +241,8 @@ async function SolutionsDeliveryContent() {
                     <a
                       href={caseStudy.liveUrl}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      // See the client-subdomain decision in docs/seo-program.md.
+                      rel="noopener noreferrer nofollow"
                       className="bg-primary/10 text-primary hover:bg-primary/15 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors"
                     >
                       <ExternalLinkIcon className="h-3.5 w-3.5" />

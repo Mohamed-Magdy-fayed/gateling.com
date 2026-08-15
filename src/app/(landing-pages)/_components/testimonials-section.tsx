@@ -48,49 +48,18 @@ export async function TestimonialsSection() {
 
   if (testimonials.length === 0) return null;
 
-  const ratedCount = testimonials.filter((c) => c.rating).length;
-  const averageRating =
-    ratedCount > 0
-      ? testimonials.reduce((sum, c) => sum + (c.rating ?? 0), 0) / ratedCount
-      : null;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": "https://gateling.com/#org",
-    ...(averageRating
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: averageRating,
-            bestRating: 5,
-            reviewCount: ratedCount,
-          },
-        }
-      : {}),
-    review: testimonials.map((client) => ({
-      "@type": "Review",
-      reviewBody: client.content,
-      author: { "@type": "Person", name: client.clientName },
-      ...(client.rating
-        ? {
-            reviewRating: {
-              "@type": "Rating",
-              ratingValue: client.rating,
-              bestRating: 5,
-            },
-          }
-        : {}),
-    })),
-  };
+  // No JSON-LD here on purpose. This block used to emit a *second*
+  // `Organization` node reusing the root layout's `@id`, carrying
+  // `aggregateRating` and `review[]` built from our own testimonials.
+  //
+  // Google's review-snippet policy disallows self-serving reviews — markup
+  // about the entity that controls the page — and ignores or penalises it
+  // rather than showing stars. It also left the Organization entity defined in
+  // two places, so enriching one half silently diverged from the other. The
+  // testimonials below still render; only the markup is gone.
 
   return (
     <Section variant="alternate">
-      <script
-        type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <Container>
         <SectionHeader
           eyebrow={t("publicPages.testimonialsSection.eyebrow")}

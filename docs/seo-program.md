@@ -18,9 +18,21 @@ in the same change (non-negotiable #4).
   `main`. Branch **from `preview`**, never merge a feature branch straight into `main`, and
   run `git branch --show-current` before the first commit — it is easy to land commits on
   `preview` by accident.
-- `npm run typecheck && npm run build` must pass. Baseline is known-dirty: **~236
-  pre-existing lint errors and 3 fixture-slug e2e failures** on a clean tree. Compare against
-  that; never claim a clean run.
+- `npm run typecheck && npm run build` must pass. Baseline is known-dirty; compare against
+  it and never claim a clean run:
+  - **Lint: 46 errors + 26 warnings.** Use `npx biome lint --max-diagnostics=1000 src/`.
+    Do **not** use `npm run lint` for comparison — `biome check` also runs the *formatter*,
+    and `core.autocrlf=true` rewrites every file with CRLF while Biome wants LF, so nearly
+    every file reports a whole-file format diff. Worse, the default diagnostic cap
+    truncates the total, so the number moves with unrelated changes. The "~236 errors"
+    figure recorded here through Phase 1.5 was that truncated count, not a real baseline.
+  - **e2e: the homepage nav check and the `content-blocks.spec.ts` fixture-slug tests fail**
+    (each × desktop and mobile).
+  - **Two known flakes**, unrelated to any change: `listing shows … and links to detail
+    pages` in `public-pages.spec.ts` (hits `/blog` or `/work` at random — a `toHaveURL`
+    race), and the `auth-flow` sign-up test when its fixture email already exists.
+  - Typecheck reports a stale `.next/types/validator.ts` error after a route is deleted.
+    Run `npm run build` first to regenerate it, then typecheck.
 - **`.env` points at production Neon.** Any script that writes is a production write. Confirm
   the target before running.
 - English-only for SEO. No `/ar` routes, no hreflang. Arabic remains a full app language —
@@ -37,7 +49,7 @@ in the same change (non-negotiable #4).
 | 0 | Defects suppressing existing pages | `feat/seo-phase-0-defects` | **Done** — 1 item unresolved, see below |
 | 1 | `/services/[slug]` + internal link graph | `feat/seo-phase-1-service-pages` | **Done** — see below |
 | 1.5 | Real 404s via a proxy slug check | `feat/seo-phase-1-5-real-404s` | **Done** — see below |
-| 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | Not started (after 1.5) |
+| 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | **Done** — 1 owner action outstanding, see below |
 | 3 | SEO data model + admin control surface | `feat/seo-phase-3-admin-surface` | Not started |
 | 4 | Content engine (`write-project` skill) | `feat/seo-phase-4-content-engine` | Not started |
 | 5 | Atelier deep pass | `feat/seo-phase-5-atelier` | Not started |
@@ -61,10 +73,33 @@ longer duplicates the homepage title tag, metadata moved out of a metadata-only 
    was never run against production. `/solutions/delivery` therefore renders without its
    articles section (the new warning logs this on every request). Only 8 blog posts exist,
    all published. Belongs to Phase 6.
-3. **From the baseline, two cheap items added to Phase 2:** verify `www` → non-www is a 301
-   with correct canonicals (`www.gateling.com/` ranks separately at position 49), and decide
-   whether client subdomains (`tms.`, `emanz.`, `atelier.`) should be indexed at all — they
-   currently outrank the marketing site and expose login pages.
+3. **From the baseline, added to Phase 2:** verify `www` → non-www is a 301 with correct
+   canonicals — `www.gateling.com/` ranks separately at position 49.
+
+## Decision: client subdomains are not indexed (2026-08-14)
+
+`tms.gateling.com`, `atelier.gateling.com` and `emanz.gateling.com` currently rank — they
+pulled 23 impressions in the baseline window and produced the only non-homepage click,
+including on a login URL. **Owner's decision: they should not be indexed.**
+
+These are separate applications with their own deployments, so **the change cannot be made
+from this repo.** Each needs, in its own codebase:
+
+- `robots.txt` with `User-agent: * / Disallow: /` (in Next: a `robots.ts` returning
+  `{ rules: { userAgent: "*", disallow: "/" } }`), and
+- an `X-Robots-Tag: noindex, nofollow` response header, which is what actually removes
+  already-indexed URLs — `robots.txt` alone blocks crawling but does **not** deindex, and a
+  blocked page can still appear as a bare URL in results.
+
+Ordering matters: ship the `noindex` header **first** and let Google recrawl, *then* add the
+`Disallow`. Doing it the other way round blocks the crawler from ever seeing the `noindex`,
+and the URLs stay indexed indefinitely.
+
+Known repos: `atelier.` → `C:\Users\moham\OneDrive\Desktop\apps\atelier-management-system`;
+`tms.` → a separate `gateling-tms` project. `emanz.` not located yet.
+
+Tracked here because it is part of this program's outcome, but it is **not** work this repo
+can complete.
 
 ### Phase 1 — what shipped
 
@@ -164,6 +199,84 @@ Effort came in at **M**, not the L that the locale rewrite would have been.
    indexed probe on a unique column and fails open, but it is a new coupling between the
    edge layer and the database. If Phase 7 makes these pages properly cacheable, revisit
    whether the check can move into the cached render instead.
+
+### Phase 2 — what shipped
+
+`src/lib/seo.ts` is now the only way page metadata is built. `buildMetadata()` takes a
+`path` and derives the canonical and `og:url` from it, and emits the full `openGraph` and
+`twitter` blocks that **13 of 16 public pages were missing entirely** — every page in
+`(landing-pages)` is migrated onto it. It also owns `featuredImage()` (the featured-media
+lookup that was inlined six times across the three `[slug]` routes) and the JSON-LD entity
+ids. `/privacy` and `/terms` gained the descriptions they never had; `/my-account` gained
+an explicit `noindex`, since `robots.ts` blocks crawling but does not prevent indexing.
+
+The Organization `@graph` in `src/app/layout.tsx` gained `address`, `areaServed`,
+`contactPoint`, `founder` and `sameAs`, and its **invalid relative `logo: "favicon.ico"`
+is fixed** — it resolved to `/blog/favicon.ico` on article pages and 404'd. `/about` now
+emits the `Person` the Organization's `founder` references. `/work/[slug]` moved from
+`CreativeWork` (too abstract to earn any rich result) to `Article`, and stopped appending
+the client name to a title that already began with it.
+
+`src/lib/company.ts` is the new single source for contact details and profile URLs. This
+surfaced a live defect: the footer's YouTube link (`@mohamedfayed`) **404'd**, and its
+Facebook/Instagram pointed at personal accounts while company pages existed. Footer and
+graph now read the same constants. The blueprint's suggested
+`linkedin.com/company/gateling` and `github.com/gateling` **do not exist** and were not
+shipped — see the `sameAs` note in `docs/seo-blueprint.md`.
+
+Two nodes were deleted rather than enriched. The homepage's `testimonials-section.tsx`
+declared a *second* `Organization` reusing the same `@id` with `aggregateRating` +
+`review[]` from our own testimonials, and `/work/[slug]` carried the same reviews on its
+node. Self-serving review markup about the entity controlling the page is against
+Google's review-snippet policy. The testimonials still render.
+
+`/tools/roi-calculator` was **removed** — see the blueprint for why, and note it 308s to
+`/services` rather than 404ing. The calculator survives as the `roi_embed` block.
+
+Nine new tests in `e2e/seo.spec.ts` cover the logo, the Organization fields, `@id`
+consistency across pages, the single-Organization rule, the `/about` Person, `Article` on
+case studies, `og:url`/canonical agreement, the ROI redirect, and — the one that proves
+the migration — **every sitemap URL carrying canonical + OG + Twitter tags**.
+
+### Phase 2 — carried forward
+
+1. **`www` → non-www is a `307 Temporary`, not a 301. This is the one item Phase 2 could
+   not fix.** Measured 2026-08-14: `curl -sI https://www.gateling.com/` returns `307` with
+   `Location: https://gateling.com/`. The path is preserved correctly, so only the status
+   code is wrong — and a 307 tells Google the move is temporary, which is why
+   `www.gateling.com/` still ranks separately at position 49.
+
+   **Owner action, in the Vercel dashboard:** project → Settings → Domains →
+   `www.gateling.com` → change the redirect status code from **307 Temporary** to
+   **308 Permanent**. Google treats 308 as it does 301.
+
+   This cannot be done from the repo. Vercel resolves domain-level redirects *before* the
+   request reaches Next, so a `redirects()` rule with `has: [{ type: "host" }]` in
+   `next.config.ts` would never fire — it would be dead code. Verify after the change:
+
+   ```bash
+   curl -sI https://www.gateling.com/ | grep -Ei "^(HTTP|Location)"
+   ```
+
+   **Canonicals were checked and need no work.** Every public page self-canonicals through
+   `absoluteUrl()` → `BASE_URL`, and production `BASE_URL` is the non-www origin.
+
+2. **Client subdomains: the decision is recorded above and unchanged.** What Phase 2 did
+   inside this repo is add `rel="nofollow"` to the three outbound `liveUrl` link sites
+   (`work/[slug]`, `work-case-card` ×2, `solutions/delivery`), so the marketing site stops
+   passing equity to apps that outrank it. The `noindex` work itself still belongs to each
+   client app's own repository. Confirmed 2026-08-14 that `tms.gateling.com/robots.txt`
+   still serves `Allow: /` with its own sitemap, so none of it has been done yet.
+
+3. **The founder's LinkedIn URL is unverified.** `linkedin.com/in/mohamed-magdy-fayed/`
+   was supplied by the owner; LinkedIn returns HTTP `999` to automated requests, so it
+   could not be machine-checked. Note the previous footer value was
+   `linkedin.com/in/mohamedmagdyfayed` (no hyphens) — one of the two is wrong. Open the
+   shipped link once and confirm.
+
+4. **`clampHeadline()` truncates at 110 chars but is only applied to case studies.** Blog
+   posts emit `headline` from the post title untouched. No current title is close to the
+   limit; revisit if long titles start appearing.
 
 ---
 

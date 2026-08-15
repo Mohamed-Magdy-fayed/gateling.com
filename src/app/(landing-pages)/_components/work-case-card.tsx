@@ -78,7 +78,8 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
               <Link
                 href={cs.liveUrl}
                 target="_blank"
-                rel="noopener noreferrer"
+                // See the client-subdomain decision in docs/seo-program.md.
+                rel="noopener noreferrer nofollow"
                 className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition-colors"
               >
                 <ExternalLinkIcon className="h-3 w-3" />
@@ -110,7 +111,8 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
             <a
               href={cs.liveUrl}
               target="_blank"
-              rel="noopener noreferrer"
+              // See the client-subdomain decision in docs/seo-program.md.
+              rel="noopener noreferrer nofollow"
               className="text-muted-foreground hover:text-primary flex items-center gap-1.5 text-sm font-medium transition-colors"
             >
               <ExternalLinkIcon className="h-3.5 w-3.5" />

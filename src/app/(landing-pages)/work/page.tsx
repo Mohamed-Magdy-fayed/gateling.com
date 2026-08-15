@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
-import { canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata } from "@/lib/seo";
 
 import { WorkCaseCard } from "../_components/work-case-card";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.workPage.metaTitle"),
     description: t("publicPages.workPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/work") },
-  };
+    path: "/work",
+  });
 }
 
 export default async function WorkPage() {

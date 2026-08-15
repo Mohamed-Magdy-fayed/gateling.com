@@ -1,12 +1,36 @@
 import Image from "next/image";
 import { H2, H3, P } from "@/components/ui/typography";
 import { getT } from "@/features/core/i18n/server";
+import { FOUNDER_SOCIALS } from "@/lib/company";
+import { absoluteUrl } from "@/lib/json-ld";
+import { FOUNDER_ID, ORG_REF } from "@/lib/seo";
 
 export async function AboutFounderSection() {
     const { t } = await getT();
 
+    // The Person the root layout's Organization references as its `founder`.
+    // Defined here, where the name, role and bio already live, so the entity
+    // exists exactly once with its own biography and profile links.
+    const personJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": FOUNDER_ID,
+        name: t("about.founder.name"),
+        jobTitle: t("about.founder.role"),
+        description: t("about.founder.bio"),
+        image: absoluteUrl("/images/mohamed_magdy_studio_headshot_final.png"),
+        url: absoluteUrl("/about"),
+        worksFor: ORG_REF,
+        sameAs: [FOUNDER_SOCIALS.linkedin],
+    };
+
     return (
         <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
+            <script
+                type="application/ld+json"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+            />
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16 scroll-reveal">
