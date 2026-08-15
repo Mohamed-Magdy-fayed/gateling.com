@@ -18,6 +18,7 @@ import {
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata, featuredImage, ORG_REF } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -29,33 +30,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .publicGetBySlug({ slug })
     .catch(() => null);
   if (!post) return {};
-  const title = locale === "ar" ? (post.titleAr ?? post.title) : post.title;
-  const description =
-    locale === "ar" ? (post.excerptAr ?? post.excerpt) : post.excerpt;
-  const url = canonicalUrl(`/blog/${slug}`);
-  const image =
-    post.media?.find((m) => m.isFeatured)?.url ?? post.coverImageUrl;
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      title,
-      description,
-      url,
-      publishedTime: post.publishedAt?.toISOString(),
-      modifiedTime: post.updatedAt?.toISOString(),
-      authors: [post.authorName],
-      ...(image ? { images: [{ url: image }] } : {}),
-    },
-    twitter: {
-      card: image ? "summary_large_image" : "summary",
-      title,
-      description,
-      ...(image ? { images: [image] } : {}),
-    },
-  };
+  return buildMetadata({
+    title: locale === "ar" ? (post.titleAr ?? post.title) : post.title,
+    description:
+      locale === "ar" ? (post.excerptAr ?? post.excerpt) : post.excerpt,
+    path: `/blog/${slug}`,
+    image: featuredImage(post.media, post.coverImageUrl),
+    type: "article",
+    publishedTime: post.publishedAt?.toISOString(),
+    modifiedTime: post.updatedAt?.toISOString(),
+    authors: [post.authorName],
+  });
 }
 
 async function BlogDetailContent({ params }: Props) {
@@ -100,11 +85,7 @@ async function BlogDetailContent({ params }: Props) {
       post.media?.find((m) => m.isFeatured)?.url ??
       post.coverImageUrl ??
       undefined,
-    publisher: {
-      "@type": "Organization",
-      "@id": "https://gateling.com/#org",
-      name: "Gateling Solutions",
-    },
+    publisher: ORG_REF,
   };
 
   const breadcrumbs = breadcrumbJsonLd([

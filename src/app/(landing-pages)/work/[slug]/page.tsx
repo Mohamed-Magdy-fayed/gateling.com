@@ -26,6 +26,12 @@ import {
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import {
+  buildMetadata,
+  clampHeadline,
+  featuredImage,
+  ORG_REF,
+} from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -36,17 +42,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .publicGetBySlug({ slug })
     .catch(() => null);
   if (!cs) return {};
-  return {
-    title: `${cs.title} — ${cs.client}`,
+  return buildMetadata({
+    // `cs.title` already leads with the client, per the case-study headline
+    // pattern in `docs/seo-blueprint.md` ("Atelier Alaa El-Kasry: 70% Less
+    // Admin Time"). Appending `cs.client` produced the name twice.
+    title: cs.title,
     description: cs.results.summary || cs.problemStatement.slice(0, 155),
-    alternates: { canonical: canonicalUrl(`/work/${slug}`) },
-    openGraph: (() => {
-      const img = cs.media?.find((m) => m.isFeatured)?.url ?? cs.coverImageUrl;
-      return img
-        ? { type: "article", images: [{ url: img }] }
-        : { type: "article" };
-    })(),
-  };
+    path: `/work/${slug}`,
+    image: featuredImage(cs.media, cs.coverImageUrl),
+    type: "article",
+    publishedTime: cs.publishedAt?.toISOString(),
+    modifiedTime: cs.updatedAt?.toISOString(),
+  });
 }
 
 async function WorkDetailContent({ params }: Props) {
@@ -72,33 +79,34 @@ async function WorkDetailContent({ params }: Props) {
     ).toUpperCase();
   }
 
+  const url = canonicalUrl(`/work/${cs.slug}`);
+  const caseStudyImage = featuredImage(cs.media, cs.coverImageUrl);
+
+  // `Article`, not `CreativeWork`: a case study is editorial content about a
+  // project, and only `Article` is eligible for Google's article treatment.
+  // `CreativeWork` is too abstract to earn any rich result.
+  //
+  // The testimonials that used to hang off this node as `review[]` are gone.
+  // They are reviews of Gateling, not of this article, and self-serving review
+  // markup about your own organization is against Google's review-snippet
+  // policy. They still render on the page.
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CreativeWork",
+    "@type": "Article",
+    headline: clampHeadline(cs.title),
     name: cs.title,
     about: cs.industry,
     description: cs.results.summary || cs.problemStatement,
-    image: cs.media?.find((m) => m.isFeatured)?.url ?? cs.coverImageUrl,
-    url: canonicalUrl(`/work/${cs.slug}`),
-    creator: { "@type": "Organization", "@id": "https://gateling.com/#org" },
-    ...(testimonials.length > 0
-      ? {
-        review: testimonials.map((rev) => ({
-          "@type": "Review",
-          reviewBody: rev.content,
-          author: { "@type": "Person", name: rev.clientName },
-          ...(rev.rating
-            ? {
-              reviewRating: {
-                "@type": "Rating",
-                ratingValue: rev.rating,
-                bestRating: 5,
-              },
-            }
-            : {}),
-        })),
-      }
+    ...(caseStudyImage ? { image: caseStudyImage } : {}),
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    inLanguage: locale === "ar" ? "ar" : "en",
+    author: ORG_REF,
+    publisher: ORG_REF,
+    ...(cs.publishedAt
+      ? { datePublished: cs.publishedAt.toISOString() }
       : {}),
+    ...(cs.updatedAt ? { dateModified: cs.updatedAt.toISOString() } : {}),
   };
 
   const breadcrumbs = breadcrumbJsonLd([
@@ -138,7 +146,10 @@ async function WorkDetailContent({ params }: Props) {
               <a
                 href={cs.liveUrl}
                 target="_blank"
-                rel="noopener noreferrer"
+                // `nofollow`: these point at client apps on *.gateling.com,
+                // which are separate deployments that currently outrank this
+                // site. See the client-subdomain decision in docs/seo-program.md.
+                rel="noopener noreferrer nofollow"
                 className="bg-primary/10 text-primary hover:bg-primary/15 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors"
               >
                 <ExternalLinkIcon className="h-3.5 w-3.5" />

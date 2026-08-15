@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { GatelingLogoLink } from "@/components/ui/logo";
 import { getT } from "@/features/core/i18n/server";
+import { COMPANY, FOUNDER_SOCIALS } from "@/lib/company";
 
 import { FooterNewsletterForm } from "./footer-newsletter-form";
 
@@ -55,22 +56,19 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-const APP_CONFIG = {
-  name: "Gateling Solutions",
-  email: "info@gateling.com",
-  phoneDisplay: "+201123862218",
-  phoneDial: "+201123862218",
-  facebook: "https://www.facebook.com/mohamedmagdyfayed",
-  youtube: "https://www.youtube.com/@mohamedfayed",
-  linkedin: "https://www.linkedin.com/in/mohamedmagdyfayed/",
-  instagram: "https://www.instagram.com/mohamedmagdyfayed/",
-} as const;
-
+// Was a module-private `APP_CONFIG` duplicating facts that also appear in the
+// Organization JSON-LD. They must agree: `sameAs` is Google's cross-check that
+// the site and these profiles are the same entity, so a footer link that
+// disagrees with the graph undermines both.
+//
+// The old values were wrong. `youtube.com/@mohamedfayed` returned 404, and
+// Facebook/Instagram pointed at the founder's personal accounts while company
+// pages existed. LinkedIn stays personal — there is no company page.
 const socialLinks = [
-  { name: "Facebook", href: APP_CONFIG.facebook, icon: FacebookIcon },
-  { name: "YouTube", href: APP_CONFIG.youtube, icon: YoutubeIcon },
-  { name: "LinkedIn", href: APP_CONFIG.linkedin, icon: LinkedinIcon },
-  { name: "Instagram", href: APP_CONFIG.instagram, icon: InstagramIcon },
+  { name: "Facebook", href: COMPANY.facebook, icon: FacebookIcon },
+  { name: "YouTube", href: COMPANY.youtube, icon: YoutubeIcon },
+  { name: "LinkedIn", href: FOUNDER_SOCIALS.linkedin, icon: LinkedinIcon },
+  { name: "Instagram", href: COMPANY.instagram, icon: InstagramIcon },
 ];
 
 export async function PublicFooter() {
@@ -122,19 +120,19 @@ export async function PublicFooter() {
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="h-4 w-4 shrink-0 text-primary" />
                   <a
-                    href={`mailto:${APP_CONFIG.email}`}
+                    href={`mailto:${COMPANY.email}`}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
-                    {APP_CONFIG.email}
+                    {COMPANY.email}
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Phone className="h-4 w-4 shrink-0 text-primary" />
                   <a
-                    href={`tel:${APP_CONFIG.phoneDial}`}
+                    href={`tel:${COMPANY.phoneDial}`}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
-                    {APP_CONFIG.phoneDisplay}
+                    {COMPANY.phoneDisplay}
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm">

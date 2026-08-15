@@ -1,12 +1,15 @@
-import { RoiCalculator } from "@/app/(landing-pages)/tools/roi-calculator/_components/roi-calculator";
 import type { BlockDataByType } from "@/features/system/shared/content-blocks";
+import { RoiCalculator } from "@/components/blocks/roi-calculator";
 
 /**
- * Judgment call: `RoiCalculator` (src/app/(landing-pages)/tools/roi-calculator/_components/roi-calculator.tsx)
- * is a small, fully self-contained "use client" component with no server-only
- * dependencies, so it's imported and rendered directly rather than falling
- * back to an <iframe src="/tools/roi-calculator">. This avoids the extra
- * network round-trip / cross-origin styling mismatch an iframe would add.
+ * `RoiCalculator` is a small, self-contained "use client" component with no
+ * server-only dependencies, so it is imported and rendered directly.
+ *
+ * It used to live under `/tools/roi-calculator`, which is why this comment once
+ * described the alternative of an <iframe> pointing at that page. The standalone
+ * page was removed in SEO Phase 2 — roughly 60 words of prose around a widget,
+ * with nothing to rank for — and the component moved here, to its only
+ * remaining consumer. `/tools/roi-calculator` now 308s to `/services`.
  *
  * The block's `data` lets an author tailor the calculator to the work item:
  * pre-fill the starting numbers for that business and keep or remove the CTA.

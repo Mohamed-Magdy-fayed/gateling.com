@@ -6,7 +6,6 @@ export const PUBLIC_SITE_PATHS = [
   "/about",
   "/contact",
   "/blog",
-  "/tools",
   "/privacy",
   "/terms",
 ] as const;
@@ -24,8 +23,7 @@ export type PublicMobileTabKey = (typeof PUBLIC_MOBILE_TABS)[number]["key"];
 export function getPublicTabIndex(pathname: string): number {
   if (pathname.startsWith("/work")) return 0;
   if (pathname === "/") return 1;
-  if (pathname.startsWith("/services") || pathname.startsWith("/tools"))
-    return 2;
+  if (pathname.startsWith("/services")) return 2;
   // Contact, Blog, About live in the "More" sheet
   if (
     pathname.startsWith("/contact") ||

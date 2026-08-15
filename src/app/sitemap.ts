@@ -32,7 +32,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     staticRoute("/blog", "weekly", 0.8),
     staticRoute("/about", "monthly", 0.7),
     staticRoute("/contact", "monthly", 0.8),
-    staticRoute("/tools/roi-calculator", "monthly", 0.7),
     staticRoute("/solutions", "monthly", 0.7),
     // Driven off the registry so a new vertical can't ship without a sitemap
     // entry — see `src/app/(landing-pages)/solutions/_solutions.ts`.

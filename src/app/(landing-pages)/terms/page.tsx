@@ -1,10 +1,14 @@
-import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
-import { canonicalUrl } from "@/lib/json-ld";
+import type { Metadata } from "next";
 
-export const metadata = {
+import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
   title: "Terms of Service",
-  alternates: { canonical: canonicalUrl("/terms") },
-};
+  description:
+    "The terms governing use of the Gateling Solutions website and our custom software development and automation engagements.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

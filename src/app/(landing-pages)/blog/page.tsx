@@ -16,15 +16,15 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
-import { canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.blogPage.metaTitle"),
     description: t("publicPages.blogPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/blog") },
-  };
+    path: "/blog",
+  });
 }
 
 export default async function BlogPage() {
