@@ -3,17 +3,17 @@ import type { Metadata } from "next";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getT } from "@/features/core/i18n/server";
 import { HydrateClient, prefetch, trpc } from "@/integrations/trpc/server";
-import { canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata } from "@/lib/seo";
 
 import { ContactPageContent } from "./_components/contact-page-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.contactPage.metaTitle"),
     description: t("publicPages.contactPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/contact") },
-  };
+    path: "/contact",
+  });
 }
 
 export default async function ContactPage({

@@ -165,13 +165,10 @@ test.describe("Solutions / delivery", () => {
   });
 });
 
-test.describe("ROI calculator", () => {
-  test("computes results from default inputs", async ({ page }) => {
-    await page.goto("/tools/roi-calculator");
-    await expect(page.getByText(/Annual cost of manual work/i)).toBeVisible();
-    await expect(page.getByText(/Potential annual savings/i)).toBeVisible();
-  });
-});
+// The standalone /tools/roi-calculator page was removed in SEO Phase 2 — it was
+// ~60 words of prose wrapped around a widget, with nothing to rank for. The
+// calculator itself survives as the `roi_embed` content block, and the retired
+// URL now 308s to /services. Both are covered in `seo.spec.ts`.
 
 test.describe("Static pages", () => {
   for (const path of ["/privacy", "/terms"]) {

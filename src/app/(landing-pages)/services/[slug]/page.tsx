@@ -25,6 +25,7 @@ import {
 } from "@/features/public-catalog/lib/related-content";
 import { api } from "@/integrations/trpc/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata, featuredImage, ORG_REF } from "@/lib/seo";
 import { ServiceIcon } from "../_service-icon";
 import { serviceLinksFor } from "../_service-links";
 
@@ -46,28 +47,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .catch(() => null);
   if (!service) return {};
 
-  const url = canonicalUrl(`/services/${slug}`);
-  const image =
-    service.media?.find((m) => m.isFeatured)?.url ?? service.coverImageUrl;
-
-  return {
+  return buildMetadata({
     title: service.title,
     description: service.shortDescription,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "website",
-      title: service.title,
-      description: service.shortDescription,
-      url,
-      ...(image ? { images: [{ url: image }] } : {}),
-    },
-    twitter: {
-      card: image ? "summary_large_image" : "summary",
-      title: service.title,
-      description: service.shortDescription,
-      ...(image ? { images: [image] } : {}),
-    },
-  };
+    path: `/services/${slug}`,
+    image: featuredImage(service.media, service.coverImageUrl),
+  });
 }
 
 async function ServiceDetailContent({ params }: Props) {
@@ -100,8 +85,7 @@ async function ServiceDetailContent({ params }: Props) {
   const paragraphs = service.fullDescription
     ? toParagraphs(service.fullDescription)
     : [];
-  const heroImage =
-    service.media?.find((m) => m.isFeatured)?.url ?? service.coverImageUrl;
+  const heroImage = featuredImage(service.media, service.coverImageUrl);
   const contactHref = `/contact?source=service-${service.slug}`;
 
   const serviceJsonLd = {
@@ -111,7 +95,7 @@ async function ServiceDetailContent({ params }: Props) {
     description: service.shortDescription,
     serviceType: service.title,
     url: canonicalUrl(`/services/${service.slug}`),
-    provider: { "@id": "https://gateling.com/#org" },
+    provider: ORG_REF,
     areaServed: "EG",
     ...(heroImage ? { image: heroImage } : {}),
     ...(service.features.length > 0

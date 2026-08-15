@@ -478,3 +478,239 @@ test.describe("Article metadata and structured data", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 2 — entity graph, metadata completeness, and the removed ROI page.
+ * ------------------------------------------------------------------------- */
+
+type JsonLdNode = Record<string, unknown>;
+
+/**
+ * Every JSON-LD node on a page, with `@graph` containers flattened.
+ *
+ * The root layout ships a `@graph`, so a top-level `p["@type"]` lookup would
+ * never see the Organization. Page-level scripts stay flat.
+ */
+async function jsonLdNodes(
+  request: import("@playwright/test").APIRequestContext,
+  path: string,
+): Promise<JsonLdNode[]> {
+  const res = await request.get(path);
+  expect(res.status(), `${path} should resolve 200`).toBe(200);
+  const html = await res.text();
+
+  const nodes: JsonLdNode[] = [];
+  const blocks = html.matchAll(
+    /<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g,
+  );
+  for (const block of blocks) {
+    const parsed = JSON.parse(block[1]) as JsonLdNode;
+    const graph = parsed["@graph"];
+    if (Array.isArray(graph)) nodes.push(...(graph as JsonLdNode[]));
+    else nodes.push(parsed);
+  }
+  return nodes;
+}
+
+function findNode(nodes: JsonLdNode[], type: string): JsonLdNode | undefined {
+  return nodes.find((node) => node["@type"] === type);
+}
+
+test.describe("Organization entity graph", () => {
+  test("the logo is an absolute raster URL that resolves", async ({
+    request,
+  }) => {
+    // Regression: `logo: "favicon.ico"` was a *relative* URL. Structured-data
+    // consumers resolve it against the current page, so on /blog/<slug> it
+    // asked for /blog/favicon.ico and 404'd. Google also wants a raster logo.
+    const org = findNode(await jsonLdNodes(request, "/"), "Organization");
+    expect(org, "Organization JSON-LD must be present").toBeTruthy();
+
+    const logo = String(org?.logo);
+    expect(logo).toMatch(/^https?:\/\//);
+    expect(logo).not.toMatch(/\.ico$/);
+    expect(hasDoubleSlashAfterOrigin(logo)).toBe(false);
+
+    const res = await request.get(new URL(logo).pathname);
+    expect(res.status(), `${logo} must resolve`).toBe(200);
+  });
+
+  test("carries address, areaServed, contactPoint, founder and sameAs", async ({
+    request,
+  }) => {
+    const org = findNode(await jsonLdNodes(request, "/"), "Organization");
+
+    expect(org?.address).toMatchObject({
+      "@type": "PostalAddress",
+      addressLocality: "Cairo",
+      addressCountry: "EG",
+    });
+    expect(Array.isArray(org?.areaServed)).toBe(true);
+    expect(org?.contactPoint).toMatchObject({ "@type": "ContactPoint" });
+    expect(org?.founder).toBeTruthy();
+
+    const sameAs = org?.sameAs as string[];
+    expect(sameAs.length).toBeGreaterThan(0);
+    for (const url of sameAs) expect(url).toMatch(/^https:\/\//);
+  });
+
+  test("page-level nodes reference the same Organization @id", async ({
+    request,
+  }) => {
+    // The guard for the hardcoded-literal trap. `"https://gateling.com/#org"`
+    // used to be typed out in the layout and six page files; the ids are now
+    // derived from BASE_URL. If any literal survives, it will not match the
+    // layout's id under the local BASE_URL — which is exactly where this runs,
+    // so the graph would break silently in production too.
+    const locs = await getSitemapLocs(request);
+    const siteOrigin = new URL(locs[0]).origin;
+
+    const homeNodes = await jsonLdNodes(request, "/");
+    const orgId = findNode(homeNodes, "Organization")?.["@id"];
+    expect(orgId).toBeTruthy();
+
+    // A surviving `https://gateling.com/#org` literal shows up here as an
+    // origin that disagrees with the one the sitemap and canonicals use.
+    expect(new URL(String(orgId)).origin).toBe(siteOrigin);
+
+    const website = findNode(homeNodes, "WebSite");
+    expect(website?.publisher).toEqual({ "@id": orgId });
+
+    const [servicePath] = locs
+      .map((u) => new URL(u).pathname)
+      .filter((p) => /^\/services\/[^/]+$/.test(p));
+    const service = findNode(await jsonLdNodes(request, servicePath), "Service");
+    expect(service?.provider).toEqual({ "@id": orgId });
+  });
+
+  test("the homepage no longer self-declares aggregateRating", async ({
+    request,
+  }) => {
+    // Self-serving review markup about your own Organization is against
+    // Google's review-snippet policy, and it left the entity defined twice.
+    const nodes = await jsonLdNodes(request, "/");
+    const orgs = nodes.filter((n) => n["@type"] === "Organization");
+    expect(orgs.length, "Organization must be declared exactly once").toBe(1);
+    expect(orgs[0].aggregateRating).toBeUndefined();
+    expect(orgs[0].review).toBeUndefined();
+  });
+});
+
+test.describe("Person schema on /about", () => {
+  test("emits a Person linked to the Organization", async ({ request }) => {
+    const person = findNode(await jsonLdNodes(request, "/about"), "Person");
+    expect(person, "Person JSON-LD must be present on /about").toBeTruthy();
+    expect(person?.name).toBeTruthy();
+    expect(person?.jobTitle).toBeTruthy();
+    expect(person?.description).toBeTruthy();
+
+    const orgId = findNode(await jsonLdNodes(request, "/"), "Organization")?.[
+      "@id"
+    ];
+    expect(person?.worksFor).toEqual({ "@id": orgId });
+
+    // The Organization's `founder` must point at this exact node.
+    const founder = findNode(await jsonLdNodes(request, "/"), "Organization")
+      ?.founder as { "@id": string };
+    expect(founder["@id"]).toBe(person?.["@id"]);
+  });
+});
+
+test.describe("Case study structured data", () => {
+  test("is an Article, not a CreativeWork", async ({ request }) => {
+    const [path] = (await getSitemapLocs(request))
+      .map((u) => new URL(u).pathname)
+      .filter((p) => /^\/work\/[^/]+$/.test(p));
+    expect(path, "at least one case study must exist").toBeTruthy();
+
+    const nodes = await jsonLdNodes(request, path);
+    expect(findNode(nodes, "CreativeWork")).toBeUndefined();
+
+    const article = findNode(nodes, "Article");
+    expect(article, "Article JSON-LD must be present").toBeTruthy();
+    expect(article?.headline).toBeTruthy();
+    expect(String(article?.headline).length).toBeLessThanOrEqual(111);
+    expect(article?.publisher).toBeTruthy();
+    expect(article?.author).toBeTruthy();
+    expect(article?.mainEntityOfPage).toBeTruthy();
+
+    // Reviews of Gateling do not belong on an article about a project.
+    expect(article?.review).toBeUndefined();
+
+    expect(findNode(nodes, "BreadcrumbList")).toBeTruthy();
+  });
+});
+
+test.describe("Metadata completeness", () => {
+  /** Meta tag content by property/name, read from the raw response body. */
+  function metaContent(html: string, selector: string): string | null {
+    const pattern = new RegExp(
+      `<meta[^>]+(?:property|name)="${selector}"[^>]+content="([^"]*)"`,
+    );
+    return html.match(pattern)?.[1] ?? null;
+  }
+
+  test("every sitemap URL carries canonical, Open Graph and Twitter tags", async ({
+    request,
+  }) => {
+    // The assertion that proves the `buildMetadata()` migration is complete.
+    // Before Phase 2, 13 of 16 public pages shipped no og: or twitter: tags at
+    // all, so every share preview fell back to the site-wide defaults.
+    const paths = (await getSitemapLocs(request)).map(
+      (u) => new URL(u).pathname,
+    );
+    expect(paths.length).toBeGreaterThan(0);
+
+    const failures: string[] = [];
+    for (const path of paths) {
+      const res = await request.get(path);
+      const html = await res.text();
+
+      const missing = [
+        !/<link[^>]+rel="canonical"/.test(html) && "canonical",
+        !metaContent(html, "og:title") && "og:title",
+        !metaContent(html, "og:description") && "og:description",
+        !metaContent(html, "og:url") && "og:url",
+        !metaContent(html, "twitter:card") && "twitter:card",
+        !metaContent(html, "twitter:title") && "twitter:title",
+      ].filter(Boolean);
+
+      if (missing.length > 0) failures.push(`${path} → missing ${missing}`);
+    }
+    expect(failures).toEqual([]);
+  });
+
+  test("og:url agrees with the canonical on a case study", async ({
+    request,
+  }) => {
+    // /work/[slug] set a canonical but no og:url before Phase 2.
+    const [path] = (await getSitemapLocs(request))
+      .map((u) => new URL(u).pathname)
+      .filter((p) => /^\/work\/[^/]+$/.test(p));
+
+    const html = await (await request.get(path)).text();
+    const canonical = html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]*)"/)?.[1];
+    expect(canonical).toBeTruthy();
+    expect(metaContent(html, "og:url")).toBe(canonical);
+    expect(new URL(canonical as string).pathname).toBe(path);
+  });
+});
+
+test.describe("Removed ROI calculator", () => {
+  test("redirects permanently and is absent from the sitemap", async ({
+    request,
+  }) => {
+    // The URL was advertised in the sitemap and crawled. Deleting it outright
+    // would add to the "Not found (404)" count instead of passing its signals.
+    const res = await request.get("/tools/roi-calculator", {
+      maxRedirects: 0,
+    });
+    expect([301, 308]).toContain(res.status());
+    expect(res.headers()["location"]).toContain("/services");
+
+    const paths = (await getSitemapLocs(request)).map(
+      (u) => new URL(u).pathname,
+    );
+    expect(paths.filter((p) => p.startsWith("/tools"))).toEqual([]);
+  });
+});

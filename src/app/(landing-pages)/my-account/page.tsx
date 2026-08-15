@@ -17,15 +17,21 @@ import type { LeadStatus } from "@/drizzle/schema";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { buildMetadata } from "@/lib/seo";
 
 import { MyBookings } from "./_components/my-bookings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.myAccountPage.metaTitle"),
     description: t("publicPages.myAccountPage.metaDescription"),
-  };
+    path: "/my-account",
+    // `robots.ts` only disallows *crawling*. A URL discovered elsewhere can
+    // still be indexed as a bare link, so the private account page needs an
+    // explicit noindex of its own.
+    noindex: true,
+  });
 }
 
 const statusBadgeVariant: Record<

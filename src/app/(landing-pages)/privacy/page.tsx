@@ -1,10 +1,14 @@
-import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
-import { canonicalUrl } from "@/lib/json-ld";
+import type { Metadata } from "next";
 
-export const metadata = {
+import { Container, HeroContainer, PageHeading } from "@/components/ui/containers";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy",
-  alternates: { canonical: canonicalUrl("/privacy") },
-};
+  description:
+    "How Gateling Solutions collects, uses, and protects personal data across our website and the software we build for clients.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

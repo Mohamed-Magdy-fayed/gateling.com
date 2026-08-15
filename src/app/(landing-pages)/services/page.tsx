@@ -32,15 +32,16 @@ import {
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
 import { canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata, ORG_REF } from "@/lib/seo";
 import { ServiceIcon } from "./_service-icon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.servicesPage.metaTitle"),
     description: t("publicPages.servicesPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/services") },
-  };
+    path: "/services",
+  });
 }
 
 export default async function ServicesPage() {
@@ -108,7 +109,7 @@ export default async function ServicesPage() {
       "@type": "Service",
       name: service.title,
       description: service.shortDescription,
-      provider: { "@id": "https://gateling.com/#org" },
+      provider: ORG_REF,
       // Each entry points at its own detail page, not the hub — otherwise
       // every Service in the graph claims the same URL.
       url: canonicalUrl(`/services/${service.slug}`),

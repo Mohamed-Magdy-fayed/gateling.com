@@ -14,17 +14,18 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { buildMetadata } from "@/lib/seo";
 import { SOLUTION_VERTICALS } from "./_solutions";
 
 const LEAD_SOURCE = "solutions-index";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.solutionsIndexPage.metaTitle"),
     description: t("publicPages.solutionsIndexPage.metaDescription"),
-    alternates: { canonical: canonicalUrl("/solutions") },
-  };
+    path: "/solutions",
+  });
 }
 
 export default async function SolutionsIndexPage() {

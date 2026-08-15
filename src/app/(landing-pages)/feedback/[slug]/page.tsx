@@ -7,6 +7,7 @@ import { H1, Lead } from "@/components/ui/typography";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { buildMetadata } from "@/lib/seo";
 import feedbackAr from "../_translations/feedback-ar";
 import feedbackEn from "../_translations/feedback-en";
 import { FeedbackForm } from "./_components/feedback-form";
@@ -18,11 +19,12 @@ type Props = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return {
+  return buildMetadata({
     title: t("publicPages.feedbackPage.metaTitle"),
     description: t("publicPages.feedbackPage.metaDescription"),
-    robots: { index: false, follow: false },
-  };
+    path: "/feedback",
+    noindex: true,
+  });
 }
 
 export default async function FeedbackPage({ params, searchParams }: Props) {
