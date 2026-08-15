@@ -18,9 +18,21 @@ in the same change (non-negotiable #4).
   `main`. Branch **from `preview`**, never merge a feature branch straight into `main`, and
   run `git branch --show-current` before the first commit — it is easy to land commits on
   `preview` by accident.
-- `npm run typecheck && npm run build` must pass. Baseline is known-dirty: **~236
-  pre-existing lint errors and 3 fixture-slug e2e failures** on a clean tree. Compare against
-  that; never claim a clean run.
+- `npm run typecheck && npm run build` must pass. Baseline is known-dirty; compare against
+  it and never claim a clean run:
+  - **Lint: 46 errors + 26 warnings.** Use `npx biome lint --max-diagnostics=1000 src/`.
+    Do **not** use `npm run lint` for comparison — `biome check` also runs the *formatter*,
+    and `core.autocrlf=true` rewrites every file with CRLF while Biome wants LF, so nearly
+    every file reports a whole-file format diff. Worse, the default diagnostic cap
+    truncates the total, so the number moves with unrelated changes. The "~236 errors"
+    figure recorded here through Phase 1.5 was that truncated count, not a real baseline.
+  - **e2e: the homepage nav check and the `content-blocks.spec.ts` fixture-slug tests fail**
+    (each × desktop and mobile).
+  - **Two known flakes**, unrelated to any change: `listing shows … and links to detail
+    pages` in `public-pages.spec.ts` (hits `/blog` or `/work` at random — a `toHaveURL`
+    race), and the `auth-flow` sign-up test when its fixture email already exists.
+  - Typecheck reports a stale `.next/types/validator.ts` error after a route is deleted.
+    Run `npm run build` first to regenerate it, then typecheck.
 - **`.env` points at production Neon.** Any script that writes is a production write. Confirm
   the target before running.
 - English-only for SEO. No `/ar` routes, no hreflang. Arabic remains a full app language —
