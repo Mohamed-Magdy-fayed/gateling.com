@@ -119,10 +119,9 @@ export default async function MyAccountPage() {
           ) : (
             <div className="mt-8 flex flex-col gap-4">
               {leads.map((lead) => {
+                const message = lead.message ?? "";
                 const messagePreview =
-                  lead.message.length > 120
-                    ? `${lead.message.slice(0, 120)}…`
-                    : lead.message;
+                  message.length > 120 ? `${message.slice(0, 120)}…` : message;
 
                 return (
                   <ContentCard key={lead.id} className="p-6">

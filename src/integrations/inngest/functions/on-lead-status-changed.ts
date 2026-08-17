@@ -21,7 +21,7 @@ export const onLeadStatusChanged = inngest.createFunction(
       subject: `🎯 Qualified lead: ${lead.name} (${lead.company ?? "no company"})`,
       html: `<h2>Lead Qualified</h2>
         <p><strong>${lead.name}</strong> from <strong>${lead.company ?? "—"}</strong> marked as qualified.</p>
-        <p>Email: ${lead.email} | Phone: ${lead.phone ?? "—"}</p>`,
+        <p>Email: ${lead.email ?? "—"} | Phone: ${lead.phone ?? "—"}</p>`,
     });
 
     return { notified: true };

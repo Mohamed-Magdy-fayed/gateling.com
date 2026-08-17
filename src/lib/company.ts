@@ -16,6 +16,8 @@
  * deliberately absent.
  */
 
+import { BUSINESS_WHATSAPP_NUMBER } from "@/lib/phone";
+
 /** Profiles belonging to the company itself. Safe for Organization `sameAs`. */
 export const COMPANY_SOCIALS = {
   facebook: "https://www.facebook.com/GatelingSolutions/",
@@ -35,8 +37,10 @@ export const FOUNDER_SOCIALS = {
 export const COMPANY = {
   name: "Gateling Solutions",
   email: "info@gateling.com",
-  phoneDisplay: "+201123862218",
-  phoneDial: "+201123862218",
+  // The phone line and the WhatsApp line are the same number. Defined once in
+  // `lib/phone.ts` so a change to one can never leave the other behind.
+  phoneDisplay: BUSINESS_WHATSAPP_NUMBER,
+  phoneDial: BUSINESS_WHATSAPP_NUMBER,
   /**
    * No street address exists. A remote-first studio should not claim a
    * storefront, and `PostalAddress` is valid with locality + country alone.

@@ -93,6 +93,20 @@ const commands = {
       await migrateContentToBlocks();
     },
   },
+  "sales-leads": {
+    description:
+      "Import the outbound prospecting CSV into the sales pipeline (idempotent — matches on name + phone). Optional second arg: CSV path.",
+    action: async () => {
+      const { importSalesLeads, DEFAULT_CSV_PATH } = await import(
+        "@/drizzle/seed/import-sales-leads"
+      );
+      const csvPath = process.argv[3] ?? DEFAULT_CSV_PATH;
+      const result = await importSalesLeads(csvPath);
+      console.log(
+        `Sales leads import: ${result.created} created, ${result.updated} updated, ${result.activitiesCreated} activities seeded, ${result.skipped} skipped.`,
+      );
+    },
+  },
   help: {
     description: "Show this help message.",
     action: async () => {
@@ -119,6 +133,8 @@ function printHelp() {
   console.log("  npm run seed:all");
   console.log("  npm run seed:clear");
   console.log("  npm run seed -- migrate-content-to-blocks");
+  console.log("  npm run seed -- sales-leads");
+  console.log('  npm run seed -- sales-leads "C:/path/to/leads-seed.csv"');
 }
 
 async function run() {
