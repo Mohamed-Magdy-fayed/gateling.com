@@ -8,9 +8,11 @@ import {
   LayoutDashboard,
   Mail,
   MessageSquare,
+  PhoneCall,
   Settings,
   Star,
   TableOfContentsIcon,
+  Target,
   Users,
 } from "lucide-react";
 
@@ -23,6 +25,9 @@ type NavTranslationKey =
   | "navServices"
   | "navTestimonials"
   | "navLeads"
+  | "navSales"
+  | "navSalesToday"
+  | "navSalesLeads"
   | "navBookings"
   | "navSubscribers"
   | "navUsers"
@@ -38,6 +43,9 @@ type BreadcrumbTranslationKey =
   | "breadcrumbServices"
   | "breadcrumbTestimonials"
   | "breadcrumbLeads"
+  | "breadcrumbSales"
+  | "breadcrumbSalesToday"
+  | "breadcrumbSalesLeads"
   | "breadcrumbBookings"
   | "breadcrumbSubscribers"
   | "breadcrumbUsers"
@@ -118,6 +126,36 @@ export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
     Icon: MessageSquare,
     navTranslationKey: "navLeads",
     breadcrumbTranslationKey: "breadcrumbLeads",
+  },
+  {
+    // Internal outbound sales pipeline. Registering the `/sales` prefix here is
+    // what makes `src/proxy.ts` guard it — `getProtectedScreenDefinitionByPathname`
+    // returns undefined for unregistered paths and the middleware then lets the
+    // request straight through. Without this entry `/sales/*` would be public.
+    key: "sales",
+    href: "/sales/today",
+    pathPrefixes: ["/sales"],
+    Icon: Target,
+    navTranslationKey: "navSales",
+    breadcrumbTranslationKey: "breadcrumbSales",
+    children: [
+      {
+        key: "salesToday",
+        href: "/sales/today",
+        pathPrefixes: ["/sales/today"],
+        Icon: PhoneCall,
+        navTranslationKey: "navSalesToday",
+        breadcrumbTranslationKey: "breadcrumbSalesToday",
+      },
+      {
+        key: "salesLeads",
+        href: "/sales/leads",
+        pathPrefixes: ["/sales/leads"],
+        Icon: Target,
+        navTranslationKey: "navSalesLeads",
+        breadcrumbTranslationKey: "breadcrumbSalesLeads",
+      },
+    ],
   },
   {
     key: "bookings",

@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/card";
 import { H1, H2, H3, Lead, P } from "@/components/ui/typography";
 import { getT } from "@/features/core/i18n/server";
+import { getPublicChatSettings } from "@/features/system/settings/server/public-settings";
+import { COMPANY } from "@/lib/company";
+import { BUSINESS_WHATSAPP_NUMBER, generateWhatsAppUrl } from "@/lib/phone";
 
 import { ContactFormCard } from "./contact-form-card";
 
@@ -38,6 +41,12 @@ function contactFormHref(tab: "message" | "book") {
 
 export async function ContactPageContent({ isSignedIn, initialTab, rescheduleId }: Props) {
     const { t } = await getT();
+    // Same resolution order as the floating button and the final CTA: the
+    // `WHATSAPP_NUMBER` setting wins, the shared constant is the fallback.
+    const { whatsappNumber } = await getPublicChatSettings();
+    const whatsappUrl = generateWhatsAppUrl(
+        whatsappNumber ?? BUSINESS_WHATSAPP_NUMBER,
+    );
 
     type ContactMethod = {
         icon: LucideIcon;
@@ -66,7 +75,7 @@ export async function ContactPageContent({ isSignedIn, initialTab, rescheduleId 
             icon: Phone,
             title: t('publicPages.contact.methods.phone.title'),
             description: t('publicPages.contact.methods.phone.description'),
-            value: '+201123862218',
+            value: COMPANY.phoneDisplay,
             action: t('publicPages.contact.methods.phone.action'),
             tab: 'book',
             color: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400'
@@ -77,7 +86,7 @@ export async function ContactPageContent({ isSignedIn, initialTab, rescheduleId 
             description: t('publicPages.contact.methods.chat.description'),
             value: t('publicPages.contact.methods.chat.value'),
             action: t('publicPages.contact.methods.chat.action'),
-            link: 'https://wa.me/201123862218',
+            link: whatsappUrl,
             external: true,
             color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
         },

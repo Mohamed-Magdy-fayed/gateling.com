@@ -1,4 +1,16 @@
 /**
+ * The single source of truth for Gateling's public WhatsApp number (E.164).
+ *
+ * Every public WhatsApp CTA resolves through the `WHATSAPP_NUMBER` system
+ * setting (code `00002`) and falls back to this constant. Both the setting's
+ * seeded default and the component fallbacks read it from here, so the number
+ * can never drift between surfaces again — a previous placeholder
+ * (`+201000000000`) shipped to production and every WhatsApp click reached
+ * nothing.
+ */
+export const BUSINESS_WHATSAPP_NUMBER = "+201123862218";
+
+/**
  * Generate a WhatsApp URL with an optional pre-filled message.
  * Used by public landing pages for the floating WhatsApp button.
  */

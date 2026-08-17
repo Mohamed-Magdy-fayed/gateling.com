@@ -1,8 +1,14 @@
 import type { SettingsLabel } from "@/drizzle/schemas/system/settings-table";
+import { BUSINESS_WHATSAPP_NUMBER } from "@/lib/phone";
 
 export const DEFAULT_BUSINESS_TIMEZONE = "Africa/Cairo";
 export const DEFAULT_CONTACT_EMAIL = "info@gateling.com";
-export const DEFAULT_WHATSAPP_NUMBER = "+201000000000";
+/**
+ * Re-exported from the shared constant rather than written out here. This used
+ * to be a `+201000000000` placeholder that shipped to production, so the number
+ * now has exactly one definition — see `BUSINESS_WHATSAPP_NUMBER`.
+ */
+export const DEFAULT_WHATSAPP_NUMBER = BUSINESS_WHATSAPP_NUMBER;
 
 export const DEFAULT_BOOKING_WINDOW_START = "19:00";
 export const DEFAULT_BOOKING_WINDOW_END = "23:00";
@@ -27,6 +33,7 @@ export const SYSTEM_SETTING_CODE = {
   WAPILOT_API_TOKEN: "00014",
   WAPILOT_WEBHOOK_SECRET: "00015",
   CHAT_WIDGET_ENABLED: "00016",
+  SALES_DAILY_NEW_QUEUE_CAP: "00017",
 } as const;
 
 export type SystemSettingCode =
@@ -49,6 +56,7 @@ export const SYSTEM_SETTING_CODES: SystemSettingCode[] = [
   SYSTEM_SETTING_CODE.WAPILOT_API_TOKEN,
   SYSTEM_SETTING_CODE.WAPILOT_WEBHOOK_SECRET,
   SYSTEM_SETTING_CODE.CHAT_WIDGET_ENABLED,
+  SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP,
 ];
 
 export type SystemSettingDefinition = {
@@ -70,7 +78,8 @@ export type SystemSettingDefinition = {
     | "settingName00013"
     | "settingName00014"
     | "settingName00015"
-    | "settingName00016";
+    | "settingName00016"
+    | "settingName00017";
   descriptionKey:
     | "settingDesc00001"
     | "settingDesc00002"
@@ -87,7 +96,8 @@ export type SystemSettingDefinition = {
     | "settingDesc00013"
     | "settingDesc00014"
     | "settingDesc00015"
-    | "settingDesc00016";
+    | "settingDesc00016"
+    | "settingDesc00017";
   descriptionEn: string;
   editable: {
     isActive?: boolean;
@@ -261,6 +271,16 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
       "Enables the on-site WhatsApp chat widget. When inactive, the floating button falls back to a wa.me link.",
     editable: { isActive: true },
     seed: { isActive: false },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP,
+    label: "policy",
+    nameKey: "settingName00017",
+    descriptionKey: "settingDesc00017",
+    descriptionEn:
+      "How many fresh prospects the Today's Work new-dial queue shows per day. An uncapped list gets ignored; a short one gets worked.",
+    editable: { amount: true },
+    seed: { isActive: true, amount: 10 },
   },
 ];
 

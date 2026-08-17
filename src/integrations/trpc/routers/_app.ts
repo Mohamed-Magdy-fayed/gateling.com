@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
 import { dashboardRouter } from "@/features/system/dashboard/server";
+import { salesRouter } from "@/features/system/sales/server/router";
 import {
   createSignedUploadUrl,
   uploadImage,
@@ -69,6 +70,7 @@ export const appRouter = createTRPCRouter({
   caseStudies: caseStudiesRouter,
   dashboard: dashboardRouter,
   leads: leadsRouter,
+  sales: salesRouter,
   servicesMgmt: servicesMgmtRouter,
   settings: settingsRouter,
   subscribers: subscribersRouter,

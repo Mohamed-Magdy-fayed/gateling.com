@@ -18,14 +18,14 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { getPublicChatSettings } from "@/features/system/settings/server/public-settings";
-import { generateWhatsAppUrl } from "@/lib/phone";
+import { BUSINESS_WHATSAPP_NUMBER, generateWhatsAppUrl } from "@/lib/phone";
 
 export async function FinalCtaSection() {
   const { t } = await getT();
   const { whatsappNumber } = await getPublicChatSettings();
 
   const whatsappUrl = generateWhatsAppUrl(
-    whatsappNumber ?? "+201123862218",
+    whatsappNumber ?? BUSINESS_WHATSAPP_NUMBER,
     t("publicPages.finalCta.whatsappMessage"),
   );
 

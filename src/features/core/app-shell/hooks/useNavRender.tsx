@@ -42,9 +42,12 @@ export function useNavRender() {
       .filter((l) => {
         if (!session?.user) return false;
         try {
+          // `screenKey`, not `href`: `EMPLOYEE_BLOCKED_SCREENS` holds keys like
+          // `leads`, so passing `/leads` never matched and every blocked screen
+          // still rendered a sidebar link that `src/proxy.ts` then refused.
           return (
             hasPermission(session.user, "screens", "view", {
-              screenKey: l?.href,
+              screenKey: l?.screenKey,
             }) || !allowedByDefault.some((href) => l?.href?.includes(href))
           );
         } catch (e) {

@@ -52,7 +52,7 @@ export const leadsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const [lead] = await ctx.db
         .insert(LeadsTable)
-        .values(input)
+        .values({ ...input, kind: "inbound" })
         .returning({ id: LeadsTable.id });
       try {
         await inngest.send(leadSubmittedEvent.create({ leadId: lead.id }));
@@ -64,7 +64,12 @@ export const leadsRouter = createTRPCRouter({
     .input(listLeadsInput)
     .query(async ({ ctx, input }) => {
       assertStaff(ctx.session?.user.role ?? "");
-      const conditions: ReturnType<typeof eq>[] = [];
+      // This screen is the contact-form inbox. Sales prospects share the table
+      // (see `leads-table.ts`) and are worked from `/sales` instead — without
+      // this scope they would appear here with no email and no message.
+      const conditions: ReturnType<typeof eq>[] = [
+        eq(LeadsTable.kind, "inbound"),
+      ];
       if (input.status && input.status !== "all")
         conditions.push(eq(LeadsTable.status, input.status));
       if (input.from)
@@ -117,7 +122,7 @@ export const leadsRouter = createTRPCRouter({
       await ctx.db
         .update(LeadsTable)
         .set({ status: input.status, updatedAt: new Date() })
-        .where(eq(LeadsTable.id, input.id));
+        .where(and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")));
       try {
         await inngest.send(
           leadStatusChangedEvent.create({
@@ -133,7 +138,9 @@ export const leadsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       assertStaff(ctx.session?.user.role ?? "");
-      await ctx.db.delete(LeadsTable).where(eq(LeadsTable.id, input.id));
+      await ctx.db
+        .delete(LeadsTable)
+        .where(and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")));
       return { deleted: true };
     }),
 
@@ -150,7 +157,9 @@ export const leadsRouter = createTRPCRouter({
         updatedAt: LeadsTable.updatedAt,
       })
       .from(LeadsTable)
-      .where(eq(LeadsTable.email, userEmail))
+      .where(
+        and(eq(LeadsTable.kind, "inbound"), eq(LeadsTable.email, userEmail)),
+      )
       .orderBy(desc(LeadsTable.createdAt));
   }),
 });
