@@ -14,12 +14,16 @@ export const onLeadSubmitted = inngest.createFunction(
     });
 
     if (!lead) return { skipped: true };
+    // Sales prospects live in this table too but never carry an email, and
+    // nothing ever raises this event for them. Bail rather than send mail to
+    // an address that does not exist.
+    if (lead.kind !== "inbound" || !lead.email) return { skipped: true };
 
     const name = escapeHtml(lead.name);
     const email = escapeHtml(lead.email);
     const company = lead.company ? escapeHtml(lead.company) : "—";
     const phone = lead.phone ? escapeHtml(lead.phone) : "—";
-    const message = escapeHtml(lead.message);
+    const message = escapeHtml(lead.message ?? "");
 
     const attributionParts = [
       lead.source && `<strong>Source:</strong> ${escapeHtml(lead.source)}`,

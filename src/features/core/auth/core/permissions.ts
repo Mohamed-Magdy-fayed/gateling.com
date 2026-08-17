@@ -56,6 +56,9 @@ const EMPLOYEE_BLOCKED_SCREENS = new Set<ScreenKey>([
   "leads",
   "bookings",
   "blog-posts",
+  // The outbound sales pipeline is admin-only. Enforced server-side by
+  // `src/proxy.ts` and again by `assertAdmin` in the sales tRPC router.
+  "sales",
 ]);
 
 export const rolesPermissions = {

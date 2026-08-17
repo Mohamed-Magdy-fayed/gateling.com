@@ -19,6 +19,8 @@ export default function robots(): MetadataRoute.Robots {
           "/services-mgmt",
           "/testimonials",
           "/leads",
+          // Internal outbound sales pipeline — staff-only, never public.
+          "/sales",
           "/subscribers",
           "/users",
           "/branches",

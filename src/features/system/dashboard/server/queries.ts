@@ -36,12 +36,22 @@ export async function getDashboardData(ctx: Ctx): Promise<DashboardData> {
     servicesRow,
     recentLeadsRaw,
   ] = await Promise.all([
+    // Every lead figure on this dashboard means *contact-form* leads. Sales
+    // prospects share the table and would otherwise inflate all three.
     ctx.db
       .select({ count: count() })
       .from(LeadsTable)
-      .where(gte(LeadsTable.createdAt, currentMonthStart)),
+      .where(
+        and(
+          eq(LeadsTable.kind, "inbound"),
+          gte(LeadsTable.createdAt, currentMonthStart),
+        ),
+      ),
 
-    ctx.db.select({ count: count() }).from(LeadsTable),
+    ctx.db
+      .select({ count: count() })
+      .from(LeadsTable)
+      .where(eq(LeadsTable.kind, "inbound")),
 
     ctx.db
       .select({ count: count() })
@@ -86,6 +96,7 @@ export async function getDashboardData(ctx: Ctx): Promise<DashboardData> {
         createdAt: LeadsTable.createdAt,
       })
       .from(LeadsTable)
+      .where(eq(LeadsTable.kind, "inbound"))
       .orderBy(desc(LeadsTable.createdAt))
       .limit(10),
   ]);
@@ -102,7 +113,9 @@ export async function getDashboardData(ctx: Ctx): Promise<DashboardData> {
     recentLeads: recentLeadsRaw.map((lead) => ({
       id: lead.id,
       name: lead.name,
-      email: lead.email,
+      // Non-null in practice — the query is scoped to inbound leads, whose
+      // email the contact-form schema requires.
+      email: lead.email ?? "",
       company: lead.company,
       status: lead.status,
       source: lead.source,

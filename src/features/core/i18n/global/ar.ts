@@ -7,6 +7,7 @@ import solutionsIndexAr from "@/app/(landing-pages)/solutions/_translations/solu
 import deliverySolutionsAr from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-ar";
 import workAr from "@/app/(landing-pages)/work/_translations/work-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
+import salesAr from "@/features/system/sales/translations/sales-ar";
 import { dt, type LanguageMessages } from "../lib";
 
 export default {
@@ -497,6 +498,9 @@ export default {
     navServices: "الخدمات",
     navTestimonials: "الشهادات",
     navLeads: "العملاء المحتملون",
+    navSales: "المبيعات",
+    navSalesToday: "عمل اليوم",
+    navSalesLeads: "خط المبيعات",
     navBookings: "الحجوزات",
     navSubscribers: "المشتركون",
     navUsers: "المستخدمون",
@@ -509,6 +513,9 @@ export default {
     breadcrumbServices: "الخدمات",
     breadcrumbTestimonials: "الشهادات",
     breadcrumbLeads: "العملاء المحتملون",
+    breadcrumbSales: "المبيعات",
+    breadcrumbSalesToday: "عمل اليوم",
+    breadcrumbSalesLeads: "خط المبيعات",
     breadcrumbBookings: "الحجوزات",
     breadcrumbSubscribers: "المشتركون",
     breadcrumbUsers: "المستخدمون",
@@ -629,6 +636,9 @@ export default {
     settingName00016: "أداة الدردشة",
     settingDesc00016:
       "تفعيل أداة دردشة واتساب داخل الموقع. عند التعطيل يعود الزر العائم إلى رابط wa.me.",
+    settingName00017: "الحد اليومي للاتصالات الجديدة",
+    settingDesc00017:
+      "عدد العملاء المحتملين الجدد الذين تعرضهم قائمة اتصالات عمل اليوم يوميًا. القائمة غير المحدودة يتم تجاهلها، والقصيرة يتم العمل عليها.",
     settingStatePricesShown: "نشط",
     settingStatePricesHidden: "غير نشط",
     settingsShowPricesState: "تبديل الحالة",
@@ -1147,4 +1157,5 @@ export default {
   }),
   ...authAr,
   ...aboutAr,
+  ...salesAr,
 } as const satisfies LanguageMessages;

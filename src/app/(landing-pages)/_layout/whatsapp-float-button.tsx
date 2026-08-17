@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslation } from "@/features/core/i18n/client";
 import { trackGaEvent } from "@/lib/ga4";
 import { trackPixelEvent } from "@/lib/meta-pixel";
-import { generateWhatsAppUrl } from "@/lib/phone";
+import { BUSINESS_WHATSAPP_NUMBER, generateWhatsAppUrl } from "@/lib/phone";
 
 const buttonClassName =
   "fixed h-12 w-12 rounded-full overflow-visible shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex bottom-4 right-4";
@@ -23,7 +23,7 @@ export function WhatsAppFloatButton({
   const { t } = useTranslation();
 
   const url = generateWhatsAppUrl(
-    whatsappNumber ?? "+201123862218",
+    whatsappNumber ?? BUSINESS_WHATSAPP_NUMBER,
     t("publicPages.finalCta.whatsappMessage"),
   );
 

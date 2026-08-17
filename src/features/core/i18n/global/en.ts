@@ -7,6 +7,7 @@ import solutionsIndexEn from "@/app/(landing-pages)/solutions/_translations/solu
 import deliverySolutionsEn from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-en";
 import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
+import salesEn from "@/features/system/sales/translations/sales-en";
 import { dt, type LanguageMessages } from "../lib";
 
 export default {
@@ -507,6 +508,9 @@ export default {
     navServices: "Services",
     navTestimonials: "Testimonials",
     navLeads: "Leads",
+    navSales: "Sales",
+    navSalesToday: "Today's Work",
+    navSalesLeads: "Pipeline",
     navBookings: "Bookings",
     navSubscribers: "Subscribers",
     navUsers: "Users",
@@ -519,6 +523,9 @@ export default {
     breadcrumbServices: "Services",
     breadcrumbTestimonials: "Testimonials",
     breadcrumbLeads: "Leads",
+    breadcrumbSales: "Sales",
+    breadcrumbSalesToday: "Today's Work",
+    breadcrumbSalesLeads: "Pipeline",
     breadcrumbBookings: "Bookings",
     breadcrumbSubscribers: "Subscribers",
     breadcrumbUsers: "Users",
@@ -642,6 +649,9 @@ export default {
     settingName00016: "Chat Widget",
     settingDesc00016:
       "Enables the on-site WhatsApp chat widget. When inactive, the floating button falls back to a wa.me link.",
+    settingName00017: "Daily New-Dial Cap",
+    settingDesc00017:
+      "How many fresh prospects the Today's Work new-dial queue shows per day. An uncapped list gets ignored; a short one gets worked.",
     settingStatePricesShown: "Active",
     settingStatePricesHidden: "Inactive",
     settingsShowPricesState: "Toggle active",
@@ -1176,4 +1186,5 @@ export default {
   }),
   ...authEn,
   ...aboutEn,
+  ...salesEn,
 } as const satisfies LanguageMessages;
