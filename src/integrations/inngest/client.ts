@@ -35,6 +35,12 @@ export const bookingRequestedEvent = eventType("booking/requested", {
   schema: z.object({ bookingId: z.string() }),
 });
 
+/** Staff asked for a Meetings room on a booking that has none (backfill / retry). */
+export const bookingMeetingRequestedEvent = eventType(
+  "booking/meeting-requested",
+  { schema: z.object({ bookingId: z.string() }) },
+);
+
 export const bookingCancelledEvent = eventType("booking/cancelled", {
   schema: z.object({
     bookingId: z.string(),

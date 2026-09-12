@@ -452,6 +452,9 @@ export default {
     statusUpdated: "Booking status updated.",
     actionFailed: "Could not update the booking.",
     joinAsHost: "Join as host",
+    createMeeting: "Create meeting room",
+    meetingRequested: "Meeting room requested — refresh in a moment.",
+    meetingRequestFailed: "Could not request the meeting room.",
     joinLinkFailed: "Could not open the meeting room.",
     cancelBookingTitle: "Cancel this booking?",
     cancelBookingDescription:
