@@ -20,12 +20,15 @@ import {
   bookingStatusValues,
   UsersTable,
 } from "@/drizzle/schema";
+import { env } from "@/env/server";
 import {
   bookingCancelledEvent,
   bookingConfirmedEvent,
   bookingRequestedEvent,
   inngest,
 } from "@/integrations/inngest/client";
+import { getContactEmail } from "@/integrations/inngest/functions/booking-helpers";
+import { getMeetingsClient } from "@/integrations/meetings";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -39,6 +42,7 @@ import {
   hasBusyOverlap,
   isOpenSlot,
 } from "../lib/slots";
+import { bookingHostJoinLink, websiteMeetingHost } from "./meeting";
 
 const MAX_CUSTOM_REQUEST_DAYS_AHEAD = 365;
 
@@ -253,6 +257,7 @@ export const bookingsRouter = createTRPCRouter({
         endsAt: BookingsTable.endsAt,
         status: BookingsTable.status,
         customerNote: BookingsTable.customerNote,
+        meetingGuestUrl: BookingsTable.meetingGuestUrl,
         createdAt: BookingsTable.createdAt,
       })
       .from(BookingsTable)
@@ -433,6 +438,41 @@ export const bookingsRouter = createTRPCRouter({
         );
       } catch {}
       return { cancelled: true };
+    }),
+
+  /**
+   * Mint a single-use host link for the booking's Meetings room and hand it
+   * to the browser. Never stored: Meetings expires it in minutes and burns it
+   * on first use, so every click is a fresh mint.
+   */
+  hostJoinLink: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      assertStaff(ctx.session.user.role);
+      const booking = await ctx.db.query.BookingsTable.findFirst({
+        where: eq(BookingsTable.id, input.id),
+        columns: { status: true, meetingCode: true },
+      });
+      if (!booking) throw new TRPCError({ code: "NOT_FOUND" });
+      if (booking.status !== "confirmed" || !booking.meetingCode)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "no_meeting",
+        });
+      const client = getMeetingsClient();
+      if (!client)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "meetings_not_configured",
+        });
+
+      const link = await bookingHostJoinLink(
+        client,
+        booking.meetingCode,
+        websiteMeetingHost(await getContactEmail()),
+        `${env.BASE_URL}/bookings`,
+      );
+      return { url: link.url, expiresAt: link.expiresAt };
     }),
 
   updateStatus: protectedProcedure

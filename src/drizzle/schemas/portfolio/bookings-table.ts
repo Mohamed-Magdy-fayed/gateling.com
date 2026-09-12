@@ -47,6 +47,10 @@ export const BookingsTable = pgTable(
     status: bookingStatusEnum().notNull().default("requested"),
     customerNote: text(),
     cancelledBy: bookingCancelledByEnum(),
+    /** Gateling Meetings room provisioned for this booking (externalRef `booking:<id>`). */
+    meetingCode: varchar({ length: 12 }),
+    /** The room's guest link, put in customer emails and My Account. */
+    meetingGuestUrl: text(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
   },
@@ -54,6 +58,7 @@ export const BookingsTable = pgTable(
     index("bookings_user_id_idx").on(table.userId),
     index("bookings_status_idx").on(table.status),
     index("bookings_starts_at_idx").on(table.startsAt),
+    index("bookings_meeting_code_idx").on(table.meetingCode),
     uniqueIndex("bookings_confirmed_starts_at_uq")
       .on(table.startsAt)
       .where(sql`${table.status} = 'confirmed'`),

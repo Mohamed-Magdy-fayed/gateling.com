@@ -22,6 +22,12 @@ export const env = createEnv({
     INNGEST_SIGNING_KEY: z.string().min(1).optional(),
     INNGEST_EVENT_KEY: z.string().min(1).optional(),
 
+    // Gateling Meetings (meetings.gateling.com/settings/integrations). Optional
+    // so local/preview run without a room provider; required together in prod.
+    MEETINGS_API_URL: z.url().optional(),
+    MEETINGS_API_KEY: z.string().min(1).optional(),
+    MEETINGS_WEBHOOK_SECRET: z.string().min(1).optional(),
+
     FIREBASE_PROJECT_ID: z.string().min(1),
     FIREBASE_CLIENT_EMAIL: z.string().min(1),
     FIREBASE_PRIVATE_KEY: z.string().min(1),
@@ -51,6 +57,20 @@ export const env = createEnv({
             val.DB_PORT &&
             val.DB_USER,
         );
+
+        // The URL alone is a harmless default; a key means the integration is
+        // live and must be complete, or webhooks would be dropped unverified.
+        if (
+          val.MEETINGS_API_KEY &&
+          !(val.MEETINGS_API_URL && val.MEETINGS_WEBHOOK_SECRET)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "MEETINGS_API_KEY requires MEETINGS_API_URL and MEETINGS_WEBHOOK_SECRET.",
+            path: ["MEETINGS_API_KEY"],
+          });
+        }
 
         if (!hasDatabaseUrl && !hasSplitDatabaseConfig) {
           console.log(hasDatabaseUrl, hasSplitDatabaseConfig);

@@ -1,13 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "@/env/server";
+import { websiteMeetingHost } from "@/features/system/bookings/server/meeting";
+import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
+import { getContactEmail } from "@/integrations/inngest/functions/booking-helpers";
+import { getMeetingsClient } from "@/integrations/meetings";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
+import { leadDemoHostJoinLink } from "./meeting";
 import {
   createLeadSchema,
   leadIdSchema,
   listPipelineSchema,
-  logActivitySchema,
+  logActivityInputSchema,
   todayWorkSchema,
   updateLeadSchema,
 } from "./schemas";
@@ -70,10 +76,55 @@ export const salesRouter = createTRPCRouter({
     }),
 
   logActivity: protectedProcedure
-    .input(logActivitySchema)
+    .input(logActivityInputSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      return service.logActivity(ctx.db, input, ctx.session.user.id);
+      const result = await service.logActivity(
+        ctx.db,
+        input,
+        ctx.session.user.id,
+      );
+      // A scheduled demo gets a Meetings room, provisioned in the background
+      // (external HTTP never runs inline). Non-fatal: the log is the truth.
+      if (input.type === "demo_scheduled" && input.nextActionAt) {
+        try {
+          await inngest.send(
+            leadDemoScheduledEvent.create({
+              leadId: input.leadId,
+              activityId: result.activityId,
+              scheduledAt: input.nextActionAt.toISOString(),
+            }),
+          );
+        } catch {}
+      }
+      return result;
+    }),
+
+  /** Single-use host link for the lead's demo room — minted per click, never stored. */
+  demoHostJoinLink: protectedProcedure
+    .input(leadIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      const found = await service.getLead(ctx.db, input.id);
+      if (!found) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!found.lead.demoMeetingCode)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "no_meeting",
+        });
+      const client = getMeetingsClient();
+      if (!client)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "meetings_not_configured",
+        });
+      const link = await leadDemoHostJoinLink(
+        client,
+        found.lead.demoMeetingCode,
+        websiteMeetingHost(await getContactEmail()),
+        `${env.BASE_URL}/sales/leads/${input.id}`,
+      );
+      return { url: link.url, expiresAt: link.expiresAt };
     }),
 
   park: protectedProcedure

@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   MoreHorizontalIcon,
   UserXIcon,
+  VideoIcon,
   XCircleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,8 +58,19 @@ export function BookingRowActions({ row, setRowAction }: Props) {
     }),
   );
 
+  const hostJoinLink = useMutation(
+    trpc.bookings.hostJoinLink.mutationOptions({
+      onSuccess: ({ url }) => {
+        // Single-use link minted for this click; open it and forget it.
+        window.open(url, "_blank", "noopener");
+      },
+      onError: () => toast.error(t("bookings.joinLinkFailed")),
+    }),
+  );
+
   const isPast = row.startsAt.getTime() < Date.now();
   const isActive = row.status === "requested" || row.status === "confirmed";
+  const canJoin = row.status === "confirmed" && !isPast && !!row.meetingCode;
 
   return (
     <DropdownMenu>
@@ -75,6 +87,15 @@ export function BookingRowActions({ row, setRowAction }: Props) {
         }
       />
       <DropdownMenuContent align="end" className="w-52">
+        {canJoin && (
+          <DropdownMenuItem
+            disabled={hostJoinLink.isPending}
+            onClick={() => hostJoinLink.mutate({ id: row.id })}
+          >
+            <VideoIcon className="size-3.5" />
+            {t("bookings.joinAsHost")}
+          </DropdownMenuItem>
+        )}
         {row.status === "requested" && (
           <DropdownMenuItem
             disabled={confirmMutation.isPending}

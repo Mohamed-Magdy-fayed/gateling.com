@@ -4,15 +4,24 @@ import {
   formatBookingTime,
 } from "@/features/system/bookings/lib/format";
 import { getBookingSettings } from "@/features/system/bookings/lib/settings";
+import { cancelBookingMeeting } from "@/features/system/bookings/server/meeting";
 import { sendMail } from "@/integrations/email";
+import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingCancelledEvent, inngest } from "../client";
 import { getBooking, getContactEmail } from "./booking-helpers";
 
 export const onBookingCancelled = inngest.createFunction(
   { id: "on-booking-cancelled", triggers: [bookingCancelledEvent] },
-  async ({ event }) => {
+  async ({ event, step }) => {
     const booking = await getBooking(event.data.bookingId);
     if (!booking || booking.status !== "cancelled") return { skipped: true };
+
+    // Free the room before anyone is told; a retried delete is a no-op.
+    await step.run("cancel-meeting", async () => {
+      const client = getMeetingsClient();
+      if (!client) return { skipped: "meetings_not_configured" };
+      return { deleted: await cancelBookingMeeting(client, booking) };
+    });
 
     const settings = await getBookingSettings(db);
     const customerTz = booking.timezone || settings.timezone;

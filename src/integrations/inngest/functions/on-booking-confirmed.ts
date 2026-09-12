@@ -1,10 +1,18 @@
+import { StepError } from "inngest";
+
 import { db } from "@/drizzle";
 import {
   escapeHtml,
   formatBookingTime,
 } from "@/features/system/bookings/lib/format";
 import { getBookingSettings } from "@/features/system/bookings/lib/settings";
+import {
+  bookingMeetingLink,
+  provisionBookingMeeting,
+  websiteMeetingHost,
+} from "@/features/system/bookings/server/meeting";
 import { sendMail } from "@/integrations/email";
+import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingConfirmedEvent, inngest } from "../client";
 import { getBooking, getContactEmail } from "./booking-helpers";
 
@@ -18,9 +26,48 @@ async function getCurrentBooking(bookingId: string, eventStartsAt: string) {
   return booking;
 }
 
+function meetingLine(link: string | null, fallback: string) {
+  if (!link) return fallback;
+  const safe = escapeHtml(link);
+  return `<p><strong>Join here:</strong> <a href="${safe}">${safe}</a></p>`;
+}
+
 export const onBookingConfirmed = inngest.createFunction(
   { id: "on-booking-confirmed", triggers: [bookingConfirmedEvent] },
-  async ({ event, step }) => {
+  async ({ event, step, logger }) => {
+    // Provision (or move) the Meetings room first so the confirmation email
+    // can carry the real link. Retried by Inngest; if it still fails, the
+    // customer must still hear from us, so the email falls back to the static
+    // link rather than the whole run dying.
+    try {
+      await step.run("provision-meeting", async () => {
+        const booking = await getCurrentBooking(
+          event.data.bookingId,
+          event.data.startsAt,
+        );
+        if (!booking) return { skipped: "stale" };
+        const client = getMeetingsClient();
+        if (!client) return { skipped: "meetings_not_configured" };
+
+        const settings = await getBookingSettings(db);
+        const host = websiteMeetingHost(await getContactEmail());
+        const { code, action } = await provisionBookingMeeting(
+          db,
+          client,
+          booking,
+          settings,
+          host,
+        );
+        return { code, action };
+      });
+    } catch (error) {
+      if (!(error instanceof StepError)) throw error;
+      logger.error("booking meeting provisioning failed", {
+        bookingId: event.data.bookingId,
+        error: error.message,
+      });
+    }
+
     const initial = await step.run("send-confirmation", async () => {
       const booking = await getCurrentBooking(
         event.data.bookingId,
@@ -40,12 +87,7 @@ export const onBookingConfirmed = inngest.createFunction(
       const note = booking.customerNote
         ? escapeHtml(booking.customerNote)
         : "—";
-      const meetingLink = settings.meetingLink
-        ? escapeHtml(settings.meetingLink)
-        : null;
-      const meetingLine = meetingLink
-        ? `<p><strong>Join here:</strong> <a href="${meetingLink}">${meetingLink}</a></p>`
-        : `<p>We'll send you the meeting link before the call.</p>`;
+      const link = bookingMeetingLink(booking, settings);
 
       await sendMail({
         to: booking.email,
@@ -53,7 +95,7 @@ export const onBookingConfirmed = inngest.createFunction(
         html: `
           <h2>Your call is confirmed, ${name}!</h2>
           <p><strong>When:</strong> ${customerTime}</p>
-          ${meetingLine}
+          ${meetingLine(link, `<p>We'll send you the meeting link before the call.</p>`)}
           <p>Need to change it? Manage your booking from the
           <a href="https://gateling.com/my-account">My Account</a> page.</p>
           <p>— Gateling Solutions</p>
@@ -71,6 +113,8 @@ export const onBookingConfirmed = inngest.createFunction(
           <p><strong>When:</strong> ${businessTime}</p>
           <p><strong>Customer timezone:</strong> ${escapeHtml(customerTz)}</p>
           <p><strong>Note:</strong> ${note}</p>
+          ${meetingLine(link, "")}
+          <p>Join as host from the bookings page — host links are minted per click.</p>
         `,
       });
       return { skipped: false };
@@ -98,12 +142,7 @@ export const onBookingConfirmed = inngest.createFunction(
         const settings = await getBookingSettings(db);
         const customerTz = booking.timezone || settings.timezone;
         const customerTime = formatBookingTime(booking.startsAt, customerTz);
-        const meetingLink = settings.meetingLink
-          ? escapeHtml(settings.meetingLink)
-          : null;
-        const meetingLine = meetingLink
-          ? `<p><strong>Join here:</strong> <a href="${meetingLink}">${meetingLink}</a></p>`
-          : "";
+        const link = bookingMeetingLink(booking, settings);
 
         await sendMail({
           to: booking.email,
@@ -112,7 +151,7 @@ export const onBookingConfirmed = inngest.createFunction(
             <h2>Upcoming call reminder</h2>
             <p>Hi ${escapeHtml(booking.name)}, your call is coming up.</p>
             <p><strong>When:</strong> ${customerTime}</p>
-            ${meetingLine}
+            ${meetingLine(link, "")}
             <p>— Gateling Solutions</p>
           `,
         });

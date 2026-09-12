@@ -12,7 +12,7 @@ import { H1 } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { toWhatsAppUrl } from "@/lib/phone";
-
+import { DemoMeetingCard } from "./components/demo-meeting-card";
 import {
   LeadFormDialog,
   type LeadFormValues,
@@ -90,6 +90,13 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
+        <DemoMeetingCard
+          leadId={lead.id}
+          meetingUrl={lead.demoMeetingUrl}
+          isPending={
+            lead.pipelineStatus === "demo_scheduled" && !lead.demoMeetingUrl
+          }
+        />
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-base">{t("sales.details")}</CardTitle>

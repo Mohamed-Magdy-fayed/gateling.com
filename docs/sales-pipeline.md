@@ -136,8 +136,19 @@ This module intentionally does not follow the standard entity pattern:
 - Bespoke table instead of the shared `DataTable` — the Today view is the daily
   surface; this one exists for search and edit.
 
+## Demo meetings
+
+Logging a `demo_scheduled` activity requires a demo time (the next-action
+field, relabelled) and provisions a Gateling Meetings room in the background —
+one per lead (`lead:<id>:demo`), moved rather than duplicated by a later
+`demo_scheduled`. The code and guest link live on `leads.demoMeetingCode` /
+`demoMeetingUrl` (not on the append-only activity log). The lead page shows
+the link to copy into WhatsApp and a **Join as host** button; the pipeline
+still sends nothing itself. Details: [meetings-integration.md](meetings-integration.md).
+
 ## Not built (by design)
 
 MCP/agent API · AI lead scoring (leave room for a `lead_scores` table — do not
 create it) · automated lead research · sending email/WhatsApp from the app ·
-reporting beyond the counter strip.
+reporting beyond the counter strip · closing a demo room when a lead is
+parked or lost.

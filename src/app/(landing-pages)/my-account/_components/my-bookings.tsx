@@ -123,6 +123,16 @@ export function MyBookings() {
             </div>
             {isActive && (
               <div className="mt-4 flex flex-wrap gap-3">
+                {booking.status === "confirmed" && booking.meetingGuestUrl && (
+                  <LinkButton
+                    href={booking.meetingGuestUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    size="sm"
+                  >
+                    {t("publicPages.myAccountPage.bookingJoinButton")}
+                  </LinkButton>
+                )}
                 <LinkButton
                   href={`/contact?tab=book&reschedule=${booking.id}`}
                   variant="outline"
