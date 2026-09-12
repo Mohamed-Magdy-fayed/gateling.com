@@ -10,9 +10,9 @@ import {
   bookingMeetingLink,
   provisionBookingMeeting,
 } from "@/features/system/bookings/server/meeting";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { sendMail } from "@/integrations/email";
-import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingConfirmedEvent, inngest } from "../client";
 import { getBooking, getContactEmail } from "./booking-helpers";
 
@@ -46,7 +46,7 @@ export const onBookingConfirmed = inngest.createFunction(
           event.data.startsAt,
         );
         if (!booking) return { skipped: "stale" };
-        const client = getMeetingsClient();
+        const client = await resolveMeetingsClient(db);
         if (!client) return { skipped: "meetings_not_configured" };
 
         const settings = await getBookingSettings(db);

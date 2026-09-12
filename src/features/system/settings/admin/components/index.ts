@@ -1,3 +1,4 @@
+export { MeetingsIntegrationCard } from "./meetings-integration-card";
 export { SettingFormDialog } from "./setting-form-dialog";
 export { SettingInfoModal } from "./setting-info-modal";
 export {

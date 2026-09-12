@@ -26,6 +26,7 @@ import type { SettingGridRow } from "@/integrations/trpc/routers/settings";
 
 import {
   buildSettingColumns,
+  MeetingsIntegrationCard,
   SettingFormDialog,
   SettingInfoModal,
   type SettingRowActionVariant,
@@ -133,6 +134,8 @@ export function SettingsTablePage() {
       }
     >
       <EntityPageHeader slug="settings" />
+
+      <MeetingsIntegrationCard />
 
       <DataTable
         table={table}

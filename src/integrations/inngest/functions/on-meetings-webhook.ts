@@ -6,7 +6,7 @@ import {
   completeBookingForMeeting,
   decideBookingCompletion,
 } from "@/features/system/bookings/server/meeting";
-import { getMeetingsClient } from "@/integrations/meetings";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { inngest, meetingsWebhookReceivedEvent } from "../client";
 
 /**
@@ -38,7 +38,7 @@ export const onMeetingsWebhook = inngest.createFunction(
       });
       if (!booking) return { skipped: "no_confirmed_booking_for_room" };
 
-      const client = getMeetingsClient();
+      const client = await resolveMeetingsClient(db);
       if (!client) return { skipped: "meetings_not_configured" };
       const participants = await client.listParticipants(meeting.code);
 
