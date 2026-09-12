@@ -94,7 +94,10 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
           leadId={lead.id}
           meetingUrl={lead.demoMeetingUrl}
           isPending={
-            lead.pipelineStatus === "demo_scheduled" && !lead.demoMeetingUrl
+            lead.pipelineStatus === "demo_scheduled" &&
+            !lead.demoMeetingUrl &&
+            lead.nextActionAt != null &&
+            lead.nextActionAt.getTime() > Date.now()
           }
         />
         <Card className="lg:col-span-1">

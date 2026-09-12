@@ -58,6 +58,23 @@ export const env = createEnv({
             val.DB_USER,
         );
 
+        // The Inngest serve endpoint accepts unsigned invocations without a
+        // signing key — on the production deployment that would let anyone
+        // run any job (including the Meetings webhook handler) with an
+        // arbitrary payload. Keyed on VERCEL_ENV, not NODE_ENV: a local
+        // `next build` is production mode without production secrets.
+        if (
+          process.env.VERCEL_ENV === "production" &&
+          !(val.INNGEST_SIGNING_KEY && val.INNGEST_EVENT_KEY)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "INNGEST_SIGNING_KEY and INNGEST_EVENT_KEY are required in production.",
+            path: ["INNGEST_SIGNING_KEY"],
+          });
+        }
+
         // The URL alone is a harmless default; a key means the integration is
         // live and must be complete, or webhooks would be dropped unverified.
         if (

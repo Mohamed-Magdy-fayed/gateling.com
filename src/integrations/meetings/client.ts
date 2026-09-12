@@ -4,7 +4,11 @@ export type MeetingsClientOptions = {
   /** `gm_live_…` from /settings/integrations. */
   apiKey: string;
   fetch?: typeof fetch;
+  /** Per-request timeout. A hung connection must not hold a job until the platform kills it. */
+  timeoutMs?: number;
 };
+
+export const DEFAULT_TIMEOUT_MS = 10_000;
 
 export type ExternalUser = {
   /** Your own stable id for the person (user id, staff id, …). */
@@ -101,10 +105,31 @@ export class MeetingsApiError extends Error {
   }
 }
 
+/**
+ * The only response fields this app turns into links (`guestUrl`, join
+ * `url`) are checked at the boundary: a mis-pointed or compromised Meetings
+ * host must not be able to put an arbitrary scheme into our emails and UI.
+ */
+function assertHttpsUrl(value: unknown, field: string): string {
+  if (typeof value === "string") {
+    try {
+      if (new URL(value).protocol === "https:") return value;
+    } catch {
+      // fall through to the error below
+    }
+  }
+  throw new MeetingsApiError(
+    502,
+    "invalid_response",
+    `${field} is not an https URL`,
+  );
+}
+
 export function createMeetingsClient({
   baseUrl,
   apiKey,
   fetch: fetchImpl = fetch,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
 }: MeetingsClientOptions) {
   const base = baseUrl.replace(/\/+$/, "");
 
@@ -122,6 +147,7 @@ export function createMeetingsClient({
         ...extraHeaders,
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (response.status === 204) return undefined as T;
     const json = (await response.json()) as
@@ -153,6 +179,7 @@ export function createMeetingsClient({
         input,
         idempotencyKey ? { "idempotency-key": idempotencyKey } : {},
       );
+      assertHttpsUrl(meeting?.guestUrl, "meeting.guestUrl");
       return meeting;
     },
 
@@ -161,6 +188,7 @@ export function createMeetingsClient({
         "GET",
         `/meetings/${encodeURIComponent(code)}`,
       );
+      assertHttpsUrl(meeting?.guestUrl, "meeting.guestUrl");
       return meeting;
     },
 
@@ -189,6 +217,7 @@ export function createMeetingsClient({
         `/meetings/${encodeURIComponent(code)}`,
         input,
       );
+      assertHttpsUrl(meeting?.guestUrl, "meeting.guestUrl");
       return meeting;
     },
 
@@ -217,6 +246,7 @@ export function createMeetingsClient({
         `/meetings/${encodeURIComponent(code)}/join-links`,
         input,
       );
+      assertHttpsUrl(joinLink?.url, "joinLink.url");
       return joinLink;
     },
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import { type Booking, BookingsTable } from "@/drizzle/schema";
@@ -10,25 +10,16 @@ import {
   ensureScheduledMeeting,
   type MeetingsClient,
   mintHostJoinLink,
+  type Participant,
 } from "@/integrations/meetings";
 
 import type { BookingSettings } from "../lib/settings";
 
 /**
- * The website books the slot; Gateling Meetings provides the room. Every
- * meeting this site creates is hosted by one fixed linked identity, so any
- * staff member can mint a host link for it — Meetings only honours a host
- * link whose `externalId` matches the meeting's host.
+ * The website books the slot; Gateling Meetings provides the room. Rooms are
+ * keyed by `externalRef booking:<id>` and hosted by the site-wide identity in
+ * `@/features/system/meetings/host`.
  */
-export const WEBSITE_MEETING_HOST_EXTERNAL_ID = "gateling-website";
-
-export function websiteMeetingHost(contactEmail: string): ExternalUser {
-  return {
-    externalId: WEBSITE_MEETING_HOST_EXTERNAL_ID,
-    name: "Gateling Solutions",
-    email: contactEmail,
-  };
-}
 
 type Db = typeof database;
 
@@ -52,7 +43,9 @@ export function bookingExternalRef(bookingId: string): string {
 /**
  * Create the room for a confirmed booking, or move it when the booking was
  * rescheduled, and persist the code + guest link. Safe to retry: the same
- * booking at the same time carries the same idempotency key.
+ * booking at the same time carries the same idempotency key. The write is a
+ * compare-and-set on the booking's time and status, so a run that lost a race
+ * with a reschedule or cancellation cannot overwrite the newer room.
  */
 export async function provisionBookingMeeting(
   db: Db,
@@ -83,7 +76,13 @@ export async function provisionBookingMeeting(
     await db
       .update(BookingsTable)
       .set({ meetingCode: meeting.code, meetingGuestUrl: meeting.guestUrl })
-      .where(eq(BookingsTable.id, booking.id));
+      .where(
+        and(
+          eq(BookingsTable.id, booking.id),
+          eq(BookingsTable.status, "confirmed"),
+          eq(BookingsTable.startsAt, booking.startsAt),
+        ),
+      );
   }
 
   return { code: meeting.code, guestUrl: meeting.guestUrl, action };
@@ -105,4 +104,59 @@ export function bookingHostJoinLink(
   returnUrl: string,
 ) {
   return mintHostJoinLink(client, meetingCode, host, { returnUrl });
+}
+
+export type BookingCompletionDecision =
+  | { complete: true }
+  | {
+      complete: false;
+      reason: "not_confirmed" | "ended_before_start" | "no_host" | "no_guest";
+    };
+
+/**
+ * Whether a `meeting.ended` delivery means the call actually happened. Pure,
+ * so the rule is testable without Inngest: the booking must still be
+ * confirmed, the room must have ended after the slot started (a staff member
+ * testing the link the day before is not the call), and both a host and a
+ * guest must have been in it. Anything else is left for staff to judge —
+ * completing a booking silences its reminders and hides the join buttons.
+ */
+export function decideBookingCompletion(
+  booking: Pick<Booking, "status" | "startsAt">,
+  participants: ReadonlyArray<Pick<Participant, "role">>,
+  endedAt: Date,
+): BookingCompletionDecision {
+  if (booking.status !== "confirmed")
+    return { complete: false, reason: "not_confirmed" };
+  if (endedAt < booking.startsAt)
+    return { complete: false, reason: "ended_before_start" };
+  if (!participants.some((p) => p.role === "host"))
+    return { complete: false, reason: "no_host" };
+  if (!participants.some((p) => p.role === "participant"))
+    return { complete: false, reason: "no_guest" };
+  return { complete: true };
+}
+
+/**
+ * Compare-and-set completion for the booking that owns `meetingCode`. Returns
+ * `false` when the row changed under us (cancelled, rescheduled to a new
+ * room, already completed) — the webhook must never clobber a newer state.
+ */
+export async function completeBookingForMeeting(
+  db: Db,
+  bookingId: string,
+  meetingCode: string,
+): Promise<boolean> {
+  const rows = await db
+    .update(BookingsTable)
+    .set({ status: "completed" })
+    .where(
+      and(
+        eq(BookingsTable.id, bookingId),
+        eq(BookingsTable.status, "confirmed"),
+        eq(BookingsTable.meetingCode, meetingCode),
+      ),
+    )
+    .returning({ id: BookingsTable.id });
+  return rows.length === 1;
 }

@@ -12,6 +12,9 @@ import { createMeetingsWebhookHandler } from "@/integrations/meetings/webhook";
 export const POST = createMeetingsWebhookHandler({
   secret: process.env.MEETINGS_WEBHOOK_SECRET,
   onDelivery: async (delivery) => {
+    // Only the end of a call changes anything here; the other lifecycle
+    // events (started, participant joined/left) are acknowledged and dropped.
+    if (delivery.event !== "meeting.ended") return;
     await inngest.send({
       ...meetingsWebhookReceivedEvent.create({
         id: delivery.id,
@@ -22,6 +25,7 @@ export const POST = createMeetingsWebhookHandler({
             code: delivery.data.meeting.code,
             externalRef: delivery.data.meeting.externalRef,
             status: delivery.data.meeting.status,
+            endedAt: delivery.data.meeting.endedAt,
           },
           endedBy: delivery.data.endedBy,
         },

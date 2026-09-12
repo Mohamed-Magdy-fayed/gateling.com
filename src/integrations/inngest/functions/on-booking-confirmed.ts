@@ -9,8 +9,8 @@ import { getBookingSettings } from "@/features/system/bookings/lib/settings";
 import {
   bookingMeetingLink,
   provisionBookingMeeting,
-  websiteMeetingHost,
 } from "@/features/system/bookings/server/meeting";
+import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { sendMail } from "@/integrations/email";
 import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingConfirmedEvent, inngest } from "../client";
@@ -50,7 +50,7 @@ export const onBookingConfirmed = inngest.createFunction(
         if (!client) return { skipped: "meetings_not_configured" };
 
         const settings = await getBookingSettings(db);
-        const host = websiteMeetingHost(await getContactEmail());
+        const host = await getWebsiteMeetingHost(db);
         const { code, action } = await provisionBookingMeeting(
           db,
           client,

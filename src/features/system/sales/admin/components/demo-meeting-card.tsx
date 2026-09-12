@@ -28,17 +28,23 @@ export function DemoMeetingCard({ leadId, meetingUrl, isPending }: Props) {
 
   const hostJoinLink = useMutation(
     trpc.sales.demoHostJoinLink.mutationOptions({
-      onSuccess: ({ url }) => window.open(url, "_blank", "noopener"),
+      // Navigate, not window.open: after the async mint we are outside the
+      // click gesture and popup blockers would waste the single-use link.
+      onSuccess: ({ url }) => window.location.assign(url),
       onError: () => toast.error(t("sales.demoMeetingJoinFailed")),
     }),
   );
 
   if (!meetingUrl && !isPending) return null;
 
-  async function copyLink() {
+  function copyLink() {
     if (!meetingUrl) return;
-    await navigator.clipboard.writeText(meetingUrl);
-    toast.success(t("sales.demoMeetingCopied"));
+    // Clipboard is unavailable on insecure origins and can be denied; the
+    // field is selectable as the manual fallback.
+    navigator.clipboard
+      ?.writeText(meetingUrl)
+      .then(() => toast.success(t("sales.demoMeetingCopied")))
+      .catch(() => toast.error(t("sales.demoMeetingCopyFailed")));
   }
 
   return (

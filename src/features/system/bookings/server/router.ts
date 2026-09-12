@@ -21,13 +21,13 @@ import {
   UsersTable,
 } from "@/drizzle/schema";
 import { env } from "@/env/server";
+import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import {
   bookingCancelledEvent,
   bookingConfirmedEvent,
   bookingRequestedEvent,
   inngest,
 } from "@/integrations/inngest/client";
-import { getContactEmail } from "@/integrations/inngest/functions/booking-helpers";
 import { getMeetingsClient } from "@/integrations/meetings";
 import {
   baseProcedure,
@@ -42,7 +42,7 @@ import {
   hasBusyOverlap,
   isOpenSlot,
 } from "../lib/slots";
-import { bookingHostJoinLink, websiteMeetingHost } from "./meeting";
+import { bookingHostJoinLink } from "./meeting";
 
 const MAX_CUSTOM_REQUEST_DAYS_AHEAD = 365;
 
@@ -469,9 +469,16 @@ export const bookingsRouter = createTRPCRouter({
       const link = await bookingHostJoinLink(
         client,
         booking.meetingCode,
-        websiteMeetingHost(await getContactEmail()),
+        await getWebsiteMeetingHost(ctx.db),
         `${env.BASE_URL}/bookings`,
       );
+      // Audit: Meetings only ever sees the shared host identity, so this is
+      // the one record of which person joined which customer's call as host.
+      console.info("meetings.host_link_minted", {
+        userId: ctx.session.user.id,
+        bookingId: input.id,
+        meetingCode: booking.meetingCode,
+      });
       return { url: link.url, expiresAt: link.expiresAt };
     }),
 

@@ -63,6 +63,7 @@ export default {
     demoMeetingPending: "جارٍ تجهيز غرفة الاجتماع…",
     demoMeetingCopy: "نسخ الرابط",
     demoMeetingCopied: "تم نسخ الرابط.",
+    demoMeetingCopyFailed: "تعذر النسخ — حدد الرابط وانسخه يدويًا.",
     demoMeetingJoin: "الانضمام كمضيف",
     demoMeetingJoinFailed: "تعذر فتح غرفة الاجتماع.",
     activityNewStatus: "نقل إلى",

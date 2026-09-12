@@ -1,14 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  WEBSITE_MEETING_HOST_EXTERNAL_ID,
+  websiteMeetingHost,
+} from "@/features/system/meetings/host";
 import { createMeetingsClient, type Meeting } from "@/integrations/meetings";
 
 import {
   bookingExternalRef,
   bookingMeetingLink,
   cancelBookingMeeting,
+  decideBookingCompletion,
   provisionBookingMeeting,
-  WEBSITE_MEETING_HOST_EXTERNAL_ID,
-  websiteMeetingHost,
 } from "./meeting";
 
 /** Scripted Meetings API + a db double that records the one update we expect. */
@@ -157,6 +160,50 @@ describe("provisionBookingMeeting", () => {
       scheduledAt: "2026-10-02T10:00:00.000Z",
     });
     expect(set).not.toHaveBeenCalled();
+  });
+});
+
+describe("decideBookingCompletion", () => {
+  const confirmed = {
+    status: "confirmed" as const,
+    startsAt: new Date("2026-10-01T10:00:00.000Z"),
+  };
+  const host = { role: "host" as const };
+  const guest = { role: "participant" as const };
+  const afterStart = new Date("2026-10-01T10:25:00.000Z");
+  const dayBefore = new Date("2026-09-30T15:00:00.000Z");
+
+  it("completes only a confirmed booking whose room ended after the slot with host and guest present", () => {
+    expect(
+      decideBookingCompletion(confirmed, [host, guest], afterStart),
+    ).toEqual({ complete: true });
+  });
+
+  it("does not complete on a room test before the call", () => {
+    expect(
+      decideBookingCompletion(confirmed, [host, guest], dayBefore),
+    ).toEqual({ complete: false, reason: "ended_before_start" });
+  });
+
+  it("does not complete when only one side showed up", () => {
+    expect(decideBookingCompletion(confirmed, [guest], afterStart)).toEqual({
+      complete: false,
+      reason: "no_host",
+    });
+    expect(decideBookingCompletion(confirmed, [host], afterStart)).toEqual({
+      complete: false,
+      reason: "no_guest",
+    });
+  });
+
+  it("never touches a booking that is no longer confirmed", () => {
+    expect(
+      decideBookingCompletion(
+        { ...confirmed, status: "cancelled" },
+        [host, guest],
+        afterStart,
+      ),
+    ).toEqual({ complete: false, reason: "not_confirmed" });
   });
 });
 

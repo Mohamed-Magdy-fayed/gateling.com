@@ -157,6 +157,25 @@ describe("createMeetingsWebhookHandler", () => {
     expect(response.status).toBe(500);
   });
 
+  it("answers 413 to an oversized body before verifying anything", async () => {
+    const onDelivery = vi.fn();
+    const handler = createMeetingsWebhookHandler({
+      secret: SECRET,
+      onDelivery,
+    });
+    const huge = JSON.stringify({ pad: "x".repeat(70 * 1024) });
+
+    const response = await handler(
+      post(
+        { [MEETINGS_SIGNATURE_HEADER]: signMeetingsWebhook(SECRET, huge) },
+        huge,
+      ),
+    );
+
+    expect(response.status).toBe(413);
+    expect(onDelivery).not.toHaveBeenCalled();
+  });
+
   it("answers 503 when no secret is configured", async () => {
     const handler = createMeetingsWebhookHandler({
       secret: undefined,

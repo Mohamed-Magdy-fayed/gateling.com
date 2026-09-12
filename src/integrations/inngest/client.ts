@@ -63,6 +63,7 @@ export const meetingsWebhookReceivedEvent = eventType(
           code: z.string(),
           externalRef: z.string().nullable(),
           status: z.string(),
+          endedAt: z.string().nullable(),
         }),
         endedBy: z.string().optional(),
       }),

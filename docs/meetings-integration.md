@@ -16,16 +16,20 @@ and re-run `npx shadcn@latest add @gateling/meetings-integration --overwrite`
 | Trigger | What happens | Where |
 |---|---|---|
 | `booking/confirmed` (book, staff confirm, reschedule) | Step `provision-meeting`: create, or `PATCH` the time when `meetingCode` exists (`externalRef booking:<id>`); persist `meetingCode` + `meetingGuestUrl`; then the confirmation email carries the room link | `src/integrations/inngest/functions/on-booking-confirmed.ts`, `src/features/system/bookings/server/meeting.ts` |
-| `booking/cancelled` | Step `cancel-meeting` deletes the room (already-gone is fine) | `on-booking-cancelled.ts` |
+| `booking/cancelled` | Step `cancel-meeting` deletes the room (already-gone is fine; a Meetings outage is logged and the emails still go out) | `on-booking-cancelled.ts` |
 | Staff → **Join as host** (bookings table) | `bookings.hostJoinLink` mints a single-use host link, browser opens it | `bookings/server/router.ts`, `admin/components/booking-row-actions.tsx` |
 | Customer → **Join call** (My Account) | Plain guest link; waiting room on, host admits | `my-account/_components/my-bookings.tsx` |
-| `sales.logActivity` `demo_scheduled` (+ demo time) | Emits `lead/demo-scheduled` → room `lead:<id>:demo` (45 min), stored on `leads.demoMeetingCode/Url`; a later `demo_scheduled` moves it | `sales/server/router.ts`, `on-lead-demo-scheduled.ts`, `sales/server/meeting.ts` |
+| `sales.logActivity` `demo_scheduled` (+ demo time) | Emits `lead/demo-scheduled` → room `lead:<id>:demo` (45 min), stored on `leads.demoMeetingCode/Url`; a later `demo_scheduled` moves it, and a retried run for an older log stands down | `sales/server/router.ts`, `on-lead-demo-scheduled.ts`, `sales/server/meeting.ts` |
 | Lead page **Demo meeting** card | Copy the guest link for WhatsApp; **Join as host** via `sales.demoHostJoinLink` | `sales/admin/components/demo-meeting-card.tsx` |
-| Meetings → `POST /api/meetings-webhook` | Verify signature + 5-min replay window → Inngest `meetings/webhook.received` (event id = delivery id, so retries dedupe) → `meeting.ended` with a guest participant marks the booking `completed` | `src/app/api/meetings-webhook/route.ts`, `on-meetings-webhook.ts` |
+| Meetings → `POST /api/meetings-webhook` | Verify signature + 5-min replay window (bodies over 64 KB rejected) → only `meeting.ended` is forwarded to Inngest as `meetings/webhook.received` (event id = delivery id, so retries dedupe) → the booking that owns the room is marked `completed` **only if** it is still confirmed, the room ended after the slot started, and both a host and a guest were in it (`decideBookingCompletion`); the write is a compare-and-set | `src/app/api/meetings-webhook/route.ts`, `on-meetings-webhook.ts`, `bookings/server/meeting.ts` |
 
 Host identity is the single linked user `gateling-website` (name "Gateling
-Solutions", email = contact-email setting). Any staff member can mint a host
-link for any room because of that; see the ADR for why not per-staff.
+Solutions", email = contact-email setting), owned by
+`src/features/system/meetings/host.ts`. **Any staff member can mint a host
+link for any room** because of that — by design, see the ADR for why not
+per-staff. Meetings therefore only ever sees "gateling-website" as the host;
+the website logs `meetings.host_link_minted { userId, bookingId | leadId,
+meetingCode }` on every mint as the audit record of who hosted what.
 
 ## Configuration
 
@@ -61,8 +65,15 @@ both together.
   reschedule (which re-runs provisioning).
 - **Stale room** (deleted/ended on Meetings while the booking is live): the
   next provisioning falls through to *create* and overwrites the stored code.
-- **Webhook without a configured secret:** endpoint answers 503, so Meetings
-  keeps retrying (6 attempts over ~1 h) instead of dropping the event.
+- **Webhook without a configured secret:** endpoint answers a bare 503, so
+  Meetings keeps retrying (6 attempts over ~1 h) instead of dropping the event.
+- **Room ended but the call didn't happen** (staff tested the link the day
+  before, or only one side joined): the booking stays `confirmed` — reminders
+  and join buttons keep working — and staff decide with the manual
+  completed / no-show actions.
+- **Inngest keys** are required on the production deployment
+  (`VERCEL_ENV=production`, checked in `src/env/server.ts`): an unsigned
+  Inngest endpoint would let anyone run the webhook handler directly.
 
 ## Testing
 

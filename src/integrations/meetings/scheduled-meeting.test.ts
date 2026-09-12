@@ -164,6 +164,42 @@ describe("ensureScheduledMeeting", () => {
   });
 });
 
+describe("response validation", () => {
+  it("refuses a guest url that is not https", async () => {
+    const { client } = fakeApi([
+      {
+        status: 201,
+        json: { meeting: { ...meeting, guestUrl: "javascript:alert(1)" } },
+      },
+    ]);
+
+    await expect(ensureScheduledMeeting(client, base)).rejects.toMatchObject({
+      status: 502,
+      code: "invalid_response",
+    });
+  });
+
+  it("refuses a join link that is not https", async () => {
+    const { client } = fakeApi([
+      {
+        status: 201,
+        json: {
+          joinLink: {
+            url: "http://evil.test/",
+            role: "host",
+            expiresAt: "x",
+            singleUse: true,
+          },
+        },
+      },
+    ]);
+
+    await expect(
+      mintHostJoinLink(client, "abc", { externalId: "site", name: "Site" }),
+    ).rejects.toMatchObject({ code: "invalid_response" });
+  });
+});
+
 describe("cancelScheduledMeeting", () => {
   it("returns true on delete and false when already gone", async () => {
     const { client } = fakeApi([

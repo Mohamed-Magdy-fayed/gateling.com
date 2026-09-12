@@ -2,13 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "@/env/server";
-import { websiteMeetingHost } from "@/features/system/bookings/server/meeting";
+import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
-import { getContactEmail } from "@/integrations/inngest/functions/booking-helpers";
 import { getMeetingsClient } from "@/integrations/meetings";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
-import { leadDemoHostJoinLink } from "./meeting";
+import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
   createLeadSchema,
   leadIdSchema,
@@ -95,7 +94,15 @@ export const salesRouter = createTRPCRouter({
               scheduledAt: input.nextActionAt.toISOString(),
             }),
           );
-        } catch {}
+        } catch (error) {
+          // The activity is saved; only the room is missing. Logged so a
+          // permanently "pending" demo card can be traced to its cause.
+          console.warn("lead/demo-scheduled send failed", {
+            leadId: input.leadId,
+            activityId: result.activityId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
       return result;
     }),
@@ -105,9 +112,9 @@ export const salesRouter = createTRPCRouter({
     .input(leadIdSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      const found = await service.getLead(ctx.db, input.id);
-      if (!found) throw new TRPCError({ code: "NOT_FOUND" });
-      if (!found.lead.demoMeetingCode)
+      const meetingCode = await getLeadDemoMeetingCode(ctx.db, input.id);
+      if (meetingCode === undefined) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!meetingCode)
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "no_meeting",
@@ -120,10 +127,16 @@ export const salesRouter = createTRPCRouter({
         });
       const link = await leadDemoHostJoinLink(
         client,
-        found.lead.demoMeetingCode,
-        websiteMeetingHost(await getContactEmail()),
+        meetingCode,
+        await getWebsiteMeetingHost(ctx.db),
         `${env.BASE_URL}/sales/leads/${input.id}`,
       );
+      // Audit: the only record of which person hosted which prospect's demo.
+      console.info("meetings.host_link_minted", {
+        userId: ctx.session.user.id,
+        leadId: input.id,
+        meetingCode,
+      });
       return { url: link.url, expiresAt: link.expiresAt };
     }),
 

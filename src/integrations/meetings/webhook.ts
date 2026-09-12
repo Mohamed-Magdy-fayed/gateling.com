@@ -20,6 +20,9 @@ export const MEETINGS_DELIVERY_HEADER = "x-meetings-delivery";
 /** Five minutes: generous for clock skew, short for replay. */
 export const DEFAULT_TOLERANCE_SECONDS = 5 * 60;
 
+/** Real deliveries are ~1 KB; anything near this is not Meetings. */
+export const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
+
 export const meetingsWebhookEventValues = [
   "meeting.started",
   "meeting.ended",
@@ -141,14 +144,19 @@ export function createMeetingsWebhookHandler({
   toleranceSeconds,
 }: MeetingsWebhookHandlerOptions) {
   return async function POST(request: Request): Promise<Response> {
-    if (!secret) {
-      return Response.json(
-        { error: "meetings webhook secret not configured" },
-        { status: 503 },
-      );
+    // Unconfigured: 503 so Meetings keeps retrying instead of dropping the
+    // event. Deliberately bare — an unauthenticated caller learns nothing.
+    if (!secret) return new Response(null, { status: 503 });
+
+    const declared = Number(request.headers.get("content-length"));
+    if (Number.isFinite(declared) && declared > MAX_WEBHOOK_BODY_BYTES) {
+      return new Response(null, { status: 413 });
     }
 
     const body = await request.text();
+    if (body.length > MAX_WEBHOOK_BODY_BYTES) {
+      return new Response(null, { status: 413 });
+    }
     const header = request.headers.get(MEETINGS_SIGNATURE_HEADER);
     if (!verifyMeetingsSignature({ secret, header, body, toleranceSeconds })) {
       return Response.json({ error: "invalid signature" }, { status: 401 });

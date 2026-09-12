@@ -61,8 +61,11 @@ export function BookingRowActions({ row, setRowAction }: Props) {
   const hostJoinLink = useMutation(
     trpc.bookings.hostJoinLink.mutationOptions({
       onSuccess: ({ url }) => {
-        // Single-use link minted for this click; open it and forget it.
-        window.open(url, "_blank", "noopener");
+        // Single-use link minted for this click. Navigate rather than
+        // window.open: after the async round-trip we are outside the click
+        // gesture and popup blockers would eat the link. Meetings' returnUrl
+        // brings the host back to this page.
+        window.location.assign(url);
       },
       onError: () => toast.error(t("bookings.joinLinkFailed")),
     }),
@@ -70,7 +73,12 @@ export function BookingRowActions({ row, setRowAction }: Props) {
 
   const isPast = row.startsAt.getTime() < Date.now();
   const isActive = row.status === "requested" || row.status === "confirmed";
-  const canJoin = row.status === "confirmed" && !isPast && !!row.meetingCode;
+  // Joinable until the slot ends, not until it starts — a host who opens the
+  // menu a minute late must still get in.
+  const canJoin =
+    row.status === "confirmed" &&
+    row.endsAt.getTime() > Date.now() &&
+    !!row.meetingCode;
 
   return (
     <DropdownMenu>

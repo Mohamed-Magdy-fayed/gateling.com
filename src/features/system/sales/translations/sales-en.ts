@@ -65,6 +65,8 @@ export default {
     demoMeetingPending: "The meeting room is being set up…",
     demoMeetingCopy: "Copy link",
     demoMeetingCopied: "Link copied.",
+    demoMeetingCopyFailed:
+      "Could not copy — select the link and copy it manually.",
     demoMeetingJoin: "Join as host",
     demoMeetingJoinFailed: "Could not open the meeting room.",
     activityNewStatus: "Move to",
