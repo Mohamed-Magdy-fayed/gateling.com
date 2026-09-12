@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "@/env/server";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
-import { getMeetingsClient } from "@/integrations/meetings";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
@@ -119,7 +119,7 @@ export const salesRouter = createTRPCRouter({
           code: "PRECONDITION_FAILED",
           message: "no_meeting",
         });
-      const client = getMeetingsClient();
+      const client = await resolveMeetingsClient(ctx.db);
       if (!client)
         throw new TRPCError({
           code: "PRECONDITION_FAILED",

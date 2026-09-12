@@ -116,6 +116,17 @@ export function buildSettingColumns(opts: {
       ),
       meta: { label: t("systemPages.settingsValue") },
       cell: ({ row }) => {
+        // A secret never reaches the browser; the row only says whether one
+        // is stored.
+        if (row.original.isSecret) {
+          return row.original.hasValue ? (
+            <Badge variant="secondary">
+              {t("systemPages.settingsSecretSet")}
+            </Badge>
+          ) : (
+            "—"
+          );
+        }
         const value = row.original.value?.trim();
         if (!value) return "—";
         return (

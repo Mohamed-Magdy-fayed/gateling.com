@@ -34,31 +34,56 @@ meetingCode }` on every mint as the audit record of who hosted what.
 
 ## Configuration
 
-Created once at `https://meetings.gateling.com/settings/integrations`:
+Set on `/settings` by an admin — **not** in the environment, so connecting is
+the same flow on every Gateling system and needs no redeploy. There are no
+`MEETINGS_*` environment variables.
 
-| Field | Value |
-|---|---|
-| Name / Slug | Gateling.com / `gateling-com` |
-| Webhook URL | `https://gateling.com/api/meetings-webhook` |
-| Allowed return origins | `https://gateling.com` |
+1. Open this app's `/settings` page. The **Gateling Meetings** card at the top
+   shows the two values Meetings will ask for: this deployment's **webhook
+   URL** (`<origin>/api/meetings-webhook`) and its **return origin** (read from
+   `window.location.origin`, so the page shows the values for the deployment
+   you are looking at).
+2. On `https://meetings.gateling.com/settings/integrations`, **New integration**:
 
-Then on Vercel (and `.env` locally):
+   | Field | Value |
+   |---|---|
+   | Name / Slug | Gateling.com / `gateling-com` |
+   | Webhook URL | the webhook URL from step 1 |
+   | Allowed return origins | the origin from step 1 |
 
-```
-MEETINGS_API_URL=https://meetings.gateling.com
-MEETINGS_API_KEY=gm_live_…
-MEETINGS_WEBHOOK_SECRET=whsec_…
-```
+3. Paste what it issues into the settings table (edit the row):
 
-Validated in `src/env/server.ts`: all optional; a key without URL + secret
-fails startup. "Rotate key" on Meetings re-issues key **and** secret — update
-both together.
+   | Code | Setting | Secret |
+   |---|---|---|
+   | `00018` | Meetings API URL — seeded `https://meetings.gateling.com`; `http` accepted for `localhost` / `127.0.0.1` only | no |
+   | `00019` | Meetings API key (`gm_live_…`) | yes |
+   | `00020` | Meetings webhook secret (`whsec_…`) | yes |
+
+Rows are created insert-or-ignore the first time the grid is listed
+(`ensureSystemSettingRows`), so a deployment that was never re-seeded still has
+them to edit. Secrets (`isSecret` in `system-settings-registry.ts`) are never
+returned to a browser: the grid reports only *Set (hidden)*, search skips
+their value, the edit dialog opens with an empty "paste to replace" field, and
+**Clear** in that dialog is the only way to send an empty value — which
+disconnects. "Rotate key" on Meetings re-issues key **and** secret — paste
+both again.
+
+One integration per environment: Preview and Production each get their own
+integration, webhook URL and return origin — never share a key.
+
+`resolveMeetingsClient` / `isMeetingsConfigured` / `resolveMeetingsWebhookSecret`
+(`src/features/system/meetings/config.ts`) read the rows per call — one
+indexed lookup — so a rotated key takes effect on the next request, not after
+a deploy. The block's own `getMeetingsClient()` reads `process.env` and is not
+used here; `config.ts` builds the client with the block's
+`createMeetingsClient` instead. Inside Inngest functions the client is loaded
+inside the step, never captured across steps.
 
 ## Failure modes
 
-- **Not configured** (`MEETINGS_API_KEY` empty): `getMeetingsClient()` is
-  `null`; every step reports `skipped: meetings_not_configured`; emails use the
-  static `BOOKING_MEETING_LINK` setting; Join buttons stay hidden (no code).
+- **Not configured** (API key not set on `/settings`): `resolveMeetingsClient()`
+  is `null`; every step reports `skipped: meetings_not_configured`; emails use
+  the static `BOOKING_MEETING_LINK` setting; Join buttons stay hidden (no code).
 - **Meetings API down at confirmation:** Inngest retries `provision-meeting`;
   after the last retry the `StepError` is logged and the run continues — the
   confirmation email still goes out with the fallback link. The room is not
@@ -66,8 +91,10 @@ both together.
   reschedule (which re-runs provisioning).
 - **Stale room** (deleted/ended on Meetings while the booking is live): the
   next provisioning falls through to *create* and overwrites the stored code.
-- **Webhook without a configured secret:** endpoint answers a bare 503, so
-  Meetings keeps retrying (6 attempts over ~1 h) instead of dropping the event.
+- **Webhook without a secret set on `/settings`:** the secret is read per
+  delivery; unset, the endpoint answers a bare 503, so Meetings keeps retrying
+  (6 attempts over ~1 h) instead of dropping the event — paste it and the
+  retries start landing.
 - **Room ended but the call didn't happen** (staff tested the link the day
   before, or only one side joined): the booking stays `confirmed` — reminders
   and join buttons keep working — and staff decide with the manual
@@ -79,15 +106,17 @@ both together.
 ## Testing
 
 ```bash
-npm run test:unit                              # includes the block's own specs + bookings/server/meeting.test.ts
+npm run test:unit                              # block specs + bookings/server/meeting.test.ts + settings registry + meetings/config resolver
 npx playwright test e2e/meetings-access.spec.ts # host-link procedures and webhook closed to the public
 ```
 
 Local end-to-end against Meetings: run its stack (`npm run db:start && npm run
 livekit && npm run inngest && npm run dev` in `G:\apps\gateling-meetings`),
 create an integration at `/settings/integrations` with webhook URL
-`http://localhost:3000/api/meetings-webhook` (adjust ports), point this app's
-`MEETINGS_*` at it, and book a slot.
+`http://localhost:3000/api/meetings-webhook` (adjust ports), then on this
+app's `/settings` set the Meetings API URL (`00018`) to the local instance
+(`http://localhost:…` is accepted for localhost only), paste the key and
+secret, and book a slot.
 
 ## Not built (follow-ups)
 

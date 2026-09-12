@@ -7,8 +7,8 @@ import {
 } from "@/features/system/bookings/lib/format";
 import { getBookingSettings } from "@/features/system/bookings/lib/settings";
 import { cancelBookingMeeting } from "@/features/system/bookings/server/meeting";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { sendMail } from "@/integrations/email";
-import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingCancelledEvent, inngest } from "../client";
 import { getBooking, getContactEmail } from "./booking-helpers";
 
@@ -23,7 +23,7 @@ export const onBookingCancelled = inngest.createFunction(
     // an orphaned room is a smaller failure than a silent cancellation.
     try {
       await step.run("cancel-meeting", async () => {
-        const client = getMeetingsClient();
+        const client = await resolveMeetingsClient(db);
         if (!client) return { skipped: "meetings_not_configured" };
         return { deleted: await cancelBookingMeeting(client, booking) };
       });

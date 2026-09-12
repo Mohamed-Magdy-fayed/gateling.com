@@ -1,8 +1,8 @@
 import { db } from "@/drizzle";
 import { getBookingSettings } from "@/features/system/bookings/lib/settings";
 import { provisionBookingMeeting } from "@/features/system/bookings/server/meeting";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
-import { getMeetingsClient } from "@/integrations/meetings";
 import { bookingMeetingRequestedEvent, inngest } from "../client";
 import { getBooking } from "./booking-helpers";
 
@@ -27,7 +27,7 @@ export const onBookingMeetingRequested = inngest.createFunction(
       if (booking.startsAt <= new Date()) return { skipped: "already_started" };
       if (booking.meetingCode) return { skipped: "has_meeting" };
 
-      const client = getMeetingsClient();
+      const client = await resolveMeetingsClient(db);
       if (!client) return { skipped: "meetings_not_configured" };
 
       const settings = await getBookingSettings(db);
