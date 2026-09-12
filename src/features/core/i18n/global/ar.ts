@@ -443,6 +443,9 @@ export default {
     statusUpdated: "تم تحديث حالة الحجز.",
     actionFailed: "تعذر تحديث الحجز.",
     joinAsHost: "الانضمام كمضيف",
+    createMeeting: "إنشاء غرفة اجتماع",
+    meetingRequested: "تم طلب غرفة الاجتماع — حدّث الصفحة بعد لحظات.",
+    meetingRequestFailed: "تعذر طلب غرفة الاجتماع.",
     joinLinkFailed: "تعذر فتح غرفة الاجتماع.",
     cancelBookingTitle: "إلغاء هذا الحجز؟",
     cancelBookingDescription:
