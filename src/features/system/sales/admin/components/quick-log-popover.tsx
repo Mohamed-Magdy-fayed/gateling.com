@@ -99,6 +99,11 @@ export function QuickLogPopover({ leadId, onLogged }: Props) {
     SUGGESTED_STATUS.call ?? "none",
   );
 
+  // A scheduled demo is a calendar entry: its "next action" is the demo time,
+  // and a Meetings room is provisioned for it — so it cannot be left blank.
+  const isDemoScheduled = type === "demo_scheduled";
+  const isDemoTimeMissing = isDemoScheduled && !nextActionAt;
+
   const logActivity = useMutation(
     trpc.sales.logActivity.mutationOptions({
       onSuccess: async () => {
@@ -243,14 +248,23 @@ export function QuickLogPopover({ leadId, onLogged }: Props) {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`next-${leadId}`}>
-            {t("sales.activityNextAction")}
+            {isDemoScheduled
+              ? t("sales.demoTime")
+              : t("sales.activityNextAction")}
           </Label>
           <Input
             id={`next-${leadId}`}
             type="datetime-local"
             value={nextActionAt}
+            required={isDemoScheduled}
+            aria-invalid={isDemoTimeMissing || undefined}
             onChange={(event) => setNextActionAt(event.target.value)}
           />
+          {isDemoTimeMissing && (
+            <p className="text-destructive text-xs">
+              {t("sales.demoTimeRequired")}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -282,7 +296,7 @@ export function QuickLogPopover({ leadId, onLogged }: Props) {
         <Button
           size="sm"
           onClick={handleSubmit}
-          disabled={logActivity.isPending}
+          disabled={logActivity.isPending || isDemoTimeMissing}
         >
           <LoadingSwap isLoading={logActivity.isPending}>
             {t("common.save")}

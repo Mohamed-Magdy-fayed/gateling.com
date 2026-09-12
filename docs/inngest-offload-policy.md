@@ -22,7 +22,7 @@ Instead: fire an Inngest event, return success to the client immediately, and le
 
 ## Event Catalog
 
-Defined in `src/integrations/inngest/events.ts`:
+Defined in `src/integrations/inngest/client.ts`:
 
 | Event Name | Payload | Fired By |
 |-----------|---------|---------|
@@ -32,6 +32,11 @@ Defined in `src/integrations/inngest/events.ts`:
 | `blog-post/published` | `{ blogPostId: string; slug: string }` | `blog-posts` router on publish |
 | `user/registered` | `{ userId: string; role: string }` | auth sign-up on user creation |
 | `lead/status-changed` | `{ leadId: string; newStatus: string }` | `leads` router on status update |
+| `booking/confirmed` | `{ bookingId; startsAt }` | `bookings` router on book / confirm / reschedule |
+| `booking/requested` | `{ bookingId }` | `bookings` router on custom-time request |
+| `booking/cancelled` | `{ bookingId; cancelledBy }` | `bookings` router on cancel |
+| `lead/demo-scheduled` | `{ leadId; activityId; scheduledAt }` | `sales` router when a `demo_scheduled` activity is logged |
+| `meetings/webhook.received` | verified Meetings delivery (event `id` = delivery id, dedupes retries) | `POST /api/meetings-webhook` |
 
 ## Function Locations
 
@@ -42,6 +47,12 @@ Defined in `src/integrations/inngest/events.ts`:
 - `on-blog-post-published.ts` — ping Google IndexNow + build newsletter digest for subscribers
 - `on-user-registered.ts` — welcome email; customer role gets Gateling intro email
 - `on-lead-status-changed.ts` — notify admin when status changes to `qualified`
+- `on-booking-confirmed.ts` — provision the Meetings room, confirmation + staff emails, 24 h / 1 h reminders
+- `on-booking-cancelled.ts` — delete the Meetings room, notify the other party
+- `on-lead-demo-scheduled.ts` — provision / move the prospect's demo room
+- `on-meetings-webhook.ts` — `meeting.ended` with a guest → booking `completed`
+
+External HTTP to Meetings goes through `src/integrations/meetings` (registry block — see `docs/meetings-integration.md`) and only ever runs inside these functions.
 
 ## Pattern in a Mutation
 

@@ -451,6 +451,8 @@ export default {
     bookingCancelled: "Booking cancelled — the customer was notified.",
     statusUpdated: "Booking status updated.",
     actionFailed: "Could not update the booking.",
+    joinAsHost: "Join as host",
+    joinLinkFailed: "Could not open the meeting room.",
     cancelBookingTitle: "Cancel this booking?",
     cancelBookingDescription:
       "The slot will be released and the customer will get a cancellation email.",
@@ -1149,6 +1151,7 @@ export default {
       bookingStatusCancelled: "Cancelled",
       bookingStatusCompleted: "Completed",
       bookingStatusNoShow: "Missed",
+      bookingJoinButton: "Join call",
       bookingRescheduleButton: "Reschedule",
       bookingCancelButton: "Cancel booking",
       bookingCancelConfirmTitle: "Cancel this call?",

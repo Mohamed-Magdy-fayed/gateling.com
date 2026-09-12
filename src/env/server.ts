@@ -22,6 +22,12 @@ export const env = createEnv({
     INNGEST_SIGNING_KEY: z.string().min(1).optional(),
     INNGEST_EVENT_KEY: z.string().min(1).optional(),
 
+    // Gateling Meetings (meetings.gateling.com/settings/integrations). Optional
+    // so local/preview run without a room provider; required together in prod.
+    MEETINGS_API_URL: z.url().optional(),
+    MEETINGS_API_KEY: z.string().min(1).optional(),
+    MEETINGS_WEBHOOK_SECRET: z.string().min(1).optional(),
+
     FIREBASE_PROJECT_ID: z.string().min(1),
     FIREBASE_CLIENT_EMAIL: z.string().min(1),
     FIREBASE_PRIVATE_KEY: z.string().min(1),
@@ -51,6 +57,37 @@ export const env = createEnv({
             val.DB_PORT &&
             val.DB_USER,
         );
+
+        // The Inngest serve endpoint accepts unsigned invocations without a
+        // signing key — on the production deployment that would let anyone
+        // run any job (including the Meetings webhook handler) with an
+        // arbitrary payload. Keyed on VERCEL_ENV, not NODE_ENV: a local
+        // `next build` is production mode without production secrets.
+        if (
+          process.env.VERCEL_ENV === "production" &&
+          !(val.INNGEST_SIGNING_KEY && val.INNGEST_EVENT_KEY)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "INNGEST_SIGNING_KEY and INNGEST_EVENT_KEY are required in production.",
+            path: ["INNGEST_SIGNING_KEY"],
+          });
+        }
+
+        // The URL alone is a harmless default; a key means the integration is
+        // live and must be complete, or webhooks would be dropped unverified.
+        if (
+          val.MEETINGS_API_KEY &&
+          !(val.MEETINGS_API_URL && val.MEETINGS_WEBHOOK_SECRET)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "MEETINGS_API_KEY requires MEETINGS_API_URL and MEETINGS_WEBHOOK_SECRET.",
+            path: ["MEETINGS_API_KEY"],
+          });
+        }
 
         if (!hasDatabaseUrl && !hasSplitDatabaseConfig) {
           console.log(hasDatabaseUrl, hasSplitDatabaseConfig);
