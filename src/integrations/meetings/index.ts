@@ -1,0 +1,80 @@
+import "server-only";
+
+import { createMeetingsClient, type MeetingsClient } from "./client";
+
+export * from "./client";
+export * from "./scheduled-meeting";
+
+/**
+ * Environment contract shared by every Gateling system that talks to Meetings.
+ * Values come from https://meetings.gateling.com/settings/integrations and are
+ * shown once; "Rotate key" issues a fresh API key *and* webhook secret together.
+ */
+export const MEETINGS_ENV_KEYS = {
+  apiUrl: "MEETINGS_API_URL",
+  apiKey: "MEETINGS_API_KEY",
+  webhookSecret: "MEETINGS_WEBHOOK_SECRET",
+} as const;
+
+export type MeetingsEnv = {
+  apiUrl: string;
+  apiKey: string;
+};
+
+/** https only, except a Meetings instance on this machine for local development. */
+export function isAllowedMeetingsApiUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol === "https:") return true;
+    return (
+      url.protocol === "http:" &&
+      (url.hostname === "localhost" || url.hostname === "127.0.0.1")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The URL/key pair when both are set, otherwise `null` — never a half-config.
+ * Throws on a plaintext non-local URL rather than silently sending the key
+ * over http.
+ */
+export function readMeetingsEnv(
+  env: Record<string, string | undefined> = process.env,
+): MeetingsEnv | null {
+  const apiUrl = env[MEETINGS_ENV_KEYS.apiUrl]?.trim();
+  const apiKey = env[MEETINGS_ENV_KEYS.apiKey]?.trim();
+  if (!apiUrl || !apiKey) return null;
+  if (!isAllowedMeetingsApiUrl(apiUrl)) {
+    throw new Error(
+      `${MEETINGS_ENV_KEYS.apiUrl} must be an https URL (http is allowed for localhost only)`,
+    );
+  }
+  return { apiUrl, apiKey };
+}
+
+export function isMeetingsConfigured(): boolean {
+  return readMeetingsEnv() !== null;
+}
+
+let cached: { key: string; client: MeetingsClient } | null = null;
+
+/**
+ * Process-wide client, or `null` when the integration is not configured so
+ * callers can degrade gracefully (local dev, preview environments without
+ * keys). Memoised per URL+key so a rotated key in a long-lived process is
+ * picked up without a restart.
+ */
+export function getMeetingsClient(): MeetingsClient | null {
+  const env = readMeetingsEnv();
+  if (!env) return null;
+  const key = `${env.apiUrl}|${env.apiKey}`;
+  if (cached?.key !== key) {
+    cached = {
+      key,
+      client: createMeetingsClient({ baseUrl: env.apiUrl, apiKey: env.apiKey }),
+    };
+  }
+  return cached.client;
+}

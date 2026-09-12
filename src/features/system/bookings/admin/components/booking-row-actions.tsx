@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   MoreHorizontalIcon,
   UserXIcon,
+  VideoIcon,
   XCircleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,8 +58,27 @@ export function BookingRowActions({ row, setRowAction }: Props) {
     }),
   );
 
+  const hostJoinLink = useMutation(
+    trpc.bookings.hostJoinLink.mutationOptions({
+      onSuccess: ({ url }) => {
+        // Single-use link minted for this click. Navigate rather than
+        // window.open: after the async round-trip we are outside the click
+        // gesture and popup blockers would eat the link. Meetings' returnUrl
+        // brings the host back to this page.
+        window.location.assign(url);
+      },
+      onError: () => toast.error(t("bookings.joinLinkFailed")),
+    }),
+  );
+
   const isPast = row.startsAt.getTime() < Date.now();
   const isActive = row.status === "requested" || row.status === "confirmed";
+  // Joinable until the slot ends, not until it starts — a host who opens the
+  // menu a minute late must still get in.
+  const canJoin =
+    row.status === "confirmed" &&
+    row.endsAt.getTime() > Date.now() &&
+    !!row.meetingCode;
 
   return (
     <DropdownMenu>
@@ -75,6 +95,15 @@ export function BookingRowActions({ row, setRowAction }: Props) {
         }
       />
       <DropdownMenuContent align="end" className="w-52">
+        {canJoin && (
+          <DropdownMenuItem
+            disabled={hostJoinLink.isPending}
+            onClick={() => hostJoinLink.mutate({ id: row.id })}
+          >
+            <VideoIcon className="size-3.5" />
+            {t("bookings.joinAsHost")}
+          </DropdownMenuItem>
+        )}
         {row.status === "requested" && (
           <DropdownMenuItem
             disabled={confirmMutation.isPending}

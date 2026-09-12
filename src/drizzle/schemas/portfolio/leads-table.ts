@@ -127,6 +127,14 @@ export const LeadsTable = pgTable(
     notes: text(),
     ownerId: uuid().references(() => UsersTable.id, { onDelete: "set null" }),
 
+    // ─── Demo meeting (prospects) ───────────────────────────────────────────
+    // One live demo room per lead, provisioned on Gateling Meetings when a
+    // `demo_scheduled` activity is logged (externalRef `lead:<id>:demo`); a
+    // later `demo_scheduled` reschedules the same room. Lives here, not on
+    // `lead_activities`, because that log is append-only.
+    demoMeetingCode: varchar({ length: 12 }),
+    demoMeetingUrl: text(),
+
     // ─── Derived cache (recomputed from lead_activities, never hand-edited) ──
     // Written only by `recomputeLeadDerived()` in the sales service layer.
     // Treat as read-only everywhere else: the activity log is the truth.
@@ -146,7 +154,10 @@ export const LeadsTable = pgTable(
     index("leads_created_at_idx").on(table.createdAt),
     index("leads_email_idx").on(table.email),
     // The Today view filters on kind + pipelineStatus on every load.
-    index("leads_kind_pipeline_status_idx").on(table.kind, table.pipelineStatus),
+    index("leads_kind_pipeline_status_idx").on(
+      table.kind,
+      table.pipelineStatus,
+    ),
     index("leads_next_action_at_idx").on(table.nextActionAt),
     index("leads_last_contacted_at_idx").on(table.lastContactedAt),
     // Backs the importer's (name, phone) idempotency probe and phone search.

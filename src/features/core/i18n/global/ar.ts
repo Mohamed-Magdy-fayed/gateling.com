@@ -442,6 +442,8 @@ export default {
     bookingCancelled: "تم إلغاء الحجز — تم إخطار العميل.",
     statusUpdated: "تم تحديث حالة الحجز.",
     actionFailed: "تعذر تحديث الحجز.",
+    joinAsHost: "الانضمام كمضيف",
+    joinLinkFailed: "تعذر فتح غرفة الاجتماع.",
     cancelBookingTitle: "إلغاء هذا الحجز؟",
     cancelBookingDescription:
       "سيتم تحرير الموعد وسيتلقى العميل بريدًا إلكترونيًا بالإلغاء.",
@@ -1120,6 +1122,7 @@ export default {
       bookingStatusCancelled: "ملغي",
       bookingStatusCompleted: "مكتمل",
       bookingStatusNoShow: "لم يحضر",
+      bookingJoinButton: "الانضمام إلى المكالمة",
       bookingRescheduleButton: "إعادة الجدولة",
       bookingCancelButton: "إلغاء الحجز",
       bookingCancelConfirmTitle: "إلغاء هذه المكالمة؟",

@@ -76,6 +76,15 @@ export const logActivitySchema = z.object({
 });
 export type LogActivityInput = z.infer<typeof logActivitySchema>;
 
+/**
+ * A scheduled demo is a time on the calendar, and that time is what the
+ * Meetings room is provisioned for — without it there is nothing to book.
+ */
+export const logActivityInputSchema = logActivitySchema.refine(
+  (val) => val.type !== "demo_scheduled" || val.nextActionAt != null,
+  { message: "demo_time_required", path: ["nextActionAt"] },
+);
+
 export const listPipelineSchema = z.object({
   page: z.number().int().min(1).default(1),
   perPage: z.number().int().min(1).max(100).default(20),

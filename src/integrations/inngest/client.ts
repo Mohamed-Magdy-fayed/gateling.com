@@ -41,3 +41,32 @@ export const bookingCancelledEvent = eventType("booking/cancelled", {
     cancelledBy: z.enum(["customer", "admin"]),
   }),
 });
+
+export const leadDemoScheduledEvent = eventType("lead/demo-scheduled", {
+  schema: z.object({
+    leadId: z.string(),
+    activityId: z.string(),
+    scheduledAt: z.string(),
+  }),
+});
+
+/** A verified delivery from Gateling Meetings; `id` doubles as the Inngest event id for dedupe. */
+export const meetingsWebhookReceivedEvent = eventType(
+  "meetings/webhook.received",
+  {
+    schema: z.object({
+      id: z.string(),
+      event: z.string(),
+      createdAt: z.string(),
+      data: z.object({
+        meeting: z.object({
+          code: z.string(),
+          externalRef: z.string().nullable(),
+          status: z.string(),
+          endedAt: z.string().nullable(),
+        }),
+        endedBy: z.string().optional(),
+      }),
+    }),
+  },
+);
