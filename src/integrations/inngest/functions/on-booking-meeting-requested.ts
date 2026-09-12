@@ -21,7 +21,10 @@ export const onBookingMeetingRequested = inngest.createFunction(
       const booking = await getBooking(event.data.bookingId);
       if (!booking || booking.status !== "confirmed")
         return { skipped: "not_confirmed" };
-      if (booking.endsAt <= new Date()) return { skipped: "in_the_past" };
+      // Meetings rejects a scheduledAt in the past ("Pick a time in the
+      // future"), so a slot that has already started is a clean skip, not
+      // three failed retries.
+      if (booking.startsAt <= new Date()) return { skipped: "already_started" };
       if (booking.meetingCode) return { skipped: "has_meeting" };
 
       const client = getMeetingsClient();

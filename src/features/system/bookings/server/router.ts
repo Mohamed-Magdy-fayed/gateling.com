@@ -490,10 +490,12 @@ export const bookingsRouter = createTRPCRouter({
       assertStaff(ctx.session.user.role);
       const booking = await ctx.db.query.BookingsTable.findFirst({
         where: eq(BookingsTable.id, input.id),
-        columns: { status: true, endsAt: true, meetingCode: true },
+        columns: { status: true, startsAt: true, meetingCode: true },
       });
       if (!booking) throw new TRPCError({ code: "NOT_FOUND" });
-      if (booking.status !== "confirmed" || booking.endsAt <= new Date())
+      // Meetings cannot schedule a room in the past; once the slot has
+      // started there is nothing to provision.
+      if (booking.status !== "confirmed" || booking.startsAt <= new Date())
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "not_upcoming",
