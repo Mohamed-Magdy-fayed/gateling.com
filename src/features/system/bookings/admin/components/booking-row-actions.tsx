@@ -94,7 +94,10 @@ export function BookingRowActions({ row, setRowAction }: Props) {
   const isUpcomingConfirmed =
     row.status === "confirmed" && row.endsAt.getTime() > Date.now();
   const canJoin = isUpcomingConfirmed && !!row.meetingCode;
-  const canRequestMeeting = isUpcomingConfirmed && !row.meetingCode;
+  // A room can only be scheduled for a future time — Meetings refuses past
+  // slots — so the action disappears at the start minute.
+  const canRequestMeeting =
+    row.status === "confirmed" && !isPast && !row.meetingCode;
 
   return (
     <DropdownMenu>
