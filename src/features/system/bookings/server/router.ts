@@ -25,9 +25,11 @@ import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import {
   bookingCancelledEvent,
   bookingConfirmedEvent,
+  bookingMeetingRequestedEvent,
   bookingRequestedEvent,
   inngest,
 } from "@/integrations/inngest/client";
+import { sendEventSafely } from "@/integrations/inngest/send";
 import { getMeetingsClient } from "@/integrations/meetings";
 import {
   baseProcedure,
@@ -186,14 +188,13 @@ export const bookingsRouter = createTRPCRouter({
         })
         .returning({ id: BookingsTable.id });
 
-      try {
-        await inngest.send(
-          bookingConfirmedEvent.create({
-            bookingId: booking.id,
-            startsAt: input.startsAt.toISOString(),
-          }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingConfirmedEvent.create({
+          bookingId: booking.id,
+          startsAt: input.startsAt.toISOString(),
+        }),
+        { bookingId: booking.id },
+      );
       return { bookingId: booking.id };
     }),
 
@@ -241,11 +242,10 @@ export const bookingsRouter = createTRPCRouter({
         })
         .returning({ id: BookingsTable.id });
 
-      try {
-        await inngest.send(
-          bookingRequestedEvent.create({ bookingId: booking.id }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingRequestedEvent.create({ bookingId: booking.id }),
+        { bookingId: booking.id },
+      );
       return { bookingId: booking.id };
     }),
 
@@ -283,14 +283,13 @@ export const bookingsRouter = createTRPCRouter({
         .update(BookingsTable)
         .set({ status: "cancelled", cancelledBy: "customer" })
         .where(eq(BookingsTable.id, input.id));
-      try {
-        await inngest.send(
-          bookingCancelledEvent.create({
-            bookingId: input.id,
-            cancelledBy: "customer",
-          }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingCancelledEvent.create({
+          bookingId: input.id,
+          cancelledBy: "customer",
+        }),
+        { bookingId: input.id },
+      );
       return { cancelled: true };
     }),
 
@@ -319,14 +318,13 @@ export const bookingsRouter = createTRPCRouter({
           status: "confirmed",
         })
         .where(eq(BookingsTable.id, input.id));
-      try {
-        await inngest.send(
-          bookingConfirmedEvent.create({
-            bookingId: input.id,
-            startsAt: input.startsAt.toISOString(),
-          }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingConfirmedEvent.create({
+          bookingId: input.id,
+          startsAt: input.startsAt.toISOString(),
+        }),
+        { bookingId: input.id },
+      );
       return { rescheduled: true };
     }),
 
@@ -400,14 +398,13 @@ export const bookingsRouter = createTRPCRouter({
         .update(BookingsTable)
         .set({ status: "confirmed" })
         .where(eq(BookingsTable.id, input.id));
-      try {
-        await inngest.send(
-          bookingConfirmedEvent.create({
-            bookingId: input.id,
-            startsAt: booking.startsAt.toISOString(),
-          }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingConfirmedEvent.create({
+          bookingId: input.id,
+          startsAt: booking.startsAt.toISOString(),
+        }),
+        { bookingId: input.id },
+      );
       return { confirmed: true };
     }),
 
@@ -429,14 +426,13 @@ export const bookingsRouter = createTRPCRouter({
         .update(BookingsTable)
         .set({ status: "cancelled", cancelledBy: "admin" })
         .where(eq(BookingsTable.id, input.id));
-      try {
-        await inngest.send(
-          bookingCancelledEvent.create({
-            bookingId: input.id,
-            cancelledBy: "admin",
-          }),
-        );
-      } catch {}
+      await sendEventSafely(
+        bookingCancelledEvent.create({
+          bookingId: input.id,
+          cancelledBy: "admin",
+        }),
+        { bookingId: input.id },
+      );
       return { cancelled: true };
     }),
 
@@ -480,6 +476,55 @@ export const bookingsRouter = createTRPCRouter({
         meetingCode: booking.meetingCode,
       });
       return { url: link.url, expiresAt: link.expiresAt };
+    }),
+
+  /**
+   * Ask for a Meetings room on a confirmed booking that has none — bookings
+   * made before the integration, or whose provisioning failed after retries.
+   * Unlike the other sends this one reports failure: the person clicked for
+   * exactly this and must know if the queue is down.
+   */
+  requestMeeting: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      assertStaff(ctx.session.user.role);
+      const booking = await ctx.db.query.BookingsTable.findFirst({
+        where: eq(BookingsTable.id, input.id),
+        columns: { status: true, endsAt: true, meetingCode: true },
+      });
+      if (!booking) throw new TRPCError({ code: "NOT_FOUND" });
+      if (booking.status !== "confirmed" || booking.endsAt <= new Date())
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "not_upcoming",
+        });
+      if (booking.meetingCode)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "has_meeting",
+        });
+      if (!getMeetingsClient())
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "meetings_not_configured",
+        });
+
+      try {
+        await inngest.send(
+          bookingMeetingRequestedEvent.create({ bookingId: input.id }),
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("[inngest] booking/meeting-requested send failed", {
+          bookingId: input.id,
+          error: message,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `queue_unavailable: ${message}`,
+        });
+      }
+      return { requested: true };
     }),
 
   updateStatus: protectedProcedure

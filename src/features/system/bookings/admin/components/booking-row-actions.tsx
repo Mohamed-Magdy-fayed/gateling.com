@@ -6,6 +6,7 @@ import {
   MoreHorizontalIcon,
   UserXIcon,
   VideoIcon,
+  VideoOffIcon,
   XCircleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -71,14 +72,29 @@ export function BookingRowActions({ row, setRowAction }: Props) {
     }),
   );
 
+  const requestMeeting = useMutation(
+    trpc.bookings.requestMeeting.mutationOptions({
+      onSuccess: () => {
+        toast.success(t("bookings.meetingRequested"));
+        void invalidate();
+      },
+      // The message carries the queue error on purpose — this is the one
+      // place staff can see that Inngest itself is failing.
+      onError: (error) =>
+        toast.error(t("bookings.meetingRequestFailed"), {
+          description: error.message,
+        }),
+    }),
+  );
+
   const isPast = row.startsAt.getTime() < Date.now();
   const isActive = row.status === "requested" || row.status === "confirmed";
   // Joinable until the slot ends, not until it starts — a host who opens the
   // menu a minute late must still get in.
-  const canJoin =
-    row.status === "confirmed" &&
-    row.endsAt.getTime() > Date.now() &&
-    !!row.meetingCode;
+  const isUpcomingConfirmed =
+    row.status === "confirmed" && row.endsAt.getTime() > Date.now();
+  const canJoin = isUpcomingConfirmed && !!row.meetingCode;
+  const canRequestMeeting = isUpcomingConfirmed && !row.meetingCode;
 
   return (
     <DropdownMenu>
@@ -102,6 +118,15 @@ export function BookingRowActions({ row, setRowAction }: Props) {
           >
             <VideoIcon className="size-3.5" />
             {t("bookings.joinAsHost")}
+          </DropdownMenuItem>
+        )}
+        {canRequestMeeting && (
+          <DropdownMenuItem
+            disabled={requestMeeting.isPending}
+            onClick={() => requestMeeting.mutate({ id: row.id })}
+          >
+            <VideoOffIcon className="size-3.5" />
+            {t("bookings.createMeeting")}
           </DropdownMenuItem>
         )}
         {row.status === "requested" && (

@@ -17,6 +17,7 @@ and re-run `npx shadcn@latest add @gateling/meetings-integration --overwrite`
 |---|---|---|
 | `booking/confirmed` (book, staff confirm, reschedule) | Step `provision-meeting`: create, or `PATCH` the time when `meetingCode` exists (`externalRef booking:<id>`); persist `meetingCode` + `meetingGuestUrl`; then the confirmation email carries the room link | `src/integrations/inngest/functions/on-booking-confirmed.ts`, `src/features/system/bookings/server/meeting.ts` |
 | `booking/cancelled` | Step `cancel-meeting` deletes the room (already-gone is fine; a Meetings outage is logged and the emails still go out) | `on-booking-cancelled.ts` |
+| Staff → **Create meeting room** (bookings table, confirmed + upcoming + no room) | `bookings.requestMeeting` emits `booking/meeting-requested` → provisioning only, no emails. This is the backfill for pre-integration bookings and the retry for a room whose provisioning failed. A failed enqueue is shown to staff with the queue's error. | `bookings/server/router.ts`, `on-booking-meeting-requested.ts` |
 | Staff → **Join as host** (bookings table) | `bookings.hostJoinLink` mints a single-use host link, browser opens it | `bookings/server/router.ts`, `admin/components/booking-row-actions.tsx` |
 | Customer → **Join call** (My Account) | Plain guest link; waiting room on, host admits | `my-account/_components/my-bookings.tsx` |
 | `sales.logActivity` `demo_scheduled` (+ demo time) | Emits `lead/demo-scheduled` → room `lead:<id>:demo` (45 min), stored on `leads.demoMeetingCode/Url`; a later `demo_scheduled` moves it, and a retried run for an older log stands down | `sales/server/router.ts`, `on-lead-demo-scheduled.ts`, `sales/server/meeting.ts` |
@@ -92,5 +93,4 @@ create an integration at `/settings/integrations` with webhook URL
 
 Availability sync from Meetings (rooms created elsewhere are invisible here) ·
 per-staff host identities · `.ics` attachment in our emails · cancelling a
-demo room when a lead is parked/lost · re-provisioning a room whose first
-attempt failed after all retries.
+demo room when a lead is parked/lost.

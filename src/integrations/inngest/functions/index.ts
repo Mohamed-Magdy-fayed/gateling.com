@@ -2,6 +2,7 @@ import { bookingTriageDigest } from "./booking-triage-digest";
 import { onBlogPostPublished } from "./on-blog-post-published";
 import { onBookingCancelled } from "./on-booking-cancelled";
 import { onBookingConfirmed } from "./on-booking-confirmed";
+import { onBookingMeetingRequested } from "./on-booking-meeting-requested";
 import { onBookingRequested } from "./on-booking-requested";
 import { onCaseStudyPublished } from "./on-case-study-published";
 import { onLeadDemoScheduled } from "./on-lead-demo-scheduled";
@@ -24,4 +25,5 @@ export const functions = [
   bookingTriageDigest,
   onLeadDemoScheduled,
   onMeetingsWebhook,
+  onBookingMeetingRequested,
 ];
