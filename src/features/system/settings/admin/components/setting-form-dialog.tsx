@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2Icon, SaveIcon, XIcon } from "lucide-react";
+import { Loader2Icon, SaveIcon, Trash2Icon, XIcon } from "lucide-react";
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useId, useMemo } from "react";
 import { toast } from "sonner";
@@ -93,6 +93,7 @@ export function SettingFormDialog({
   const updateMut = useMutation(trpc.settings.update.mutationOptions());
 
   const definition = setting ? getSystemSettingDefinition(setting.code) : null;
+  const isSecret = definition?.isSecret === true;
 
   const isActiveSelectOptions = useMemo(
     () => [
@@ -137,28 +138,40 @@ export function SettingFormDialog({
             ? null
             : undefined;
 
+      // A secret's field starts empty because its stored value never comes
+      // back from the server. Empty therefore means "keep what is stored" —
+      // otherwise toggling a WaPilot state would wipe its token. Clearing is
+      // the explicit button below.
+      const nextValue = value.value?.trim() || null;
+      const valuePatch = !definition.editable.value
+        ? {}
+        : isSecret && nextValue === null
+          ? {}
+          : { value: nextValue };
+
+      const patch = {
+        ...(definition.editable.isActive
+          ? { isActive: mapIsActiveToPayload(value.isActive ?? "") }
+          : {}),
+        ...valuePatch,
+        ...(definition.editable.amount ? { amount } : {}),
+      };
+      if (Object.keys(patch).length === 0) {
+        // Nothing typed into a secret-only setting: nothing to save.
+        onOpenChange(false);
+        return;
+      }
+
       try {
         await toast
-          .promise(
-            updateMut.mutateAsync({
-              id: setting.id,
-              ...(definition.editable.isActive
-                ? { isActive: mapIsActiveToPayload(value.isActive ?? "") }
-                : {}),
-              ...(definition.editable.value
-                ? { value: value.value?.trim() || null }
-                : {}),
-              ...(definition.editable.amount ? { amount } : {}),
-            }),
-            {
-              loading: t("common.saving"),
-              success: t("systemPages.settingUpdated"),
-              error: (err) =>
-                err instanceof Error
-                  ? err.message
-                  : t("systemPages.settingSaveFailed"),
-            },
-          )
+          .promise(updateMut.mutateAsync({ id: setting.id, ...patch }), {
+            loading: t("common.saving"),
+            success: t("systemPages.settingUpdated"),
+            error: (err) =>
+              err instanceof Error
+                ? err.message
+                : t("systemPages.settingSaveFailed"),
+          })
           .unwrap();
         await queryClient.invalidateQueries({
           queryKey: trpc.settings.pathKey(),
@@ -179,6 +192,30 @@ export function SettingFormDialog({
 
   const pending = updateMut.isPending;
   const formId = useId();
+
+  // Disconnects an integration by wiping its stored credential — the one way
+  // to send an empty value for a secret, so it cannot happen by accident.
+  const clearSecret = useCallback(async () => {
+    if (!setting) return;
+    try {
+      await toast
+        .promise(updateMut.mutateAsync({ id: setting.id, value: null }), {
+          loading: t("common.saving"),
+          success: t("systemPages.settingUpdated"),
+          error: (err) =>
+            err instanceof Error
+              ? err.message
+              : t("systemPages.settingSaveFailed"),
+        })
+        .unwrap();
+      await queryClient.invalidateQueries({
+        queryKey: trpc.settings.pathKey(),
+      });
+      onOpenChange(false);
+    } catch {
+      // toast.promise already surfaced the failure.
+    }
+  }, [onOpenChange, queryClient, setting, t, trpc, updateMut]);
 
   const handleBodySubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -244,7 +281,25 @@ export function SettingFormDialog({
                     )}
                   </form.AppField>
                 ) : null}
-                {definition.editable.value ? (
+                {definition.editable.value && isSecret ? (
+                  <form.AppField name="value">
+                    {(field) => (
+                      <field.PasswordField
+                        label={t("systemPages.settingsValue")}
+                        description={String(
+                          t("systemPages.settingsSecretHint"),
+                        )}
+                        placeholder={String(
+                          t(
+                            setting.hasValue
+                              ? "systemPages.settingsSecretPlaceholder"
+                              : "systemPages.settingsValuePlaceholder",
+                          ),
+                        )}
+                      />
+                    )}
+                  </form.AppField>
+                ) : definition.editable.value ? (
                   <form.AppField name="value">
                     {(field) => (
                       <field.StringField
@@ -255,6 +310,19 @@ export function SettingFormDialog({
                       />
                     )}
                   </form.AppField>
+                ) : null}
+                {isSecret && setting.hasValue ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="self-start"
+                    disabled={pending}
+                    onClick={() => void clearSecret()}
+                  >
+                    <Trash2Icon className="size-3.5" />
+                    {t("systemPages.settingsSecretClear")}
+                  </Button>
                 ) : null}
                 {definition.editable.amount ? (
                   <form.AppField name="amount">

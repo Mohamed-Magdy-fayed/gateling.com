@@ -3,13 +3,13 @@ import { eq } from "drizzle-orm";
 import { db } from "@/drizzle";
 import { LeadsTable } from "@/drizzle/schema";
 import { getBookingSettings } from "@/features/system/bookings/lib/settings";
+import { resolveMeetingsClient } from "@/features/system/meetings/config";
 import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import {
   getLatestDemoActivityId,
   isCurrentDemoActivity,
   provisionLeadDemoMeeting,
 } from "@/features/system/sales/server/meeting";
-import { getMeetingsClient } from "@/integrations/meetings";
 import { inngest, leadDemoScheduledEvent } from "../client";
 
 /**
@@ -20,7 +20,7 @@ export const onLeadDemoScheduled = inngest.createFunction(
   { id: "on-lead-demo-scheduled", triggers: [leadDemoScheduledEvent] },
   async ({ event, step }) => {
     return step.run("provision-demo-meeting", async () => {
-      const client = getMeetingsClient();
+      const client = await resolveMeetingsClient(db);
       if (!client) return { skipped: "meetings_not_configured" };
 
       // A retried run for an older log must not move the room back: only the

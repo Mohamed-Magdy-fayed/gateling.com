@@ -16,6 +16,8 @@ export const DEFAULT_BOOKING_SLOT_MINUTES = 30;
 export const DEFAULT_BOOKING_MIN_NOTICE_HOURS = 4;
 export const DEFAULT_BOOKING_MAX_DAYS_AHEAD = 14;
 
+export const DEFAULT_MEETINGS_API_URL = "https://meetings.gateling.com";
+
 export const SYSTEM_SETTING_CODE = {
   CONTACT_EMAIL: "00001",
   WHATSAPP_NUMBER: "00002",
@@ -34,6 +36,9 @@ export const SYSTEM_SETTING_CODE = {
   WAPILOT_WEBHOOK_SECRET: "00015",
   CHAT_WIDGET_ENABLED: "00016",
   SALES_DAILY_NEW_QUEUE_CAP: "00017",
+  MEETINGS_API_URL: "00018",
+  MEETINGS_API_KEY: "00019",
+  MEETINGS_WEBHOOK_SECRET: "00020",
 } as const;
 
 export type SystemSettingCode =
@@ -57,6 +62,9 @@ export const SYSTEM_SETTING_CODES: SystemSettingCode[] = [
   SYSTEM_SETTING_CODE.WAPILOT_WEBHOOK_SECRET,
   SYSTEM_SETTING_CODE.CHAT_WIDGET_ENABLED,
   SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP,
+  SYSTEM_SETTING_CODE.MEETINGS_API_URL,
+  SYSTEM_SETTING_CODE.MEETINGS_API_KEY,
+  SYSTEM_SETTING_CODE.MEETINGS_WEBHOOK_SECRET,
 ];
 
 export type SystemSettingDefinition = {
@@ -79,7 +87,10 @@ export type SystemSettingDefinition = {
     | "settingName00014"
     | "settingName00015"
     | "settingName00016"
-    | "settingName00017";
+    | "settingName00017"
+    | "settingName00018"
+    | "settingName00019"
+    | "settingName00020";
   descriptionKey:
     | "settingDesc00001"
     | "settingDesc00002"
@@ -97,8 +108,18 @@ export type SystemSettingDefinition = {
     | "settingDesc00014"
     | "settingDesc00015"
     | "settingDesc00016"
-    | "settingDesc00017";
+    | "settingDesc00017"
+    | "settingDesc00018"
+    | "settingDesc00019"
+    | "settingDesc00020";
   descriptionEn: string;
+  /**
+   * A credential for another system (API token, webhook secret). Never
+   * returned to a browser once set: the grid reports only whether a value
+   * exists, search skips its value, and saving replaces it wholesale — an
+   * admin who needs to see one again rotates it on the issuing system.
+   */
+  isSecret?: boolean;
   editable: {
     isActive?: boolean;
     value?: boolean;
@@ -112,6 +133,26 @@ export type SystemSettingDefinition = {
   /** Optional extra validation for `value`, beyond the generic max-length check. */
   validateValue?: (value: string) => boolean;
 };
+
+/**
+ * https only, except a Meetings instance on this machine for local development.
+ * The API key travels in a header to whatever host this says, so a plaintext
+ * non-local URL must never be accepted. (A copy of the block's own check —
+ * `@/integrations/meetings` is server-only and this registry is shared with
+ * the browser.)
+ */
+export function isAllowedMeetingsApiUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol === "https:") return true;
+    return (
+      url.protocol === "http:" &&
+      (url.hostname === "localhost" || url.hostname === "127.0.0.1")
+    );
+  } catch {
+    return false;
+  }
+}
 
 export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
   {
@@ -249,6 +290,7 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
     nameKey: "settingName00014",
     descriptionKey: "settingDesc00014",
     descriptionEn: "WaPilot API token used to authenticate send requests.",
+    isSecret: true,
     editable: { isActive: true, value: true },
     seed: { isActive: false, value: null },
   },
@@ -259,6 +301,7 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
     descriptionKey: "settingDesc00015",
     descriptionEn:
       "Shared secret appended to the WaPilot webhook URL (?secret=...) to authenticate incoming replies.",
+    isSecret: true,
     editable: { isActive: true, value: true },
     seed: { isActive: false, value: null },
   },
@@ -282,7 +325,51 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
     editable: { amount: true },
     seed: { isActive: true, amount: 10 },
   },
+  // Gateling Meetings (docs/meetings-integration.md). The key and secret are
+  // issued together on meetings.gateling.com/settings/integrations and pasted
+  // here — no environment variables, no redeploy. Presence of the key is what
+  // turns the integration on, so `isActive` is not editable.
+  {
+    code: SYSTEM_SETTING_CODE.MEETINGS_API_URL,
+    label: "integration",
+    nameKey: "settingName00018",
+    descriptionKey: "settingDesc00018",
+    descriptionEn:
+      "Base URL of the Gateling Meetings instance this site creates rooms on. https only; http is accepted for localhost during local development.",
+    editable: { value: true },
+    seed: { isActive: true, value: DEFAULT_MEETINGS_API_URL },
+    validateValue: isAllowedMeetingsApiUrl,
+  },
+  {
+    code: SYSTEM_SETTING_CODE.MEETINGS_API_KEY,
+    label: "integration",
+    nameKey: "settingName00019",
+    descriptionKey: "settingDesc00019",
+    descriptionEn:
+      "API key issued on meetings.gateling.com/settings/integrations. Stored, never shown again; paste a new one to replace it, clear it to disconnect.",
+    isSecret: true,
+    editable: { value: true },
+    seed: { isActive: true, value: null },
+  },
+  {
+    code: SYSTEM_SETTING_CODE.MEETINGS_WEBHOOK_SECRET,
+    label: "integration",
+    nameKey: "settingName00020",
+    descriptionKey: "settingDesc00020",
+    descriptionEn:
+      "Webhook secret issued with the API key; verifies room-ended deliveries to /api/meetings-webhook. Until it is set, deliveries are answered 503 and retried.",
+    isSecret: true,
+    editable: { value: true },
+    seed: { isActive: true, value: null },
+  },
 ];
+
+export const SECRET_SYSTEM_SETTING_CODES: SystemSettingCode[] =
+  SYSTEM_SETTINGS.filter((def) => def.isSecret).map((def) => def.code);
+
+export function isSecretSystemSetting(code: string): boolean {
+  return getSystemSettingDefinition(code)?.isSecret === true;
+}
 
 export function getSystemSettingDefinition(
   code: string,

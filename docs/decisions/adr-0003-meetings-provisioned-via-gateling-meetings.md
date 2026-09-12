@@ -68,12 +68,14 @@ registry (`npx shadcn@latest add @gateling/meetings-integration`):
 
 ## Consequences
 
-- Every Gateling system integrates the same way: install the block, set three
-  env vars, call `ensureScheduledMeeting` / `cancelScheduledMeeting` from a
+- Every Gateling system integrates the same way: install the block, paste the
+  API URL / key / webhook secret on the admin settings page (the `settings`
+  table, codes `00018`–`00020` — not env vars, so no redeploy and the same flow
+  as WaPilot), call `ensureScheduledMeeting` / `cancelScheduledMeeting` from a
   job, mint host links in a procedure, hand webhooks to the queue.
 - The Meetings API contract now has consumers; breaking changes there follow
   the API-evolution rule in `standards/api.md` and a bump of the block.
 - Rooms created by the website all belong to one linked host account on
   Meetings; the attendance log and "Back to Gateling" behaviour are per room.
-- `MEETINGS_API_KEY` unset means no rooms and the static-link fallback — the
-  site keeps working in every environment without keys.
+- No API key set on `/settings` means no rooms and the static-link fallback —
+  the site keeps working in every environment without keys.

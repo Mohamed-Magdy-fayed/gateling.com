@@ -21,6 +21,10 @@ import {
   UsersTable,
 } from "@/drizzle/schema";
 import { env } from "@/env/server";
+import {
+  isMeetingsConfigured,
+  resolveMeetingsClient,
+} from "@/features/system/meetings/config";
 import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import {
   bookingCancelledEvent,
@@ -30,7 +34,6 @@ import {
   inngest,
 } from "@/integrations/inngest/client";
 import { sendEventSafely } from "@/integrations/inngest/send";
-import { getMeetingsClient } from "@/integrations/meetings";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -455,7 +458,7 @@ export const bookingsRouter = createTRPCRouter({
           code: "PRECONDITION_FAILED",
           message: "no_meeting",
         });
-      const client = getMeetingsClient();
+      const client = await resolveMeetingsClient(ctx.db);
       if (!client)
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
@@ -505,7 +508,7 @@ export const bookingsRouter = createTRPCRouter({
           code: "PRECONDITION_FAILED",
           message: "has_meeting",
         });
-      if (!getMeetingsClient())
+      if (!(await isMeetingsConfigured(ctx.db)))
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "meetings_not_configured",

@@ -657,6 +657,26 @@ export default {
     settingName00017: "Daily New-Dial Cap",
     settingDesc00017:
       "How many fresh prospects the Today's Work new-dial queue shows per day. An uncapped list gets ignored; a short one gets worked.",
+    settingName00018: "Meetings API URL",
+    settingDesc00018:
+      "Base URL of the Gateling Meetings instance this site creates rooms on. https only; http is accepted for localhost during local development.",
+    settingName00019: "Meetings API Key",
+    settingDesc00019:
+      "API key issued on meetings.gateling.com/settings/integrations. Stored, never shown again; paste a new one to replace it, clear it to disconnect.",
+    settingName00020: "Meetings Webhook Secret",
+    settingDesc00020:
+      "Webhook secret issued with the API key; verifies room-ended deliveries to /api/meetings-webhook. Until it is set, deliveries are answered 503 and retried.",
+    settingsSecretSet: "Set (hidden)",
+    settingsSecretNotSet: "Not set",
+    settingsSecretPlaceholder: "Paste a new value to replace the stored one",
+    settingsSecretHint:
+      "Stored values are never shown again. Leave empty to keep the current value; save an empty value with Clear to disconnect.",
+    settingsSecretClear: "Clear",
+    settingsMeetingsTitle: "Gateling Meetings",
+    settingsMeetingsLead:
+      "Create the integration on meetings.gateling.com/settings/integrations with the two values below, then paste the API key (00019) and webhook secret (00020) it issues into the settings table.",
+    settingsMeetingsWebhookUrl: "Webhook URL",
+    settingsMeetingsReturnOrigin: "Allowed return origin",
     settingStatePricesShown: "Active",
     settingStatePricesHidden: "Inactive",
     settingsShowPricesState: "Toggle active",

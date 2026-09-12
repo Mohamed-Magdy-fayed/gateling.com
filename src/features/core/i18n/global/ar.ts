@@ -644,6 +644,26 @@ export default {
     settingName00017: "الحد اليومي للاتصالات الجديدة",
     settingDesc00017:
       "عدد العملاء المحتملين الجدد الذين تعرضهم قائمة اتصالات عمل اليوم يوميًا. القائمة غير المحدودة يتم تجاهلها، والقصيرة يتم العمل عليها.",
+    settingName00018: "رابط واجهة Gateling Meetings",
+    settingDesc00018:
+      "الرابط الأساسي لمنصة Gateling Meetings التي يُنشئ عليها الموقع غرف الاجتماعات. يُقبل https فقط، ويُسمح بـ http لـ localhost أثناء التطوير المحلي.",
+    settingName00019: "مفتاح واجهة Gateling Meetings",
+    settingDesc00019:
+      "مفتاح API الصادر من meetings.gateling.com/settings/integrations. يُحفظ ولا يُعرض مرة أخرى؛ الصق مفتاحًا جديدًا لاستبداله، أو امسحه لفصل التكامل.",
+    settingName00020: "سر Webhook لـ Gateling Meetings",
+    settingDesc00020:
+      "سر الـ Webhook الصادر مع مفتاح API؛ يتحقق من إشعارات انتهاء الغرف المرسلة إلى ‎/api/meetings-webhook. حتى يتم ضبطه تُرفض الإشعارات بالرمز 503 ويُعاد إرسالها.",
+    settingsSecretSet: "محفوظ (مخفي)",
+    settingsSecretNotSet: "غير محدد",
+    settingsSecretPlaceholder: "الصق قيمة جديدة لاستبدال القيمة المحفوظة",
+    settingsSecretHint:
+      "القيم المحفوظة لا تُعرض مرة أخرى. اترك الحقل فارغًا للإبقاء على القيمة الحالية، أو استخدم «مسح» لفصل التكامل.",
+    settingsSecretClear: "مسح",
+    settingsMeetingsTitle: "Gateling Meetings",
+    settingsMeetingsLead:
+      "أنشئ التكامل على meetings.gateling.com/settings/integrations باستخدام القيمتين أدناه، ثم الصق مفتاح API (00019) وسر الـ Webhook (00020) الصادرين عنه في جدول الإعدادات.",
+    settingsMeetingsWebhookUrl: "رابط الـ Webhook",
+    settingsMeetingsReturnOrigin: "أصل الرجوع المسموح",
     settingStatePricesShown: "نشط",
     settingStatePricesHidden: "غير نشط",
     settingsShowPricesState: "تبديل الحالة",
