@@ -2,6 +2,10 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { TRPCError } from "@trpc/server";
+import {
+  CONTENT_LENGTH_RANGE_HEADER,
+  contentLengthRange,
+} from "@/lib/upload-limits";
 import { getStorageBucket } from "./admin";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB
@@ -51,9 +55,10 @@ export type SignedUploadTarget = {
  * Generate a short-lived v4 signed URL that lets the browser upload a single
  * file straight to Firebase Storage (bypassing the serverless body limit).
  *
- * The signature covers the `Content-Type` and `x-goog-acl` headers, so the
- * client must send exactly the returned `headers`. The bucket also needs a CORS
- * rule allowing PUT + those request headers from the site origin.
+ * The signature covers `Content-Type`, `x-goog-acl` and
+ * `x-goog-content-length-range` (the per-type size cap Cloud Storage enforces),
+ * so the client must send exactly the returned `headers`. The bucket also needs
+ * a CORS rule allowing PUT + those request headers from the site origin.
  */
 export async function createSignedUploadUrl(
   contentType: string,
@@ -70,18 +75,23 @@ export async function createSignedUploadUrl(
   const filename = `${folder}/${Date.now()}-${randomUUID()}${extension}`;
   const file = getStorageBucket().file(filename);
 
+  const extensionHeaders = {
+    "x-goog-acl": PUBLIC_READ_ACL,
+    [CONTENT_LENGTH_RANGE_HEADER]: contentLengthRange(contentType),
+  };
+
   const [uploadUrl] = await file.getSignedUrl({
     version: "v4",
     action: "write",
     expires: Date.now() + SIGNED_UPLOAD_TTL_MS,
     contentType,
-    extensionHeaders: { "x-goog-acl": PUBLIC_READ_ACL },
+    extensionHeaders,
   });
 
   return {
     uploadUrl,
     publicUrl: file.publicUrl(),
-    headers: { "Content-Type": contentType, "x-goog-acl": PUBLIC_READ_ACL },
+    headers: { "Content-Type": contentType, ...extensionHeaders },
   };
 }
 

@@ -2,11 +2,11 @@ import { ExternalLinkIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
+import { isSafeHref } from "@/components/blocks/safe-url";
 
 import { LinkButton } from "@/components/general/link-button";
 import { RelatedContentSection } from "@/components/general/related-content";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   CardHeading,
   CheckItem,
@@ -20,10 +20,11 @@ import {
   SectionHeader,
   StatCard,
 } from "@/components/ui/containers";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { resolveRelatedArticles } from "@/features/public-catalog/lib/related-content";
 import { api } from "@/integrations/trpc/server";
-import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata, ORG_REF } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -118,17 +119,17 @@ async function SolutionsDeliveryContent() {
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(serviceJsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbs) }}
       />
 
       <HeroContainer>
@@ -237,7 +238,7 @@ async function SolutionsDeliveryContent() {
                   <LinkButton href={`/work/${caseStudy.slug}`}>
                     {t("publicPages.solutionsDeliveryPage.proofCta")}
                   </LinkButton>
-                  {caseStudy.liveUrl && (
+                  {isSafeHref(caseStudy.liveUrl) && (
                     <a
                       href={caseStudy.liveUrl}
                       target="_blank"

@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: false,
   },
   cacheComponents: true,
+  // The content MCP server serves its guide from docs/ at runtime.
+  outputFileTracingIncludes: {
+    "/api/mcp": ["./docs/content-mcp.md"],
+  },
   images: {
     remotePatterns: [
       {

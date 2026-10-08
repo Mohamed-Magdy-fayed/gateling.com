@@ -18,7 +18,7 @@ function assertAdmin(role: string) {
 const required = translationKey("forms.validation.required");
 const max255 = translationKey("forms.validation.max255");
 
-const testimonialMutationSchema = z.object({
+export const testimonialMutationSchema = z.object({
   clientName: z.string().trim().min(1, required).max(255, max255),
   company: z.string().trim().min(1, required).max(255, max255),
   role: z.string().trim().max(128).optional().nullable(),
@@ -31,7 +31,7 @@ const testimonialMutationSchema = z.object({
   sortOrder: z.number().int().min(0).default(0),
 });
 
-const testimonialUpdateSchema = testimonialMutationSchema.extend({
+export const testimonialUpdateSchema = testimonialMutationSchema.extend({
   id: z.string().uuid(),
 });
 

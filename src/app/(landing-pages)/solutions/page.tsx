@@ -13,7 +13,7 @@ import {
   SectionHeader,
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
-import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata } from "@/lib/seo";
 import { SOLUTION_VERTICALS } from "./_solutions";
 
@@ -52,19 +52,21 @@ export default async function SolutionsIndexPage() {
     })),
   };
 
-  const breadcrumbs = breadcrumbJsonLd([{ name: "Solutions", path: "/solutions" }]);
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Solutions", path: "/solutions" },
+  ]);
 
   return (
     <>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListJsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbs) }}
       />
 
       <HeroContainer>

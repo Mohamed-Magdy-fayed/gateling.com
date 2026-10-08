@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { Providers } from "@/app/_providers";
 import { getLocaleCookie } from "@/features/core/i18n/server";
 import { COMPANY, COMPANY_SAME_AS } from "@/lib/company";
-import { absoluteUrl } from "@/lib/json-ld";
+import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import { FOUNDER_ID, ORG_ID, ORG_REF, WEBSITE_ID } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -142,13 +142,11 @@ async function Suspended({ children }: { children: React.ReactNode }) {
         <script
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
       </head>
       <body>
-        <Providers locale={locale}>
-          {children}
-        </Providers>
+        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   );

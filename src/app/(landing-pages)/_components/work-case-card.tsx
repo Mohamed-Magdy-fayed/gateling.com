@@ -1,6 +1,7 @@
 import { ArrowRightIcon, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { isSafeHref } from "@/components/blocks/safe-url";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -74,7 +75,7 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
               <span>{t("common.readMore")}</span>
               <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
             </Link>
-            {cs.liveUrl && (
+            {isSafeHref(cs.liveUrl) && (
               <Link
                 href={cs.liveUrl}
                 target="_blank"
@@ -107,7 +108,7 @@ export async function WorkCaseCard({ cs, variant, priority }: Props) {
               {"→"} {firstMetric.value} {firstMetric.label}
             </p>
           )}
-          {cs.liveUrl && (
+          {isSafeHref(cs.liveUrl) && (
             <a
               href={cs.liveUrl}
               target="_blank"

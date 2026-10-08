@@ -26,6 +26,7 @@ import type { SettingGridRow } from "@/integrations/trpc/routers/settings";
 
 import {
   buildSettingColumns,
+  ContentApiKeysCard,
   MeetingsIntegrationCard,
   SettingFormDialog,
   SettingInfoModal,
@@ -136,6 +137,8 @@ export function SettingsTablePage() {
       <EntityPageHeader slug="settings" />
 
       <MeetingsIntegrationCard />
+
+      <ContentApiKeysCard />
 
       <DataTable
         table={table}

@@ -6,7 +6,12 @@
       "http://localhost:3000"
     ],
     "method": ["GET", "PUT"],
-    "responseHeader": ["Content-Type", "x-goog-acl", "ETag"],
+    "responseHeader": [
+      "Content-Type",
+      "x-goog-acl",
+      "x-goog-content-length-range",
+      "ETag"
+    ],
     "maxAgeSeconds": 3600
   }
 ]
