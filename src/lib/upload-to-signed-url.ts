@@ -1,9 +1,6 @@
-// Per-file size caps for direct-to-Firebase gallery/block uploads. Uploads go
-// straight to Firebase Storage via a signed URL, so they aren't bound by the
-// serverless request-body limit — but we still cap to keep assets sane.
-// Enforced client-side (a signed PUT URL can't enforce size on its own).
-export const MAX_IMAGE_BYTES = 15 * 1024 * 1024; // 15MB
-export const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100MB
+// Size caps are checked here for a friendly early error and enforced by Cloud
+// Storage through the signed `x-goog-content-length-range` header.
+export { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from "./upload-limits";
 
 /**
  * PUT a file directly to a Firebase Storage signed URL, reporting upload

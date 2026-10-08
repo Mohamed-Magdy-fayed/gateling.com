@@ -3,6 +3,7 @@ import { z } from "zod";
 import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
 import { dashboardRouter } from "@/features/system/dashboard/server";
 import { salesRouter } from "@/features/system/sales/server/router";
+import { assertAdminRole } from "@/features/system/shared/staff-access";
 import {
   createSignedUploadUrl,
   uploadImage,
@@ -59,7 +60,11 @@ export const appRouter = createTRPCRouter({
         folder: z.string().min(1).default("uploads"),
       }),
     )
-    .mutation(async ({ input }) => {
+    // Signed URLs take large (video) uploads and only the admin content
+    // editors and the content MCP use them. Feedback/profile forms use
+    // `uploadImage`, which stays open to any signed-in user.
+    .mutation(async ({ ctx, input }) => {
+      assertAdminRole(ctx.session.user.role);
       return createSignedUploadUrl(input.contentType, input.folder);
     }),
 
