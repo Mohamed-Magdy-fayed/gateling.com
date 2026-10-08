@@ -7,6 +7,8 @@
 export function isSafeHref(url: string | null | undefined): url is string {
   if (!url) return false;
   const trimmed = url.trim();
+  // `//host` and `/\host` are protocol-relative: browsers send them off-site.
+  if (/^\/[/\\]/.test(trimmed)) return false;
   if (trimmed.startsWith("/") || trimmed.startsWith("#")) return true;
   return /^https?:\/\//i.test(trimmed);
 }

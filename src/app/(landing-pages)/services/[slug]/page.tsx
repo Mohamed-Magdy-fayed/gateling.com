@@ -24,7 +24,7 @@ import {
   resolveRelatedCaseStudies,
 } from "@/features/public-catalog/lib/related-content";
 import { api } from "@/integrations/trpc/server";
-import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata, featuredImage, ORG_REF } from "@/lib/seo";
 import { ServiceIcon } from "../_service-icon";
 import { serviceLinksFor } from "../_service-links";
@@ -122,12 +122,12 @@ async function ServiceDetailContent({ params }: Props) {
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(serviceJsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbs) }}
       />
 
       <HeroContainer>

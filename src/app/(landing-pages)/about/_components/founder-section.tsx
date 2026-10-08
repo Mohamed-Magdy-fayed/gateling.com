@@ -2,7 +2,7 @@ import Image from "next/image";
 import { H2, H3, P } from "@/components/ui/typography";
 import { getT } from "@/features/core/i18n/server";
 import { FOUNDER_SOCIALS } from "@/lib/company";
-import { absoluteUrl } from "@/lib/json-ld";
+import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import { FOUNDER_ID, ORG_REF } from "@/lib/seo";
 
 export async function AboutFounderSection() {
@@ -29,7 +29,7 @@ export async function AboutFounderSection() {
             <script
                 type="application/ld+json"
                 // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+                dangerouslySetInnerHTML={{ __html: serializeJsonLd(personJsonLd) }}
             />
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">

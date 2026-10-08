@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/containers";
 import { getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
-import { canonicalUrl } from "@/lib/json-ld";
+import { canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata, ORG_REF } from "@/lib/seo";
 import { ServiceIcon } from "./_service-icon";
 
@@ -121,7 +121,7 @@ export default async function ServicesPage() {
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <HeroContainer>
         <Container className="text-center">

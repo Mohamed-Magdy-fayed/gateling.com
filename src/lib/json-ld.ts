@@ -30,3 +30,18 @@ export function breadcrumbJsonLd(
     })),
   };
 }
+
+/**
+ * Serialises structured data for a `<script type="application/ld+json">`.
+ * `JSON.stringify` leaves `<`, `>` and `&` as-is, so a title containing
+ * `</script>` would close the tag and run whatever follows; escaping them as
+ * JSON unicode escapes keeps the data identical for parsers and inert for HTML.
+ */
+export function serializeJsonLd(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}

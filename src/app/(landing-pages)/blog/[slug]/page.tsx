@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
-import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata, featuredImage, ORG_REF } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -98,12 +98,12 @@ async function BlogDetailContent({ params }: Props) {
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbs) }}
       />
 
       <HeroContainer>

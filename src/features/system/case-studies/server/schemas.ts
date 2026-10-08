@@ -57,7 +57,14 @@ export const caseStudyMutationSchema = z.object({
     .optional()
     .nullable(),
   coverImageUrl: z.string().max(1024).optional().nullable(),
-  liveUrl: z.string().url().max(1024).optional().nullable(),
+  liveUrl: z
+    .url({
+      protocol: /^https?$/,
+      message: translationKey("forms.validation.invalidUrl"),
+    })
+    .max(1024)
+    .optional()
+    .nullable(),
   sortOrder: z.number().int().min(0).default(0),
   media: z.array(mediaItemSchema).default([]),
   blocks: blocksArraySchema,

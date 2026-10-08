@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlockRenderer } from "@/components/blocks/block-renderer";
+import { isSafeHref } from "@/components/blocks/safe-url";
 import { LinkButton } from "@/components/general/link-button";
 import { MediaSection } from "@/components/general/media-section";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
-import { breadcrumbJsonLd, canonicalUrl } from "@/lib/json-ld";
+import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import {
   buildMetadata,
   clampHeadline,
@@ -103,9 +104,7 @@ async function WorkDetailContent({ params }: Props) {
     inLanguage: locale === "ar" ? "ar" : "en",
     author: ORG_REF,
     publisher: ORG_REF,
-    ...(cs.publishedAt
-      ? { datePublished: cs.publishedAt.toISOString() }
-      : {}),
+    ...(cs.publishedAt ? { datePublished: cs.publishedAt.toISOString() } : {}),
     ...(cs.updatedAt ? { dateModified: cs.updatedAt.toISOString() } : {}),
   };
 
@@ -119,12 +118,12 @@ async function WorkDetailContent({ params }: Props) {
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbs) }}
       />
 
       {/* Hero: title, client, badge */}
@@ -142,7 +141,7 @@ async function WorkDetailContent({ params }: Props) {
             <Badge variant="secondary">{cs.industry}</Badge>
             <PageHeading className="leading-tight">{cs.title}</PageHeading>
             <ProseText size="lg">{cs.client}</ProseText>
-            {cs.liveUrl && (
+            {isSafeHref(cs.liveUrl) && (
               <a
                 href={cs.liveUrl}
                 target="_blank"

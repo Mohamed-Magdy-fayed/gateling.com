@@ -47,7 +47,7 @@ async function upsertServiceMedia(
 const required = translationKey("forms.validation.required");
 const max255 = translationKey("forms.validation.max255");
 
-const serviceMutationSchema = z.object({
+export const serviceMutationSchema = z.object({
   title: z.string().trim().min(1, required).max(255, max255),
   titleAr: z.string().trim().max(255).optional().nullable(),
   slug: z
@@ -69,7 +69,7 @@ const serviceMutationSchema = z.object({
   media: z.array(mediaItemSchema).default([]),
 });
 
-const serviceUpdateSchema = serviceMutationSchema.extend({
+export const serviceUpdateSchema = serviceMutationSchema.extend({
   id: z.string().uuid(),
 });
 

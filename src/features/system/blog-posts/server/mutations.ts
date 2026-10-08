@@ -16,9 +16,7 @@ import {
   type TRPCContext,
 } from "./shared";
 
-type DbOrTx = Parameters<
-  Parameters<TRPCContext["db"]["transaction"]>[0]
->[0];
+type DbOrTx = Parameters<Parameters<TRPCContext["db"]["transaction"]>[0]>[0];
 
 async function upsertBlogPostMedia(
   db: DbOrTx,
@@ -154,6 +152,10 @@ export async function publishBlogPost(ctx: TRPCContext, id: string) {
       updatedBy: session.user.id,
     })
     .where(eq(BlogPostsTable.id, id));
+  // The event emails every subscriber, so only a post's first publish sends
+  // it — re-publishing (by hand or by an agent on the content MCP) must not
+  // mail the list again.
+  if (existing.publishedAt != null) return { published: true };
   try {
     await inngest.send(
       blogPostPublishedEvent.create({ blogPostId: id, slug: existing.slug }),

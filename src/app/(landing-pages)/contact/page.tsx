@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getT } from "@/features/core/i18n/server";
 import { HydrateClient, prefetch, trpc } from "@/integrations/trpc/server";
+import { serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata } from "@/lib/seo";
 
 import { ContactPageContent } from "./_components/contact-page-content";
@@ -49,7 +49,7 @@ export default async function ContactPage({
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <HydrateClient>
         <ContactPageContent
