@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
+import { apiKeysRouter } from "@/features/system/api-keys/server/router";
 import { dashboardRouter } from "@/features/system/dashboard/server";
 import { salesRouter } from "@/features/system/sales/server/router";
 import {
@@ -63,6 +64,7 @@ export const appRouter = createTRPCRouter({
       return createSignedUploadUrl(input.contentType, input.folder);
     }),
 
+  apiKeys: apiKeysRouter,
   bookings: bookingsRouter,
   branches: branchesRouter,
   blogPosts: blogPostsRouter,
