@@ -1,7 +1,7 @@
 "use server";
 
 import crypto from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/drizzle";
@@ -15,9 +15,15 @@ import {
   generateSalt,
   hashPassword,
 } from "@/features/core/auth/core/passwordHasher";
+import {
+  evaluateResetAttempt,
+  RESET_ATTEMPTS_METADATA_KEY,
+  readResetAttempts,
+} from "@/features/core/auth/core/passwordResetLimits";
 import { hashTokenValue } from "@/features/core/auth/core/token";
 import { validateInput } from "@/features/core/auth/nextjs/actions/helpers";
 import { sendPasswordResetCodeEmail } from "@/features/core/auth/nextjs/emails";
+import { isPasswordResetRateLimited } from "@/features/core/auth/nextjs/passwordResetRateLimit";
 import {
   passwordResetRequestSchema,
   passwordResetSubmissionSchema,
@@ -39,6 +45,33 @@ function hashPasswordResetOtp(normalizedEmail: string, otp: string) {
   return hashTokenValue(`${normalizedEmail}:${otp}`);
 }
 
+function hashesMatch(a: string, b: string) {
+  const left = Buffer.from(a, "hex");
+  const right = Buffer.from(b, "hex");
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+/**
+ * Atomically bumps the guess counter on a reset token and returns the new
+ * value, or `null` if the token is gone or already used. The row lock makes
+ * parallel guesses each get a distinct number.
+ */
+async function recordResetAttempt(tokenId: string): Promise<number | null> {
+  const key = sql.raw(`'${RESET_ATTEMPTS_METADATA_KEY}'`);
+  const path = sql.raw(`'{${RESET_ATTEMPTS_METADATA_KEY}}'`);
+  const [row] = await db
+    .update(UserTokensTable)
+    .set({
+      metadata: sql`jsonb_set(coalesce(${UserTokensTable.metadata}, '{}'::jsonb), ${path}, to_jsonb(coalesce((${UserTokensTable.metadata}->>${key})::int, 0) + 1))`,
+    })
+    .where(
+      and(eq(UserTokensTable.id, tokenId), isNull(UserTokensTable.consumedAt)),
+    )
+    .returning({ metadata: UserTokensTable.metadata });
+
+  return row ? readResetAttempts(row.metadata) : null;
+}
+
 export async function requestPasswordResetAction(
   rawInput: z.infer<typeof passwordResetRequestSchema>,
 ): Promise<TypedResponse<object>> {
@@ -50,6 +83,15 @@ export async function requestPasswordResetAction(
     return {
       isError: true,
       message: t("authTranslations.passwordReset.request.invalidEmail"),
+    };
+  }
+
+  // Before the user lookup, so the answer never depends on whether the
+  // account exists.
+  if (await isPasswordResetRateLimited("request", normalizedEmail)) {
+    return {
+      isError: true,
+      message: t("authTranslations.passwordReset.tooManyRequests"),
     };
   }
 
@@ -86,6 +128,7 @@ export async function requestPasswordResetAction(
         email: user.email,
         normalizedEmail,
         otpLength: PASSWORD_RESET_OTP_LENGTH,
+        [RESET_ATTEMPTS_METADATA_KEY]: 0,
       },
     });
   });
@@ -121,58 +164,61 @@ export async function resetPasswordAction(
   );
 
   const normalizedEmail = normalizeEmail(email);
-  const tokenHash = hashPasswordResetOtp(normalizedEmail, otp);
+
+  if (await isPasswordResetRateLimited("reset", normalizedEmail)) {
+    return {
+      isError: true,
+      message: t("authTranslations.passwordReset.tooManyRequests"),
+    };
+  }
+
+  // One message for every failure — unknown email, no code, wrong code,
+  // revoked code — so a response never confirms an account or a lockout.
+  const invalidCode = {
+    isError: true,
+    message: t("authTranslations.passwordReset.reset.invalidCode"),
+  } as const;
   const now = new Date();
 
-  const tokenRecord = await db.query.UserTokensTable.findFirst({
-    columns: {
-      id: true,
-      userId: true,
-      expiresAt: true,
-      consumedAt: true,
-      metadata: true,
-    },
-    where: and(
-      eq(UserTokensTable.tokenHash, tokenHash),
-      eq(UserTokensTable.type, "password_reset"),
-    ),
-  });
-
-  if (
-    !tokenRecord ||
-    tokenRecord.consumedAt != null ||
-    tokenRecord.expiresAt.getTime() <= now.getTime()
-  ) {
-    return {
-      isError: true,
-      message: t("authTranslations.passwordReset.reset.invalidCode"),
-    };
-  }
-
-  const metadata = (tokenRecord.metadata ?? {}) as {
-    normalizedEmail?: unknown;
-  };
-  const tokenEmail =
-    typeof metadata.normalizedEmail === "string"
-      ? metadata.normalizedEmail
-      : null;
-  if (tokenEmail && tokenEmail !== normalizedEmail) {
-    return {
-      isError: true,
-      message: t("authTranslations.passwordReset.reset.invalidCode"),
-    };
-  }
-
   const user = await db.query.UsersTable.findFirst({
-    columns: { id: true, email: true },
-    where: eq(UsersTable.id, tokenRecord.userId ?? ""),
+    columns: { id: true },
+    where: eq(UsersTable.email, normalizedEmail),
   });
+  if (!user) return invalidCode;
 
-  if (!user || normalizeEmail(user.email) !== normalizedEmail) {
-    return {
-      isError: true,
-      message: t("authTranslations.passwordReset.reset.invalidCode"),
-    };
+  // A guess cannot be looked up by its hash (a wrong code finds nothing to
+  // count against), so load the user's live reset token and compare.
+  const tokenRecord = await db.query.UserTokensTable.findFirst({
+    columns: { id: true, tokenHash: true },
+    where: and(
+      eq(UserTokensTable.userId, user.id),
+      eq(UserTokensTable.type, "password_reset"),
+      isNull(UserTokensTable.consumedAt),
+      gt(UserTokensTable.expiresAt, now),
+    ),
+    orderBy: desc(UserTokensTable.createdAt),
+  });
+  if (!tokenRecord) return invalidCode;
+
+  // Count the guess before checking it, so at most MAX_RESET_CODE_ATTEMPTS
+  // guesses are ever compared, however many arrive in parallel.
+  const attemptNumber = await recordResetAttempt(tokenRecord.id);
+  if (attemptNumber === null) return invalidCode;
+
+  const verdict = evaluateResetAttempt(
+    attemptNumber,
+    hashesMatch(
+      tokenRecord.tokenHash,
+      hashPasswordResetOtp(normalizedEmail, otp),
+    ),
+  );
+  if (verdict !== "accept") {
+    if (verdict === "reject_and_revoke") {
+      await db
+        .delete(UserTokensTable)
+        .where(eq(UserTokensTable.id, tokenRecord.id));
+    }
+    return invalidCode;
   }
 
   const salt = generateSalt();
@@ -180,6 +226,19 @@ export async function resetPasswordAction(
 
   try {
     await db.transaction(async (trx) => {
+      // Claim the token first: a code is good for exactly one reset.
+      const [claimed] = await trx
+        .update(UserTokensTable)
+        .set({ consumedAt: now })
+        .where(
+          and(
+            eq(UserTokensTable.id, tokenRecord.id),
+            isNull(UserTokensTable.consumedAt),
+          ),
+        )
+        .returning({ id: UserTokensTable.id });
+      if (!claimed) throw new Error("Password reset token already used");
+
       const credentials = await trx.query.UserCredentialsTable.findFirst({
         columns: { userId: true },
         where: eq(UserCredentialsTable.userId, user.id),
@@ -204,11 +263,6 @@ export async function resetPasswordAction(
           lastChangedAt: now,
         });
       }
-
-      await trx
-        .update(UserTokensTable)
-        .set({ consumedAt: now })
-        .where(eq(UserTokensTable.id, tokenRecord.id));
     });
   } catch {
     return {

@@ -206,6 +206,8 @@ export default {
       otpHelp: "Enter the 6-digit code sent to your email.",
       newPasswordLabel: "New password",
       backToSignIn: "Back to sign in",
+      tooManyRequests:
+        "Too many attempts. Please wait a while before trying again.",
       reset: {
         submitting: "Updating...",
         submit: "Update password",
@@ -214,7 +216,8 @@ export default {
           "Enter the verification code from your email and set a new password.",
         didntReceive: "Didn't get a code?",
         requestAnother: "Request another reset code.",
-        invalidCode: "The verification code is invalid or has expired.",
+        invalidCode:
+          "The verification code is invalid or has expired. If it keeps failing, request a new code.",
         error: "Unable to reset password",
         success: "Password updated. You can sign in with your new password.",
       },
