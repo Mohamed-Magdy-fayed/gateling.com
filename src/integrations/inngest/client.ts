@@ -23,6 +23,11 @@ export const userRegisteredEvent = eventType("user/registered", {
   schema: z.object({ userId: z.string(), role: z.string() }),
 });
 
+/** A user proved they own their address — the point a signup becomes a lead. */
+export const userEmailVerifiedEvent = eventType("user/email-verified", {
+  schema: z.object({ userId: z.string() }),
+});
+
 export const leadStatusChangedEvent = eventType("lead/status-changed", {
   schema: z.object({ leadId: z.string(), newStatus: z.string() }),
 });

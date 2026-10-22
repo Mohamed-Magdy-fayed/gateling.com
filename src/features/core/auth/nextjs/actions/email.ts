@@ -23,6 +23,8 @@ import {
 import { changeEmailSchema } from "@/features/core/auth/schemas";
 import type { TypedResponse } from "@/features/core/auth/types";
 import { getT } from "@/features/core/i18n/server";
+import { userEmailVerifiedEvent } from "@/integrations/inngest/client";
+import { sendEventSafely } from "@/integrations/inngest/send";
 
 const EMAIL_TOKEN_TTL_MS = 1000 * 60 * 60 * 24;
 const verifyEmailTokenSchema = z.object({ token: z.string().min(1) });
@@ -346,6 +348,12 @@ export async function verifyEmailTokenAction(
           ne(UserTokensTable.id, record.id),
         ),
       );
+  });
+
+  // Verified customers surface in /leads (see on-user-email-verified.ts).
+  await sendEventSafely(userEmailVerifiedEvent.create({ userId }), {
+    source: "verifyEmailTokenAction",
+    userId,
   });
 
   return { isError: false, status: "verified" };

@@ -18,6 +18,7 @@ import { oAuthSignIn, signUpAction } from "@/features/core/auth/nextjs/actions";
 import FormAlert from "@/features/core/auth/nextjs/components/form-alert";
 import { useOauthProviderIcon } from "@/features/core/auth/nextjs/components/useOauthProviderIcon";
 import { signUpSchema } from "@/features/core/auth/schemas";
+import { useBotGuard } from "@/features/core/bot-guard/client/use-bot-guard";
 import { useTranslation } from "@/features/core/i18n/client";
 
 function isNextRedirectError(error: unknown): boolean {
@@ -37,6 +38,7 @@ export function SignUpForm() {
 
   const searchParams = useSearchParams();
   const getOauthProviderIcon = useOauthProviderIcon();
+  const botGuard = useBotGuard("signup");
 
   const form = useAppForm({
     defaultValues: {
@@ -49,16 +51,32 @@ export function SignUpForm() {
       onSubmit: signUpSchema,
     },
     onSubmit: ({ value }) => {
+      const guardFields = botGuard.getFields();
+      if (!guardFields) {
+        toast.error(t("common.botGuard.verificationPending"));
+        return;
+      }
       const returnTo = searchParams.get("returnTo") ?? undefined;
-      const loadingToast = toast.loading(t("authTranslations.signUp.submitting"));
+      const loadingToast = toast.loading(
+        t("authTranslations.signUp.submitting"),
+      );
       startTransition(async () => {
         try {
-          await signUpAction(value, returnTo);
+          const result = await signUpAction(
+            { ...value, ...guardFields },
+            returnTo,
+          );
+          // Only a rejection comes back; success redirects.
+          if (result.isError) {
+            botGuard.reset();
+            toast.error(result.message);
+          }
         } catch (error) {
           // signUpAction redirects on success, which Next.js implements by
           // throwing a special error — let that one propagate so the
           // navigation actually happens, only toast on a real failure.
           if (isNextRedirectError(error)) throw error;
+          botGuard.reset();
           toast.error(
             t("error", {
               error: error instanceof Error ? error.message : String(error),
@@ -84,7 +102,7 @@ export function SignUpForm() {
         e.preventDefault();
         form.handleSubmit();
       }}
-      className="space-y-4 p-6 md:p-8"
+      className="relative space-y-4 p-6 md:p-8"
     >
       <div className="space-y-2 text-center">
         <h1 className="font-semibold text-3xl tracking-tight">
@@ -151,6 +169,8 @@ export function SignUpForm() {
             <PasswordField label={t("authTranslations.signUp.passwordLabel")} />
           )}
         </form.AppField>
+
+        {botGuard.widget}
 
         <form.Subscribe selector={(state) => state.isSubmitting}>
           {(isSubmitting) => (
