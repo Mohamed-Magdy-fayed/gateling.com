@@ -1,9 +1,28 @@
 const MAX_IMPORT_BYTES = 256 * 1024;
 
+/** Cells Excel / Sheets would evaluate as a formula. */
+const FORMULA_START = /^[=@\t\r]/;
+const SIGN_START = /^[+-]/;
+/** Numbers and phone numbers (`+201001234567`, `-3.5`) are left as typed. */
+const NUMBER_OR_PHONE = /^[+-]?[\d\s().-]+$/;
+/** The `'` guard `escapeCell` adds; stripped again on import. */
+const GUARDED_CELL = /^'[=+\-@]/;
+
+function guardFormula(s: string): string {
+  if (FORMULA_START.test(s)) return `'${s}`;
+  if (SIGN_START.test(s) && !NUMBER_OR_PHONE.test(s)) return `'${s}`;
+  return s;
+}
+
 function escapeCell(value: unknown): string {
-  const s = value === null || value === undefined ? "" : String(value);
+  const raw = value === null || value === undefined ? "" : String(value);
+  const s = guardFormula(raw);
   if (/[",\n\r]/.test(s)) return `"${s.replaceAll('"', '""')}"`;
   return s;
+}
+
+function unguardCell(s: string): string {
+  return GUARDED_CELL.test(s) ? s.slice(1) : s;
 }
 
 export function rowsToCsv(
@@ -73,7 +92,7 @@ export function parseCsvToObjects(
     const cells = parseCsvLine(line);
     const o: Record<string, unknown> = {};
     headers.forEach((h, i) => {
-      o[h] = cells[i] ?? "";
+      o[h] = unguardCell(cells[i] ?? "");
     });
     rows.push(o);
   }
