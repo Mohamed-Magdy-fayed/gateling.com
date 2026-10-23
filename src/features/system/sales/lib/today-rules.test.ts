@@ -188,6 +188,23 @@ describe("hard exclusions", () => {
     expect(computeTodayBuckets([parked], NOW).totalActionable).toBe(0);
   });
 
+  // A closed lead chased twice used to surface in Auto-park, offering to park
+  // a lead that was already lost or won.
+  it.each(["lost", "won", "blocked_no_number"] as const)(
+    "never shows a %s lead in any bucket, Auto-park included",
+    (pipelineStatus) => {
+      const closed = lead({
+        id: "x",
+        pipelineStatus,
+        lastContactedAt: daysAgo(9),
+        followUpCount: 3,
+        nextActionAt: daysAgo(1),
+      });
+      const result = computeTodayBuckets([closed], NOW);
+      expect(result.buckets.flatMap((bucket) => bucket.rows)).toEqual([]);
+    },
+  );
+
   it("keeps blocked_no_number out of the new queue", () => {
     const noNumber = lead({
       id: "x",

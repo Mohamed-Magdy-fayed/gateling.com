@@ -21,14 +21,29 @@ export const CONTACT_ACTIVITY_TYPES = [
   "demo_done",
 ] as const satisfies readonly LeadActivityType[];
 
-/** Outbound attempts that count toward the follow-up safety limit. */
+/** Unanswered outbound attempts that count toward the follow-up safety limit. */
 export const FOLLOW_UP_ACTIVITY_TYPES = [
   "whatsapp_sent",
+  "no_answer",
+  "call_unclear",
+] as const satisfies readonly LeadActivityType[];
+
+/**
+ * Two-way exchanges. Each resets the follow-up count: an answered call is a
+ * conversation, not a chase, so counting it pushed leads you actually spoke
+ * to into Auto-park.
+ */
+export const CONVERSATION_ACTIVITY_TYPES = [
+  "whatsapp_reply",
   "call",
+  "demo_agreed",
+  "demo_scheduled",
+  "demo_done",
 ] as const satisfies readonly LeadActivityType[];
 
 const CONTACT_SET = new Set<string>(CONTACT_ACTIVITY_TYPES);
 const FOLLOW_UP_SET = new Set<string>(FOLLOW_UP_ACTIVITY_TYPES);
+const CONVERSATION_SET = new Set<string>(CONVERSATION_ACTIVITY_TYPES);
 
 export function isContactActivity(type: string): boolean {
   return CONTACT_SET.has(type);
@@ -52,11 +67,11 @@ export function computeDerived(
 ): DerivedLeadValues {
   let lastContactedAt: Date | null = null;
   let nextActionAt: Date | null = null;
-  // Counts outbound attempts *since the last inbound reply* — a reply resets
-  // the count, because the conversation restarted.
+  // Counts unanswered attempts *since the last conversation* — a reply,
+  // answered call or demo step resets the count.
   let followUpCount = 0;
 
-  // Chronological, so the reply reset applies to the attempts that follow it.
+  // Chronological, so the reset applies to the attempts that follow it.
   const ordered = [...activities].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
@@ -68,7 +83,7 @@ export function computeDerived(
       }
     }
 
-    if (activity.type === "whatsapp_reply") {
+    if (CONVERSATION_SET.has(activity.type)) {
       followUpCount = 0;
     } else if (FOLLOW_UP_SET.has(activity.type)) {
       followUpCount += 1;

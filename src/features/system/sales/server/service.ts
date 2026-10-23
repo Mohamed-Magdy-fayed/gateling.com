@@ -9,7 +9,10 @@ import {
   type LeadPipelineStatus,
   LeadsTable,
 } from "@/drizzle/schema";
-import { isContactActivity } from "@/features/system/sales/lib/derived";
+import {
+  isBlockedOutbound,
+  shouldDischargePromises,
+} from "@/features/system/sales/lib/pipeline-status";
 import {
   computeTodayBuckets,
   DEFAULT_TODAY_RULES_CONFIG,
@@ -17,7 +20,8 @@ import {
   type TodayLeadInput,
 } from "@/features/system/sales/lib/today-rules";
 
-import { recomputeLeadDerived } from "./recompute";
+import { SalesError } from "./errors";
+import { type Executor, recomputeLeadDerived } from "./recompute";
 import type {
   CreateLeadInput,
   ListPipelineInput,
@@ -55,58 +59,81 @@ const prospectScope = eq(LeadsTable.kind, "prospect");
  * Append an activity and, optionally, move the lead's pipeline status — in one
  * transaction, so a logged call can never leave the pipeline out of step with
  * its own history.
- *
- * Logging a contact also discharges any outstanding promise on the lead: if you
- * said you would call back and you just did, the commitment is kept. That is
- * recorded by stamping `nextActionDoneAt` on the earlier rows rather than
- * editing them away.
  */
 export async function logActivity(
   db: Db,
   input: LogActivityInput,
   actorId: string,
 ): Promise<{ activityId: string }> {
-  return db.transaction(async (tx) => {
-    const occurredAt = input.occurredAt ?? new Date();
+  return db.transaction((tx) => logActivityInTx(tx, input, actorId));
+}
 
-    if (isContactActivity(input.type)) {
-      await tx
-        .update(LeadActivitiesTable)
-        .set({ nextActionDoneAt: occurredAt })
-        .where(
-          and(
-            eq(LeadActivitiesTable.leadId, input.leadId),
-            isNull(LeadActivitiesTable.nextActionDoneAt),
-            sql`${LeadActivitiesTable.nextActionAt} is not null`,
-          ),
-        );
-    }
+/**
+ * `logActivity` without a transaction of its own, so bulk actions can log many
+ * leads in one. The caller owns the transaction.
+ *
+ * The lead row is locked first: concurrent logs on one lead serialise, and a
+ * customer or unknown id fails before anything is written.
+ *
+ * Contacting the lead discharges its outstanding promises (you said you would
+ * call back and you just did), and so does closing it — a lost lead must not
+ * resurface in Overdue. Discharge stamps `nextActionDoneAt` on the earlier
+ * rows rather than editing them away.
+ */
+export async function logActivityInTx(
+  tx: Executor,
+  input: LogActivityInput,
+  actorId: string,
+): Promise<{ activityId: string }> {
+  const [lead] = await tx
+    .select({ doNotContact: LeadsTable.doNotContact })
+    .from(LeadsTable)
+    .where(and(eq(LeadsTable.id, input.leadId), prospectScope))
+    .for("update");
+  if (!lead) throw new SalesError("SALES_LEAD_NOT_PROSPECT", input.leadId);
+  if (isBlockedOutbound(input.type, lead.doNotContact)) {
+    throw new SalesError("SALES_DO_NOT_CONTACT", input.leadId);
+  }
 
-    const [activity] = await tx
-      .insert(LeadActivitiesTable)
-      .values({
-        leadId: input.leadId,
-        type: input.type,
-        channel: input.channel ?? null,
-        occurredAt,
-        outcome: input.outcome ?? null,
-        notes: input.notes ?? null,
-        nextActionAt: input.nextActionAt ?? null,
-        createdBy: actorId,
-      })
-      .returning({ id: LeadActivitiesTable.id });
+  const occurredAt = input.occurredAt ?? new Date();
 
-    if (input.pipelineStatus) {
-      await tx
-        .update(LeadsTable)
-        .set({ pipelineStatus: input.pipelineStatus, updatedBy: actorId })
-        .where(and(eq(LeadsTable.id, input.leadId), prospectScope));
-    }
+  if (shouldDischargePromises(input.type, input.pipelineStatus)) {
+    await tx
+      .update(LeadActivitiesTable)
+      .set({ nextActionDoneAt: occurredAt })
+      .where(
+        and(
+          eq(LeadActivitiesTable.leadId, input.leadId),
+          isNull(LeadActivitiesTable.nextActionDoneAt),
+          sql`${LeadActivitiesTable.nextActionAt} is not null`,
+        ),
+      );
+  }
 
-    await recomputeLeadDerived(tx, input.leadId);
+  const [activity] = await tx
+    .insert(LeadActivitiesTable)
+    .values({
+      leadId: input.leadId,
+      type: input.type,
+      channel: input.channel ?? null,
+      occurredAt,
+      outcome: input.outcome ?? null,
+      notes: input.notes ?? null,
+      nextActionAt: input.nextActionAt ?? null,
+      createdBy: actorId,
+    })
+    .returning({ id: LeadActivitiesTable.id });
 
-    return { activityId: activity.id };
-  });
+  if (input.pipelineStatus) {
+    await tx
+      .update(LeadsTable)
+      .set({ pipelineStatus: input.pipelineStatus, updatedBy: actorId })
+      .where(and(eq(LeadsTable.id, input.leadId), prospectScope));
+  }
+
+  await recomputeLeadDerived(tx, input.leadId);
+
+  return { activityId: activity.id };
 }
 
 /**
@@ -119,8 +146,18 @@ export async function parkLead(
   actorId: string,
   reason?: string,
 ): Promise<void> {
-  await logActivity(
-    db,
+  await db.transaction((tx) => parkLeadInTx(tx, leadId, actorId, reason));
+}
+
+/** `parkLead` inside the caller's transaction. */
+export async function parkLeadInTx(
+  tx: Executor,
+  leadId: string,
+  actorId: string,
+  reason?: string,
+): Promise<void> {
+  await logActivityInTx(
+    tx,
     {
       leadId,
       type: "status_change",
