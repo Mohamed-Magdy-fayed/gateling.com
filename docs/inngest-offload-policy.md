@@ -30,7 +30,6 @@ Defined in `src/integrations/inngest/client.ts`:
 | `subscriber/created` | `{ subscriberId: string }` | `subscribers` router on create |
 | `case-study/published` | `{ caseStudyId: string; slug: string }` | `case-studies` router on publish |
 | `blog-post/published` | `{ blogPostId: string; slug: string }` | `blog-posts` router on publish |
-| `user/registered` | `{ userId: string; role: string }` | auth sign-up on user creation |
 | `lead/status-changed` | `{ leadId: string; newStatus: string }` | `leads` router on status update |
 | `booking/confirmed` | `{ bookingId; startsAt }` | `bookings` router on book / confirm / reschedule |
 | `booking/requested` | `{ bookingId }` | `bookings` router on custom-time request |
@@ -39,6 +38,13 @@ Defined in `src/integrations/inngest/client.ts`:
 | `lead/demo-scheduled` | `{ leadId; activityId; scheduledAt }` | `sales` router when a `demo_scheduled` activity is logged |
 | `meetings/webhook.received` | verified Meetings delivery (event `id` = delivery id, dedupes retries) | `POST /api/meetings-webhook` |
 
+Inngest delivers an event to every app in the environment that has a matching
+trigger, not only to the app that sent it. Gateling Meetings and Gateling TMS
+send `user/registered` as `{ userId }` from their own sign-ups, so gateling.com
+must not listen on that name (an old `on-user-registered` listener here failed
+schema validation on every one of their sign-ups). Only trigger on events this
+app sends itself; `functions/index.test.ts` guards `user/registered`.
+
 ## Function Locations
 
 `src/integrations/inngest/functions/`:
@@ -46,7 +52,6 @@ Defined in `src/integrations/inngest/client.ts`:
 - `on-subscriber-created.ts` — confirmation email with unsubscribe link
 - `on-case-study-published.ts` — ping Google IndexNow for `/work/[slug]`
 - `on-blog-post-published.ts` — ping Google IndexNow + build newsletter digest for subscribers
-- `on-user-registered.ts` — welcome email; customer role gets Gateling intro email
 - `on-lead-status-changed.ts` — notify admin when status changes to `qualified`
 - `on-booking-confirmed.ts` — provision the Meetings room, confirmation + staff emails, 24 h / 1 h reminders
 - `on-booking-cancelled.ts` — delete the Meetings room, notify the other party

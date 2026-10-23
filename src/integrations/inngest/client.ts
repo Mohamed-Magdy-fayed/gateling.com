@@ -19,10 +19,6 @@ export const blogPostPublishedEvent = eventType("blog-post/published", {
   schema: z.object({ blogPostId: z.string(), slug: z.string() }),
 });
 
-export const userRegisteredEvent = eventType("user/registered", {
-  schema: z.object({ userId: z.string(), role: z.string() }),
-});
-
 /** A user proved they own their address — the point a signup becomes a lead. */
 export const userEmailVerifiedEvent = eventType("user/email-verified", {
   schema: z.object({ userId: z.string() }),
