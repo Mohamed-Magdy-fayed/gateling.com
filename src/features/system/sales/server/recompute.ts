@@ -15,7 +15,8 @@ import { computeDerived } from "@/features/system/sales/lib/derived";
  */
 
 type Db = typeof database;
-type Executor = Db | Parameters<Parameters<Db["transaction"]>[0]>[0];
+/** The database handle or an open transaction — what the `InTx` service functions take. */
+export type Executor = Db | Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 /**
  * Recompute the derived cache columns for one lead from its activity log.

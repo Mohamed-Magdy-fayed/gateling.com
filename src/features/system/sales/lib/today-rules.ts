@@ -4,6 +4,8 @@ import type {
   WhatsappStatus,
 } from "@/drizzle/schema";
 
+import { isTerminalPipelineStatus } from "./pipeline-status";
+
 /**
  * The whole point of the sales module: given pipeline state, decide who to
  * contact today and why.
@@ -146,8 +148,9 @@ function openingAngleFrom(notes: string | null): string | null {
  * down — surfacing them again defeats the point, and in the auto-park bucket
  * a "Park" button on an already-parked lead would never clear.
  */
+/** Do-not-contact and closed leads (lost, won, parked, wrong number) never surface. */
 function isSuppressed(lead: TodayLeadInput): boolean {
-  return lead.doNotContact || lead.pipelineStatus === "parked";
+  return lead.doNotContact || isTerminalPipelineStatus(lead.pipelineStatus);
 }
 
 function toRow(lead: TodayLeadInput, reason: TodayReason, now: Date): TodayRow {
