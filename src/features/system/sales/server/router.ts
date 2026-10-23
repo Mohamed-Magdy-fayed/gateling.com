@@ -7,6 +7,7 @@ import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
+import { toTRPCError } from "./errors";
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
   createLeadSchema,
@@ -78,11 +79,11 @@ export const salesRouter = createTRPCRouter({
     .input(logActivityInputSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      const result = await service.logActivity(
-        ctx.db,
-        input,
-        ctx.session.user.id,
-      );
+      const result = await service
+        .logActivity(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
       // A scheduled demo gets a Meetings room, provisioned in the background
       // (external HTTP never runs inline). Non-fatal: the log is the truth.
       if (input.type === "demo_scheduled" && input.nextActionAt) {
@@ -149,12 +150,11 @@ export const salesRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      await service.parkLead(
-        ctx.db,
-        input.leadId,
-        ctx.session.user.id,
-        input.reason,
-      );
+      await service
+        .parkLead(ctx.db, input.leadId, ctx.session.user.id, input.reason)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
       return { parked: true };
     }),
 });

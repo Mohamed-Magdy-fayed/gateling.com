@@ -22,6 +22,7 @@
     "seed:all": "tsx src/drizzle/seed/cli.ts all",
     "seed:clear": "tsx src/drizzle/seed/cli.ts clear",
     "leads:source": "tsx src/features/system/sales/cli/source-atelier-leads.ts",
+    "sales:recompute": "tsx src/features/system/sales/cli/recompute-derived.ts",
     "migrate:legacy": "tsx scripts/migrations/migrate-legacy.ts",
     "migrate:legacy:dry": "tsx scripts/migrations/migrate-legacy.ts -- --dry-run",
     "preview": "next build && next start",

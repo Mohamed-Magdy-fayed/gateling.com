@@ -33,9 +33,13 @@ authorisation:
 src/features/system/sales/
   lib/today-rules.ts     ← pure bucket logic, `now` injected, no DB
   lib/derived.ts         ← pure derivation of the cached columns
+  lib/pipeline-status.ts ← closed statuses, promise discharge, do-not-contact rule
+  lib/recompute-plan.ts  ← pure planning for `sales:recompute`
   lib/calling-window.ts  ← Cairo business-hours advice
   server/service.ts      ← ALL business logic (server-only)
-  server/recompute.ts    ← shared with the seed CLI (NOT server-only — see below)
+  server/errors.ts       ← `SalesError` + router mapping
+  server/recompute.ts    ← shared with the CLIs (NOT server-only — see below)
+  cli/recompute-derived.ts ← `npm run sales:recompute`
   server/schemas.ts      ← Zod inputs, shared by router and any future caller
   server/router.ts       ← thin tRPC wrapper: authorise, delegate
   admin/                 ← pages and components
@@ -63,9 +67,10 @@ Thresholds live in `TodayRulesConfig` and are meant to be tuned.
 | 4 | New queue | `new`, not do-not-contact, has a phone — ordered tier A→C then followers desc, **capped** |
 | 5 | Auto-park candidates | `followUpCount >= 2` and no inbound reply — offers one-click Park |
 
-Enforced, not merely displayed: `doNotContact` and `parked` leads are filtered
-out of **every** bucket; `blocked_no_number` cannot enter the new queue; the cap
-is applied inside the rules module, not the UI.
+Enforced, not merely displayed: `doNotContact` leads and closed leads
+(`TERMINAL_PIPELINE_STATUSES` in `lib/pipeline-status.ts`: `lost`, `won`,
+`parked`, `blocked_no_number`) are filtered out of **every** bucket, Auto-park
+included; the cap is applied inside the rules module, not the UI.
 
 The `followUpCount >= 2` cutoff is a **safety limit, not a preference** —
 chasing past two unanswered WhatsApp messages risks a ban on the business
@@ -78,12 +83,48 @@ from `lead_activities` by `recomputeLeadDerived()` after every append:
 
 - `lastContactedAt` — latest contact-type activity. **`demo_agreed` is a contact
   type**; without it the Rescue bucket cannot see leads that agreed to a demo.
-- `followUpCount` — `whatsapp_sent` + `call` since the last inbound reply.
+- `followUpCount` — unanswered attempts (`whatsapp_sent`, `no_answer`,
+  `call_unclear`) since the last conversation. A conversation —
+  `whatsapp_reply`, an answered `call`, `demo_agreed`, `demo_scheduled`,
+  `demo_done` — resets it to 0.
 - `nextActionAt` — earliest unfulfilled promise. Discharged by stamping
-  `nextActionDoneAt`, never by editing history.
+  `nextActionDoneAt`, never by editing history: on any contact activity, and
+  on any log that moves the lead to a closed status.
 
 `lead_activities` is **append-only**. The service layer exposes no update or
 delete for it, and must not.
+
+**Rule change, 2026-10-23** (relevant to the sell-first day-14 read, which
+should split before/after this date): before it, `followUpCount` counted
+answered `call`s as chases and ignored `no_answer`, and lost/won/wrong-number
+leads could surface in Auto-park. Existing leads are brought in line once with
+`sales:recompute` (below).
+
+### Writes and errors
+
+Every activity goes through `logActivity` (own transaction) or
+`logActivityInTx` (caller's transaction, for bulk actions); `parkLead` /
+`parkLeadInTx` likewise. Each locks the lead row first and throws a
+`SalesError` (`server/errors.ts`), which the router maps to tRPC:
+
+| `appCode` | tRPC code | When |
+|---|---|---|
+| `SALES_LEAD_NOT_PROSPECT` | `NOT_FOUND` | id is unknown or not `kind = 'prospect'` |
+| `SALES_DO_NOT_CONTACT` | `PRECONDITION_FAILED` | outbound type (`call`, `no_answer`, `call_unclear`, `whatsapp_sent`) on a do-not-contact lead |
+
+## Recomputing derived values
+
+Run once after any change to `lib/derived.ts`, so existing leads match what a
+fresh log produces. `DATABASE_URL` in `.env` is production: the script prints
+the target host, writes nothing without `--yes`, and is idempotent.
+
+```bash
+npm run sales:recompute -- --dry-run   # changed-lead count + leads entering/leaving each Today bucket
+npm run sales:recompute -- --yes       # write, in 50-lead transactions
+```
+
+Review the dry-run output before `--yes`. A failed batch rolls back, prints
+the lead id and cause, and the script exits non-zero.
 
 ## Configuration
 
@@ -141,11 +182,21 @@ kept, so delete batches you will not contact. Logic and tests:
 ## Testing
 
 ```bash
-npm run test:unit                       # Vitest — rules + CSV mapping (43 tests)
+npm run test:unit                       # Vitest — rules, derivation, CSV mapping (DB tests skip)
 npx playwright test e2e/sales-access.spec.ts   # access control + no public leakage
 ```
 
 Vitest was added for this module; Playwright still owns `npm test`.
+
+Service tests (`server/service.test.ts`) need a database and run only when
+`TEST_DATABASE_URL` is set; `src/test/test-db.ts` refuses the `.env` host.
+Use a throwaway container (or a Neon branch):
+
+```bash
+docker run -d --rm --name gateling-test-pg -e POSTGRES_PASSWORD=test -e POSTGRES_DB=gateling_test -p 55432:5432 postgres:16-alpine
+DATABASE_URL=postgresql://postgres:test@localhost:55432/gateling_test npx drizzle-kit migrate
+TEST_DATABASE_URL=postgresql://postgres:test@localhost:55432/gateling_test npx vitest run src/features/system/sales
+```
 
 ## Deviations from `entity-blueprint.md`
 
@@ -174,3 +225,10 @@ MCP/agent API · AI lead scoring (leave room for a `lead_scores` table — do no
 create it) · automated lead research · sending email/WhatsApp from the app ·
 reporting beyond the counter strip · closing a demo room when a lead is
 parked or lost.
+
+Deferred by the sales workspace redesign
+([designs/sales-workspace-redesign.md](designs/sales-workspace-redesign.md)):
+WhatsApp message templates per bucket · kanban board view · sprint/track
+metrics widget (the sprint mandates a read-only SQL query) · admin Playwright
+fixture and an end-to-end Today flow test · `occurred_at` index and `pg_trgm`
+search index · the users export's size risk at its 50,000-row cap.
