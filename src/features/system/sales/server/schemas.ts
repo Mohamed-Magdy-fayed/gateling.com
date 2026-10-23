@@ -28,7 +28,13 @@ const optionalText = z.string().trim().max(4000).optional().nullable();
 
 export const leadIdSchema = z.object({ id: z.string().uuid() });
 
-export const createLeadSchema = z.object({
+/**
+ * Lead fields without defaults. Defaults belong to creation only: inside
+ * `.partial()` zod still applies them, so an update built from the create
+ * schema would reset omitted fields (status back to `new`, do-not-contact
+ * cleared).
+ */
+const leadFieldsSchema = z.object({
   name: z.string().trim().min(1).max(255),
   nameAr: z.string().trim().max(255).optional().nullable(),
   city: z.string().trim().max(128).optional().nullable(),
@@ -36,7 +42,7 @@ export const createLeadSchema = z.object({
   address: optionalText,
   phone: phoneSchema.optional().nullable(),
   phoneSecondary: phoneSchema.optional().nullable(),
-  whatsappStatus: whatsappStatusSchema.default("unknown"),
+  whatsappStatus: whatsappStatusSchema,
   whatsappProfileName: z.string().trim().max(255).optional().nullable(),
   tier: leadTierSchema.optional().nullable(),
   socialPlatform: z.string().trim().max(64).optional().nullable(),
@@ -45,14 +51,20 @@ export const createLeadSchema = z.object({
   branchCount: z.number().int().min(0).optional().nullable(),
   businessType: z.string().trim().max(255).optional().nullable(),
   sourceUrl: optionalText,
-  pipelineStatus: pipelineStatusSchema.default("new"),
-  doNotContact: z.boolean().default(false),
+  pipelineStatus: pipelineStatusSchema,
+  doNotContact: z.boolean(),
   notes: optionalText,
   ownerId: z.string().uuid().optional().nullable(),
 });
+
+export const createLeadSchema = leadFieldsSchema.extend({
+  whatsappStatus: whatsappStatusSchema.default("unknown"),
+  pipelineStatus: pipelineStatusSchema.default("new"),
+  doNotContact: z.boolean().default(false),
+});
 export type CreateLeadInput = z.infer<typeof createLeadSchema>;
 
-export const updateLeadSchema = createLeadSchema.partial().extend({
+export const updateLeadSchema = leadFieldsSchema.partial().extend({
   id: z.string().uuid(),
 });
 export type UpdateLeadInput = z.infer<typeof updateLeadSchema>;

@@ -3,6 +3,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { ApiKeysTable, UsersTable } from "@/drizzle/schema";
+import { apiKeyScopeValues } from "@/drizzle/schemas/system/api-keys-table";
 import { translationKey } from "@/features/core/i18n/global";
 import {
   assertAdminRole,
@@ -17,6 +18,12 @@ const apiKeyCreateSchema = z.object({
     .trim()
     .min(1, translationKey("forms.validation.required"))
     .max(100, translationKey("forms.validation.max255")),
+  /** `sales` reaches prospect phone numbers, so it is never implied. */
+  scopes: z
+    .array(z.enum(apiKeyScopeValues))
+    .min(1, translationKey("systemPages.apiKeysScopeRequired"))
+    .default(["content"])
+    .transform((scopes) => [...new Set(scopes)]),
 });
 
 /**
@@ -31,6 +38,7 @@ export const apiKeysRouter = createTRPCRouter({
         id: ApiKeysTable.id,
         name: ApiKeysTable.name,
         keyPrefix: ApiKeysTable.keyPrefix,
+        scopes: ApiKeysTable.scopes,
         ownerEmail: UsersTable.email,
         lastUsedAt: ApiKeysTable.lastUsedAt,
         revokedAt: ApiKeysTable.revokedAt,
@@ -51,6 +59,7 @@ export const apiKeysRouter = createTRPCRouter({
         .insert(ApiKeysTable)
         .values({
           name: input.name,
+          scopes: input.scopes,
           keyPrefix: prefix,
           keyHash: hash,
           userId: session.user.id,

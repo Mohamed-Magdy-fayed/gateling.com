@@ -21,6 +21,7 @@ import {
   logActivityInTx,
   parkLead,
   parkLeadInTx,
+  updateLead,
 } from "./service";
 
 const CAP_CODE = SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP;
@@ -86,6 +87,23 @@ describeWithDb("sales service (database)", () => {
       .from(LeadActivitiesTable)
       .where(eq(LeadActivitiesTable.leadId, inbound.id));
     expect(activities).toEqual([]);
+  });
+
+  it("refuses to report an update of a non-prospect lead as done", async () => {
+    const [inbound] = await db
+      .insert(LeadsTable)
+      .values({ kind: "inbound", name: "Contact form" })
+      .returning({ id: LeadsTable.id });
+    await expect(
+      updateLead(db, { id: inbound.id, city: "Giza" }, ACTOR),
+    ).rejects.toMatchObject({ appCode: "SALES_LEAD_NOT_PROSPECT" });
+  });
+
+  it("updates only the fields given", async () => {
+    const id = await prospect({ pipelineStatus: "lost", doNotContact: true });
+    await updateLead(db, { id, city: "Giza" }, ACTOR);
+    const row = await leadRow(id);
+    expect(row).toMatchObject({ city: "Giza", pipelineStatus: "lost", doNotContact: true });
   });
 
   it("rejects outreach to a do-not-contact lead, but still logs a note", async () => {

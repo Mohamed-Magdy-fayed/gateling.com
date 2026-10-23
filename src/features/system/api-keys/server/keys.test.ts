@@ -6,8 +6,22 @@ import {
   generateApiKey,
   hashApiKey,
   isWellFormedApiKey,
+  keyHasScope,
   verifyApiKey,
 } from "./keys";
+
+describe("keyHasScope", () => {
+  // Sales tools reach prospect phone numbers: a content key must not.
+  it("grants only the scopes the key was created with", () => {
+    expect(keyHasScope(["content"], "content")).toBe(true);
+    expect(keyHasScope(["content"], "sales")).toBe(false);
+    expect(keyHasScope(["content", "sales"], "sales")).toBe(true);
+  });
+
+  it("grants nothing to a key with no scopes", () => {
+    expect(keyHasScope([], "content")).toBe(false);
+  });
+});
 
 describe("api keys", () => {
   it("generates a well-formed key whose hash verifies", () => {

@@ -37,9 +37,10 @@ function subscribeToNothing() {
 }
 
 /**
- * Keys an AI agent uses to write site content through `/api/mcp`
- * (docs/content-mcp.md). The endpoint is read from the page, like the
- * Meetings card, so it shows this deployment's URL.
+ * Keys an AI agent uses for the content MCP (`/api/mcp`, docs/content-mcp.md)
+ * and, with the `sales` scope, the sales MCP (`/api/mcp/sales`,
+ * docs/sales-mcp.md). Endpoints are read from the page, like the Meetings
+ * card, so they show this deployment's URL.
  */
 export function ContentApiKeysCard() {
   const { t, locale } = useTranslation();
@@ -90,6 +91,12 @@ export function ContentApiKeysCard() {
           <dd dir="ltr" className="text-start">
             <InlineCode>{`${origin}/api/mcp`}</InlineCode>
           </dd>
+          <dt className="text-muted-foreground">
+            {t("systemPages.apiKeysSalesEndpoint")}
+          </dt>
+          <dd dir="ltr" className="text-start">
+            <InlineCode>{`${origin}/api/mcp/sales`}</InlineCode>
+          </dd>
         </dl>
 
         {isError ? (
@@ -104,6 +111,7 @@ export function ContentApiKeysCard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("systemPages.apiKeysName")}</TableHead>
+                  <TableHead>{t("systemPages.apiKeysScopes")}</TableHead>
                   <TableHead>{t("systemPages.apiKeysPrefix")}</TableHead>
                   <TableHead>{t("systemPages.apiKeysOwner")}</TableHead>
                   <TableHead>{t("systemPages.apiKeysLastUsed")}</TableHead>
@@ -119,7 +127,7 @@ export function ContentApiKeysCard() {
                 {isLoading
                   ? SKELETON_ROW_KEYS.map((rowKey) => (
                       <TableRow key={rowKey}>
-                        <TableCell colSpan={6}>
+                        <TableCell colSpan={7}>
                           <Skeleton className="h-6 w-full" />
                         </TableCell>
                       </TableRow>
@@ -127,7 +135,7 @@ export function ContentApiKeysCard() {
                   : null}
                 {!isLoading && keys?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Muted>{t("systemPages.apiKeysEmpty")}</Muted>
                     </TableCell>
                   </TableRow>
@@ -135,6 +143,19 @@ export function ContentApiKeysCard() {
                 {keys?.map((key) => (
                   <TableRow key={key.id}>
                     <TableCell className="font-medium">{key.name}</TableCell>
+                    <TableCell>
+                      <span className="flex flex-wrap gap-1">
+                        {key.scopes.map((scope) => (
+                          <Badge key={scope} variant="outline">
+                            {t(
+                              scope === "sales"
+                                ? "systemPages.apiKeysScopeSales"
+                                : "systemPages.apiKeysScopeContent",
+                            )}
+                          </Badge>
+                        ))}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <span dir="ltr">
                         <InlineCode>{`gl_live_${key.keyPrefix}…`}</InlineCode>
