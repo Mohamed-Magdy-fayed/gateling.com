@@ -76,6 +76,73 @@ The `followUpCount >= 2` cutoff is a **safety limit, not a preference** —
 chasing past two unanswered WhatsApp messages risks a ban on the business
 number.
 
+## Working the Today page
+
+`/sales/today` is a guided session: one pinned **Up next** lead, one primary
+action, outcome buttons that log in one tap, then the next lead. The tables
+below are read from `lib/outcomes.ts` and `lib/today-shortcuts.ts`, which the
+UI and the `?` panel also read, so they cannot drift.
+
+| Bucket | Primary action | Outcome set shown |
+|---|---|---|
+| Rescue, Overdue, New queue | Call | Call set |
+| Follow-up due | WhatsApp if `whatsappStatus = confirmed`, else Call | WhatsApp set / Call set |
+| Auto-park | Park | Auto-park set (never another outbound message) |
+| any, no phone | Open lead (Call/WhatsApp disabled with a reason) | — |
+
+Pressing Call or WhatsApp (or the Call/WhatsApp switch) changes the outcome
+set. Every outcome is one `sales.logActivity` call (or `sales.park`):
+
+| Outcome | Type | Channel | New status | Needs time |
+|---|---|---|---|---|
+| Interested | `demo_agreed` | phone | `demo_agreed` | |
+| Book demo | `demo_scheduled` | phone | `demo_scheduled` | demo time |
+| Call back | `call` | phone | `callback_scheduled` | call-back time |
+| No answer | `no_answer` | phone | `awaiting_reply` | |
+| Not interested ↶ | `call` | phone | `lost` | |
+| Wrong number ↶ | `call_unclear` | phone | `blocked_no_number` | |
+| Sent | `whatsapp_sent` | whatsapp | `awaiting_reply` | |
+| Replied | `whatsapp_reply` | whatsapp | `contacted` | |
+| Park ↶ (Auto-park) | via `sales.park` | — | `parked` | |
+| They replied (Auto-park) | `whatsapp_reply` | whatsapp | `contacted` | |
+| Answered a call (Auto-park) | `call` | phone | `contacted` | |
+
+↶ = offers **Undo** for 5 s. Undo is compensating, not a deletion: it logs a
+`status_change` back to the previous status, carrying the previous
+`nextActionAt` so a discharged promise returns. The timeline shows both rows.
+Times are entered in business time (Cairo); presets already past are hidden
+and a past time is refused.
+
+| Key (`event.code`, so any layout) | Action | Ignored when |
+|---|---|---|
+| `C` | Start call: dials on a touch device, copies the number on a computer | no phone, Auto-park |
+| `W` | Open WhatsApp | no WhatsApp link, Auto-park |
+| `1`–`9` (and numpad) | The numbered visible outcome | beyond the visible count, time picker open |
+| `S` | Skip for now (persists for the local day) | — |
+| `?` | Shortcut list, with an on/off switch | — |
+
+All keys are ignored while typing in a field, in an open dialog/menu, or
+with Ctrl/Alt/Meta. Hints and the `?` panel are hidden on touch screens.
+
+**Progress** = `doneToday` (distinct leads with any activity today) of
+`done + left`, where *left* counts the remaining bucket rows with the new
+queue limited to today's goal (`newQueueCap − newTouchedToday`); new leads
+beyond the goal show as "Extra (daily goal met)". A lead logged today that is
+due again the same day counts in both, so the bar can dip — accepted.
+"Conversations today" (answered call, reply, demo agreed/booked) sits beside
+it so parks alone cannot fill the headline. The session state (pinning,
+skips, stale-refetch guard) is the pure reducer in `lib/today-session.ts`.
+
+**Why build, not buy:** the pipeline already owns the bucket rules, the
+WhatsApp follow-up safety limit, Meetings demo provisioning and bilingual
+RTL; an external CRM would duplicate all four.
+
+**Baseline** (read-only; before the redesign ships and two weeks after):
+
+```bash
+psql "$DATABASE_URL" -v sprint_start="'<SPRINT_START>'" -f docs/queries/sales-baseline.sql
+```
+
 ## Derived values
 
 Never hand-maintained. Cached on `leads` for query performance and recomputed
@@ -111,6 +178,11 @@ Every activity goes through `logActivity` (own transaction) or
 |---|---|---|
 | `SALES_LEAD_NOT_PROSPECT` | `NOT_FOUND` | id is unknown or not `kind = 'prospect'` |
 | `SALES_DO_NOT_CONTACT` | `PRECONDITION_FAILED` | outbound type (`call`, `no_answer`, `call_unclear`, `whatsapp_sent`) on a do-not-contact lead |
+
+On the Today page a not-found save drops the lead from the session with a
+"no longer in the pipeline" toast; a do-not-contact save rolls back with its
+own toast; any other failure rolls back (the lead returns, Up next if it was)
+with a Retry action.
 
 ## Recomputing derived values
 
