@@ -120,6 +120,13 @@
       "when": 1792793276654,
       "tag": "0016_tired_revanche",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792797308283,
+      "tag": "0017_drop_orphan_subscriber_segment",
+      "breakpoints": true
     }
   ]
 }
