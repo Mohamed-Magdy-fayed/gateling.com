@@ -64,13 +64,16 @@ export const signUpSchema = z.object({
     .min(1, translationKey("authTranslations.required"))
     .max(100, translationKey("authTranslations.required")),
   email: z.email(translationKey("authTranslations.validation.invalidEmail")),
-  // The phone input submits E.164 (`+20…`). Sign-up bots post 12 random
-  // digits with no `+`, which a length check let through.
+  // `MobileNumberInput` stores E.164 without the `+` (`2011…`), the shape
+  // users.phone already holds. Sign-up bots post 12 random digits, which a
+  // length check let through, so the number must be a real one; it is
+  // stored digits-only either way.
   phone: z
     .string()
     .trim()
+    .transform((value) => value.replace(/^\+/, ""))
     .refine(
-      (value) => value.startsWith("+") && isValidPhoneNumber(value),
+      (digits) => /^\d+$/.test(digits) && isValidPhoneNumber(`+${digits}`),
       translationKey("authTranslations.profile.phone.error.invalid"),
     ),
   password: passwordSchema,
