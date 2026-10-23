@@ -3,6 +3,11 @@ import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { SubscribersTable } from "@/drizzle/schema";
+import {
+  botGuardFieldsSchema,
+  splitBotGuardFields,
+} from "@/features/core/bot-guard/lib/rules";
+import { requireHumanSubmission } from "@/features/core/bot-guard/server/trpc";
 import { inngest, subscriberCreatedEvent } from "@/integrations/inngest/client";
 import {
   baseProcedure,
@@ -22,8 +27,15 @@ const listSubscribersInput = z.object({
 
 export const subscribersRouter = createTRPCRouter({
   subscribe: baseProcedure
-    .input(z.object({ email: z.string().trim().email().max(256) }))
-    .mutation(async ({ ctx, input }) => {
+    .input(
+      z
+        .object({ email: z.string().trim().email().max(256) })
+        .extend(botGuardFieldsSchema.shape),
+    )
+    .mutation(async ({ ctx, input: rawInput }) => {
+      const { guard, data: input } = splitBotGuardFields(rawInput);
+      await requireHumanSubmission("newsletter", guard, ctx.t);
+
       const existing = await ctx.db.query.SubscribersTable.findFirst({
         columns: { id: true, status: true },
         where: eq(SubscribersTable.email, input.email.toLowerCase()),

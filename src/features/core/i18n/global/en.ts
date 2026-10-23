@@ -32,6 +32,14 @@ export default {
     required: "Required",
     enabled: "Enabled",
     disabled: "Disabled",
+    botGuard: {
+      verificationPending:
+        "We're still running a quick security check. Please try again in a moment.",
+      verificationFailed:
+        "We couldn't verify this request. Please refresh the page and try again.",
+      tooManyRequests:
+        "Too many attempts from your network. Please wait a while and try again.",
+    },
     days: dt("{dayName:enum}", {
       enum: {
         dayName: {

@@ -34,6 +34,11 @@ import type {
   PartialUser,
   TypedResponse,
 } from "@/features/core/auth/types";
+import { botGuardFieldsSchema } from "@/features/core/bot-guard/lib/rules";
+import {
+  BOT_GUARD_MESSAGE_KEYS,
+  checkHumanSubmission,
+} from "@/features/core/bot-guard/server/guard";
 import { getT } from "@/features/core/i18n/server";
 
 export async function signInAction(
@@ -110,6 +115,19 @@ export async function signUpAction(
     signUpSchema,
     rawData,
   );
+
+  // Every self-signup before this check was a bot or a test run; see
+  // `features/core/bot-guard`.
+  const guard = botGuardFieldsSchema.safeParse(rawData);
+  const human = await checkHumanSubmission(
+    "signup",
+    guard.success ? guard.data : {},
+  );
+  if (!human.ok) {
+    // Returned, not thrown: Next.js replaces thrown server-action messages
+    // with a generic error in production builds.
+    return { isError: true, message: t(BOT_GUARD_MESSAGE_KEYS[human.reason]) };
+  }
 
   const normalizedEmail = normalizeEmail(email);
 

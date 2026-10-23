@@ -32,6 +32,14 @@ export default {
     required: "مطلوب",
     enabled: "مفعل",
     disabled: "معطل",
+    botGuard: {
+      verificationPending:
+        "ما زلنا نجري فحصًا أمنيًا سريعًا. يُرجى المحاولة مرة أخرى بعد لحظات.",
+      verificationFailed:
+        "تعذّر التحقق من هذا الطلب. يُرجى تحديث الصفحة والمحاولة مرة أخرى.",
+      tooManyRequests:
+        "محاولات كثيرة من شبكتك. يُرجى الانتظار قليلًا ثم المحاولة مرة أخرى.",
+    },
     days: dt("{dayName:enum}", {
       enum: {
         dayName: {

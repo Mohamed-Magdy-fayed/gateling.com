@@ -35,6 +35,10 @@ export const env = createEnv({
     SMTP_FROM_EMAIL: z.email().optional(),
     SMTP_FROM_NAME: z.string().min(1).optional(),
 
+    // Cloudflare Turnstile secret. Optional locally (the bot guard skips the
+    // token check without it); required on the production deployment below.
+    TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -66,6 +70,38 @@ export const env = createEnv({
             message:
               "INNGEST_SIGNING_KEY and INNGEST_EVENT_KEY are required in production.",
             path: ["INNGEST_SIGNING_KEY"],
+          });
+        }
+
+        // Without both keys the sign-up, contact and newsletter forms fall
+        // back to honeypot + rate limit only — the state that let ~75 bot
+        // accounts through. Required on every Vercel deployment, previews
+        // included: a public preview URL is a sign-up form too, and it may
+        // share the production database.
+        const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+        if (
+          process.env.VERCEL_ENV &&
+          !(val.TURNSTILE_SECRET_KEY && turnstileSiteKey)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "TURNSTILE_SECRET_KEY and NEXT_PUBLIC_TURNSTILE_SITE_KEY are required on Vercel deployments.",
+            path: ["TURNSTILE_SECRET_KEY"],
+          });
+        }
+        // Cloudflare's published test keys pass every request.
+        if (
+          process.env.VERCEL_ENV === "production" &&
+          [val.TURNSTILE_SECRET_KEY, turnstileSiteKey].some(
+            (key) => key && /^[123]x0{10,}/.test(key),
+          )
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "Cloudflare Turnstile test keys must not be used in production.",
+            path: ["TURNSTILE_SECRET_KEY"],
           });
         }
 

@@ -8,6 +8,10 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Container, Section, SectionHeader } from "@/components/ui/containers";
 import { Input } from "@/components/ui/input";
+import {
+  isBotGuardRejection,
+  useBotGuard,
+} from "@/features/core/bot-guard/client/use-bot-guard";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { trackGaEvent } from "@/lib/ga4";
@@ -17,6 +21,7 @@ export function NewsletterSection() {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const trpc = useTRPC();
+  const botGuard = useBotGuard("newsletter");
 
   const mutation = useMutation(
     trpc.subscribers.subscribe.mutationOptions({
@@ -32,9 +37,14 @@ export function NewsletterSection() {
         }
         setEmail("");
       },
-      onError: () => {
-        toast.error(t("publicPages.newsletter.error"));
+      onError: (err) => {
+        toast.error(
+          isBotGuardRejection(err)
+            ? err.message
+            : t("publicPages.newsletter.error"),
+        );
       },
+      onSettled: () => botGuard.reset(),
     }),
   );
 
@@ -45,7 +55,12 @@ export function NewsletterSection() {
       toast.error(t("publicPages.newsletter.invalidEmail"));
       return;
     }
-    mutation.mutate({ email });
+    const guardFields = botGuard.getFields();
+    if (!guardFields) {
+      toast.error(t("common.botGuard.verificationPending"));
+      return;
+    }
+    mutation.mutate({ email, ...guardFields });
   }
 
   return (
@@ -58,7 +73,7 @@ export function NewsletterSection() {
         />
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-3 sm:flex-row"
+          className="relative flex flex-col gap-3 sm:flex-row sm:flex-wrap"
         >
           <Input
             type="email"
@@ -77,6 +92,7 @@ export function NewsletterSection() {
               ? t("publicPages.newsletter.subscribing")
               : t("publicPages.newsletter.subscribe")}
           </Button>
+          {botGuard.widget}
         </form>
         <p className="text-muted-foreground mt-3 text-xs">
           {t("publicPages.newsletter.noSpam")}

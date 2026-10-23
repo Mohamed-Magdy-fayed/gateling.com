@@ -4,6 +4,11 @@ import { z } from "zod";
 
 import { LeadsTable } from "@/drizzle/schema";
 import {
+  botGuardFieldsSchema,
+  splitBotGuardFields,
+} from "@/features/core/bot-guard/lib/rules";
+import { requireHumanSubmission } from "@/features/core/bot-guard/server/trpc";
+import {
   inngest,
   leadStatusChangedEvent,
   leadSubmittedEvent,
@@ -48,11 +53,14 @@ const listLeadsInput = z.object({
 
 export const leadsRouter = createTRPCRouter({
   submit: baseProcedure
-    .input(submitLeadSchema)
-    .mutation(async ({ ctx, input }) => {
+    .input(submitLeadSchema.extend(botGuardFieldsSchema.shape))
+    .mutation(async ({ ctx, input: rawInput }) => {
+      const { guard, data: input } = splitBotGuardFields(rawInput);
+      const { ip } = await requireHumanSubmission("contact", guard, ctx.t);
+
       const [lead] = await ctx.db
         .insert(LeadsTable)
-        .values({ ...input, kind: "inbound" })
+        .values({ ...input, kind: "inbound", ipAddress: ip })
         .returning({ id: LeadsTable.id });
       try {
         await inngest.send(leadSubmittedEvent.create({ leadId: lead.id }));
@@ -122,7 +130,9 @@ export const leadsRouter = createTRPCRouter({
       await ctx.db
         .update(LeadsTable)
         .set({ status: input.status, updatedAt: new Date() })
-        .where(and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")));
+        .where(
+          and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")),
+        );
       try {
         await inngest.send(
           leadStatusChangedEvent.create({
@@ -140,7 +150,9 @@ export const leadsRouter = createTRPCRouter({
       assertStaff(ctx.session?.user.role ?? "");
       await ctx.db
         .delete(LeadsTable)
-        .where(and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")));
+        .where(
+          and(eq(LeadsTable.id, input.id), eq(LeadsTable.kind, "inbound")),
+        );
       return { deleted: true };
     }),
 

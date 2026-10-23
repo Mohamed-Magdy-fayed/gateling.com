@@ -12,6 +12,10 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  isBotGuardRejection,
+  useBotGuard,
+} from "@/features/core/bot-guard/client/use-bot-guard";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 
@@ -19,6 +23,7 @@ export function FooterNewsletterForm() {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const trpc = useTRPC();
+  const botGuard = useBotGuard("newsletter");
 
   const mutation = useMutation(
     trpc.subscribers.subscribe.mutationOptions({
@@ -30,9 +35,14 @@ export function FooterNewsletterForm() {
         }
         setEmail("");
       },
-      onError: () => {
-        toast.error(t("publicPages.newsletter.error"));
+      onError: (err) => {
+        toast.error(
+          isBotGuardRejection(err)
+            ? err.message
+            : t("publicPages.newsletter.error"),
+        );
       },
+      onSettled: () => botGuard.reset(),
     }),
   );
 
@@ -43,11 +53,16 @@ export function FooterNewsletterForm() {
       toast.error(t("publicPages.newsletter.invalidEmail"));
       return;
     }
-    mutation.mutate({ email });
+    const guardFields = botGuard.getFields();
+    if (!guardFields) {
+      toast.error(t("common.botGuard.verificationPending"));
+      return;
+    }
+    mutation.mutate({ email, ...guardFields });
   }
 
   return (
-    <form onSubmit={handleSubscribe} className="mt-3">
+    <form onSubmit={handleSubscribe} className="relative mt-3 space-y-2">
       <InputGroup>
         <InputGroupAddon align="inline-start">
           <MailIcon />
@@ -69,6 +84,7 @@ export function FooterNewsletterForm() {
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
+      {botGuard.widget}
     </form>
   );
 }

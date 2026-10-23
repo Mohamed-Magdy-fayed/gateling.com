@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useBotGuard } from "@/features/core/bot-guard/client/use-bot-guard";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { trackGaEvent } from "@/lib/ga4";
@@ -19,6 +20,7 @@ export function ContactForm() {
   const { t } = useTranslation();
   const trpc = useTRPC();
   const searchParams = useSearchParams();
+  const botGuard = useBotGuard("contact");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -43,6 +45,7 @@ export function ContactForm() {
       onError: (err) => {
         toast.error(err.message || t("publicPages.contactPage.formError"));
       },
+      onSettled: () => botGuard.reset(),
     }),
   );
 
@@ -58,16 +61,22 @@ export function ContactForm() {
       toast.error(t("publicPages.contactPage.formValidation"));
       return;
     }
+    const guardFields = botGuard.getFields();
+    if (!guardFields) {
+      toast.error(t("common.botGuard.verificationPending"));
+      return;
+    }
     const attribution = readAttribution();
     mutation.mutate({
       ...form,
       source: searchParams.get("source") ?? "contact-form",
       ...attribution,
+      ...guardFields,
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="relative space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="name">
@@ -140,6 +149,8 @@ export function ContactForm() {
           required
         />
       </div>
+
+      {botGuard.widget}
 
       <Button
         type="submit"

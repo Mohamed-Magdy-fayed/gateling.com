@@ -1,3 +1,4 @@
+import { isValidPhoneNumber } from "libphonenumber-js/min";
 import { z } from "zod";
 
 import { userRoleValues } from "@/drizzle/schemas/auth";
@@ -57,11 +58,21 @@ export const signInSchema = z.object({
 });
 
 export const signUpSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .trim()
+    .min(1, translationKey("authTranslations.required"))
+    .max(100, translationKey("authTranslations.required")),
   email: z.email(translationKey("authTranslations.validation.invalidEmail")),
+  // The phone input submits E.164 (`+20…`). Sign-up bots post 12 random
+  // digits with no `+`, which a length check let through.
   phone: z
     .string()
-    .min(10, translationKey("authTranslations.profile.phone.error.invalid")),
+    .trim()
+    .refine(
+      (value) => value.startsWith("+") && isValidPhoneNumber(value),
+      translationKey("authTranslations.profile.phone.error.invalid"),
+    ),
   password: passwordSchema,
 });
 
