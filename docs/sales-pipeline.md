@@ -167,6 +167,8 @@ answered `call`s as chases and ignored `no_answer`, and lost/won/wrong-number
 leads could surface in Auto-park. Existing leads are brought in line once with
 `sales:recompute` (below).
 
+Recompute ran on production 2026-10-23 (`a99700c`): 4 of 44 prospects updated, no Today bucket moves.
+
 ### Writes and errors
 
 Every activity goes through `logActivity` (own transaction) or
