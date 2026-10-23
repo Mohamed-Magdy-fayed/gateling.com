@@ -22,8 +22,6 @@ import {
 
 import type { ListFilterInput } from "./schemas";
 
-export const EXPORT_ROW_LIMIT = 50_000;
-
 function parseRangeBoundary(raw: string, mode: "start" | "end"): Date {
   const trimmed = raw.trim();
   if (trimmed.includes("T")) return new Date(trimmed);
