@@ -5,12 +5,13 @@ import {
   BranchMembershipsTable,
   UsersTable,
 } from "@/drizzle/schema";
+import { EXPORT_ROW_LIMIT } from "@/features/core/data-table/lib/limits";
 
 import {
   listAssignableBranches as fetchAssignableBranches,
   getUserBranchIds as fetchUserBranchIds,
 } from "./branch-memberships";
-import { buildWhere, EXPORT_ROW_LIMIT, sortExpr } from "./filters";
+import { buildWhere, sortExpr } from "./filters";
 import type {
   ExportRowsInput,
   ListCustomersInput,
