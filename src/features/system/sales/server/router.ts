@@ -71,7 +71,11 @@ export const salesRouter = createTRPCRouter({
     .input(updateLeadSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      await service.updateLead(ctx.db, input, ctx.session.user.id);
+      await service
+        .updateLead(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
       return { updated: true };
     }),
 

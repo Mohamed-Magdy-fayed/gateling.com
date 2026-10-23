@@ -1,7 +1,22 @@
-import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { UsersTable } from "@/drizzle/schemas/auth/users-table";
 import { createdAt, createdBy, id } from "@/drizzle/schemas/helpers";
+
+/**
+ * Which MCP server a key may call. `sales` reaches prospect names and phone
+ * numbers, so it is granted per key, never implied: keys created before
+ * scopes existed keep `content` only.
+ */
+export const apiKeyScopeValues = ["content", "sales"] as const;
+export type ApiKeyScope = (typeof apiKeyScopeValues)[number];
 
 /**
  * Bearer keys for machine clients (the content MCP server). The key itself
@@ -20,6 +35,11 @@ export const ApiKeysTable = pgTable(
     userId: uuid()
       .notNull()
       .references(() => UsersTable.id, { onDelete: "cascade" }),
+    scopes: text()
+      .array()
+      .$type<ApiKeyScope[]>()
+      .notNull()
+      .default(["content"]),
     lastUsedAt: timestamp({ withTimezone: true }),
     revokedAt: timestamp({ withTimezone: true }),
     createdBy,

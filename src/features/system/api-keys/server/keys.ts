@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
 
+import type { ApiKeyScope } from "@/drizzle/schemas/system/api-keys-table";
+
 /**
  * API keys look like `gl_live_<43 base64url chars>` (32 random bytes). The
  * first `PREFIX_LENGTH` characters of the random part are stored in clear
@@ -40,6 +42,14 @@ export function apiKeyPrefix(key: string): string {
 /** Shape check only — cheap enough to run before touching the database. */
 export function isWellFormedApiKey(key: string): boolean {
   return API_KEY_PATTERN.test(key);
+}
+
+/** A key reaches an MCP server only if it was granted that scope explicitly. */
+export function keyHasScope(
+  scopes: readonly ApiKeyScope[],
+  scope: ApiKeyScope,
+): boolean {
+  return scopes.includes(scope);
 }
 
 /** Constant-time: a wrong key takes exactly as long as a right one. */
