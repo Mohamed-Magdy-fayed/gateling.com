@@ -5,7 +5,13 @@ import { and, eq, isNull, lt, or } from "drizzle-orm";
 import { db } from "@/drizzle";
 import { ApiKeysTable, UsersTable } from "@/drizzle/schema";
 import { redisClient } from "@/integrations/redis";
-import { apiKeyPrefix, isWellFormedApiKey, verifyApiKey } from "./keys";
+import type { ApiKeyScope } from "@/drizzle/schemas/system/api-keys-table";
+import {
+  apiKeyPrefix,
+  isWellFormedApiKey,
+  keyHasScope,
+  verifyApiKey,
+} from "./keys";
 
 /** Who an authenticated machine request acts as. */
 export type ApiKeyActor = {
@@ -47,13 +53,14 @@ const LAST_USED_WRITE_INTERVAL_MS = 60_000;
  */
 export async function resolveApiKeyRequest(
   request: Request,
+  scope: ApiKeyScope,
 ): Promise<ApiKeyActor> {
   const failureBucket = `ratelimit:apikey-auth:${requestIp(request)}`;
   if (await isOverLimit(failureBucket, AUTH_ATTEMPTS_PER_WINDOW)) {
     throw new ApiKeyAuthError(429, "Too many requests.");
   }
   try {
-    return await authenticate(request);
+    return await authenticate(request, scope);
   } catch (error) {
     if (error instanceof ApiKeyAuthError && error.status === 401) {
       await overBudget(failureBucket, AUTH_ATTEMPTS_PER_WINDOW);
@@ -62,7 +69,10 @@ export async function resolveApiKeyRequest(
   }
 }
 
-async function authenticate(request: Request): Promise<ApiKeyActor> {
+async function authenticate(
+  request: Request,
+  scope: ApiKeyScope,
+): Promise<ApiKeyActor> {
   const header = request.headers.get("authorization") ?? "";
   const [scheme, key] = header.split(" ");
   if (scheme?.toLowerCase() !== "bearer" || !key || !isWellFormedApiKey(key)) {
@@ -74,6 +84,7 @@ async function authenticate(request: Request): Promise<ApiKeyActor> {
       keyId: ApiKeysTable.id,
       keyName: ApiKeysTable.name,
       keyHash: ApiKeysTable.keyHash,
+      scopes: ApiKeysTable.scopes,
       revokedAt: ApiKeysTable.revokedAt,
       userId: UsersTable.id,
       role: UsersTable.role,
@@ -94,11 +105,16 @@ async function authenticate(request: Request): Promise<ApiKeyActor> {
   if (row.deletedAt != null || row.role !== "admin") {
     throw new ApiKeyAuthError(403, "The key's owner is no longer an admin.");
   }
-
+  // Charged before the scope check, so wrong-scope calls are not free.
   if (
     await overBudget(`ratelimit:apikey:${row.keyId}`, CALLS_PER_KEY_PER_WINDOW)
   ) {
     throw new ApiKeyAuthError(429, "Too many requests.");
+  }
+
+  // A content key must not reach the sales server (prospect phone numbers).
+  if (!keyHasScope(row.scopes, scope)) {
+    throw new ApiKeyAuthError(403, `This key is not allowed to use the ${scope} server.`);
   }
 
   await touchLastUsed(row.keyId);

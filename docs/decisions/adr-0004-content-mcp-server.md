@@ -1,7 +1,7 @@
 # ADR-0004: Admin content is writable by AI agents through an MCP server on the admin's own tRPC procedures
 
 - **Date:** 2026-10-08
-- **Status:** accepted
+- **Status:** accepted; the "no sales" boundary is superseded by [ADR-0006](adr-0006-sales-mcp-and-scoped-api-keys.md) (sales on its own scoped endpoint)
 
 ## Context
 

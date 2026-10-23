@@ -1,0 +1,183 @@
+import "server-only";
+
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+import { McpServer } from "@modelcontextprotocol/server";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+import type { ApiKeyActor } from "@/features/system/api-keys/server/auth";
+import {
+  callerContext,
+  type Translate,
+  text,
+  toolRegistrar,
+} from "@/features/system/api-keys/server/mcp-tools";
+import { agentToday } from "@/features/system/sales/lib/agent-view";
+import {
+  ALL_OUTCOMES,
+  type OutcomeId,
+  outcomeById,
+  outcomeToLogInput,
+} from "@/features/system/sales/lib/outcomes";
+import { createCallerFactory } from "@/integrations/trpc/init";
+import { appRouter } from "@/integrations/trpc/routers/_app";
+
+import { createLeadSchema, listPipelineSchema, updateLeadSchema } from "./schemas";
+
+const SERVER_INFO = { name: "gateling-sales", version: "1.0.0" };
+const GUIDE_URI = "docs://sales-mcp";
+const LOG_TAG = "[api/mcp/sales]";
+
+const OUTCOME_IDS = ALL_OUTCOMES.map((o) => o.id) as [OutcomeId, ...OutcomeId[]];
+
+const leadIdInput = z.object({ leadId: z.string().uuid() });
+
+const logOutcomeInput = z.object({
+  leadId: z.string().uuid(),
+  outcome: z.enum(OUTCOME_IDS),
+  /** Required for bookDemo and callBack: the demo or call-back time. */
+  at: z.iso.datetime({ offset: true }).optional(),
+  note: z.string().trim().min(1).max(4000).optional(),
+});
+
+const addNoteInput = z.object({
+  leadId: z.string().uuid(),
+  note: z.string().trim().min(1).max(4000),
+});
+
+/** Lead data partly comes from scraped sources, so an agent may only link out to http(s). */
+const agentSourceUrl = z.url({ protocol: /^https?$/ }).max(4000).optional().nullable();
+
+/**
+ * Status moves only through outcomes (so the timeline records them), and
+ * do-not-contact and ownership are a person's call — an agent never edits
+ * them. Notes are appended through `add_note`, never overwritten.
+ */
+const agentLeadCreate = createLeadSchema
+  .omit({ pipelineStatus: true, doNotContact: true, ownerId: true })
+  .extend({ sourceUrl: agentSourceUrl });
+const agentLeadUpdate = updateLeadSchema
+  .omit({ pipelineStatus: true, doNotContact: true, ownerId: true, notes: true })
+  .extend({ sourceUrl: agentSourceUrl });
+
+const createCaller = createCallerFactory(appRouter);
+
+/**
+ * The sales MCP face of the admin: today's queue, lead lookup, and logging
+ * outcomes through the same tRPC procedures the Today page calls, as the
+ * admin who owns the key. It never sends a message — the operator does,
+ * and the agent logs what happened. No delete tools.
+ */
+export function buildSalesMcpServer(actor: ApiKeyActor, t: Translate): McpServer {
+  const caller = createCaller(callerContext(actor, t));
+  const server = new McpServer(SERVER_INFO, {
+    instructions:
+      "Gateling sales pipeline (Egyptian ateliers; WhatsApp and phone). Read `get_sales_guide` first. Start each day with `get_today`: it is the prioritised queue with each lead's primary action and the outcome ids `log_outcome` accepts. This server never sends messages — draft them for the operator, and log only what the operator reports. Never suggest a third unanswered WhatsApp message (Auto-park bucket): it risks a ban on the business number.",
+  });
+  const { readTool, writeTool } = toolRegistrar(server, t, LOG_TAG);
+
+  server.registerResource(
+    "sales-guide",
+    GUIDE_URI,
+    { title: "Sales guide", mimeType: "text/markdown" },
+    async (uri) => ({ contents: [{ uri: uri.href, text: await readGuide() }] }),
+  );
+
+  server.registerTool(
+    "get_sales_guide",
+    {
+      title: "Read the sales guide",
+      description:
+        "How the pipeline works: buckets, outcomes, the follow-up safety limit, the daily routine and how to write messages for Egyptian ateliers. Read this first.",
+      inputSchema: z.object({}),
+      annotations: { readOnlyHint: true },
+    },
+    async () => text(await readGuide()),
+  );
+
+  readTool(
+    "get_today",
+    "Get today's work",
+    "Today's prioritised queue (rescue → overdue → follow-up → new → auto-park) with each lead's contact details, why it is due, its primary action, the outcome ids you may log, and the day's progress. New leads past the daily goal are flagged `beyondDailyGoal`.",
+    z.object({}),
+    async () => agentToday(await caller.sales.today({})),
+  );
+
+  readTool(
+    "list_leads",
+    "List leads",
+    "The whole pipeline, paged and filterable by status, tier, city and WhatsApp status, with a global search.",
+    listPipelineSchema,
+    (input) => caller.sales.list(input),
+  );
+
+  readTool(
+    "get_lead",
+    "Get a lead",
+    "One lead with its full activity timeline (oldest first is not guaranteed; read `occurredAt`).",
+    leadIdInput,
+    ({ leadId }) => caller.sales.byId({ id: leadId }),
+  );
+
+  writeTool(
+    "log_outcome",
+    "Log an outcome",
+    "Record what happened with a lead, using an id from that lead's `outcomes` in `get_today`. `bookDemo` and `callBack` need `at` (ISO 8601 with offset, in the future). `notInterested`, `wrongNumber` and `park` close the lead — log them only when the operator says so. Optional `note` is saved on the activity.",
+    logOutcomeInput,
+    async ({ leadId, outcome: id, at, note }) => {
+      const outcome = outcomeById(id);
+      if (outcome.kind === "park") {
+        await caller.sales.park({ leadId, reason: note });
+        return { logged: true, outcome: id, pipelineStatus: outcome.pipelineStatus };
+      }
+      const result = outcomeToLogInput(outcome, leadId, at ? new Date(at) : null, new Date());
+      if (!result.ok) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: result.error });
+      }
+      const { activityId } = await caller.sales.logActivity({
+        ...result.input,
+        ...(note ? { notes: note } : {}),
+      });
+      return { logged: true, outcome: id, activityId, pipelineStatus: outcome.pipelineStatus };
+    },
+    // Some outcomes close the lead: clients should confirm with the operator.
+    { destructive: true },
+  );
+
+  writeTool(
+    "add_note",
+    "Add a note",
+    "Append a note to a lead's timeline (no status change, not a contact).",
+    addNoteInput,
+    async ({ leadId, note }) =>
+      caller.sales.logActivity({ leadId, type: "note", notes: note }),
+  );
+
+  writeTool(
+    "create_lead",
+    "Create a lead",
+    "Add a prospect (status `new`). Check `list_leads` with a search first so you do not create a duplicate.",
+    agentLeadCreate,
+    (input) => caller.sales.create(input),
+  );
+
+  writeTool(
+    "update_lead",
+    "Update a lead's details",
+    "Change contact or profile fields; send only the fields to change. Overwrites the old value (no history), so confirm with the operator. Status goes through `log_outcome`, notes through `add_note`; do-not-contact and owner are not editable here.",
+    agentLeadUpdate,
+    async (input) => {
+      await caller.sales.update(input);
+      return { updated: true };
+    },
+    { destructive: true },
+  );
+
+  return server;
+}
+
+async function readGuide(): Promise<string> {
+  return readFile(path.join(process.cwd(), "docs", "sales-mcp.md"), "utf8");
+}

@@ -205,10 +205,13 @@ export async function updateLead(
   actorId: string,
 ): Promise<void> {
   const { id, ...fields } = input;
-  await db
+  const updated = await db
     .update(LeadsTable)
     .set({ ...fields, updatedBy: actorId })
-    .where(and(eq(LeadsTable.id, id), prospectScope));
+    .where(and(eq(LeadsTable.id, id), prospectScope))
+    .returning({ id: LeadsTable.id });
+  // An unknown or non-prospect id must not report success.
+  if (updated.length === 0) throw new SalesError("SALES_LEAD_NOT_PROSPECT", id);
 }
 
 export async function getLead(db: Db, id: string) {

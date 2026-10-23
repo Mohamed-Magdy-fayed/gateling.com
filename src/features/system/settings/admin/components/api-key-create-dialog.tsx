@@ -29,19 +29,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FieldGroup, FieldSet } from "@/components/ui/field";
+import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/features/core/i18n/client";
 import { translationKey } from "@/features/core/i18n/global";
 import { useTRPC } from "@/integrations/trpc/client";
 
-const createKeySchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, translationKey("forms.validation.required"))
-    .max(100, translationKey("forms.validation.max255")),
-});
+const createKeySchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, translationKey("forms.validation.required"))
+      .max(100, translationKey("forms.validation.max255")),
+    content: z.boolean(),
+    sales: z.boolean(),
+  })
+  .refine((value) => value.content || value.sales, {
+    message: translationKey("systemPages.apiKeysScopeRequired"),
+    path: ["sales"],
+  });
+
+type KeyScope = "content" | "sales";
 
 type Props = {
   open: boolean;
@@ -61,11 +70,15 @@ export function ApiKeyCreateDialog({ open, onOpenChange }: Props) {
   const formId = useId();
 
   const form = useAppForm({
-    defaultValues: { name: "" },
+    // Sales is off by default: it reaches customer phone numbers.
+    defaultValues: { name: "", content: true, sales: false },
     validators: { onSubmit: createKeySchema },
     onSubmit: async ({ value }) => {
+      const scopes: KeyScope[] = [];
+      if (value.content) scopes.push("content");
+      if (value.sales) scopes.push("sales");
       try {
-        const { key } = await createMut.mutateAsync({ name: value.name });
+        const { key } = await createMut.mutateAsync({ name: value.name, scopes });
         setCreatedKey(key);
         await queryClient.invalidateQueries({
           queryKey: trpc.apiKeys.pathKey(),
@@ -161,6 +174,27 @@ export function ApiKeyCreateDialog({ open, onOpenChange }: Props) {
                         placeholder={String(
                           t("systemPages.apiKeysNamePlaceholder"),
                         )}
+                      />
+                    )}
+                  </form.AppField>
+                </FieldGroup>
+              </FieldSet>
+              <FieldSet disabled={pending}>
+                <FieldLegend>{t("systemPages.apiKeysScopes")}</FieldLegend>
+                <FieldGroup>
+                  <form.AppField name="content">
+                    {(field) => (
+                      <field.BooleanField
+                        label={t("systemPages.apiKeysScopeContent")}
+                        description={t("systemPages.apiKeysScopeContentHint")}
+                      />
+                    )}
+                  </form.AppField>
+                  <form.AppField name="sales">
+                    {(field) => (
+                      <field.BooleanField
+                        label={t("systemPages.apiKeysScopeSales")}
+                        description={t("systemPages.apiKeysScopeSalesHint")}
                       />
                     )}
                   </form.AppField>

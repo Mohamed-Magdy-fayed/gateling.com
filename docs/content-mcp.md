@@ -14,7 +14,8 @@ Auth       Authorization: Bearer gl_live_…
 
 ## Keys
 
-An admin creates a key on **/settings → Content API keys (MCP)**. The key is
+An admin creates a key on **/settings → API keys (MCP)** with **Content**
+access (the default; Sales access is separate, see [sales-mcp.md](sales-mcp.md)). The key is
 shown once; only its SHA-256 is stored. A key **acts as the admin who created
 it**: every tool calls the same tRPC procedure the admin screens call, as that
 user, so validation, slug uniqueness and publish events are identical to the

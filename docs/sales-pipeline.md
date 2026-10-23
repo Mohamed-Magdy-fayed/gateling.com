@@ -291,9 +291,16 @@ one per lead (`lead:<id>:demo`), moved rather than duplicated by a later
 the link to copy into WhatsApp and a **Join as host** button; the pipeline
 still sends nothing itself. Details: [meetings-integration.md](meetings-integration.md).
 
+## Agents (MCP)
+
+An AI agent can run the daily routine with the operator through the sales
+MCP server at `/api/mcp/sales` (key with Sales access): read today's queue,
+draft messages, log outcomes. It never sends anything. Guide:
+[sales-mcp.md](sales-mcp.md); decision: ADR-0006.
+
 ## Not built (by design)
 
-MCP/agent API · AI lead scoring (leave room for a `lead_scores` table — do not
+AI lead scoring (leave room for a `lead_scores` table — do not
 create it) · automated lead research · sending email/WhatsApp from the app ·
 reporting beyond the counter strip · closing a demo room when a lead is
 parked or lost.
