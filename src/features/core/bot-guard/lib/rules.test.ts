@@ -191,6 +191,23 @@ describe("signUpSchema phone", () => {
     expect(phoneOk("+966501234567")).toBe(true);
   });
 
+  // `MobileNumberInput` strips the `+` before it reaches the form, so this is
+  // the shape every real sign-up submits.
+  it("accepts the phone input's stored shape: digits without the plus", () => {
+    expect(phoneOk("201123451235")).toBe(true);
+    expect(phoneOk("201015824280")).toBe(true);
+  });
+
+  it("stores digits only, matching existing users.phone rows", () => {
+    const parsed = signUpSchema.safeParse({ ...base, phone: " +201123451235 " });
+    expect(parsed.success && parsed.data.phone).toBe("201123451235");
+  });
+
+  it("rejects non-digit input that only looks like a number", () => {
+    expect(phoneOk("20112345123x")).toBe(false);
+    expect(phoneOk("++201123451235")).toBe(false);
+  });
+
   it("rejects the bot pattern: 12 digits, no plus, not a real number", () => {
     expect(phoneOk("203063367281")).toBe(false);
     expect(phoneOk("+203063367281")).toBe(false);
