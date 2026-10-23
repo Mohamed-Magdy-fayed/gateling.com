@@ -79,9 +79,18 @@ type Props = {
   leadId: string;
   /** Called after a successful save so the parent can refetch. */
   onLogged?: () => void;
+  /** Trigger text; defaults to "Log". */
+  triggerLabel?: string;
+  /** Up next keeps a single primary button, so it asks for a quieter trigger. */
+  triggerVariant?: "default" | "ghost" | "link";
 };
 
-export function QuickLogPopover({ leadId, onLogged }: Props) {
+export function QuickLogPopover({
+  leadId,
+  onLogged,
+  triggerLabel,
+  triggerVariant = "default",
+}: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -152,8 +161,8 @@ export function QuickLogPopover({ leadId, onLogged }: Props) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={(props) => (
-          <Button size="sm" variant="default" {...props}>
-            {t("sales.quickLog")}
+          <Button size="sm" variant={triggerVariant} {...props}>
+            {triggerLabel ?? t("sales.quickLog")}
           </Button>
         )}
       />
