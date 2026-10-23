@@ -1,177 +1,129 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useTranslation } from "@/features/core/i18n/client";
-import type { TodayRow } from "@/features/system/sales/lib/today-rules";
-import { useTRPC } from "@/integrations/trpc/client";
+import { type Channel, primaryActionFor } from "@/features/system/sales/lib/outcomes";
+import type { SessionItem } from "@/features/system/sales/lib/today-session";
 import { toWhatsAppUrl } from "@/lib/phone";
 
-import { QuickLogPopover } from "./quick-log-popover";
-
-/**
- * Everything needed to make the call is on the row — name, where they are,
- * the numbers, WhatsApp status, size, why they surfaced, how cold they are,
- * and an opening angle. Clicking through to a detail page before dialling is
- * exactly the friction that sends people back to a spreadsheet.
- */
+import { reasonText } from "./today-reason";
 
 type Props = {
-  row: TodayRow;
-  /** Auto-park rows get a one-click Park instead of only a log control. */
-  showPark?: boolean;
+  item: SessionItem;
+  saving: boolean;
+  /** Make this lead Up next. */
+  onPromote: () => void;
+  /** The contact action fired from the row: promote it and start the call. */
+  onStart: (channel: Channel) => void;
+  onPark: () => void;
+  onSkip?: () => void;
 };
 
-export function TodayLeadRow({ row, showPark = false }: Props) {
-  const { lead, reason, daysSinceLastContact, openingAngle } = row;
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
+/**
+ * One compact line in the queue: who, why, and the single action the bucket
+ * recommends. Clicking the name promotes the lead to Up next.
+ */
+export function TodayLeadRow({ item, saving, onPromote, onStart, onPark, onSkip }: Props) {
   const { t } = useTranslation();
-
-  const park = useMutation(
-    trpc.sales.park.mutationOptions({
-      onSuccess: async () => {
-        toast.success(t("sales.parked"));
-        await queryClient.invalidateQueries();
-      },
-      onError: () => toast.error(t("sales.parkFailed")),
-    }),
-  );
-
+  const { lead } = item.row;
+  const primary = primaryActionFor(item.bucket, lead);
   const whatsappUrl = toWhatsAppUrl(lead.phone);
 
   return (
-    <div className="flex flex-col gap-3 border-b p-4 last:border-b-0 sm:flex-row sm:items-start sm:justify-between">
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/sales/leads/${lead.id}`}
-            className="font-medium text-sm hover:underline"
-          >
-            {lead.name}
-          </Link>
-          {lead.nameAr && (
-            <span className="text-muted-foreground text-xs">{lead.nameAr}</span>
-          )}
-          {lead.tier && <Badge variant="secondary">{lead.tier}</Badge>}
-          {lead.socialFollowers != null && (
-            <span className="text-muted-foreground text-xs">
-              {new Intl.NumberFormat().format(lead.socialFollowers)}
-            </span>
-          )}
-        </div>
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5">
+      <Button
+        variant="ghost"
+        onClick={onPromote}
+        className="h-auto min-w-0 flex-1 flex-col items-start gap-0.5 whitespace-normal py-1.5 text-start"
+      >
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-medium text-sm">{lead.name}</span>
+          {item.isNew && <Badge variant="outline">{t("sales.newMarker")}</Badge>}
+        </span>
+        <span className="font-normal text-muted-foreground text-xs">
+          {reasonText(item.row.reason, t)}
+        </span>
+      </Button>
 
-        <p className="text-muted-foreground text-xs">
-          {[lead.city, lead.area].filter(Boolean).join(" · ")}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          {lead.phone ? (
-            <a href={`tel:${lead.phone}`} className="font-mono hover:underline">
-              {lead.phone}
-            </a>
-          ) : (
-            <span className="text-muted-foreground">{t("sales.noPhone")}</span>
-          )}
-          {lead.phoneSecondary && (
-            <a
-              href={`tel:${lead.phoneSecondary}`}
-              className="font-mono text-muted-foreground hover:underline"
-            >
-              {lead.phoneSecondary}
-            </a>
-          )}
-          <Badge
-            variant={
-              lead.whatsappStatus === "confirmed" ? "default" : "outline"
-            }
-          >
-            {t("sales.whatsappStatuses", { status: lead.whatsappStatus })}
-          </Badge>
-          {/* The public WA display name is how you confirm you are messaging
-              the business and not a stranger who owns the number. */}
-          {lead.whatsappProfileName && (
-            <span className="text-muted-foreground">
-              {lead.whatsappProfileName}
-            </span>
-          )}
-        </div>
-
-        <p className="text-xs">
-          <span className="text-muted-foreground">{reasonText(reason, t)}</span>
-          {daysSinceLastContact !== null && (
-            <span className="text-muted-foreground">
-              {" · "}
-              {t("sales.daysSinceContact", { days: daysSinceLastContact })}
-            </span>
-          )}
-        </p>
-
-        {openingAngle && (
-          <p className="line-clamp-2 text-muted-foreground text-xs italic">
-            {openingAngle}
-          </p>
-        )}
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2">
-        {whatsappUrl && (
+      <div className="flex shrink-0 items-center gap-1">
+        {primary === "call" && lead.phone && (
           <Button
-            size="sm"
             variant="outline"
+            className="max-sm:min-h-11"
+            render={(props) => (
+              <a href={`tel:${lead.phone}`} onClick={() => onStart("call")} {...props}>
+                {t("sales.primaryAction", { action: "call" })}
+              </a>
+            )}
+          />
+        )}
+        {primary === "whatsapp" && whatsappUrl && (
+          <Button
+            variant="outline"
+            className="max-sm:min-h-11"
             render={(props) => (
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => onStart("whatsapp")}
                 {...props}
               >
-                {t("sales.openWhatsapp")}
+                {t("sales.primaryAction", { action: "whatsapp" })}
               </a>
             )}
           />
         )}
-        {showPark && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={park.isPending}
-            onClick={() => park.mutate({ leadId: lead.id })}
-          >
-            {t("sales.park")}
+        {primary === "park" && (
+          <Button variant="outline" disabled={saving} onClick={onPark} className="max-sm:min-h-11">
+            {t("sales.primaryAction", { action: "park" })}
           </Button>
         )}
-        <QuickLogPopover leadId={lead.id} />
+        {primary === "openLead" && (
+          <Button
+            variant="outline"
+            className="max-sm:min-h-11"
+            render={(props) => (
+              <Link href={`/sales/leads/${lead.id}`} {...props}>
+                {t("sales.primaryAction", { action: "openLead" })}
+              </Link>
+            )}
+          />
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("sales.rowActions")}
+                className="max-sm:size-11"
+                {...props}
+              >
+                <EllipsisIcon aria-hidden="true" />
+              </Button>
+            )}
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem render={<Link href={`/sales/leads/${lead.id}`} />}>
+              {t("sales.primaryAction", { action: "openLead" })}
+            </DropdownMenuItem>
+            {onSkip && (
+              <DropdownMenuItem onClick={onSkip}>{t("sales.skipForNow")}</DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </div>
+    </li>
   );
-}
-
-type Translate = ReturnType<typeof useTranslation>["t"];
-
-/** Turns the rules module's structured reason into a sentence. */
-function reasonText(reason: TodayRow["reason"], t: Translate): string {
-  switch (reason.kind) {
-    case "rescue":
-      return reason.daysSinceContact === null
-        ? t("sales.reasonRescueNeverContacted")
-        : t("sales.reasonRescue", { days: reason.daysSinceContact });
-    case "overdue":
-      return reason.daysOverdue <= 0
-        ? t("sales.reasonOverdueToday")
-        : t("sales.reasonOverdue", { days: reason.daysOverdue });
-    case "followUp":
-      return t("sales.reasonFollowUp", {
-        days: reason.daysSinceContact ?? 0,
-        count: reason.followUpCount,
-      });
-    case "newQueue":
-      return t("sales.reasonNewQueue");
-    case "autoPark":
-      return t("sales.reasonAutoPark", { count: reason.followUpCount });
-  }
 }

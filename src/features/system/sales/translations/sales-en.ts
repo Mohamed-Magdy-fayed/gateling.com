@@ -44,6 +44,123 @@ export default {
     daysSinceContact: dt("{days:number}d since contact", {}),
     neverContacted: "Never contacted",
 
+    // Progress header.
+    progressLabel: "Today's progress",
+    progressDone: dt("{done:number} of {total:number} done", {}),
+    conversationsToday: dt("Conversations today: {count:number}", {}),
+    refreshing: "Refreshing",
+    loadFailed: "Could not load today's work.",
+    retry: "Retry",
+    pipelineSummary: "Pipeline summary",
+
+    // Up next.
+    upNext: "Up next",
+    primaryAction: dt("{action:enum}", {
+      enum: {
+        action: {
+          call: "Call",
+          whatsapp: "WhatsApp",
+          park: "Park",
+          openLead: "Open lead",
+        },
+      },
+    }),
+    copyNumber: "Copy number",
+    numberCopied: "Number copied.",
+    copyFailed: "Could not copy the number.",
+    channelLabel: "Channel",
+    channel: dt("{channel:enum}", {
+      enum: { channel: { call: "Call", whatsapp: "WhatsApp" } },
+    }),
+    outcomesPromptCall: "After you call: how did it go?",
+    outcomesPromptWhatsapp: "After you message: what happened?",
+    outcomesPromptAutoPark: "Chased twice with no reply. What now?",
+    outcome: dt("{outcome:enum}", {
+      enum: {
+        outcome: {
+          interested: "Interested",
+          bookDemo: "Book demo",
+          callBack: "Call back",
+          noAnswer: "No answer",
+          notInterested: "Not interested",
+          wrongNumber: "Wrong number",
+          whatsappSent: "Sent",
+          whatsappReplied: "Replied",
+          park: "Park",
+          theyReplied: "They replied",
+          answeredCall: "Answered a call",
+        },
+      },
+    }),
+    disabledNoPhone: "No phone number on this lead.",
+    whatsappUnconfirmed: "WhatsApp not confirmed for this number.",
+    skipForNow: "Skip for now",
+    moreDetails: "More details",
+    rowActions: "More actions",
+
+    // Time picker.
+    pickTime: "When?",
+    timePreset: dt("{preset:enum}", {
+      enum: {
+        preset: {
+          today5pm: "Today 5 pm",
+          tomorrow11am: "Tomorrow 11 am",
+          in2Days11am: "In 2 days, 11 am",
+        },
+      },
+    }),
+    customTime: "Custom time",
+    businessTimeNote: dt("Times are in {zone}.", {}),
+    cairoTime: "Cairo time",
+    noPresetsLeft: "No quick picks left today. Choose a time.",
+    timeRequired: "Pick a time first.",
+    timeInPast: "Pick a time in the future.",
+    saveOutcome: "Save",
+    cancel: "Cancel",
+
+    // Saving and undo.
+    outcomeSaved: dt("Logged for {name}.", {}),
+    undo: "Undo",
+    undone: "Restored.",
+    undoFailed: "Could not undo. Reopen the lead from its page.",
+    leadNotFound: "That lead is no longer in the pipeline.",
+    doNotContactBlocked: "This lead asked not to be contacted.",
+
+    // Queue and states.
+    queueTitle: "Queue",
+    queueSkipped: "Skipped",
+    queueExtra: "Extra (daily goal met)",
+    queueExtraHint: "Optional: today's new-lead goal is done.",
+    newMarker: "New",
+    noLeadsYet: "No leads yet",
+    noLeadsYetHint: "Add prospects in the pipeline to start working them here.",
+    openPipeline: "Open pipeline",
+    allDoneTitle: "All done for today",
+    allDoneRecap: dt(
+      "{conversations:number} conversations · {demos:number} demos booked · {due:number} follow-ups due tomorrow",
+      {},
+    ),
+    allSkippedTitle: "All remaining leads skipped",
+    allSkippedHint: "Everything left today is skipped.",
+    startOver: "Start over",
+
+    // Keyboard shortcuts.
+    shortcutsTitle: "Keyboard shortcuts",
+    shortcutsOpen: "Shortcuts",
+    shortcutsEnabled: "Keyboard shortcuts on",
+    shortcutsHint: "Shortcuts work when no field is focused.",
+    shortcut: dt("{id:enum}", {
+      enum: {
+        id: {
+          call: "Start call (copies the number on a computer)",
+          whatsapp: "Open WhatsApp",
+          outcome: "Log the numbered outcome",
+          skip: "Skip for now",
+          help: "Show this list",
+        },
+      },
+    }),
+
     // ─── Quick log ───────────────────────────────────────────────────────
     quickLog: "Log",
     quickLogTitle: "Log activity",

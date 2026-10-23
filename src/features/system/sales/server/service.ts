@@ -1,14 +1,32 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
   LeadActivitiesTable,
   type LeadActivity,
+  type LeadActivityType,
   type LeadPipelineStatus,
   LeadsTable,
 } from "@/drizzle/schema";
+import {
+  dueTomorrowWindow,
+  startOfLocalDay,
+  startOfNextLocalDay,
+} from "@/features/system/sales/lib/day-window";
+import { CONTACT_ACTIVITY_TYPES } from "@/features/system/sales/lib/derived";
 import {
   isBlockedOutbound,
   shouldDischargePromises,
@@ -16,7 +34,6 @@ import {
 import {
   computeTodayBuckets,
   DEFAULT_TODAY_RULES_CONFIG,
-  type TodayBuckets,
   type TodayLeadInput,
 } from "@/features/system/sales/lib/today-rules";
 
@@ -26,8 +43,10 @@ import type {
   CreateLeadInput,
   ListPipelineInput,
   LogActivityInput,
+  TodayWorkSummary,
   UpdateLeadInput,
 } from "./schemas";
+import { getSalesSettings } from "./settings";
 
 /**
  * Re-exported so application callers have one import surface. The
@@ -287,9 +306,89 @@ function orderForPipeline(input: ListPipelineInput) {
 export async function getTodayWork(
   db: Db,
   options: { now?: Date; newQueueCap?: number } = {},
-): Promise<TodayBuckets> {
+): Promise<TodayWorkSummary> {
   const now = options.now ?? new Date();
+  const settings = await getSalesSettings(db);
+  const newQueueCap = options.newQueueCap ?? settings.newQueueCap;
 
+  const [leads, stats] = await Promise.all([
+    todayLeadInputs(db),
+    todayStats(db, now, settings.timeZone),
+  ]);
+
+  return {
+    ...computeTodayBuckets(leads, now, { ...DEFAULT_TODAY_RULES_CONFIG, newQueueCap }),
+    ...stats,
+    timeZone: settings.timeZone,
+    newQueueCap,
+    now,
+  };
+}
+
+/** Conversations for the progress chip: a two-way exchange or a demo step. */
+const CONVERSATION_TODAY_TYPES = [
+  "call",
+  "whatsapp_reply",
+  "demo_agreed",
+  "demo_scheduled",
+] as const satisfies readonly LeadActivityType[];
+
+/**
+ * Today's counts for the progress header, in one statement. Day boundaries
+ * are business-local (Cairo), not UTC.
+ */
+async function todayStats(db: Db, now: Date, timeZone: string) {
+  const dayStart = startOfLocalDay(now, timeZone).toISOString();
+  const dayEnd = startOfNextLocalDay(now, timeZone).toISOString();
+  const tomorrow = dueTomorrowWindow(now, timeZone);
+  const A = LeadActivitiesTable;
+
+  const [row] = await db
+    .select({
+      doneToday: sql<number>`count(distinct ${A.leadId})`.mapWith(Number),
+      conversationsToday: sql<number>`count(distinct ${A.leadId}) filter (where ${inArray(A.type, CONVERSATION_TODAY_TYPES)})`.mapWith(Number),
+      demosBookedToday: sql<number>`count(distinct ${A.leadId}) filter (where ${A.type} = 'demo_scheduled')`.mapWith(Number),
+      // First contact ever falls today — a lead first reached yesterday and
+      // again today is not a new lead.
+      newTouchedToday: sql<number>`(
+        select count(*) from (
+          select ${A.leadId}, min(${A.occurredAt}) as first_contact
+          from ${A}
+          inner join ${LeadsTable} on ${LeadsTable.id} = ${A.leadId} and ${prospectScope}
+          where ${inArray(A.type, CONTACT_ACTIVITY_TYPES)}
+          group by ${A.leadId}
+        ) first_contacts
+        where first_contact >= ${dayStart}::timestamptz and first_contact < ${dayEnd}::timestamptz
+      )`.mapWith(Number),
+      dueTomorrow: sql<number>`(
+        select count(*) from ${LeadsTable}
+        where ${prospectScope}
+          and ${LeadsTable.nextActionAt} >= ${tomorrow.start.toISOString()}::timestamptz
+          and ${LeadsTable.nextActionAt} < ${tomorrow.end.toISOString()}::timestamptz
+      )`.mapWith(Number),
+      hasProspects: sql<boolean>`exists (select 1 from ${LeadsTable} where ${prospectScope})`,
+    })
+    .from(A)
+    .innerJoin(LeadsTable, and(eq(LeadsTable.id, A.leadId), prospectScope))
+    .where(
+      and(
+        sql`${A.occurredAt} >= ${dayStart}::timestamptz`,
+        sql`${A.occurredAt} < ${dayEnd}::timestamptz`,
+      ),
+    );
+
+  return {
+    doneToday: row?.doneToday ?? 0,
+    conversationsToday: row?.conversationsToday ?? 0,
+    demosBookedToday: row?.demosBookedToday ?? 0,
+    newTouchedToday: row?.newTouchedToday ?? 0,
+    dueTomorrow: row?.dueTomorrow ?? 0,
+    hasProspects: Boolean(row?.hasProspects),
+  };
+}
+
+/** Every prospect as the rules module's input. */
+async function todayLeadInputs(db: Db): Promise<TodayLeadInput[]> {
   // Two boolean facts per lead that the cache columns cannot express. Computed
   // as aggregates so this stays a single round trip rather than N+1.
   const rows = await db
@@ -325,16 +424,11 @@ export async function getTodayWork(
     .from(LeadsTable)
     .where(prospectScope);
 
-  const leads: TodayLeadInput[] = rows.map((row) => ({
+  return rows.map((row) => ({
     ...row,
     hasDemoScheduledActivity: Boolean(row.hasDemoScheduledActivity),
     hasInboundReply: Boolean(row.hasInboundReply),
   }));
-
-  return computeTodayBuckets(leads, now, {
-    ...DEFAULT_TODAY_RULES_CONFIG,
-    newQueueCap: options.newQueueCap ?? DEFAULT_TODAY_RULES_CONFIG.newQueueCap,
-  });
 }
 
 export type PipelineCounters = {

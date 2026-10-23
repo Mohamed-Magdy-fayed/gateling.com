@@ -1,33 +1,53 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { ChevronDownIcon, KeyboardIcon } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { H1, Lead } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
-import type {
-  TodayBucket,
-  TodayBucketId,
-} from "@/features/system/sales/lib/today-rules";
-import { useTRPC } from "@/integrations/trpc/client";
+import { outcomeById } from "@/features/system/sales/lib/outcomes";
+import { canSave } from "@/features/system/sales/lib/today-session";
 
 import { PipelineCounters } from "./components/pipeline-counters";
-import { TodayLeadRow } from "./components/today-lead-row";
+import { TodayProgress } from "./components/today-progress";
+import { TodayQueue } from "./components/today-queue";
+import { TodayShortcutsDialog } from "./components/today-shortcuts-dialog";
+import { TodayUpNextCard } from "./components/today-up-next-card";
+import { useTodaySession } from "./hooks/use-today-session";
 
-/**
- * Copy per bucket. `as const` keeps the keys as literals so the typed `t()`
- * can tell they take no arguments.
- */
-const BUCKET_COPY = {
-  rescue: { title: "sales.bucketRescue", hint: "sales.bucketRescueHint" },
-  overdue: { title: "sales.bucketOverdue", hint: "sales.bucketOverdueHint" },
-  followUp: { title: "sales.bucketFollowUp", hint: "sales.bucketFollowUpHint" },
-  newQueue: { title: "sales.bucketNewQueue", hint: "sales.bucketNewQueueHint" },
-  autoPark: { title: "sales.bucketAutoPark", hint: "sales.bucketAutoParkHint" },
-} as const satisfies Record<TodayBucketId, { title: string; hint: string }>;
+const SHORTCUTS_PREF_KEY = "sales-today-shortcuts";
+
+/** Per-viewer on/off for keyboard shortcuts; default on, works without storage. */
+function useShortcutPreference(): [boolean, (on: boolean) => void] {
+  const [enabled, setEnabled] = useState(true);
+  useEffect(() => {
+    try {
+      setEnabled(window.localStorage.getItem(SHORTCUTS_PREF_KEY) !== "off");
+    } catch {
+      // Storage unavailable: keep the default.
+    }
+  }, []);
+  const update = (on: boolean) => {
+    setEnabled(on);
+    try {
+      window.localStorage.setItem(SHORTCUTS_PREF_KEY, on ? "on" : "off");
+    } catch {
+      // The choice then lasts for this page view.
+    }
+  };
+  return [enabled, update];
+}
 
 type Props = {
   /**
@@ -41,89 +61,186 @@ type Props = {
 };
 
 export function SalesTodayPage({ callingWindow }: Props) {
-  const trpc = useTRPC();
   const { t } = useTranslation();
-  const { data, isPending } = useQuery(trpc.sales.today.queryOptions({}));
+  const { query, summary, state, view, actions } = useTodaySession();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [shortcutsOn, setShortcutsOn] = useShortcutPreference();
+
+  const callingAdvice = callingWindow.isBeforeCallingHours
+    ? t("sales.callingWindowTooEarly")
+    : callingWindow.isAfterCallingHours
+      ? t("sales.callingWindowTooLate")
+      : null;
+  const upNext = view?.upNext ?? null;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <H1>{t("sales.todayTitle")}</H1>
-        <Lead>{t("sales.todayLead")}</Lead>
-      </div>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <H1>{t("sales.todayTitle")}</H1>
+            {query.isFetching && !query.isPending && (
+              <Spinner role="status" aria-label={t("sales.refreshing")} />
+            )}
+          </div>
+          <Lead>{t("sales.todayLead")}</Lead>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-keyshortcuts="Shift+Slash"
+          onClick={() => setHelpOpen(true)}
+          className="pointer-coarse:hidden"
+        >
+          <KeyboardIcon aria-hidden="true" />
+          {t("sales.shortcutsOpen")}
+        </Button>
+      </header>
 
-      {/* Advice, never a gate — the buckets stay visible either way. */}
-      {callingWindow.isBeforeCallingHours && (
+      {/* Advice, never a gate — the queue stays visible either way. */}
+      {callingAdvice && (
         <Alert>
-          <AlertDescription>
-            {t("sales.callingWindowTooEarly")}
+          <AlertDescription>{callingAdvice}</AlertDescription>
+        </Alert>
+      )}
+
+      {query.isPending && (
+        <div className="flex flex-col gap-4" aria-busy="true">
+          <Skeleton className="h-2 w-full" />
+          <Skeleton className="h-80 w-full rounded-lg" />
+          {Array.from({ length: 4 }, (_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      )}
+
+      {query.isError && !summary && (
+        <Alert variant="destructive">
+          <AlertDescription className="flex flex-wrap items-center gap-3">
+            {t("sales.loadFailed")}
+            <Button variant="outline" size="sm" onClick={() => void query.refetch()}>
+              {t("sales.retry")}
+            </Button>
           </AlertDescription>
         </Alert>
       )}
-      {callingWindow.isAfterCallingHours && (
-        <Alert>
-          <AlertDescription>{t("sales.callingWindowTooLate")}</AlertDescription>
-        </Alert>
-      )}
 
-      <PipelineCounters />
-
-      {isPending && <Skeleton className="h-64 w-full" />}
-
-      {data?.totalActionable === 0 && (
+      {summary && view && !summary.hasProspects && (
         <Card>
-          <CardContent className="pt-6 text-muted-foreground text-sm">
-            {t("sales.todayEmpty")}
+          <CardContent className="flex flex-col items-start gap-2">
+            <h2 className="font-semibold text-base">{t("sales.noLeadsYet")}</h2>
+            <p className="text-muted-foreground text-sm">{t("sales.noLeadsYetHint")}</p>
+            <Button
+              variant="outline"
+              render={(props) => (
+                <Link href="/sales/leads" {...props}>
+                  {t("sales.openPipeline")}
+                </Link>
+              )}
+            />
           </CardContent>
         </Card>
       )}
 
-      {data && data.totalActionable > 0 && (
-        <div className="flex flex-col gap-4">
-          {data.buckets.map((bucket) => (
-            <BucketCard key={bucket.id} bucket={bucket} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function BucketCard({ bucket }: { bucket: TodayBucket }) {
-  const { t } = useTranslation();
-  const copy = BUCKET_COPY[bucket.id];
-
-  // An empty bucket is a good thing — say nothing and save the vertical space.
-  if (bucket.rows.length === 0) return null;
-
-  const isCapped = bucket.totalBeforeCap > bucket.rows.length;
-
-  return (
-    <Card>
-      <CardHeader className="gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <CardTitle className="text-base">{t(copy.title)}</CardTitle>
-          <Badge variant="secondary">{bucket.rows.length}</Badge>
-          {isCapped && (
-            <Badge variant="outline">
-              {t("sales.capNotice", {
-                shown: bucket.rows.length,
-                total: bucket.totalBeforeCap,
-              })}
-            </Badge>
-          )}
-        </div>
-        <p className="text-muted-foreground text-xs">{t(copy.hint)}</p>
-      </CardHeader>
-      <CardContent className="p-0">
-        {bucket.rows.map((row) => (
-          <TodayLeadRow
-            key={row.lead.id}
-            row={row}
-            showPark={bucket.id === "autoPark"}
+      {summary && view && summary.hasProspects && (
+        <>
+          <TodayProgress
+            done={view.progress.done}
+            left={view.progress.left}
+            ratio={view.progress.ratio}
+            conversations={summary.conversationsToday}
           />
-        ))}
-      </CardContent>
-    </Card>
+
+          <section aria-labelledby="today-up-next-heading" className="flex flex-col gap-3">
+            <h2 id="today-up-next-heading" className="font-semibold text-base">
+              {t("sales.upNext")}
+            </h2>
+
+            {upNext && (
+              <div
+                key={upNext.row.lead.id}
+                className="fade-in-0 animate-in duration-200 motion-reduce:animate-none"
+              >
+                <TodayUpNextCard
+                  item={upNext}
+                  timeZone={summary.timeZone}
+                  startedChannel={state.started[upNext.row.lead.id]}
+                  channel={state.channel[upNext.row.lead.id]}
+                  saving={!canSave(state, upNext.row.lead.id)}
+                  shortcutsEnabled={shortcutsOn}
+                  onStarted={(channel) => actions.started(upNext.row.lead.id, channel)}
+                  onSwitchChannel={(channel) =>
+                    actions.switchChannel(upNext.row.lead.id, channel)
+                  }
+                  onSave={(outcome, at) => void actions.save(upNext, outcome, at)}
+                  onSkip={() => actions.skip(upNext.row.lead.id)}
+                  onHelp={() => setHelpOpen(true)}
+                />
+              </div>
+            )}
+
+            {!upNext && view.allSkipped && (
+              <Card>
+                <CardContent className="flex flex-col items-start gap-2">
+                  <p className="font-semibold text-base">{t("sales.allSkippedTitle")}</p>
+                  <p className="text-muted-foreground text-sm">{t("sales.allSkippedHint")}</p>
+                  <Button variant="outline" onClick={actions.startOver}>
+                    {t("sales.startOver")}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {!upNext && view.allDone && (
+              <Card>
+                <CardContent className="flex flex-col items-start gap-2">
+                  <p className="font-semibold text-base">{t("sales.allDoneTitle")}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("sales.allDoneRecap", {
+                      conversations: summary.conversationsToday,
+                      demos: summary.demosBookedToday,
+                      due: summary.dueTomorrow,
+                    })}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </section>
+
+          <TodayQueue
+            groups={view.groups}
+            skipped={view.skipped}
+            extra={view.extra}
+            saving={false}
+            onPromote={actions.promote}
+            onStart={actions.started}
+            onPark={(item) => void actions.save(item, outcomeById("park"), null)}
+            onSkip={actions.skip}
+          />
+
+          {/* Moves to the Pipeline page with Part A. */}
+          <Collapsible>
+            <CollapsibleTrigger
+              render={(props) => (
+                <Button variant="ghost" size="sm" {...props}>
+                  {t("sales.pipelineSummary")}
+                  <ChevronDownIcon aria-hidden="true" />
+                </Button>
+              )}
+            />
+            <CollapsibleContent className="pt-3">
+              <PipelineCounters />
+            </CollapsibleContent>
+          </Collapsible>
+        </>
+      )}
+
+      <TodayShortcutsDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        enabled={shortcutsOn}
+        onEnabledChange={setShortcutsOn}
+      />
+    </div>
   );
 }

@@ -42,6 +42,123 @@ export default {
     daysSinceContact: dt("{days:number} يوم منذ آخر تواصل", {}),
     neverContacted: "لم يتم التواصل",
 
+    // شريط التقدّم.
+    progressLabel: "تقدّم اليوم",
+    progressDone: dt("تم {done:number} من {total:number}", {}),
+    conversationsToday: dt("محادثات اليوم: {count:number}", {}),
+    refreshing: "جارٍ التحديث",
+    loadFailed: "تعذّر تحميل عمل اليوم.",
+    retry: "إعادة المحاولة",
+    pipelineSummary: "ملخص خط المبيعات",
+
+    // التالي.
+    upNext: "التالي",
+    primaryAction: dt("{action:enum}", {
+      enum: {
+        action: {
+          call: "اتصال",
+          whatsapp: "واتساب",
+          park: "تأجيل",
+          openLead: "فتح العميل",
+        },
+      },
+    }),
+    copyNumber: "نسخ الرقم",
+    numberCopied: "تم نسخ الرقم.",
+    copyFailed: "تعذّر نسخ الرقم.",
+    channelLabel: "القناة",
+    channel: dt("{channel:enum}", {
+      enum: { channel: { call: "اتصال", whatsapp: "واتساب" } },
+    }),
+    outcomesPromptCall: "بعد الاتصال: كيف كانت المكالمة؟",
+    outcomesPromptWhatsapp: "بعد الرسالة: ماذا حدث؟",
+    outcomesPromptAutoPark: "تمت المتابعة مرتين دون رد. ما الخطوة التالية؟",
+    outcome: dt("{outcome:enum}", {
+      enum: {
+        outcome: {
+          interested: "مهتم",
+          bookDemo: "حجز عرض",
+          callBack: "معاودة الاتصال",
+          noAnswer: "لا رد",
+          notInterested: "غير مهتم",
+          wrongNumber: "رقم خاطئ",
+          whatsappSent: "تم الإرسال",
+          whatsappReplied: "تم الرد",
+          park: "تأجيل",
+          theyReplied: "ردّوا",
+          answeredCall: "ردّوا على مكالمة",
+        },
+      },
+    }),
+    disabledNoPhone: "لا يوجد رقم هاتف لهذا العميل.",
+    whatsappUnconfirmed: "لم يتم تأكيد واتساب لهذا الرقم.",
+    skipForNow: "تخطٍّ الآن",
+    moreDetails: "تفاصيل أكثر",
+    rowActions: "إجراءات أخرى",
+
+    // اختيار الوقت.
+    pickTime: "متى؟",
+    timePreset: dt("{preset:enum}", {
+      enum: {
+        preset: {
+          today5pm: "اليوم 5 مساءً",
+          tomorrow11am: "غدًا 11 صباحًا",
+          in2Days11am: "بعد يومين، 11 صباحًا",
+        },
+      },
+    }),
+    customTime: "وقت مخصص",
+    businessTimeNote: dt("الأوقات حسب {zone}.", {}),
+    cairoTime: "توقيت القاهرة",
+    noPresetsLeft: "لم يتبقَّ اختيار سريع اليوم. اختر وقتًا.",
+    timeRequired: "اختر وقتًا أولًا.",
+    timeInPast: "اختر وقتًا في المستقبل.",
+    saveOutcome: "حفظ",
+    cancel: "إلغاء",
+
+    // الحفظ والتراجع.
+    outcomeSaved: dt("تم التسجيل لـ {name}.", {}),
+    undo: "تراجع",
+    undone: "تمت الاستعادة.",
+    undoFailed: "تعذّر التراجع. افتح العميل من صفحته.",
+    leadNotFound: "هذا العميل لم يعد في خط المبيعات.",
+    doNotContactBlocked: "طلب هذا العميل عدم التواصل معه.",
+
+    // القائمة والحالات.
+    queueTitle: "القائمة",
+    queueSkipped: "تم تخطيها",
+    queueExtra: "إضافي (تم تحقيق هدف اليوم)",
+    queueExtraHint: "اختياري: تم تحقيق هدف اليوم من العملاء الجدد.",
+    newMarker: "جديد",
+    noLeadsYet: "لا يوجد عملاء محتملون بعد",
+    noLeadsYetHint: "أضف عملاء محتملين في خط المبيعات لتبدأ العمل عليهم هنا.",
+    openPipeline: "فتح خط المبيعات",
+    allDoneTitle: "انتهى عمل اليوم",
+    allDoneRecap: dt(
+      "{conversations:number} محادثات · {demos:number} عروض محجوزة · {due:number} متابعات مستحقة غدًا",
+      {},
+    ),
+    allSkippedTitle: "تم تخطي كل العملاء المتبقين",
+    allSkippedHint: "كل ما تبقى اليوم تم تخطيه.",
+    startOver: "البدء من جديد",
+
+    // اختصارات لوحة المفاتيح.
+    shortcutsTitle: "اختصارات لوحة المفاتيح",
+    shortcutsOpen: "الاختصارات",
+    shortcutsEnabled: "تفعيل اختصارات لوحة المفاتيح",
+    shortcutsHint: "تعمل الاختصارات عندما لا يكون أي حقل نشطًا.",
+    shortcut: dt("{id:enum}", {
+      enum: {
+        id: {
+          call: "بدء الاتصال (ينسخ الرقم على الكمبيوتر)",
+          whatsapp: "فتح واتساب",
+          outcome: "تسجيل النتيجة المرقّمة",
+          skip: "تخطٍّ الآن",
+          help: "عرض هذه القائمة",
+        },
+      },
+    }),
+
     // ─── تسجيل سريع ───────────────────────────────────────────────────────
     quickLog: "تسجيل",
     quickLogTitle: "تسجيل نشاط",

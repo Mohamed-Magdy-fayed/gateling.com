@@ -7,6 +7,7 @@ import {
   leadTierValues,
   whatsappStatusValues,
 } from "@/drizzle/schema";
+import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
 
 /**
  * Typed inputs for every sales operation, defined once and shared by the tRPC
@@ -106,3 +107,24 @@ export const todayWorkSchema = z.object({
   newQueueCap: z.number().int().min(0).max(100).optional(),
 });
 export type TodayWorkInput = z.infer<typeof todayWorkSchema>;
+
+/**
+ * `sales.today`: the buckets plus what the page needs to show progress for the
+ * business-local day. Counts are distinct prospect leads.
+ */
+export type TodayWorkSummary = TodayBuckets & {
+  /** Any activity today — parks and status changes included. */
+  doneToday: number;
+  /** An answered call, a reply, or a demo agreed/booked today. */
+  conversationsToday: number;
+  demosBookedToday: number;
+  /** First contact ever was today: progress toward the daily new-lead cap. */
+  newTouchedToday: number;
+  /** Open promises falling on the next local day. */
+  dueTomorrow: number;
+  hasProspects: boolean;
+  timeZone: string;
+  /** Effective cap: request override, else settings, else the default. */
+  newQueueCap: number;
+  now: Date;
+};
