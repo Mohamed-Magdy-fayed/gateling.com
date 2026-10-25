@@ -1,12 +1,3 @@
-export type DashboardSummary = {
-  newLeadsThisMonth: number;
-  totalLeads: number;
-  activeSubscribers: number;
-  publishedCaseStudies: number;
-  publishedBlogPosts: number;
-  activeServices: number;
-};
-
 export type DashboardRecentLead = {
   id: string;
   name: string;
@@ -18,6 +9,6 @@ export type DashboardRecentLead = {
 };
 
 export type DashboardData = {
-  summary: DashboardSummary;
+  newLeadsThisMonth: number;
   recentLeads: DashboardRecentLead[];
 };
