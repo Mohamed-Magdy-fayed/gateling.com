@@ -11,14 +11,12 @@ import { onLeadSubmitted } from "./on-lead-submitted";
 import { onMeetingsWebhook } from "./on-meetings-webhook";
 import { onSubscriberCreated } from "./on-subscriber-created";
 import { onUserEmailVerified } from "./on-user-email-verified";
-import { onUserRegistered } from "./on-user-registered";
 
 export const functions = [
   onLeadSubmitted,
   onSubscriberCreated,
   onCaseStudyPublished,
   onBlogPostPublished,
-  onUserRegistered,
   onUserEmailVerified,
   onLeadStatusChanged,
   onBookingConfirmed,
