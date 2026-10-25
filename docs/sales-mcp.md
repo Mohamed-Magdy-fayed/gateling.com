@@ -47,7 +47,7 @@ claude mcp add --transport http gateling-sales https://gateling.com/api/mcp/sale
 |---|---|
 | `get_sales_guide` | This file (also resource `docs://sales-mcp`). |
 | `get_today` | Today's queue in priority order with contact details, why each lead is due, its `primaryAction`, the `outcomes` you may log, and progress. |
-| `list_leads` | The whole pipeline: paged, filterable, searchable. |
+| `list_leads` | The whole pipeline, newest first, paged. Optional filters: `pipelineStatus`, `tier`, `whatsappStatus` (arrays, any-of), `city`, `businessType` (partial match), `search` (name, phone, city, area, WhatsApp name). |
 | `get_lead` | One lead with its activity timeline. |
 | `log_outcome` | Log what happened, by outcome id (below). |
 | `add_note` | Append a note to the timeline (no status change). |

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -10,14 +12,21 @@ import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 import { toTRPCError } from "./errors";
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
+  bulkSetStatusSchema,
   createLeadSchema,
   leadIdSchema,
   listPipelineSchema,
   logActivityInputSchema,
+  pipelineFilterSchema,
   todayWorkSchema,
   updateLeadSchema,
 } from "./schemas";
 import * as service from "./service";
+
+/** One row of the pipeline grid (and of its CSV export). */
+export type PipelineGridRow = Awaited<
+  ReturnType<typeof service.listPipeline>
+>["rows"][number];
 
 /**
  * Thin transport layer: authorise, then delegate. All logic lives in
@@ -51,6 +60,57 @@ export const salesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
       return service.listPipeline(ctx.db, input);
+    }),
+
+  exportRows: protectedProcedure
+    .input(pipelineFilterSchema)
+    .query(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      const result = await service.exportPipeline(ctx.db, input);
+      // Activity log line. Filter ids only: search text can be a phone number.
+      console.info("sales.export", {
+        userId: ctx.session.user.id,
+        count: result.rows.length,
+        truncated: result.truncated,
+        filters: input.columnFilters.map((f) => f.id),
+        searched: Boolean(input.globalFilter?.trim()),
+      });
+      return result;
+    }),
+
+  bulkSetStatus: protectedProcedure
+    .input(bulkSetStatusSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      const correlationId = randomUUID();
+      try {
+        const result = await service.bulkSetStatus(
+          ctx.db,
+          input,
+          ctx.session.user.id,
+        );
+        console.info("sales.bulk", {
+          userId: ctx.session.user.id,
+          action: "setStatus",
+          status: input.status,
+          count: result.updated,
+        });
+        return result;
+      } catch (error) {
+        console.error("sales.bulk failed", {
+          correlationId,
+          action: "setStatus",
+          status: input.status,
+          count: input.ids.length,
+          cause: error instanceof Error ? error.message : String(error),
+        });
+        const mapped = toTRPCError(error);
+        if (mapped instanceof TRPCError) throw mapped;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `bulk_failed:${correlationId}`,
+        });
+      }
     }),
 
   byId: protectedProcedure.input(leadIdSchema).query(async ({ ctx, input }) => {

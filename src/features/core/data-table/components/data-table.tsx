@@ -21,6 +21,8 @@ type DataTableProps<T> = {
   toolbar?: ReactNode;
   footer?: ReactNode;
   actionBar?: ReactNode;
+  /** Replaces the default "no results" text, e.g. a loading skeleton or a call to action. */
+  emptyState?: ReactNode;
 };
 
 export function DataTable<T>({
@@ -28,6 +30,7 @@ export function DataTable<T>({
   toolbar,
   footer,
   actionBar,
+  emptyState,
 }: DataTableProps<T>) {
   const { t, dir } = useTranslation();
   const rows = table.getRowModel().rows;
@@ -80,7 +83,7 @@ export function DataTable<T>({
                 colSpan={visible}
                 className="h-24 text-center text-muted-foreground"
               >
-                {t("dataTable.noResults")}
+                {emptyState ?? t("dataTable.noResults")}
               </TableCell>
             </TableRow>
           )}
