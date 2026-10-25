@@ -18,7 +18,7 @@ export const CROSSFADE_MS = 180;
 
 export type SessionSummary = {
   buckets: TodayBucket[];
-  /** Distinct leads with any activity today (server-side, local day). */
+  /** Distinct leads with any activity but a note today (server-side, local day). */
   doneToday: number;
   /** Leads whose first contact was today: progress toward the daily cap. */
   newTouchedToday: number;
