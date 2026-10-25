@@ -4,7 +4,6 @@ import { ExternalLinkIcon, SearchIcon } from "lucide-react";
 import { useId } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/features/core/i18n/client";
 import {
   type SocialLeadFields,
@@ -12,35 +11,33 @@ import {
   socialProfiles,
 } from "@/features/system/sales/lib/social-profiles";
 
-type Props = { lead: SocialLeadFields };
+type Props = { lead: SocialLeadFields; className?: string };
 
 /**
- * One card per social platform for the Up-next lead: what research found, or
- * a Google search (name + platform + address) to go and find it.
+ * The lead's social profiles as a compact list inside the Up-next card: what
+ * research found, or a Google search (name + platform + address) to find it.
  */
-export function TodaySocialProfiles({ lead }: Props) {
+export function TodaySocialProfiles({ lead, className }: Props) {
   const { t } = useTranslation();
   const headingId = useId();
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3">
-      <h2 id={headingId} className="font-semibold text-base">
+    <section aria-labelledby={headingId} className={className}>
+      <h4 id={headingId} className="font-medium text-muted-foreground text-xs">
         {t("sales.socialTitle")}
-      </h2>
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      </h4>
+      <ul className="flex flex-col divide-y">
         {socialProfiles(lead).map((profile) => (
-          <li key={profile.platform} className="flex">
-            <SocialProfileCard profile={profile} />
-          </li>
+          <SocialProfileRow key={profile.platform} profile={profile} />
         ))}
       </ul>
     </section>
   );
 }
 
-function SocialProfileCard({ profile }: { profile: SocialProfile }) {
+function SocialProfileRow({ profile }: { profile: SocialProfile }) {
   const { t, locale } = useTranslation();
-  const titleId = useId();
+  const nameId = useId();
   const numberFmt = new Intl.NumberFormat(locale);
   const checkedAt =
     profile.kind !== "missing" && profile.checkedAt
@@ -51,107 +48,95 @@ function SocialProfileCard({ profile }: { profile: SocialProfile }) {
         })
       : null;
 
-  return (
-    <Card size="sm" className="w-full">
-      <CardContent className="flex h-full flex-col items-start gap-2">
-        <h3 id={titleId} className="font-medium text-sm">
-          {t("sales.socialPlatform", { platform: profile.platform })}
-        </h3>
+  const found = profile.kind === "found" ? profile : null;
+  const href = found
+    ? found.profileUrl
+    : profile.kind !== "found"
+      ? profile.searchUrl
+      : null;
 
-        {profile.kind === "found" ? (
+  return (
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
+      <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
+        <span id={nameId} className="font-medium text-sm">
+          {t("sales.socialPlatform", { platform: profile.platform })}
+        </span>
+
+        {found ? (
           <>
-            <div className="flex min-w-0 max-w-full flex-col gap-1">
-              {profile.handle && (
-                <span
-                  dir="ltr"
-                  className="truncate text-start font-mono text-sm"
-                >
-                  {profile.handle.startsWith("http")
-                    ? profile.handle
-                    : `@${profile.handle}`}
-                </span>
-              )}
-              {(profile.followers !== null || profile.posts !== null) && (
-                <dl className="flex flex-wrap gap-x-3 text-xs">
-                  {profile.followers !== null && (
-                    <div className="flex gap-1">
-                      <dt className="text-muted-foreground">
-                        {t("sales.fieldSocialFollowers")}
-                      </dt>
-                      <dd className="font-medium tabular-nums">
-                        {numberFmt.format(profile.followers)}
-                      </dd>
-                    </div>
-                  )}
-                  {profile.posts !== null && (
-                    <div className="flex gap-1">
-                      <dt className="text-muted-foreground">
-                        {t("sales.socialPosts")}
-                      </dt>
-                      <dd className="font-medium tabular-nums">
-                        {numberFmt.format(profile.posts)}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              )}
-              {profile.bio && (
-                <p dir="auto" className="line-clamp-3 text-pretty text-xs">
-                  {profile.bio}
-                </p>
-              )}
-              {checkedAt && (
-                <p className="text-muted-foreground text-xs">{checkedAt}</p>
-              )}
-            </div>
-            {profile.profileUrl && (
-              <Button
-                variant="outline"
-                size="sm"
-                aria-describedby={titleId}
-                className="mt-auto max-sm:min-h-11"
-                render={(props) => (
-                  <a
-                    href={profile.profileUrl ?? undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    {...props}
-                  >
-                    <ExternalLinkIcon aria-hidden="true" />
-                    {t("sales.socialOpenProfile")}
-                  </a>
+            {found.handle && (
+              <span dir="ltr" className="truncate text-start font-mono text-sm">
+                {found.handle.startsWith("http")
+                  ? found.handle
+                  : `@${found.handle}`}
+              </span>
+            )}
+            {(found.followers !== null || found.posts !== null) && (
+              <dl className="flex flex-wrap gap-x-3 text-xs">
+                {found.followers !== null && (
+                  <div className="flex gap-1">
+                    <dt className="text-muted-foreground">
+                      {t("sales.fieldSocialFollowers")}
+                    </dt>
+                    <dd className="font-medium tabular-nums">
+                      {numberFmt.format(found.followers)}
+                    </dd>
+                  </div>
                 )}
-              />
+                {found.posts !== null && (
+                  <div className="flex gap-1">
+                    <dt className="text-muted-foreground">
+                      {t("sales.socialPosts")}
+                    </dt>
+                    <dd className="font-medium tabular-nums">
+                      {numberFmt.format(found.posts)}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            )}
+            {found.bio && (
+              <p
+                dir="auto"
+                className="line-clamp-2 text-pretty text-muted-foreground text-xs"
+              >
+                {found.bio}
+              </p>
             )}
           </>
         ) : (
-          <>
-            <p className="text-muted-foreground text-xs">
-              {profile.kind === "notFound"
-                ? t("sales.socialNotFound")
-                : t("sales.socialNotOnFile")}
-              {checkedAt && ` · ${checkedAt}`}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-describedby={titleId}
-              className="mt-auto max-sm:min-h-11"
-              render={(props) => (
-                <a
-                  href={profile.searchUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  {...props}
-                >
-                  <SearchIcon aria-hidden="true" />
-                  {t("sales.socialSearchGoogle")}
-                </a>
-              )}
-            />
-          </>
+          <span className="text-muted-foreground text-xs">
+            {profile.kind === "notFound"
+              ? t("sales.socialNotFound")
+              : t("sales.socialNotOnFile")}
+          </span>
         )}
-      </CardContent>
-    </Card>
+
+        {checkedAt && (
+          <span className="text-muted-foreground text-xs">{checkedAt}</span>
+        )}
+      </div>
+
+      {href && (
+        <Button
+          variant="outline"
+          size="sm"
+          aria-describedby={nameId}
+          className="shrink-0 max-sm:min-h-11"
+          render={(props) => (
+            <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+              {found ? (
+                <ExternalLinkIcon aria-hidden="true" />
+              ) : (
+                <SearchIcon aria-hidden="true" />
+              )}
+              {found
+                ? t("sales.socialOpenProfile")
+                : t("sales.socialSearchGoogle")}
+            </a>
+          )}
+        />
+      )}
+    </li>
   );
 }

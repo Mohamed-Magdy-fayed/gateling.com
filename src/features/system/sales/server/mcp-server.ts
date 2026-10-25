@@ -254,7 +254,7 @@ export function buildSalesMcpServer(
   writeTool(
     "set_social_profile",
     "Record a social profile",
-    "Save what research found for a lead on one platform (instagram, facebook, tiktok). `found` needs `url` (the profile link on that platform) and should carry the public `handle`, `followers`, `posts` and a short `bio` as they appear today. `notFound` records that a search found no account; `clear` removes a wrong entry. Replaces that platform's previous entry; the server stamps the check time. Only public business-profile facts — never personal details of individuals.",
+    "Save what research found for a lead on one platform (instagram, facebook, tiktok). Research all three: first follow the links on profiles already found (a Facebook Page lists its Instagram and TikTok under Contact info), then search for the rest. `found` needs `url` (the profile link on that platform) and should carry the public `handle`, `followers`, `posts` and a short `bio` as they appear today. `notFound` records that a search found no account; `clear` removes a wrong entry. Replaces that platform's previous entry; the server stamps the check time. Only public business-profile facts — never personal details of individuals.",
     setSocialProfileInput,
     async ({ leadId, ...profile }) =>
       caller.sales.setSocialProfile(
