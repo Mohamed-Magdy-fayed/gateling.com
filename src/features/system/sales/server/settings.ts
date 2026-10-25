@@ -7,6 +7,7 @@ import { SettingsTable } from "@/drizzle/schema";
 import { DEFAULT_TODAY_RULES_CONFIG } from "@/features/system/sales/lib/today-rules";
 import {
   DEFAULT_BUSINESS_TIMEZONE,
+  isSprintStartDate,
   SYSTEM_SETTING_CODE,
 } from "@/features/system/settings/lib/system-settings-registry";
 
@@ -15,6 +16,8 @@ export type SalesSettings = {
   timeZone: string;
   /** Daily ceiling on the new-dial queue. */
   newQueueCap: number;
+  /** Day 1 of the current sprint as `YYYY-MM-DD`, or null when unset or invalid. */
+  sprintStart: string | null;
 };
 
 /**
@@ -36,12 +39,16 @@ export async function getSalesSettings(
       inArray(SettingsTable.code, [
         SYSTEM_SETTING_CODE.BUSINESS_TIMEZONE,
         SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP,
+        SYSTEM_SETTING_CODE.SALES_SPRINT_START,
       ]),
     );
 
   const byCode = new Map(rows.map((row) => [row.code, row]));
 
   const cap = byCode.get(SYSTEM_SETTING_CODE.SALES_DAILY_NEW_QUEUE_CAP)?.amount;
+  const sprintStart = byCode
+    .get(SYSTEM_SETTING_CODE.SALES_SPRINT_START)
+    ?.value?.trim();
 
   return {
     timeZone:
@@ -49,5 +56,7 @@ export async function getSalesSettings(
       DEFAULT_BUSINESS_TIMEZONE,
     newQueueCap:
       cap != null && cap > 0 ? cap : DEFAULT_TODAY_RULES_CONFIG.newQueueCap,
+    sprintStart:
+      sprintStart && isSprintStartDate(sprintStart) ? sprintStart : null,
   };
 }

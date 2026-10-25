@@ -199,19 +199,68 @@ export default {
   },
   dashboard: {
     title: "لوحة التحكم",
-    lead: "نشاط المحفظة والعملاء المحتملين والمحتوى في لمحة.",
-    newLeadsThisMonth: "عملاء محتملون جدد",
-    newLeadsThisMonthDesc: "طلبات التواصل هذا الشهر",
-    activeSubscribers: "المشتركون",
-    activeSubscribersDesc: "المشتركون النشطون في النشرة البريدية",
-    publishedCaseStudies: "دراسات الحالة",
-    publishedCaseStudiesDesc: "قصص النجاح المنشورة",
-    publishedBlogPosts: "مقالات المدونة",
-    publishedBlogPostsDesc: "المقالات المنشورة",
-    activeServices: "الخدمات",
-    activeServicesDesc: "الخدمات النشطة",
-    recentLeads: "العملاء المحتملون الأخيرون",
-    recentLeadsDesc: "أحدث طلبات التواصل",
+    lead: "المبيعات في لمحة: الدورة الحالية، وعمل اليوم، وما هو قادم.",
+    salesLoadFailed: "تعذر تحميل أرقام المبيعات. حدّث الصفحة وحاول مرة أخرى.",
+    openToday: "فتح عمل اليوم",
+
+    sprintTitle: "مؤشرات الدورة",
+    sprintDesc:
+      "عدد العملاء المميزين لكل مؤشر، مع احتساب الأنشطة المسجلة خلال الدورة فقط.",
+    sprintNotSet:
+      "حدد اليوم الأول للدورة من الإعدادات (بداية دورة المبيعات) لبدء احتساب المؤشرات.",
+    sprintOpenSettings: "فتح الإعدادات",
+    sprintDay: dt("اليوم {day:number} من {total:number}", {}),
+    sprintUpcoming: "تبدأ في {date}",
+    sprintEnded: "انتهت الدورة. طبّق قرار اليوم الرابع عشر.",
+    trackAtelier: "الأتيليهات",
+    trackDistributor: "الموزعون",
+    metricContacted: "تم التواصل",
+    metricReplied: "ردّوا",
+    metricBooked: "عروض محجوزة",
+    metricHeld: "عروض تمت",
+    metricDeposits: "عربون",
+    contactProgress: dt("{done:number} من {target:number} تم التواصل معهم", {}),
+    paceNeeded: dt("يلزم {pace:number} يوميًا للوصول إلى الهدف", {}),
+    targetMet: "تم بلوغ هدف التواصل",
+    conversion: dt("{rate:number}% من الخطوة السابقة", {}),
+
+    workloadTitle: "عمل اليوم",
+    workloadDesc: "ما تطلبه صفحة عمل اليوم الآن.",
+    workloadClear: "لا يوجد ما ينتظر. أضف عملاء أو عُد غدًا.",
+    newQueueCapped: dt(
+      "يُعرض {shown:number} من {total:number} (الحد اليومي)",
+      {},
+    ),
+    dueTomorrow: dt("{count:number} مستحقة غدًا", {}),
+
+    demosTitle: "العروض القادمة",
+    demosDesc: "العروض المحجوزة من اليوم وحتى الأيام السبعة القادمة.",
+    demosEmpty: "لا توجد عروض محجوزة هذا الأسبوع.",
+    demoGuestLink: "رابط الضيف",
+    demoRoomPending: "الغرفة قيد التجهيز",
+    demoOpenLead: "فتح العميل",
+
+    stagesTitle: "خط المبيعات حسب المرحلة",
+    stagesDesc: "أين يقف كل عميل محتمل الآن.",
+    stagesEmpty: "لا يوجد عملاء محتملون بعد.",
+
+    touchesTitle: "التواصل اليومي",
+    touchesDesc: "المكالمات ورسائل واتساب المرسلة خلال آخر 14 يومًا.",
+    touchesAverage: dt("{avg:number} يوميًا في المتوسط", {}),
+    touchesBar: "{date}: {count}",
+
+    risksTitle: "مخاطر",
+    risksDesc: "عملاء يحتاجون إلى حذر قبل الرسالة التالية.",
+    riskAutoPark: "متابعتان دون رد",
+    riskAutoParkHint:
+      "لا ترسل رسالة واتساب ثالثة. أوقفه مؤقتًا أو اتصل بدلًا من ذلك.",
+    riskNoNumber: "بلا رقم",
+    riskNoNumberHint: "لا يمكن الوصول إليه حتى يتوفر رقم.",
+    riskWhatsapp: "واتساب غير مؤكد",
+    riskWhatsappHint: "اتصل أولًا؛ قد لا تصل الرسالة.",
+
+    recentLeads: "أحدث العملاء الواردين",
+    recentLeadsDesc: dt("{count:number} طلب تواصل هذا الشهر", {}),
     noLeads: "لا يوجد عملاء محتملون بعد. ستظهر هنا الطلبات من نموذج التواصل.",
   },
   work: {
@@ -662,6 +711,9 @@ export default {
     settingName00020: "سر Webhook لـ Gateling Meetings",
     settingDesc00020:
       "سر الـ Webhook الصادر مع مفتاح API؛ يتحقق من إشعارات انتهاء الغرف المرسلة إلى ‎/api/meetings-webhook. حتى يتم ضبطه تُرفض الإشعارات بالرمز 503 ويُعاد إرسالها.",
+    settingName00021: "بداية دورة المبيعات",
+    settingDesc00021:
+      "اليوم الأول لدورة المبيعات الحالية (بصيغة YYYY-MM-DD وبتوقيت النشاط). لا تحتسب مؤشرات لوحة التحكم إلا الأنشطة المسجلة من ذلك اليوم ولمدة 14 يومًا.",
     settingsSecretSet: "محفوظ (مخفي)",
     settingsSecretNotSet: "غير محدد",
     settingsSecretPlaceholder: "الصق قيمة جديدة لاستبدال القيمة المحفوظة",
@@ -680,7 +732,8 @@ export default {
     apiKeysSalesEndpoint: "نقطة MCP للمبيعات",
     apiKeysScopes: "الصلاحيات",
     apiKeysScopeContent: "المحتوى",
-    apiKeysScopeContentHint: "كتابة دراسات الحالة والمقالات والخدمات والشهادات.",
+    apiKeysScopeContentHint:
+      "كتابة دراسات الحالة والمقالات والخدمات والشهادات.",
     apiKeysScopeSales: "المبيعات",
     apiKeysScopeSalesHint:
       "قراءة العملاء المحتملين، بما في ذلك الأسماء وأرقام الهواتف، وتسجيل نتائج المكالمات. تُرسل هذه البيانات إلى خدمة الذكاء الاصطناعي التي يعمل عليها الوكيل: امنحها فقط لوكيل تثق به في بيانات العملاء.",
