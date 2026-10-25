@@ -204,19 +204,71 @@ export default {
   },
   dashboard: {
     title: "Dashboard",
-    lead: "Portfolio activity, new leads, and content at a glance.",
-    newLeadsThisMonth: "New leads",
-    newLeadsThisMonthDesc: "Contact form submissions this month",
-    activeSubscribers: "Subscribers",
-    activeSubscribersDesc: "Active newsletter subscribers",
-    publishedCaseStudies: "Case studies",
-    publishedCaseStudiesDesc: "Published success stories",
-    publishedBlogPosts: "Blog posts",
-    publishedBlogPostsDesc: "Published articles",
-    activeServices: "Services",
-    activeServicesDesc: "Active service offerings",
-    recentLeads: "Recent leads",
-    recentLeadsDesc: "Latest contact form submissions",
+    lead: "Sales at a glance: the sprint, today's work and what's coming up.",
+    salesLoadFailed:
+      "Couldn't load the sales numbers. Refresh the page to try again.",
+    openToday: "Open Today's Work",
+
+    sprintTitle: "Sprint scorecard",
+    sprintDesc:
+      "Distinct leads per gate metric, counting only activities logged during the sprint.",
+    sprintNotSet:
+      "Set the sprint's day 1 in Settings (Sales Sprint Start) to start the scorecard.",
+    sprintOpenSettings: "Open settings",
+    sprintDay: dt("Day {day:number} of {total:number}", {}),
+    sprintUpcoming: "Starts {date}",
+    sprintEnded: "Sprint over. Run the day-14 gate.",
+    trackAtelier: "Ateliers",
+    trackDistributor: "Distributors",
+    metricContacted: "Contacted",
+    metricReplied: "Replied",
+    metricBooked: "Demos booked",
+    metricHeld: "Demos held",
+    metricDeposits: "Deposits",
+    contactProgress: dt("{done:number} of {target:number} contacted", {}),
+    paceNeeded: dt("Needs {pace:number} a day to reach the target", {}),
+    targetMet: "Contact target met",
+    conversion: dt("{rate:number}% of previous step", {}),
+
+    workloadTitle: "Today's work",
+    workloadDesc: "What Today's Work is asking for right now.",
+    workloadClear: "Nothing waiting. Add leads or check back tomorrow.",
+    newQueueCapped: dt(
+      "{shown:number} of {total:number} shown (daily cap)",
+      {},
+    ),
+    dueTomorrow: dt("{count:number} due tomorrow", {}),
+
+    demosTitle: "Upcoming demos",
+    demosDesc: "Booked demos from today through the next 7 days.",
+    demosEmpty: "No demos booked this week.",
+    demoGuestLink: "Guest link",
+    demoRoomPending: "Room pending",
+    demoOpenLead: "Open lead",
+
+    stagesTitle: "Pipeline by stage",
+    stagesDesc: "Where every prospect sits right now.",
+    stagesEmpty: "No prospects yet.",
+
+    touchesTitle: "Daily touches",
+    touchesDesc: "Calls and WhatsApp messages sent, last 14 days.",
+    touchesAverage: dt("{avg:number} a day on average", {}),
+    touchesBar: "{date}: {count}",
+
+    risksTitle: "Risks",
+    risksDesc: "Leads that need care before the next message.",
+    riskAutoPark: "Chased twice, no reply",
+    riskAutoParkHint: "No third WhatsApp. Park or call instead.",
+    riskNoNumber: "No number",
+    riskNoNumberHint: "Can't be reached until a number is found.",
+    riskWhatsapp: "WhatsApp not confirmed",
+    riskWhatsappHint: "Call first; a message may not arrive.",
+
+    recentLeads: "Recent inbound leads",
+    recentLeadsDesc: dt(
+      "{count:number} contact-form submissions this month",
+      {},
+    ),
     noLeads:
       "No leads yet. Submissions from the contact form will appear here.",
   },
@@ -675,6 +727,9 @@ export default {
     settingName00020: "Meetings Webhook Secret",
     settingDesc00020:
       "Webhook secret issued with the API key; verifies room-ended deliveries to /api/meetings-webhook. Until it is set, deliveries are answered 503 and retried.",
+    settingName00021: "Sales Sprint Start",
+    settingDesc00021:
+      "Day 1 of the current sales sprint (YYYY-MM-DD, business timezone). The dashboard scorecard counts only activities logged from that day for 14 days.",
     settingsSecretSet: "Set (hidden)",
     settingsSecretNotSet: "Not set",
     settingsSecretPlaceholder: "Paste a new value to replace the stored one",
@@ -693,7 +748,8 @@ export default {
     apiKeysSalesEndpoint: "Sales MCP endpoint",
     apiKeysScopes: "Access",
     apiKeysScopeContent: "Content",
-    apiKeysScopeContentHint: "Write case studies, blog posts, services and testimonials.",
+    apiKeysScopeContentHint:
+      "Write case studies, blog posts, services and testimonials.",
     apiKeysScopeSales: "Sales",
     apiKeysScopeSalesHint:
       "Read prospects, including names and phone numbers, and log call outcomes. That data is sent to whichever AI service runs the agent: grant only to an agent you trust with customer data.",

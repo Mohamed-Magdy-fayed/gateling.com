@@ -39,6 +39,7 @@ export const SYSTEM_SETTING_CODE = {
   MEETINGS_API_URL: "00018",
   MEETINGS_API_KEY: "00019",
   MEETINGS_WEBHOOK_SECRET: "00020",
+  SALES_SPRINT_START: "00021",
 } as const;
 
 export type SystemSettingCode =
@@ -65,6 +66,7 @@ export const SYSTEM_SETTING_CODES: SystemSettingCode[] = [
   SYSTEM_SETTING_CODE.MEETINGS_API_URL,
   SYSTEM_SETTING_CODE.MEETINGS_API_KEY,
   SYSTEM_SETTING_CODE.MEETINGS_WEBHOOK_SECRET,
+  SYSTEM_SETTING_CODE.SALES_SPRINT_START,
 ];
 
 export type SystemSettingDefinition = {
@@ -90,7 +92,8 @@ export type SystemSettingDefinition = {
     | "settingName00017"
     | "settingName00018"
     | "settingName00019"
-    | "settingName00020";
+    | "settingName00020"
+    | "settingName00021";
   descriptionKey:
     | "settingDesc00001"
     | "settingDesc00002"
@@ -111,7 +114,8 @@ export type SystemSettingDefinition = {
     | "settingDesc00017"
     | "settingDesc00018"
     | "settingDesc00019"
-    | "settingDesc00020";
+    | "settingDesc00020"
+    | "settingDesc00021";
   descriptionEn: string;
   /**
    * A credential for another system (API token, webhook secret). Never
@@ -152,6 +156,19 @@ export function isAllowedMeetingsApiUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** A real calendar date written as `YYYY-MM-DD` (rejects `2026-02-30`). */
+export function isSprintStartDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return (
+    date.getUTCFullYear() === y &&
+    date.getUTCMonth() === m - 1 &&
+    date.getUTCDate() === d
+  );
 }
 
 export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
@@ -361,6 +378,20 @@ export const SYSTEM_SETTINGS: SystemSettingDefinition[] = [
     isSecret: true,
     editable: { value: true },
     seed: { isActive: true, value: null },
+  },
+  // Day 1 of the current sales sprint (docs/designs/distributor-offer-sell-first.md).
+  // The dashboard scorecard counts only activities logged from this local day
+  // on, so seeded history and pre-sprint work count toward nothing.
+  {
+    code: SYSTEM_SETTING_CODE.SALES_SPRINT_START,
+    label: "policy",
+    nameKey: "settingName00021",
+    descriptionKey: "settingDesc00021",
+    descriptionEn:
+      "Day 1 of the current sales sprint, as YYYY-MM-DD in the business timezone. The dashboard scorecard counts only activities logged from that day for 14 days.",
+    editable: { value: true },
+    seed: { isActive: true, value: null },
+    validateValue: isSprintStartDate,
   },
 ];
 

@@ -14,6 +14,7 @@ why it shares the `leads` table.
 | `/sales/today` | **The point of the module.** Computed call list, five buckets. |
 | `/sales/leads` | Pipeline table on the shared data-table kit: quick-view chips with counts, filters, search, export, bulk close, create, edit. |
 | `/sales/leads/[id]` | Detail + append-only activity timeline. |
+| `/dashboard` | Sales overview (see [Dashboard](#dashboard)) above the recent inbound leads. |
 
 Admin-only. Enforced in three independent places — a route guard alone is not
 authorisation:
@@ -236,6 +237,31 @@ the lead id and cause, and the script exits non-zero.
 |---|---|---|
 | Daily new-dial cap | `00017` | 10 |
 | Business timezone (calling window) | `00003` | `Africa/Cairo` |
+| Sales sprint start (`YYYY-MM-DD`, day 1) | `00021` | unset — the scorecard asks for it |
+
+## Dashboard
+
+`dashboard.getSales` (admin-only, same check as `assertAdmin`) feeds six cards
+from `src/features/system/sales/server/dashboard.ts`; non-admins see only the
+inbound-leads card. All read-only.
+
+- **Sprint scorecard** — the day-14 gate inputs from
+  `docs/designs/distributor-offer-sell-first.md`: distinct leads per metric,
+  activities with `createdAt` in the 14 local days from setting `00021`,
+  atelier and distributor (`businessType = 'distributor'`) never mixed.
+  Deposits are `note` rows whose outcome starts `DEPOSIT` (case-insensitive);
+  `won` status is never counted. Window, pace and conversion maths live in
+  `lib/sprint.ts` (tested). The Atelier Alaa reference record is **not**
+  excluded — the design doc excludes it by id, and no id is recorded.
+- **Today's work** — bucket sizes from `getTodayWork`, so it can't disagree
+  with `/sales/today`.
+- **Upcoming demos** — leads in `demo_scheduled` whose latest `demo_scheduled`
+  log's `nextActionAt` falls from today's local midnight to now + 7 days.
+- **Risks** — Auto-park bucket size, `blocked_no_number`, and open contactable
+  prospects with `whatsappStatus = 'not_confirmed'`.
+- **Pipeline by stage** — `getPipelineCounters().byStatus`.
+- **Daily touches** — `whatsapp_sent`/`call`/`no_answer`/`call_unclear`
+  per business-local day by `occurredAt`, last 14 days.
 
 Calling window: ateliers open ~11:00–12:00, close ~22:00–23:00. Before 12:00
 Cairo the page shows a banner advising WhatsApp instead of calls. It advises —
