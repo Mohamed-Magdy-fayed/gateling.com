@@ -13,6 +13,11 @@ import {
 
 type Props = { lead: SocialLeadFields; className?: string };
 
+/** A bare username gets an `@`; a URL or a page name (Facebook) is shown as is. */
+function isUsername(handle: string): boolean {
+  return /^[w.-]+$/.test(handle);
+}
+
 /**
  * The lead's social profiles as a compact list inside the Up-next card: what
  * research found, or a Google search (name + platform + address) to find it.
@@ -65,10 +70,11 @@ function SocialProfileRow({ profile }: { profile: SocialProfile }) {
         {found ? (
           <>
             {found.handle && (
-              <span dir="ltr" className="truncate text-start font-mono text-sm">
-                {found.handle.startsWith("http")
-                  ? found.handle
-                  : `@${found.handle}`}
+              <span
+                dir={isUsername(found.handle) ? "ltr" : "auto"}
+                className="truncate text-start font-mono text-sm"
+              >
+                {isUsername(found.handle) ? `@${found.handle}` : found.handle}
               </span>
             )}
             {(found.followers !== null || found.posts !== null) && (
