@@ -17,7 +17,6 @@ import { canSave } from "@/features/system/sales/lib/today-session";
 import { TodayProgress } from "./components/today-progress";
 import { TodayQueue } from "./components/today-queue";
 import { TodayShortcutsDialog } from "./components/today-shortcuts-dialog";
-import { TodaySocialProfiles } from "./components/today-social-profiles";
 import { TodayUpNextCard } from "./components/today-up-next-card";
 import { useTodaySession } from "./hooks/use-today-session";
 
@@ -220,10 +219,6 @@ export function SalesTodayPage({ callingWindow }: Props) {
               </Card>
             )}
           </section>
-
-          {upNext && (
-            <TodaySocialProfiles key={upNext.row.lead.id} lead={upNext.row.lead} />
-          )}
 
           <TodayQueue
             groups={view.groups}

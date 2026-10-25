@@ -111,13 +111,26 @@ missing ones"): each `get_today` item's `socialProfiles` shows every platform
 as `found`, `notFound` or `missing`, with a ready Google `searchUrl` for the
 business name + platform + address (`get_lead` has the raw `socialProfiles`).
 
-1. Search for the business by name and area. Accept a profile only when the
-   name, location, phone or bio clearly match this atelier — a similarly named
-   shop elsewhere is not a match. If unsure, ask the operator.
-2. `set_social_profile` with `found` and the figures as shown on the profile
-   today, or `notFound` when nothing matches. Do not guess follower counts.
-3. Record public business-profile facts only — no details about individuals.
-4. Report back in one line per platform.
+Research all three platforms every time — a lead with one profile on file
+usually has the others too.
+
+1. **Start from what is already known.** Open every `found` profile and read
+   its links: a Facebook Page's *Details / Contact info* lists its Instagram
+   and TikTok accounts, an Instagram bio links its website or Linktree, a
+   TikTok bio names its Instagram. Accounts linked from the business's own
+   profile are the strongest match.
+2. **Then search for each platform still missing**: the business name + area,
+   and its phone number (Egyptian pages often show it). Accept a profile only
+   when the name, location, phone or linked accounts clearly match this
+   atelier — a similarly named shop elsewhere is not a match. If unsure, ask
+   the operator.
+3. **Open each profile you accept** and read the figures as shown today:
+   followers, posts, a short bio. Do not guess counts; leave a figure out if
+   it is not shown.
+4. `set_social_profile` once per platform: `found` with the profile `url`,
+   or `notFound` only after steps 1 and 2 both came up empty.
+5. Record public business-profile facts only — no details about individuals.
+6. Report back in one line per platform, saying where each link came from.
 
 Re-researching a `found` profile replaces it with fresh numbers.
 

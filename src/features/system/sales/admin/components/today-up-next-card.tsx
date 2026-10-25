@@ -29,6 +29,7 @@ import { toWhatsAppUrl } from "@/lib/phone";
 import { OutcomeButtons, OutcomeTimePicker } from "./outcome-buttons";
 import { QuickLogPopover } from "./quick-log-popover";
 import { reasonText } from "./today-reason";
+import { TodaySocialProfiles } from "./today-social-profiles";
 
 type Props = {
   item: SessionItem;
@@ -230,9 +231,14 @@ export function TodayUpNextCard({
 
   return (
     <Card className="shadow-md ring-primary/20">
-      <CardContent className="flex flex-col gap-5">
+      {/*
+        One column on small screens (socials sit between contact and outcomes,
+        so they are there before the call). From xl, socials take the right
+        column beside sections 1–4; the last row absorbs any extra height.
+      */}
+      <CardContent className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-rows-[auto_auto_auto_1fr] xl:gap-x-8">
         {/* 1. Who */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 xl:col-start-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-xl">
               <Link href={`/sales/leads/${lead.id}`} className="hover:underline">
@@ -250,7 +256,7 @@ export function TodayUpNextCard({
         </div>
 
         {/* 2. Why now */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 xl:col-start-1">
           <p className="text-sm">{reasonText(item.row.reason, t)}</p>
           {item.row.openingAngle && (
             <p className="text-muted-foreground text-sm">{item.row.openingAngle}</p>
@@ -258,7 +264,7 @@ export function TodayUpNextCard({
         </div>
 
         {/* 3. Contact zone */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 xl:col-start-1">
           {lead.phone && (
             <div className="flex flex-wrap items-center gap-2">
               <span dir="ltr" className="font-mono font-semibold text-2xl tabular-nums">
@@ -309,8 +315,14 @@ export function TodayUpNextCard({
           )}
         </div>
 
+        {/* Research: where to look before or during the contact. */}
+        <TodaySocialProfiles
+          lead={lead}
+          className="flex flex-col gap-1 border-t pt-3 xl:col-start-2 xl:row-span-4 xl:row-start-1 xl:border-t-0 xl:border-s xl:ps-6 xl:pt-0"
+        />
+
         {/* 4. How did it go */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 xl:col-start-1 xl:self-start">
           {item.bucket !== "autoPark" && (
             <ButtonGroup aria-label={t("sales.channelLabel")}>
               {(["call", "whatsapp"] as const).map((value) => (
@@ -356,7 +368,7 @@ export function TodayUpNextCard({
         </div>
 
         {/* 5. Tertiary */}
-        <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+        <div className="flex flex-wrap items-center gap-2 border-t pt-3 xl:col-span-2">
           <Button
             variant="ghost"
             size="sm"
