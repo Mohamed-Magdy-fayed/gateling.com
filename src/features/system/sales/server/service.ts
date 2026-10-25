@@ -8,6 +8,7 @@ import {
   type LeadActivity,
   type LeadActivityType,
   type LeadPipelineStatus,
+  type LeadSocialProfiles,
   LeadsTable,
 } from "@/drizzle/schema";
 import { SALES_EXPORT_ROW_LIMIT } from "@/features/core/data-table/lib/limits";
@@ -17,6 +18,7 @@ import {
   startOfNextLocalDay,
 } from "@/features/system/sales/lib/day-window";
 import { CONTACT_ACTIVITY_TYPES } from "@/features/system/sales/lib/derived";
+import { largestFollowers } from "@/features/system/sales/lib/social-profiles";
 import {
   isBlockedOutbound,
   shouldDischargePromises,
@@ -36,6 +38,7 @@ import type {
   ListPipelineInput,
   LogActivityInput,
   PipelineFilterInput,
+  SetSocialProfileInput,
   TodayWorkSummary,
   UpdateLeadInput,
 } from "./schemas";
@@ -205,6 +208,60 @@ export async function updateLead(
     .returning({ id: LeadsTable.id });
   // An unknown or non-prospect id must not report success.
   if (updated.length === 0) throw new SalesError("SALES_LEAD_NOT_PROSPECT", id);
+}
+
+/**
+ * Records research for one platform. Read-modify-write under a row lock, so
+ * two agents updating different platforms cannot drop each other's entry, and
+ * `socialFollowers` (the new-queue ranking) moves with the profiles.
+ */
+export async function setSocialProfile(
+  db: Db,
+  input: SetSocialProfileInput,
+  actorId: string,
+): Promise<LeadSocialProfiles> {
+  return db.transaction(async (tx) => {
+    const [lead] = await tx
+      .select({
+        socialProfiles: LeadsTable.socialProfiles,
+        socialFollowers: LeadsTable.socialFollowers,
+      })
+      .from(LeadsTable)
+      .where(and(eq(LeadsTable.id, input.id), prospectScope))
+      .for("update");
+    if (!lead) throw new SalesError("SALES_LEAD_NOT_PROSPECT", input.id);
+
+    const { [input.platform]: _previous, ...others } = lead.socialProfiles;
+    const checkedAt = new Date().toISOString();
+    const socialProfiles: LeadSocialProfiles =
+      input.status === "clear"
+        ? others
+        : {
+            ...others,
+            [input.platform]:
+              input.status === "found"
+                ? {
+                    status: "found",
+                    url: input.url,
+                    handle: input.handle ?? null,
+                    followers: input.followers ?? null,
+                    posts: input.posts ?? null,
+                    bio: input.bio ?? null,
+                    checkedAt,
+                  }
+                : { status: "notFound", checkedAt },
+          };
+
+    await tx
+      .update(LeadsTable)
+      .set({
+        socialProfiles,
+        socialFollowers: largestFollowers(socialProfiles) ?? lead.socialFollowers,
+        updatedBy: actorId,
+      })
+      .where(eq(LeadsTable.id, input.id));
+    return socialProfiles;
+  });
 }
 
 export async function getLead(db: Db, id: string) {
@@ -448,6 +505,10 @@ async function todayLeadInputs(db: Db): Promise<TodayLeadInput[]> {
       whatsappProfileName: LeadsTable.whatsappProfileName,
       tier: LeadsTable.tier,
       socialFollowers: LeadsTable.socialFollowers,
+      socialPlatform: LeadsTable.socialPlatform,
+      socialHandle: LeadsTable.socialHandle,
+      address: LeadsTable.address,
+      socialProfiles: LeadsTable.socialProfiles,
       pipelineStatus: LeadsTable.pipelineStatus,
       doNotContact: LeadsTable.doNotContact,
       notes: LeadsTable.notes,

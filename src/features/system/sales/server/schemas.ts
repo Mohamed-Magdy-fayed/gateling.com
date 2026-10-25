@@ -5,9 +5,11 @@ import {
   leadActivityTypeValues,
   leadPipelineStatusValues,
   leadTierValues,
+  socialPlatformValues,
   whatsappStatusValues,
 } from "@/drizzle/schema";
 import { BULK_ACTION_LIMIT } from "@/features/core/data-table/lib/limits";
+import { isPlatformUrl } from "@/features/system/sales/lib/social-profiles";
 import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
 
 /**
@@ -137,6 +139,38 @@ export const todayWorkSchema = z.object({
   newQueueCap: z.number().int().min(0).max(100).optional(),
 });
 export type TodayWorkInput = z.infer<typeof todayWorkSchema>;
+
+/**
+ * Recording what research found for a lead on one platform. `found` needs the
+ * profile link on that platform's own domain; `notFound` records a search that
+ * came up empty; `clear` removes a wrong entry. The server stamps `checkedAt`.
+ */
+/** Largest Postgres `integer`; `socialFollowers` is one. */
+const PG_INT_MAX = 2_147_483_647;
+
+const socialProfileTarget = {
+  id: z.string().uuid(),
+  platform: z.enum(socialPlatformValues),
+};
+export const setSocialProfileSchema = z
+  .discriminatedUnion("status", [
+    z.object({
+      ...socialProfileTarget,
+      status: z.literal("found"),
+      url: z.url({ protocol: /^https?$/ }).max(512),
+      handle: z.string().trim().min(1).max(255).optional().nullable(),
+      followers: z.number().int().min(0).max(PG_INT_MAX).optional().nullable(),
+      posts: z.number().int().min(0).max(PG_INT_MAX).optional().nullable(),
+      bio: z.string().trim().max(1000).optional().nullable(),
+    }),
+    z.object({ ...socialProfileTarget, status: z.literal("notFound") }),
+    z.object({ ...socialProfileTarget, status: z.literal("clear") }),
+  ])
+  .refine((input) => input.status !== "found" || isPlatformUrl(input.platform, input.url), {
+    message: "url must be a profile link on the chosen platform",
+    path: ["url"],
+  });
+export type SetSocialProfileInput = z.infer<typeof setSocialProfileSchema>;
 
 /**
  * `sales.today`: the buckets plus what the page needs to show progress for the
