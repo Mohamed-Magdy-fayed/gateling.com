@@ -172,11 +172,18 @@ function toRow(lead: TodayLeadInput, reason: TodayReason, now: Date): TodayRow {
 /**
  * Bucket every lead, in priority order. A lead lands in at most one bucket —
  * the first it matches — so the page never asks for the same call twice.
+ *
+ * `dayStart` freezes the list for the business day: staleness is judged as of
+ * the day start, so nothing crosses a threshold while the list is being
+ * worked, and a lead contacted today is done for the day. Only a promised
+ * follow-up (Overdue) still surfaces later the same day, when it falls due.
+ * Defaults to `now`, which judges everything against the current moment.
  */
 export function computeTodayBuckets(
   leads: readonly TodayLeadInput[],
   now: Date,
   config: TodayRulesConfig = DEFAULT_TODAY_RULES_CONFIG,
+  dayStart: Date = now,
 ): TodayBuckets {
   const rescue: TodayRow[] = [];
   const overdue: TodayRow[] = [];
@@ -187,11 +194,16 @@ export function computeTodayBuckets(
   for (const lead of leads) {
     if (isSuppressed(lead)) continue;
 
+    const contactedToday =
+      lead.lastContactedAt !== null &&
+      lead.lastContactedAt.getTime() >= dayStart.getTime();
+
     // 1. Rescue — someone said yes and is going cold. Most perishable.
     if (
+      !contactedToday &&
       lead.pipelineStatus === "demo_agreed" &&
       !lead.hasDemoScheduledActivity &&
-      isStalerThan(now, lead.lastContactedAt, config.rescueStaleDays)
+      isStalerThan(dayStart, lead.lastContactedAt, config.rescueStaleDays)
     ) {
       rescue.push(
         toRow(
@@ -223,10 +235,13 @@ export function computeTodayBuckets(
       continue;
     }
 
+    // Worked today: done until tomorrow, unless a promise above fell due.
+    if (contactedToday) continue;
+
     // 3. Follow-up due — warm but unanswered, still under the safety limit.
     if (
       lead.pipelineStatus === "awaiting_reply" &&
-      isStalerThan(now, lead.lastContactedAt, config.followUpStaleDays) &&
+      isStalerThan(dayStart, lead.lastContactedAt, config.followUpStaleDays) &&
       lead.followUpCount < config.followUpMaxCount
     ) {
       followUp.push(

@@ -370,3 +370,76 @@ describe("the seeded CSV shape reproduces the expected counts", () => {
     expect(bucketById(result, "followUp").rows).toHaveLength(7);
   });
 });
+
+/**
+ * Today is frozen per business day: everything is judged as of the local day
+ * start, and a lead contacted today is done for the day. Without this the list
+ * grew while it was being worked — leads crossed a threshold mid-afternoon and
+ * a lead chased a second time dropped straight into Auto-park.
+ */
+describe("frozen per business day", () => {
+  /** Cairo midnight before NOW (12:00Z) — 15 hours earlier. */
+  const DAY_START = new Date("2026-08-16T21:00:00.000Z");
+
+  function bucketsOf(leads: TodayLeadInput[]) {
+    return computeTodayBuckets(leads, NOW, DEFAULT_TODAY_RULES_CONFIG, DAY_START);
+  }
+
+  it("does not move a lead chased for the second time today into Auto-park", () => {
+    const chased = lead({
+      pipelineStatus: "awaiting_reply",
+      lastContactedAt: new Date(NOW.getTime() - HOUR),
+      followUpCount: 2,
+    });
+    expect(bucketsOf([chased]).totalActionable).toBe(0);
+  });
+
+  it("does not resurface any lead contacted earlier today", () => {
+    const contactedToday = new Date(DAY_START.getTime() + HOUR);
+    const leads = [
+      lead({ id: "rescue", pipelineStatus: "demo_agreed", lastContactedAt: contactedToday }),
+      lead({ id: "new", pipelineStatus: "new", lastContactedAt: contactedToday }),
+      lead({ id: "park", pipelineStatus: "awaiting_reply", lastContactedAt: contactedToday, followUpCount: 3 }),
+    ];
+    expect(bucketsOf(leads).totalActionable).toBe(0);
+  });
+
+  it("does not add a follow-up that only goes stale during the day", () => {
+    // Stale against NOW (3 days + 1h), not yet stale at the day start.
+    const goesStaleToday = lead({
+      pipelineStatus: "awaiting_reply",
+      lastContactedAt: daysAgo(3, HOUR),
+      followUpCount: 1,
+    });
+    expect(bucketById(bucketsOf([goesStaleToday]), "followUp").rows).toHaveLength(0);
+  });
+
+  it("keeps a follow-up that was already stale when the day started", () => {
+    const staleAtDayStart = lead({
+      pipelineStatus: "awaiting_reply",
+      lastContactedAt: new Date(DAY_START.getTime() - 3 * DAY - HOUR),
+      followUpCount: 1,
+    });
+    const [row] = bucketById(bucketsOf([staleAtDayStart]), "followUp").rows;
+    // Days since contact is still told against the current time.
+    expect(row.daysSinceLastContact).toBe(3);
+  });
+
+  it("still shows a callback promised for later today once it is due", () => {
+    const callback = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: new Date(DAY_START.getTime() + HOUR),
+      nextActionAt: new Date(NOW.getTime() - HOUR),
+    });
+    expect(bucketById(bucketsOf([callback]), "overdue").rows).toHaveLength(1);
+  });
+
+  it("judges against the current time when no day start is given", () => {
+    const goesStaleToday = lead({
+      pipelineStatus: "awaiting_reply",
+      lastContactedAt: daysAgo(3, HOUR),
+      followUpCount: 1,
+    });
+    expect(bucketById(computeTodayBuckets([goesStaleToday], NOW), "followUp").rows).toHaveLength(1);
+  });
+});
