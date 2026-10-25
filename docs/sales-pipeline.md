@@ -12,7 +12,7 @@ why it shares the `leads` table.
 | Route | Purpose |
 |---|---|
 | `/sales/today` | **The point of the module.** Computed call list, five buckets. |
-| `/sales/leads` | Full prospect table: filter, search, create, edit. |
+| `/sales/leads` | Pipeline table on the shared data-table kit: quick-view chips with counts, filters, search, export, bulk close, create, edit. |
 | `/sales/leads/[id]` | Detail + append-only activity timeline. |
 
 Admin-only. Enforced in three independent places — a route guard alone is not
@@ -40,6 +40,7 @@ src/features/system/sales/
   server/errors.ts       ← `SalesError` + router mapping
   server/recompute.ts    ← shared with the CLIs (NOT server-only — see below)
   cli/recompute-derived.ts ← `npm run sales:recompute`
+  server/filters.ts      ← pipeline grid where/sort (whitelisted column ids)
   server/schemas.ts      ← Zod inputs, shared by router and any future caller
   server/router.ts       ← thin tRPC wrapper: authorise, delegate
   admin/                 ← pages and components
@@ -181,10 +182,39 @@ Every activity goes through `logActivity` (own transaction) or
 | `SALES_LEAD_NOT_PROSPECT` | `NOT_FOUND` | id is unknown or not `kind = 'prospect'` |
 | `SALES_DO_NOT_CONTACT` | `PRECONDITION_FAILED` | outbound type (`call`, `no_answer`, `call_unclear`, `whatsapp_sent`) on a do-not-contact lead |
 
+Bulk status changes (`sales.bulkSetStatus`) take at most `BULK_ACTION_LIMIT`
+(100) ids, run every lead through `logActivityInTx` / `parkLeadInTx` in one
+transaction with a 10 s statement timeout, and so either all apply or none do.
+An unexpected failure is logged with a correlation id that the toast shows.
+
 On the Today page a not-found save drops the lead from the session with a
 "no longer in the pipeline" toast; a do-not-contact save rolls back with its
 own toast; any other failure rolls back (the lead returns, Up next if it was)
 with a Retry action.
+
+## Pipeline table
+
+`/sales/leads` uses the same kit as the users table: `useTableUrlState` keeps
+paging, sorting, filters and search in the URL, and `server/filters.ts` turns
+the grid input into SQL. Only whitelisted column ids filter or sort; anything
+else is ignored. Search covers name (both scripts), both phones, city, area and
+the WhatsApp profile name, with `%`, `_` and `` stripped. Default order is
+newest first (new batches are worked from the top); empty last-contact,
+next-action and follower values sort last either way.
+
+- **Quick views** (All · Needs follow-up · Demos · Won · Parked/lost) are chips
+  that replace only the status filter and show live counts. The counter strip
+  moved here from Today.
+- **Row actions:** Log (the quick-log popover), Open, WhatsApp, Edit, Park.
+  Do-not-contact rows show a badge, render the phone as plain text and
+  disable Log and WhatsApp.
+- **Bulk:** Park or Mark lost, confirmed with the count first.
+- **Export:** the filtered set (or the selection), capped at
+  `SALES_EXPORT_ROW_LIMIT` (5,000; lead rows are wide). A capped export is
+  named `sales-pipeline-truncated-5000.csv` and the page says so. Cells are
+  formula-guarded by the shared CSV writer.
+- Activity log lines: `sales.export` (user, count, filter ids — never the
+  search text) and `sales.bulk` (user, status, count).
 
 ## Recomputing derived values
 
@@ -280,8 +310,6 @@ This module intentionally does not follow the standard entity pattern:
   the pipeline table needs bespoke filters.
 - Plain controlled form instead of the `useAppForm` stack — internal tool, no
   validation nuance beyond "name is required", server re-validates with Zod.
-- Bespoke table instead of the shared `DataTable` — the Today view is the daily
-  surface; this one exists for search and edit.
 
 ## Demo meetings
 
@@ -305,7 +333,9 @@ draft messages, log outcomes. It never sends anything. Guide:
 AI lead scoring (leave room for a `lead_scores` table — do not
 create it) · automated lead research · sending email/WhatsApp from the app ·
 reporting beyond the counter strip · closing a demo room when a lead is
-parked or lost.
+parked or lost · bulk actions over a whole filtered set (selection only) ·
+saved views (the URL and quick-view chips cover it) · an "Export selected"
+button (export already prefers the selection).
 
 Deferred by the sales workspace redesign
 ([designs/sales-workspace-redesign.md](designs/sales-workspace-redesign.md)):

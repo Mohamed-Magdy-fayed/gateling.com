@@ -24,13 +24,23 @@ import {
 import { createCallerFactory } from "@/integrations/trpc/init";
 import { appRouter } from "@/integrations/trpc/routers/_app";
 
-import { createLeadSchema, listPipelineSchema, updateLeadSchema } from "./schemas";
+import {
+  createLeadSchema,
+  type ListPipelineInput,
+  leadTierSchema,
+  pipelineStatusSchema,
+  updateLeadSchema,
+  whatsappStatusSchema,
+} from "./schemas";
 
 const SERVER_INFO = { name: "gateling-sales", version: "1.0.0" };
 const GUIDE_URI = "docs://sales-mcp";
 const LOG_TAG = "[api/mcp/sales]";
 
-const OUTCOME_IDS = ALL_OUTCOMES.map((o) => o.id) as [OutcomeId, ...OutcomeId[]];
+const OUTCOME_IDS = ALL_OUTCOMES.map((o) => o.id) as [
+  OutcomeId,
+  ...OutcomeId[],
+];
 
 const leadIdInput = z.object({ leadId: z.string().uuid() });
 
@@ -47,8 +57,48 @@ const addNoteInput = z.object({
   note: z.string().trim().min(1).max(4000),
 });
 
+/**
+ * `list_leads` keeps a flat, self-describing input for agents; `toGridInput`
+ * translates it into the column-filter shape the pipeline grid uses.
+ */
+const listLeadsInput = z.object({
+  page: z.number().int().min(1).default(1),
+  perPage: z.number().int().min(1).max(100).default(20),
+  search: z.string().trim().max(200).optional(),
+  pipelineStatus: z.array(pipelineStatusSchema).max(20).optional(),
+  tier: z.array(leadTierSchema).max(10).optional(),
+  whatsappStatus: z.array(whatsappStatusSchema).max(10).optional(),
+  city: z.string().trim().max(128).optional(),
+  businessType: z.string().trim().max(255).optional(),
+});
+
+function toGridInput(input: z.infer<typeof listLeadsInput>): ListPipelineInput {
+  const filters = [
+    ["pipelineStatus", input.pipelineStatus],
+    ["tier", input.tier],
+    ["whatsappStatus", input.whatsappStatus],
+    ["city", input.city],
+    ["businessType", input.businessType],
+  ] as const;
+  return {
+    page: input.page,
+    perPage: input.perPage,
+    sorting: [],
+    globalFilter: input.search,
+    columnFilters: filters
+      .filter(([, value]) =>
+        Array.isArray(value) ? value.length > 0 : Boolean(value),
+      )
+      .map(([id, value]) => ({ id, value })),
+  };
+}
+
 /** Lead data partly comes from scraped sources, so an agent may only link out to http(s). */
-const agentSourceUrl = z.url({ protocol: /^https?$/ }).max(4000).optional().nullable();
+const agentSourceUrl = z
+  .url({ protocol: /^https?$/ })
+  .max(4000)
+  .optional()
+  .nullable();
 
 /**
  * Status moves only through outcomes (so the timeline records them), and
@@ -59,7 +109,12 @@ const agentLeadCreate = createLeadSchema
   .omit({ pipelineStatus: true, doNotContact: true, ownerId: true })
   .extend({ sourceUrl: agentSourceUrl });
 const agentLeadUpdate = updateLeadSchema
-  .omit({ pipelineStatus: true, doNotContact: true, ownerId: true, notes: true })
+  .omit({
+    pipelineStatus: true,
+    doNotContact: true,
+    ownerId: true,
+    notes: true,
+  })
   .extend({ sourceUrl: agentSourceUrl });
 
 const createCaller = createCallerFactory(appRouter);
@@ -70,7 +125,10 @@ const createCaller = createCallerFactory(appRouter);
  * admin who owns the key. It never sends a message — the operator does,
  * and the agent logs what happened. No delete tools.
  */
-export function buildSalesMcpServer(actor: ApiKeyActor, t: Translate): McpServer {
+export function buildSalesMcpServer(
+  actor: ApiKeyActor,
+  t: Translate,
+): McpServer {
   const caller = createCaller(callerContext(actor, t));
   const server = new McpServer(SERVER_INFO, {
     instructions:
@@ -108,9 +166,9 @@ export function buildSalesMcpServer(actor: ApiKeyActor, t: Translate): McpServer
   readTool(
     "list_leads",
     "List leads",
-    "The whole pipeline, paged and filterable by status, tier, city and WhatsApp status, with a global search.",
-    listPipelineSchema,
-    (input) => caller.sales.list(input),
+    "The whole pipeline, newest first, paged. Filters (each optional, combined with AND): statuses, tiers and WhatsApp statuses (any of the listed values), city and business type (partial match), and a search over name, phone, city, area and WhatsApp profile name.",
+    listLeadsInput,
+    (input) => caller.sales.list(toGridInput(input)),
   );
 
   readTool(
@@ -130,9 +188,18 @@ export function buildSalesMcpServer(actor: ApiKeyActor, t: Translate): McpServer
       const outcome = outcomeById(id);
       if (outcome.kind === "park") {
         await caller.sales.park({ leadId, reason: note });
-        return { logged: true, outcome: id, pipelineStatus: outcome.pipelineStatus };
+        return {
+          logged: true,
+          outcome: id,
+          pipelineStatus: outcome.pipelineStatus,
+        };
       }
-      const result = outcomeToLogInput(outcome, leadId, at ? new Date(at) : null, new Date());
+      const result = outcomeToLogInput(
+        outcome,
+        leadId,
+        at ? new Date(at) : null,
+        new Date(),
+      );
       if (!result.ok) {
         throw new TRPCError({ code: "BAD_REQUEST", message: result.error });
       }
@@ -140,7 +207,12 @@ export function buildSalesMcpServer(actor: ApiKeyActor, t: Translate): McpServer
         ...result.input,
         ...(note ? { notes: note } : {}),
       });
-      return { logged: true, outcome: id, activityId, pipelineStatus: outcome.pipelineStatus };
+      return {
+        logged: true,
+        outcome: id,
+        activityId,
+        pipelineStatus: outcome.pipelineStatus,
+      };
     },
     // Some outcomes close the lead: clients should confirm with the operator.
     { destructive: true },

@@ -1,17 +1,6 @@
 import "server-only";
 
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
@@ -21,6 +10,7 @@ import {
   type LeadPipelineStatus,
   LeadsTable,
 } from "@/drizzle/schema";
+import { SALES_EXPORT_ROW_LIMIT } from "@/features/core/data-table/lib/limits";
 import {
   dueTomorrowWindow,
   startOfLocalDay,
@@ -38,11 +28,14 @@ import {
 } from "@/features/system/sales/lib/today-rules";
 
 import { SalesError } from "./errors";
+import { buildPipelineWhere, pipelineSortExpr } from "./filters";
 import { type Executor, recomputeLeadDerived } from "./recompute";
 import type {
+  BulkSetStatusInput,
   CreateLeadInput,
   ListPipelineInput,
   LogActivityInput,
+  PipelineFilterInput,
   TodayWorkSummary,
   UpdateLeadInput,
 } from "./schemas";
@@ -236,33 +229,33 @@ export async function getLead(db: Db, id: string) {
   return { lead, activities };
 }
 
+/**
+ * The columns the pipeline grid shows and exports. Inbound-only fields
+ * (email, message, UTM, IP) never leave the server for a prospect row.
+ */
+const pipelineGridSelect = {
+  id: LeadsTable.id,
+  name: LeadsTable.name,
+  nameAr: LeadsTable.nameAr,
+  city: LeadsTable.city,
+  area: LeadsTable.area,
+  phone: LeadsTable.phone,
+  phoneSecondary: LeadsTable.phoneSecondary,
+  whatsappStatus: LeadsTable.whatsappStatus,
+  whatsappProfileName: LeadsTable.whatsappProfileName,
+  tier: LeadsTable.tier,
+  businessType: LeadsTable.businessType,
+  socialFollowers: LeadsTable.socialFollowers,
+  pipelineStatus: LeadsTable.pipelineStatus,
+  doNotContact: LeadsTable.doNotContact,
+  followUpCount: LeadsTable.followUpCount,
+  lastContactedAt: LeadsTable.lastContactedAt,
+  nextActionAt: LeadsTable.nextActionAt,
+  createdAt: LeadsTable.createdAt,
+};
+
 export async function listPipeline(db: Db, input: ListPipelineInput) {
-  const conditions = [prospectScope];
-
-  if (input.pipelineStatus !== "all") {
-    conditions.push(eq(LeadsTable.pipelineStatus, input.pipelineStatus));
-  }
-  if (input.tier !== "all") {
-    conditions.push(eq(LeadsTable.tier, input.tier));
-  }
-  if (input.whatsappStatus !== "all") {
-    conditions.push(eq(LeadsTable.whatsappStatus, input.whatsappStatus));
-  }
-  if (input.city?.trim()) {
-    conditions.push(ilike(LeadsTable.city, `%${input.city.trim()}%`));
-  }
-
-  let where = and(...conditions);
-  if (input.globalFilter?.trim()) {
-    const like = `%${input.globalFilter.trim()}%`;
-    const textWhere = or(
-      ilike(LeadsTable.name, like),
-      ilike(LeadsTable.nameAr, like),
-      ilike(LeadsTable.phone, like),
-      ilike(LeadsTable.phoneSecondary, like),
-    );
-    where = and(where, textWhere);
-  }
+  const where = buildPipelineWhere(input);
 
   const [{ total }] = await db
     .select({ total: count() })
@@ -273,32 +266,71 @@ export async function listPipeline(db: Db, input: ListPipelineInput) {
   const page = Math.min(input.page, pageCount);
 
   const rows = await db
-    .select()
+    .select(pipelineGridSelect)
     .from(LeadsTable)
     .where(where)
-    .orderBy(...orderForPipeline(input))
+    .orderBy(...pipelineSortExpr(input.sorting))
     .limit(input.perPage)
     .offset((page - 1) * input.perPage);
 
   return { rows, pageCount, total: Number(total) };
 }
 
-function orderForPipeline(input: ListPipelineInput) {
-  const first = input.sorting[0];
-  if (first?.id === "name") {
-    return [first.desc ? desc(LeadsTable.name) : asc(LeadsTable.name)];
-  }
-  if (first?.id === "tier") {
-    return [first.desc ? desc(LeadsTable.tier) : asc(LeadsTable.tier)];
-  }
-  if (first?.id === "lastContactedAt") {
-    return [
-      first.desc
-        ? desc(LeadsTable.lastContactedAt)
-        : asc(LeadsTable.lastContactedAt),
-    ];
-  }
-  return [desc(LeadsTable.createdAt)];
+/**
+ * Every row matching the grid's filters, up to `limit`. Fetches one extra row
+ * so the caller can tell a complete export from a truncated one.
+ */
+export async function exportPipeline(
+  db: Db,
+  input: PipelineFilterInput,
+  limit: number = SALES_EXPORT_ROW_LIMIT,
+) {
+  const rows = await db
+    .select(pipelineGridSelect)
+    .from(LeadsTable)
+    .where(buildPipelineWhere(input))
+    .orderBy(...pipelineSortExpr(input.sorting))
+    .limit(limit + 1);
+
+  const truncated = rows.length > limit;
+  return { rows: truncated ? rows.slice(0, limit) : rows, truncated, limit };
+}
+
+const BULK_PARK_REASON = "Parked from the pipeline (bulk)";
+const BULK_LOST_REASON = "Marked lost from the pipeline (bulk)";
+
+/**
+ * Close many leads at once. Each lead gets its own `status_change` activity
+ * (parks go through `parkLeadInTx`), all in one transaction: an unknown or
+ * non-prospect id rolls the whole batch back, so the result is all or nothing.
+ */
+export async function bulkSetStatus(
+  db: Db,
+  input: BulkSetStatusInput,
+  actorId: string,
+): Promise<{ updated: number }> {
+  const ids = [...new Set(input.ids)];
+  await db.transaction(async (tx) => {
+    // Bounds how long a slow batch can hold its row locks.
+    await tx.execute(sql`set local statement_timeout = '10s'`);
+    for (const leadId of ids) {
+      if (input.status === "parked") {
+        await parkLeadInTx(tx, leadId, actorId, BULK_PARK_REASON);
+      } else {
+        await logActivityInTx(
+          tx,
+          {
+            leadId,
+            type: "status_change",
+            outcome: BULK_LOST_REASON,
+            pipelineStatus: "lost",
+          },
+          actorId,
+        );
+      }
+    }
+  });
+  return { updated: ids.length };
 }
 
 /**
@@ -320,7 +352,10 @@ export async function getTodayWork(
   ]);
 
   return {
-    ...computeTodayBuckets(leads, now, { ...DEFAULT_TODAY_RULES_CONFIG, newQueueCap }),
+    ...computeTodayBuckets(leads, now, {
+      ...DEFAULT_TODAY_RULES_CONFIG,
+      newQueueCap,
+    }),
     ...stats,
     timeZone: settings.timeZone,
     newQueueCap,
@@ -349,8 +384,14 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
   const [row] = await db
     .select({
       doneToday: sql<number>`count(distinct ${A.leadId})`.mapWith(Number),
-      conversationsToday: sql<number>`count(distinct ${A.leadId}) filter (where ${inArray(A.type, CONVERSATION_TODAY_TYPES)})`.mapWith(Number),
-      demosBookedToday: sql<number>`count(distinct ${A.leadId}) filter (where ${A.type} = 'demo_scheduled')`.mapWith(Number),
+      conversationsToday:
+        sql<number>`count(distinct ${A.leadId}) filter (where ${inArray(A.type, CONVERSATION_TODAY_TYPES)})`.mapWith(
+          Number,
+        ),
+      demosBookedToday:
+        sql<number>`count(distinct ${A.leadId}) filter (where ${A.type} = 'demo_scheduled')`.mapWith(
+          Number,
+        ),
       // First contact ever falls today — a lead first reached yesterday and
       // again today is not a new lead.
       newTouchedToday: sql<number>`(

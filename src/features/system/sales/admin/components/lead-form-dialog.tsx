@@ -371,3 +371,53 @@ function Text({
     </div>
   );
 }
+
+type LeadRecord = {
+  id: string;
+  name: string;
+  nameAr: string | null;
+  city: string | null;
+  area: string | null;
+  address: string | null;
+  phone: string | null;
+  phoneSecondary: string | null;
+  whatsappStatus: LeadFormValues["whatsappStatus"];
+  whatsappProfileName: string | null;
+  tier: "A" | "B" | "C" | null;
+  socialPlatform: string | null;
+  socialHandle: string | null;
+  socialFollowers: number | null;
+  branchCount: number | null;
+  businessType: string | null;
+  sourceUrl: string | null;
+  pipelineStatus: LeadFormValues["pipelineStatus"];
+  doNotContact: boolean;
+  notes: string | null;
+};
+
+/** A stored lead as the form edits it. */
+export function leadToFormValues(lead: LeadRecord): LeadFormValues {
+  return {
+    id: lead.id,
+    name: lead.name,
+    nameAr: lead.nameAr ?? "",
+    city: lead.city ?? "",
+    area: lead.area ?? "",
+    address: lead.address ?? "",
+    phone: lead.phone ?? "",
+    phoneSecondary: lead.phoneSecondary ?? "",
+    whatsappStatus: lead.whatsappStatus,
+    whatsappProfileName: lead.whatsappProfileName ?? "",
+    tier: lead.tier ?? "none",
+    socialPlatform: lead.socialPlatform ?? "",
+    socialHandle: lead.socialHandle ?? "",
+    socialFollowers:
+      lead.socialFollowers != null ? String(lead.socialFollowers) : "",
+    branchCount: lead.branchCount != null ? String(lead.branchCount) : "",
+    businessType: lead.businessType ?? "",
+    sourceUrl: lead.sourceUrl ?? "",
+    pipelineStatus: lead.pipelineStatus,
+    doNotContact: lead.doNotContact,
+    notes: lead.notes ?? "",
+  };
+}
