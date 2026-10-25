@@ -68,6 +68,29 @@ export default {
     copyNumber: "Copy number",
     numberCopied: "Number copied.",
     copyFailed: "Could not copy the number.",
+
+    // Social profiles (Up next).
+    socialTitle: "Social profiles",
+    socialPlatform: dt("{platform:enum}", {
+      enum: {
+        platform: {
+
+          instagram: "Instagram",
+
+          facebook: "Facebook",
+
+          tiktok: "TikTok",
+
+        },
+      },
+    }),
+    socialPosts: "Posts",
+    socialCheckedAt: dt("Checked {date}", {}),
+    socialNotFound: "Searched — no account found.",
+    socialNotOnFile: "Not on file yet.",
+    socialSearchGoogle: "Search on Google",
+    socialOpenProfile: "Open profile",
+
     channelLabel: "Channel",
     channel: dt("{channel:enum}", {
       enum: { channel: { call: "Call", whatsapp: "WhatsApp" } },
