@@ -1,5 +1,6 @@
 import type {
   LeadPipelineStatus,
+  LeadSocialProfiles,
   LeadTier,
   WhatsappStatus,
 } from "@/drizzle/schema";
@@ -28,6 +29,10 @@ export type TodayLeadInput = {
   whatsappProfileName: string | null;
   tier: LeadTier | null;
   socialFollowers: number | null;
+  socialPlatform: string | null;
+  socialHandle: string | null;
+  address: string | null;
+  socialProfiles: LeadSocialProfiles;
   pipelineStatus: LeadPipelineStatus;
   doNotContact: boolean;
   notes: string | null;

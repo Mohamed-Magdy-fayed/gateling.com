@@ -66,6 +66,29 @@ export default {
     copyNumber: "نسخ الرقم",
     numberCopied: "تم نسخ الرقم.",
     copyFailed: "تعذّر نسخ الرقم.",
+
+    // حسابات التواصل (التالي).
+    socialTitle: "حسابات التواصل الاجتماعي",
+    socialPlatform: dt("{platform:enum}", {
+      enum: {
+        platform: {
+
+          instagram: "إنستجرام",
+
+          facebook: "فيسبوك",
+
+          tiktok: "تيك توك",
+
+        },
+      },
+    }),
+    socialPosts: "المنشورات",
+    socialCheckedAt: dt("آخر تحقق {date}", {}),
+    socialNotFound: "تم البحث — لا يوجد حساب.",
+    socialNotOnFile: "غير مسجّل بعد.",
+    socialSearchGoogle: "ابحث على جوجل",
+    socialOpenProfile: "فتح الحساب",
+
     channelLabel: "القناة",
     channel: dt("{channel:enum}", {
       enum: { channel: { call: "اتصال", whatsapp: "واتساب" } },

@@ -2,6 +2,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -81,6 +82,30 @@ export const leadTierValues = ["A", "B", "C"] as const;
 export type LeadTier = (typeof leadTierValues)[number];
 export const leadTierEnum = pgEnum("lead_tier", leadTierValues);
 
+export const socialPlatformValues = ["instagram", "facebook", "tiktok"] as const;
+export type SocialPlatform = (typeof socialPlatformValues)[number];
+
+/**
+ * What was found for a prospect on one platform. `notFound` records that it
+ * was searched for and does not exist, so nobody searches again; `checkedAt`
+ * says how fresh the numbers are (they are researched, never synced).
+ */
+export type LeadSocialProfile =
+  | {
+      status: "found";
+      url: string;
+      handle: string | null;
+      followers: number | null;
+      posts: number | null;
+      bio: string | null;
+      checkedAt: string;
+    }
+  | { status: "notFound"; checkedAt: string };
+
+export type LeadSocialProfiles = Partial<
+  Record<SocialPlatform, LeadSocialProfile>
+>;
+
 export const LeadsTable = pgTable(
   "leads",
   {
@@ -119,6 +144,15 @@ export const LeadsTable = pgTable(
     socialPlatform: varchar({ length: 64 }),
     socialHandle: varchar({ length: 255 }),
     socialFollowers: integer(),
+    /**
+     * One entry per platform, keyed by `SocialPlatform`, written by research
+     * (the sales MCP `set_social_profile` tool). The single
+     * `socialPlatform`/`socialHandle` pair above is still written by the form
+     * and CSV import; readers fall back to it for a platform with no entry.
+     * Setting a profile raises `socialFollowers` to the largest found count,
+     * because the new queue ranks by it.
+     */
+    socialProfiles: jsonb().$type<LeadSocialProfiles>().notNull().default({}),
     branchCount: integer(),
     /** Free text for now: rental / sale / both. */
     businessType: varchar({ length: 255 }),

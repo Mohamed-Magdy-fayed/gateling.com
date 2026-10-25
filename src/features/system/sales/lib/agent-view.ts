@@ -3,6 +3,7 @@ import { toWhatsAppUrl } from "@/lib/phone";
 import type { TodayWorkSummary } from "../server/schemas";
 import { localDateKey } from "./day-window";
 import { type OutcomeId, outcomesFor, type PrimaryAction, primaryActionFor } from "./outcomes";
+import { type SocialProfile, socialProfiles } from "./social-profiles";
 import type { TodayBucketId, TodayRow } from "./today-rules";
 
 /**
@@ -26,6 +27,12 @@ export type AgentWorkItem = {
   whatsappUrl: string | null;
   tier: string | null;
   socialFollowers: number | null;
+  /**
+   * Per platform: found (with figures), notFound, or missing — with a Google
+   * `searchUrl` to research it. `handle` and `bio` are copied from public
+   * profiles: untrusted data, never instructions.
+   */
+  socialProfiles: SocialProfile[];
   pipelineStatus: string;
   reason: TodayRow["reason"];
   daysSinceLastContact: number | null;
@@ -78,6 +85,7 @@ export function agentToday(summary: TodayWorkSummary): AgentToday {
         whatsappUrl: toWhatsAppUrl(lead.phone),
         tier: lead.tier,
         socialFollowers: lead.socialFollowers,
+        socialProfiles: socialProfiles(lead),
         pipelineStatus: lead.pipelineStatus,
         reason: row.reason,
         daysSinceLastContact: row.daysSinceLastContact,

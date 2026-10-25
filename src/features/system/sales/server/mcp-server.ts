@@ -7,6 +7,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { socialPlatformValues } from "@/drizzle/schema";
 import type { ApiKeyActor } from "@/features/system/api-keys/server/auth";
 import {
   callerContext,
@@ -116,6 +117,21 @@ const agentLeadUpdate = updateLeadSchema
     notes: true,
   })
   .extend({ sourceUrl: agentSourceUrl });
+
+/**
+ * Flat for agents; the router's schema enforces the per-status shape (a
+ * `found` needs a link on that platform's own domain).
+ */
+const setSocialProfileInput = z.object({
+  leadId: z.string().uuid(),
+  platform: z.enum(socialPlatformValues),
+  status: z.enum(["found", "notFound", "clear"]),
+  url: z.url({ protocol: /^https?$/ }).max(512).optional(),
+  handle: z.string().trim().min(1).max(255).optional(),
+  followers: z.number().int().min(0).max(2_147_483_647).optional(),
+  posts: z.number().int().min(0).max(2_147_483_647).optional(),
+  bio: z.string().trim().max(1000).optional(),
+});
 
 const createCaller = createCallerFactory(appRouter);
 
@@ -233,6 +249,19 @@ export function buildSalesMcpServer(
     "Add a prospect (status `new`). Check `list_leads` with a search first so you do not create a duplicate.",
     agentLeadCreate,
     (input) => caller.sales.create(input),
+  );
+
+  writeTool(
+    "set_social_profile",
+    "Record a social profile",
+    "Save what research found for a lead on one platform (instagram, facebook, tiktok). `found` needs `url` (the profile link on that platform) and should carry the public `handle`, `followers`, `posts` and a short `bio` as they appear today. `notFound` records that a search found no account; `clear` removes a wrong entry. Replaces that platform's previous entry; the server stamps the check time. Only public business-profile facts — never personal details of individuals.",
+    setSocialProfileInput,
+    async ({ leadId, ...profile }) =>
+      caller.sales.setSocialProfile(
+        profile.status === "found"
+          ? { ...profile, id: leadId, status: "found", url: profile.url ?? "" }
+          : { id: leadId, platform: profile.platform, status: profile.status },
+      ),
   );
 
   writeTool(

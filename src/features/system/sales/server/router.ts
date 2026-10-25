@@ -18,6 +18,7 @@ import {
   listPipelineSchema,
   logActivityInputSchema,
   pipelineFilterSchema,
+  setSocialProfileSchema,
   todayWorkSchema,
   updateLeadSchema,
 } from "./schemas";
@@ -137,6 +138,18 @@ export const salesRouter = createTRPCRouter({
           throw toTRPCError(error);
         });
       return { updated: true };
+    }),
+
+  setSocialProfile: protectedProcedure
+    .input(setSocialProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      const socialProfiles = await service
+        .setSocialProfile(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+      return { socialProfiles };
     }),
 
   logActivity: protectedProcedure
