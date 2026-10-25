@@ -177,7 +177,7 @@ export type SetSocialProfileInput = z.infer<typeof setSocialProfileSchema>;
  * business-local day. Counts are distinct prospect leads.
  */
 export type TodayWorkSummary = TodayBuckets & {
-  /** Any activity today — parks and status changes included. */
+  /** Any activity today except notes — parks and status changes included. */
   doneToday: number;
   /** An answered call, a reply, or a demo agreed/booked today. */
   conversationsToday: number;

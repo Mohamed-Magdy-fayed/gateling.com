@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
@@ -409,10 +409,12 @@ export async function getTodayWork(
   ]);
 
   return {
-    ...computeTodayBuckets(leads, now, {
-      ...DEFAULT_TODAY_RULES_CONFIG,
-      newQueueCap,
-    }),
+    ...computeTodayBuckets(
+      leads,
+      now,
+      { ...DEFAULT_TODAY_RULES_CONFIG, newQueueCap },
+      startOfLocalDay(now, settings.timeZone),
+    ),
     ...stats,
     timeZone: settings.timeZone,
     newQueueCap,
@@ -475,6 +477,8 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
       and(
         sql`${A.occurredAt} >= ${dayStart}::timestamptz`,
         sql`${A.occurredAt} < ${dayEnd}::timestamptz`,
+        // A note is research, not work on the lead: it must not count as done.
+        ne(A.type, "note"),
       ),
     );
 
