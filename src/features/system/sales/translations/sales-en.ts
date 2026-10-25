@@ -225,7 +225,7 @@ export default {
     // ─── Pipeline table ──────────────────────────────────────────────────
     leadsTitle: "Sales Pipeline",
     leadsLead: "Every prospect, with the full outreach history.",
-    searchHint: "Search by name or phone",
+    searchHint: "Search name, phone, city or area",
     newLead: "Add lead",
     editLead: "Edit lead",
     createLeadTitle: "Add a prospect",
@@ -242,6 +242,47 @@ export default {
     columnLastContacted: "Last contact",
     columnNextAction: "Next action",
     columnFollowUps: "Follow-ups",
+    columnBusinessType: "Business type",
+    columnCreated: "Added",
+    columnDoNotContact: "Contact",
+    doNotContact: "Do not contact",
+    contactable: "Contactable",
+    untiered: "No tier",
+    overdue: "Overdue",
+    openLead: "Open",
+
+    quickViewsLabel: "Quick views",
+    quickView: dt("{view:enum}", {
+      enum: {
+        view: {
+          all: "All",
+          followUp: "Needs follow-up",
+          demos: "Demos",
+          won: "Won",
+          closed: "Parked / lost",
+        },
+      },
+    }),
+
+    pipelineLoadFailed: "Could not load the pipeline.",
+    pipelineEmptyFiltered: "No leads match these filters.",
+    pipelineEmptyHint: "Add a prospect to start the pipeline.",
+    clearFilters: "Clear filters",
+    exportTruncated: dt(
+      "Only the first {limit:number} rows were exported. Narrow the filters to export the rest.",
+      {},
+    ),
+
+    bulkPark: "Park",
+    bulkLost: "Mark lost",
+    bulkConfirmPark: dt("Park {count:number} leads?", {}),
+    bulkConfirmLost: dt("Mark {count:number} leads as lost?", {}),
+    bulkConfirmBody:
+      "Each lead gets a status change in its timeline, and any open follow-up promise is closed.",
+    bulkConfirm: "Confirm",
+    bulkDone: dt("{count:number} leads updated.", {}),
+    bulkFailed: dt("Nothing changed. Reference: {ref}", {}),
+    bulkLimit: dt("Select at most {limit:number} leads for a bulk action.", {}),
 
     fieldName: "Business name",
     fieldNameAr: "Business name (Arabic)",

@@ -24,8 +24,9 @@ type DataTableExportButtonProps<T> = {
    * Server-mode hook: when no rows are selected, asked to fetch every row
    * matching the current filters/sorting (no pagination). When omitted the
    * export falls back to `table.getFilteredRowModel().rows` (client mode).
+   * May return `{ rows, fileName }` to rename the download (e.g. a capped export).
    */
-  fetchAllRows?: () => Promise<T[]>;
+  fetchAllRows?: () => Promise<T[] | { rows: T[]; fileName?: string }>;
 };
 
 export function DataTableExportButton<T>({
@@ -47,20 +48,27 @@ export function DataTableExportButton<T>({
     try {
       const selected = table.getFilteredSelectedRowModel().rows;
       let rows: T[];
+      let fileName = exportFileName;
 
       if (selected.length > 0) {
         // 1. Selected rows always win.
         rows = selected.map((r) => r.original);
       } else if (fetchAllRows) {
         // 2. Server mode — fetch every match (limit enforced server-side).
-        rows = await fetchAllRows();
+        const fetched = await fetchAllRows();
+        if (Array.isArray(fetched)) {
+          rows = fetched;
+        } else {
+          rows = fetched.rows;
+          fileName = fetched.fileName ?? exportFileName;
+        }
       } else {
         // 3. Client mode — current filter, all pages already in memory.
         rows = table.getFilteredRowModel().rows.map((r) => r.original);
       }
 
       const csv = rowsToCsv(headers, rows.map(getExportRow));
-      downloadCsv(exportFileName, csv);
+      downloadCsv(fileName, csv);
       toast.success(t("dataTable.exportSuccess", { count: rows.length }));
     } catch (err) {
       toast.error(

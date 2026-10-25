@@ -222,7 +222,7 @@ export default {
     // ─── جدول خط المبيعات ─────────────────────────────────────────────────
     leadsTitle: "خط المبيعات",
     leadsLead: "كل عميل محتمل، مع سجل التواصل الكامل.",
-    searchHint: "ابحث بالاسم أو رقم الهاتف",
+    searchHint: "ابحث بالاسم أو الهاتف أو المدينة أو المنطقة",
     newLead: "إضافة عميل محتمل",
     editLead: "تعديل العميل المحتمل",
     createLeadTitle: "إضافة عميل محتمل",
@@ -239,6 +239,53 @@ export default {
     columnLastContacted: "آخر تواصل",
     columnNextAction: "الإجراء التالي",
     columnFollowUps: "المتابعات",
+    columnBusinessType: "نوع النشاط",
+    columnCreated: "تاريخ الإضافة",
+    columnDoNotContact: "التواصل",
+    doNotContact: "عدم التواصل",
+    contactable: "يمكن التواصل",
+    untiered: "بدون فئة",
+    overdue: "متأخر",
+    openLead: "فتح",
+
+    quickViewsLabel: "عروض سريعة",
+    quickView: dt("{view:enum}", {
+      enum: {
+        view: {
+          all: "الكل",
+          followUp: "بحاجة إلى متابعة",
+          demos: "العروض التوضيحية",
+          won: "تم الفوز",
+          closed: "مؤجل / خاسر",
+        },
+      },
+    }),
+
+    pipelineLoadFailed: "تعذر تحميل خط المبيعات.",
+    pipelineEmptyFiltered: "لا يوجد عملاء محتملون يطابقون هذه الفلاتر.",
+    pipelineEmptyHint: "أضف عميلًا محتملًا لتبدأ خط المبيعات.",
+    clearFilters: "مسح الفلاتر",
+    exportTruncated: dt(
+      "تم تصدير أول {limit:number} صف فقط. ضيّق الفلاتر لتصدير الباقي.",
+      {},
+    ),
+
+    bulkPark: "تأجيل",
+    bulkLost: "تحديد كخاسر",
+    bulkConfirmPark: dt("تأجيل {count:number} من العملاء المحتملين؟", {}),
+    bulkConfirmLost: dt(
+      "تحديد {count:number} من العملاء المحتملين كخاسرين؟",
+      {},
+    ),
+    bulkConfirmBody:
+      "يُسجَّل تغيير الحالة في السجل الزمني لكل عميل، وتُغلق أي متابعة موعودة مفتوحة.",
+    bulkConfirm: "تأكيد",
+    bulkDone: dt("تم تحديث {count:number} من العملاء المحتملين.", {}),
+    bulkFailed: dt("لم يتغير شيء. المرجع: {ref}", {}),
+    bulkLimit: dt(
+      "اختر {limit:number} عميلًا محتملًا كحد أقصى للإجراء الجماعي.",
+      {},
+    ),
 
     fieldName: "اسم النشاط التجاري",
     fieldNameAr: "اسم النشاط التجاري (بالعربية)",

@@ -1,17 +1,12 @@
 "use client";
 
-import { ChevronDownIcon, KeyboardIcon } from "lucide-react";
+import { KeyboardIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { H1, Lead } from "@/components/ui/typography";
@@ -19,7 +14,6 @@ import { useTranslation } from "@/features/core/i18n/client";
 import { outcomeById } from "@/features/system/sales/lib/outcomes";
 import { canSave } from "@/features/system/sales/lib/today-session";
 
-import { PipelineCounters } from "./components/pipeline-counters";
 import { TodayProgress } from "./components/today-progress";
 import { TodayQueue } from "./components/today-queue";
 import { TodayShortcutsDialog } from "./components/today-shortcuts-dialog";
@@ -118,7 +112,11 @@ export function SalesTodayPage({ callingWindow }: Props) {
         <Alert variant="destructive">
           <AlertDescription className="flex flex-wrap items-center gap-3">
             {t("sales.loadFailed")}
-            <Button variant="outline" size="sm" onClick={() => void query.refetch()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void query.refetch()}
+            >
               {t("sales.retry")}
             </Button>
           </AlertDescription>
@@ -129,7 +127,9 @@ export function SalesTodayPage({ callingWindow }: Props) {
         <Card>
           <CardContent className="flex flex-col items-start gap-2">
             <h2 className="font-semibold text-base">{t("sales.noLeadsYet")}</h2>
-            <p className="text-muted-foreground text-sm">{t("sales.noLeadsYetHint")}</p>
+            <p className="text-muted-foreground text-sm">
+              {t("sales.noLeadsYetHint")}
+            </p>
             <Button
               variant="outline"
               render={(props) => (
@@ -151,7 +151,10 @@ export function SalesTodayPage({ callingWindow }: Props) {
             conversations={summary.conversationsToday}
           />
 
-          <section aria-labelledby="today-up-next-heading" className="flex flex-col gap-3">
+          <section
+            aria-labelledby="today-up-next-heading"
+            className="flex flex-col gap-3"
+          >
             <h2 id="today-up-next-heading" className="font-semibold text-base">
               {t("sales.upNext")}
             </h2>
@@ -168,11 +171,15 @@ export function SalesTodayPage({ callingWindow }: Props) {
                   channel={state.channel[upNext.row.lead.id]}
                   saving={!canSave(state, upNext.row.lead.id)}
                   shortcutsEnabled={shortcutsOn}
-                  onStarted={(channel) => actions.started(upNext.row.lead.id, channel)}
+                  onStarted={(channel) =>
+                    actions.started(upNext.row.lead.id, channel)
+                  }
                   onSwitchChannel={(channel) =>
                     actions.switchChannel(upNext.row.lead.id, channel)
                   }
-                  onSave={(outcome, at) => void actions.save(upNext, outcome, at)}
+                  onSave={(outcome, at) =>
+                    void actions.save(upNext, outcome, at)
+                  }
                   onSkip={() => actions.skip(upNext.row.lead.id)}
                   onHelp={() => setHelpOpen(true)}
                 />
@@ -182,8 +189,12 @@ export function SalesTodayPage({ callingWindow }: Props) {
             {!upNext && view.allSkipped && (
               <Card>
                 <CardContent className="flex flex-col items-start gap-2">
-                  <p className="font-semibold text-base">{t("sales.allSkippedTitle")}</p>
-                  <p className="text-muted-foreground text-sm">{t("sales.allSkippedHint")}</p>
+                  <p className="font-semibold text-base">
+                    {t("sales.allSkippedTitle")}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("sales.allSkippedHint")}
+                  </p>
                   <Button variant="outline" onClick={actions.startOver}>
                     {t("sales.startOver")}
                   </Button>
@@ -194,7 +205,9 @@ export function SalesTodayPage({ callingWindow }: Props) {
             {!upNext && view.allDone && (
               <Card>
                 <CardContent className="flex flex-col items-start gap-2">
-                  <p className="font-semibold text-base">{t("sales.allDoneTitle")}</p>
+                  <p className="font-semibold text-base">
+                    {t("sales.allDoneTitle")}
+                  </p>
                   <p className="text-muted-foreground text-sm">
                     {t("sales.allDoneRecap", {
                       conversations: summary.conversationsToday,
@@ -214,24 +227,11 @@ export function SalesTodayPage({ callingWindow }: Props) {
             saving={false}
             onPromote={actions.promote}
             onStart={actions.started}
-            onPark={(item) => void actions.save(item, outcomeById("park"), null)}
+            onPark={(item) =>
+              void actions.save(item, outcomeById("park"), null)
+            }
             onSkip={actions.skip}
           />
-
-          {/* Moves to the Pipeline page with Part A. */}
-          <Collapsible>
-            <CollapsibleTrigger
-              render={(props) => (
-                <Button variant="ghost" size="sm" {...props}>
-                  {t("sales.pipelineSummary")}
-                  <ChevronDownIcon aria-hidden="true" />
-                </Button>
-              )}
-            />
-            <CollapsibleContent className="pt-3">
-              <PipelineCounters />
-            </CollapsibleContent>
-          </Collapsible>
         </>
       )}
 

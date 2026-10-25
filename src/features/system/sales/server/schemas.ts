@@ -7,6 +7,7 @@ import {
   leadTierValues,
   whatsappStatusValues,
 } from "@/drizzle/schema";
+import { BULK_ACTION_LIMIT } from "@/features/core/data-table/lib/limits";
 import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
 
 /**
@@ -98,21 +99,38 @@ export const logActivityInputSchema = logActivitySchema.refine(
   { message: "demo_time_required", path: ["nextActionAt"] },
 );
 
-export const listPipelineSchema = z.object({
+/**
+ * The shared data-table grid shape (same as the users table): column ids in
+ * `sorting` and `columnFilters` are interpreted by `server/filters.ts`, which
+ * ignores ids it does not know.
+ */
+export const pipelineFilterSchema = z.object({
+  sorting: z
+    .array(z.object({ id: z.string().max(64), desc: z.boolean() }))
+    .max(8)
+    .default([]),
+  globalFilter: z.string().max(200).optional(),
+  columnFilters: z
+    .array(z.object({ id: z.string().max(64), value: z.unknown() }))
+    .max(20)
+    .default([]),
+});
+export type PipelineFilterInput = z.infer<typeof pipelineFilterSchema>;
+
+export const listPipelineSchema = pipelineFilterSchema.extend({
   page: z.number().int().min(1).default(1),
   perPage: z.number().int().min(1).max(100).default(20),
-  sorting: z.array(z.object({ id: z.string(), desc: z.boolean() })).default([]),
-  globalFilter: z.string().optional(),
-  pipelineStatus: z
-    .union([pipelineStatusSchema, z.literal("all")])
-    .default("all"),
-  tier: z.union([leadTierSchema, z.literal("all")]).default("all"),
-  city: z.string().trim().max(128).optional(),
-  whatsappStatus: z
-    .union([whatsappStatusSchema, z.literal("all")])
-    .default("all"),
 });
 export type ListPipelineInput = z.infer<typeof listPipelineSchema>;
+
+/** Statuses a bulk action may set: closing moves only, never a stage jump. */
+export const bulkStatusValues = ["parked", "lost"] as const;
+
+export const bulkSetStatusSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(BULK_ACTION_LIMIT),
+  status: z.enum(bulkStatusValues),
+});
+export type BulkSetStatusInput = z.infer<typeof bulkSetStatusSchema>;
 
 export const todayWorkSchema = z.object({
   /** Overrides the daily new-queue cap for this request only. */
