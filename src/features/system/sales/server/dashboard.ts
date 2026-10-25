@@ -89,12 +89,19 @@ const emptyScore = (): SprintScore => ({
   deposits: 0,
 });
 
-/** Distinct leads per gate metric and track, for activities created in `[start, end)`. */
-async function sprintScores(
-  db: Db,
+/**
+ * Group by output position, not by repeating the expression. Drizzle binds a
+ * parameter inside the expression again for GROUP BY (`$1` in SELECT, `$2` in
+ * GROUP BY), and Postgres then refuses to treat the two as the same column.
+ */
+const BY_FIRST_COLUMN = sql`1`;
+
+/** The scorecard aggregate, separate so its SQL shape can be tested without a database. */
+export function sprintScoresQuery(
+  db: Pick<Db, "select">,
   start: Date,
   end: Date,
-): Promise<Record<SprintTrack, SprintScore>> {
+) {
   const metricFilter = (
     id: SprintMetricId,
     types: readonly LeadActivityType[],
@@ -117,20 +124,30 @@ async function sprintScores(
 
   const track = sql<SprintTrack>`case when ${LeadsTable.businessType} = ${DISTRIBUTOR_BUSINESS_TYPE} then 'distributor' else 'atelier' end`;
 
-  const rows = await db
-    .select({ track, ...columns })
-    .from(A)
-    .innerJoin(LeadsTable, and(eq(LeadsTable.id, A.leadId), prospectScope))
-    // The design doc's window is on `createdAt`: backdated logs entered before
-    // the sprint must not count, and in-sprint logs of earlier calls must.
-    .where(
-      and(
-        sql`${A.createdAt} >= ${start.toISOString()}::timestamptz`,
-        sql`${A.createdAt} < ${end.toISOString()}::timestamptz`,
-      ),
-    )
-    .groupBy(track);
+  return (
+    db
+      .select({ track, ...columns })
+      .from(A)
+      .innerJoin(LeadsTable, and(eq(LeadsTable.id, A.leadId), prospectScope))
+      // The design doc's window is on `createdAt`: backdated logs entered before
+      // the sprint must not count, and in-sprint logs of earlier calls must.
+      .where(
+        and(
+          sql`${A.createdAt} >= ${start.toISOString()}::timestamptz`,
+          sql`${A.createdAt} < ${end.toISOString()}::timestamptz`,
+        ),
+      )
+      .groupBy(BY_FIRST_COLUMN)
+  );
+}
 
+/** Distinct leads per gate metric and track, for activities created in `[start, end)`. */
+async function sprintScores(
+  db: Db,
+  start: Date,
+  end: Date,
+): Promise<Record<SprintTrack, SprintScore>> {
+  const rows = await sprintScoresQuery(db, start, end);
   const scores: Record<SprintTrack, SprintScore> = {
     atelier: emptyScore(),
     distributor: emptyScore(),
@@ -195,9 +212,19 @@ async function dailyTouches(
     new Date(now.getTime() - (TOUCH_CHART_DAYS - 1) * MS_PER_DAY),
     timeZone,
   );
+  const rows = await dailyTouchesQuery(db, since, timeZone);
+  return fillDailySeries(keys, rows);
+}
+
+/** The touches aggregate, separate so its SQL shape can be tested without a database. */
+export function dailyTouchesQuery(
+  db: Pick<Db, "select">,
+  since: Date,
+  timeZone: string,
+) {
   const day = sql<string>`to_char(${A.occurredAt} at time zone ${timeZone}, 'YYYY-MM-DD')`;
 
-  const rows = await db
+  return db
     .select({ day, count: count() })
     .from(A)
     .innerJoin(LeadsTable, and(eq(LeadsTable.id, A.leadId), prospectScope))
@@ -207,9 +234,7 @@ async function dailyTouches(
         sql`${A.occurredAt} >= ${since.toISOString()}::timestamptz`,
       ),
     )
-    .groupBy(day);
-
-  return fillDailySeries(keys, rows);
+    .groupBy(BY_FIRST_COLUMN);
 }
 
 /** Open, contactable prospects whose WhatsApp was checked and isn't there. */
