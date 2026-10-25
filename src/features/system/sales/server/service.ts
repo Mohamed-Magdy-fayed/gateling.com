@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
@@ -568,7 +568,9 @@ export async function getPipelineCounters(
       .select({ count: count() })
       .from(LeadsTable)
       .where(
-        and(prospectScope, sql`${LeadsTable.lastContactedAt} >= ${weekAgo}`),
+        // `gte`, not a raw `sql` fragment: postgres-js cannot bind a bare Date
+        // there, while the column's own mapper serialises it.
+        and(prospectScope, gte(LeadsTable.lastContactedAt, weekAgo)),
       ),
   ]);
 
