@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useId, useState } from "react";
+import { type ReactNode, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,43 +18,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Textarea } from "@/components/ui/textarea";
-import type { LeadLocation } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { parseMapsEmbed } from "@/features/system/sales/lib/maps-embed";
 import { useTRPC } from "@/integrations/trpc/client";
+
+/** The lead's stored Maps listing, as the dialog edits it. */
+export type MapsListing = {
+  address: string | null;
+  mapsEmbedSrc: string | null;
+  mapsCategory: string | null;
+  mapsRating: number | null;
+  mapsReviewCount: number | null;
+};
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   leadId: string;
-  /** Omit to add; provide to edit. */
-  location?: LeadLocation;
-  /** Adding the first location makes it the main one regardless. */
-  isFirst: boolean;
+  listing: MapsListing;
 };
 
 type Values = {
   embed: string;
   removeMap: boolean;
-  name: string;
   address: string;
   category: string;
   rating: string;
   reviewCount: string;
-  isPrimary: boolean;
 };
 
-function initialValues(location?: LeadLocation): Values {
+function initialValues(listing: MapsListing): Values {
   return {
     embed: "",
     removeMap: false,
-    name: location?.name ?? "",
-    address: location?.address ?? "",
-    category: location?.category ?? "",
-    rating: location?.rating != null ? String(location.rating) : "",
+    address: listing.address ?? "",
+    category: listing.mapsCategory ?? "",
+    rating: listing.mapsRating != null ? String(listing.mapsRating) : "",
     reviewCount:
-      location?.reviewCount != null ? String(location.reviewCount) : "",
-    isPrimary: false,
+      listing.mapsReviewCount != null ? String(listing.mapsReviewCount) : "",
   };
 }
 
@@ -67,108 +68,73 @@ function toNumber(value: string, integer: boolean): number | null {
 }
 
 /**
- * Add or edit one Google Maps location. The operator pastes the listing's
- * Share › Embed a map HTML; the name is pre-filled from it, and the Maps
- * numbers are typed as the listing shows them. Same plain controlled form as
- * `LeadFormDialog` — the server re-validates everything, embed included.
+ * Edit the client's Google Maps listing: paste the Share › Embed a map HTML
+ * and copy the numbers as the listing shows them. Same plain controlled form
+ * as `LeadFormDialog` — the server re-validates everything, embed included.
  */
-export function LocationDialog({
+export function MapsListingDialog({
   open,
   onOpenChange,
   leadId,
-  location,
-  isFirst,
+  listing,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const [values, setValues] = useState<Values>(() => initialValues(location));
+  const [values, setValues] = useState<Values>(() => initialValues(listing));
   const embedId = useId();
   const embedHintId = useId();
   const embedErrorId = useId();
 
   useEffect(() => {
-    if (open) setValues(initialValues(location));
-  }, [open, location]);
+    if (open) setValues(initialValues(listing));
+  }, [open, listing]);
 
-  const onSuccess = async () => {
-    toast.success(t("sales.account.locationSaved"));
-    await queryClient.invalidateQueries({
-      queryKey: trpc.sales.byId.pathKey(),
-    });
-    onOpenChange(false);
-  };
-  const onError = () => toast.error(t("sales.account.locationSaveFailed"));
-  const add = useMutation(
-    trpc.sales.addLocation.mutationOptions({ onSuccess, onError }),
+  const mutation = useMutation(
+    trpc.sales.setMapsListing.mutationOptions({
+      onSuccess: async () => {
+        toast.success(t("sales.account.mapsSaved"));
+        await queryClient.invalidateQueries({
+          queryKey: trpc.sales.byId.pathKey(),
+        });
+        onOpenChange(false);
+      },
+      onError: () => toast.error(t("sales.account.mapsSaveFailed")),
+    }),
   );
-  const update = useMutation(
-    trpc.sales.updateLocation.mutationOptions({ onSuccess, onError }),
-  );
-  const isPending = add.isPending || update.isPending;
 
-  const parsed = values.embed.trim() ? parseMapsEmbed(values.embed) : null;
-  const embedInvalid = values.embed.trim() !== "" && parsed === null;
+  const embedInvalid =
+    values.embed.trim() !== "" && parseMapsEmbed(values.embed) === null;
   const rating = toNumber(values.rating, false);
   const ratingInvalid =
     values.rating.trim() !== "" &&
     (rating === null || rating < 0 || rating > 5);
-  const canSubmit =
-    values.name.trim() !== "" && !embedInvalid && !ratingInvalid && !isPending;
+  const canSubmit = !embedInvalid && !ratingInvalid && !mutation.isPending;
 
   function set<K extends keyof Values>(key: K, value: Values[K]) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function handleEmbedChange(embed: string) {
-    const name = parseMapsEmbed(embed)?.name;
-    setValues((current) => ({
-      ...current,
-      embed,
-      // Only fill an empty name: never overwrite what the operator typed.
-      name: current.name.trim() || !name ? current.name : name,
-    }));
-  }
-
   function handleSubmit() {
-    const fields = {
-      name: values.name.trim(),
+    const embed = values.embed.trim();
+    mutation.mutate({
+      id: leadId,
       address: orNull(values.address),
       category: orNull(values.category),
       rating,
       reviewCount: toNumber(values.reviewCount, true),
-    };
-    const embed = values.embed.trim();
-    if (location) {
-      update.mutate({
-        id: location.id,
-        ...fields,
-        // Empty textarea keeps the current map; "remove map" clears it.
-        ...(embed ? { embed } : values.removeMap ? { embed: null } : {}),
-      });
-    } else {
-      add.mutate({
-        leadId,
-        ...fields,
-        embed: embed || null,
-        isPrimary: values.isPrimary,
-      });
-    }
+      // Empty textarea keeps the current map; "remove map" clears it.
+      ...(embed ? { embed } : values.removeMap ? { embed: null } : {}),
+    });
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            {location
-              ? t("sales.account.editLocation")
-              : isFirst
-                ? t("sales.account.addMainLocation")
-                : t("sales.account.addBranch")}
-          </DialogTitle>
+          <DialogTitle>{t("sales.account.editMaps")}</DialogTitle>
           <DialogDescription>
-            {t("sales.account.locationDialogLead")}
+            {t("sales.account.mapsDialogLead")}
           </DialogDescription>
         </DialogHeader>
 
@@ -182,15 +148,15 @@ export function LocationDialog({
               className="text-start font-mono text-xs"
               placeholder='<iframe src="https://www.google.com/maps/embed?pb=…"></iframe>'
               value={values.embed}
-              onChange={(event) => handleEmbedChange(event.target.value)}
+              onChange={(event) => set("embed", event.target.value)}
               aria-invalid={embedInvalid || undefined}
               aria-describedby={
                 embedInvalid ? `${embedHintId} ${embedErrorId}` : embedHintId
               }
-              data-testid="location-embed-input"
+              data-testid="maps-embed-input"
             />
             <p id={embedHintId} className="text-muted-foreground text-xs">
-              {location?.embedSrc
+              {listing.mapsEmbedSrc
                 ? t("sales.account.embedHintReplace")
                 : t("sales.account.embedHint")}
             </p>
@@ -203,7 +169,7 @@ export function LocationDialog({
                 {t("sales.account.embedInvalid")}
               </p>
             )}
-            {location?.embedSrc && !values.embed.trim() && (
+            {listing.mapsEmbedSrc && !values.embed.trim() && (
               <div className="flex items-center gap-2">
                 <Checkbox
                   id={`${embedId}-remove`}
@@ -219,16 +185,6 @@ export function LocationDialog({
             )}
           </div>
 
-          <Field label={t("sales.account.locationName")}>
-            {(id) => (
-              <Input
-                id={id}
-                value={values.name}
-                onChange={(event) => set("name", event.target.value)}
-                data-testid="location-name-input"
-              />
-            )}
-          </Field>
           <Field label={t("sales.fieldAddress")}>
             {(id) => (
               <Input
@@ -278,21 +234,6 @@ export function LocationDialog({
               )}
             </Field>
           </div>
-
-          {!location && !isFirst && (
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={`${embedId}-primary`}
-                checked={values.isPrimary}
-                onCheckedChange={(checked) =>
-                  set("isPrimary", checked === true)
-                }
-              />
-              <Label htmlFor={`${embedId}-primary`}>
-                {t("sales.account.makeMain")}
-              </Label>
-            </div>
-          )}
         </div>
 
         <DialogFooter>
@@ -302,9 +243,11 @@ export function LocationDialog({
           <Button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            data-testid="location-save"
+            data-testid="maps-save"
           >
-            <LoadingSwap isLoading={isPending}>{t("common.save")}</LoadingSwap>
+            <LoadingSwap isLoading={mutation.isPending}>
+              {t("common.save")}
+            </LoadingSwap>
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -319,7 +262,7 @@ function Field({
 }: {
   label: string;
   error?: string | null;
-  children: (id: string, describedBy: string | undefined) => React.ReactNode;
+  children: (id: string, describedBy: string | undefined) => ReactNode;
 }) {
   const id = useId();
   const errorId = `${id}-error`;

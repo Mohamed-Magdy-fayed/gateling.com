@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { NotebookPenIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -82,7 +83,10 @@ type Props = {
   /** Trigger text; defaults to "Log". */
   triggerLabel?: string;
   /** Up next keeps a single primary button, so it asks for a quieter trigger. */
-  triggerVariant?: "default" | "ghost" | "link";
+  triggerVariant?: "default" | "outline" | "ghost" | "link";
+  /** `lg` adds an icon, matching the lead page's Edit button. */
+  triggerSize?: "sm" | "lg";
+  triggerClassName?: string;
 };
 
 export function QuickLogPopover({
@@ -90,6 +94,8 @@ export function QuickLogPopover({
   onLogged,
   triggerLabel,
   triggerVariant = "default",
+  triggerSize = "sm",
+  triggerClassName,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -161,7 +167,13 @@ export function QuickLogPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={(props) => (
-          <Button size="sm" variant={triggerVariant} {...props}>
+          <Button
+            size={triggerSize}
+            variant={triggerVariant}
+            className={triggerClassName}
+            {...props}
+          >
+            {triggerSize === "lg" && <NotebookPenIcon aria-hidden="true" />}
             {triggerLabel ?? t("sales.quickLog")}
           </Button>
         )}

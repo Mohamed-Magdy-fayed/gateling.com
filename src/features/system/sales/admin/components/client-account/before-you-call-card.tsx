@@ -37,8 +37,6 @@ export function BeforeYouCallCard({ tips }: { tips: CallTip[] }) {
           platform: tip.platform,
           followers: compact.format(tip.followers),
         });
-      case "locations":
-        return t("sales.account.tipLocations", { count: tip.count });
     }
   }
 

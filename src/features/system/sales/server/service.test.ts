@@ -28,6 +28,7 @@ import {
   logActivityInTx,
   parkLead,
   parkLeadInTx,
+  setMapsListing,
   updateLead,
 } from "./service";
 
@@ -438,6 +439,45 @@ describeWithDb("sales service (database)", () => {
         bulkSetStatus(db, { ids: [id, inbound.id], status: "parked" }, ACTOR),
       ).rejects.toMatchObject({ appCode: "SALES_LEAD_NOT_PROSPECT" });
       expect((await leadRow(id)).pipelineStatus).toBe("new");
+    });
+  });
+
+  describe("setMapsListing", () => {
+    const SRC =
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1!2d31.0112!3d30.5571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7%3A0x1a2b!2sSASHA!5e0";
+
+    it("stores only the rebuilt embed, dates the numbers, keeps the rest", async () => {
+      const id = await prospect({ address: "Old address" });
+      await setMapsListing(
+        db,
+        { id, embed: `<iframe src="${SRC}&x=1"></iframe>`, rating: 4.8 },
+        ACTOR,
+      );
+      const row = await leadRow(id);
+      expect(row).toMatchObject({
+        mapsEmbedSrc: SRC,
+        mapsLat: 30.5571,
+        mapsLng: 31.0112,
+        address: "Old address",
+      });
+      expect(row.mapsRating).toBeCloseTo(4.8);
+      expect(row.mapsCheckedAt).toBeInstanceOf(Date);
+
+      await setMapsListing(db, { id, embed: null }, ACTOR);
+      expect(await leadRow(id)).toMatchObject({
+        mapsEmbedSrc: null,
+        mapsLat: null,
+      });
+    });
+
+    it("refuses a non-prospect lead", async () => {
+      await expect(
+        setMapsListing(
+          db,
+          { id: "3f1c2b7e-9a4d-4c1e-8b2a-1d2e3f4a5b6c", rating: 4 },
+          ACTOR,
+        ),
+      ).rejects.toMatchObject({ appCode: "SALES_LEAD_NOT_PROSPECT" });
     });
   });
 });

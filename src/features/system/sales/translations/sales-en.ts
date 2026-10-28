@@ -393,38 +393,24 @@ export default {
       quickActions: "Quick actions",
       noPhone: "No phone on file.",
 
-      reachRating: "Google rating",
       reachTotal: "Total reach",
       followers: "followers",
       reviewsCount: dt("{count:plural}", {
         plural: { count: { one: "{?} review", other: "{?} reviews" } },
       }),
-      locationsCount: dt("{count:plural}", {
-        plural: {
-          count: {
-            zero: "No locations",
-            one: "{?} location",
-            other: "{?} locations",
-          },
-        },
-      }),
 
       mapsHeading: "Google Maps",
+      editMaps: "Edit Google Maps listing",
+      mapsSaved: "Maps listing saved.",
+      mapsSaveFailed: "Could not save the Maps listing.",
+      mapsDialogLead:
+        "Paste the embed and copy what the listing shows. The numbers are a snapshot, dated when you save.",
       mapTitle: dt("Map of {name}", {}),
       mapMissing: "Paste this listing's embed code to show the map here.",
-      noLocations:
-        "No Google Maps listing yet. Add the main shop from its Maps embed.",
       addEmbed: "Add map embed",
-      addMainLocation: "Add main location",
-      addBranch: "Add a branch",
-      editLocation: "Edit location",
       ratingLabel: dt("Rated {rating} out of 5", {}),
-      noRating: "No rating entered",
-      directions: "Directions",
       openInMaps: "Open in Maps",
 
-      locationDialogLead:
-        "Copy what the Google Maps listing shows. The numbers are a snapshot, dated when you save.",
       embedLabel: "Embed code",
       embedHint: "Google Maps › Share › Embed a map › Copy HTML",
       embedHintReplace:
@@ -432,29 +418,10 @@ export default {
       embedInvalid:
         "That is not a Google Maps embed. Copy the HTML from Share › Embed a map.",
       removeMap: "Remove the current map",
-      locationName: "Name",
       category: "Category (as shown on Maps)",
       rating: "Rating (0–5)",
       ratingInvalid: "Enter a rating between 0 and 5.",
       reviews: "Reviews",
-      makeMain: "Make this the main location",
-      locationSaved: "Location saved.",
-      locationSaveFailed: "Could not save the location.",
-      locationRemoveFailed: "Could not remove the location.",
-
-      branches: "Branches",
-      branchesLead: "Every location this client runs, from Google Maps.",
-      mainTag: "Main",
-      branchTag: "Branch",
-      noAddress: "No address entered",
-      locationActions: dt("Actions for {name}", {}),
-      remove: "Remove",
-      mainCannotRemove: "Make another location main to remove this one",
-      removeLocationTitle: "Remove this location?",
-      removeLocationBody: dt(
-        "{name} will be removed from this client's branches.",
-        {},
-      ),
 
       businessAccount: "Business account",
       whatsappNoName: "No WhatsApp name on file",
@@ -484,23 +451,10 @@ export default {
           },
         },
       ),
-      tipLocations: dt(
-        "They run {count:number} locations — ask which one handles bookings.",
-        {},
-      ),
 
       noAccount: "No account found",
       search: "Search",
       editWhatsapp: "Edit WhatsApp details",
-      openProfileOn: dt("Open {platform:enum} profile", {
-        enum: {
-          platform: {
-            facebook: "Facebook",
-            instagram: "Instagram",
-            tiktok: "TikTok",
-          },
-        },
-      }),
       editProfileOn: dt("Edit {platform:enum} profile", {
         enum: {
           platform: {
