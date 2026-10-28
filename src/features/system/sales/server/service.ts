@@ -28,6 +28,7 @@ import {
   startOfNextLocalDay,
 } from "@/features/system/sales/lib/day-window";
 import { CONTACT_ACTIVITY_TYPES } from "@/features/system/sales/lib/derived";
+import { parseMapsEmbed } from "@/features/system/sales/lib/maps-embed";
 import {
   isBlockedOutbound,
   shouldDischargePromises,
@@ -41,7 +42,6 @@ import {
 
 import { SalesError } from "./errors";
 import { buildPipelineWhere, pipelineSortExpr } from "./filters";
-import { listLocations } from "./locations";
 import { type Executor, recomputeLeadDerived } from "./recompute";
 import type {
   BulkSetStatusInput,
@@ -49,6 +49,7 @@ import type {
   ListPipelineInput,
   LogActivityInput,
   PipelineFilterInput,
+  SetMapsListingInput,
   SetSocialProfileInput,
   TodayWorkSummary,
   UpdateLeadInput,
@@ -306,9 +307,46 @@ export async function getLead(db: Db, id: string) {
       desc(LeadActivitiesTable.createdAt),
     );
 
-  const locations = await listLocations(db, id);
+  return { lead, activities };
+}
 
-  return { lead, activities, locations };
+/**
+ * The lead's Google Maps listing. Only the fields sent change; a pasted embed
+ * is re-parsed here and stored as the rebuilt src with its coordinates. Typed
+ * Maps numbers are dated, like researched social numbers.
+ */
+export async function setMapsListing(
+  db: Db,
+  input: SetMapsListingInput,
+  actorId: string,
+): Promise<void> {
+  const { id, embed, rating, reviewCount, category, address } = input;
+  const parsed = embed ? parseMapsEmbed(embed) : null;
+  const embedColumns =
+    embed === undefined
+      ? {}
+      : {
+          mapsEmbedSrc: parsed?.src ?? null,
+          mapsLat: parsed?.lat ?? null,
+          mapsLng: parsed?.lng ?? null,
+        };
+  const numbersTouched =
+    rating !== undefined || reviewCount !== undefined || category !== undefined;
+
+  const updated = await db
+    .update(LeadsTable)
+    .set({
+      ...embedColumns,
+      ...(address !== undefined ? { address } : {}),
+      ...(rating !== undefined ? { mapsRating: rating } : {}),
+      ...(reviewCount !== undefined ? { mapsReviewCount: reviewCount } : {}),
+      ...(category !== undefined ? { mapsCategory: category } : {}),
+      ...(numbersTouched ? { mapsCheckedAt: new Date() } : {}),
+      updatedBy: actorId,
+    })
+    .where(and(eq(LeadsTable.id, id), prospectScope))
+    .returning({ id: LeadsTable.id });
+  if (updated.length === 0) throw new SalesError("SALES_LEAD_NOT_PROSPECT", id);
 }
 
 /**

@@ -1,40 +1,36 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  addLocationSchema,
   createLeadSchema,
+  setMapsListingSchema,
   setSocialProfileSchema,
   updateLeadSchema,
 } from "./schemas";
 
 const ID = "3f1c2b7e-9a4d-4c1e-8b2a-1d2e3f4a5b6c";
 
-describe("addLocationSchema", () => {
-  const base = {
-    leadId: ID,
-    name: "SASHA",
-    address: null,
-    category: null,
-    rating: null,
-    reviewCount: null,
-  };
-
+describe("setMapsListingSchema", () => {
   it("accepts a Google Maps embed and rejects anything else", () => {
     const embed =
       '<iframe src="https://www.google.com/maps/embed?pb=!1m2!2sSASHA"></iframe>';
-    expect(addLocationSchema.safeParse({ ...base, embed }).success).toBe(true);
+    expect(setMapsListingSchema.safeParse({ id: ID, embed }).success).toBe(
+      true,
+    );
     expect(
-      addLocationSchema.safeParse({
-        ...base,
+      setMapsListingSchema.safeParse({
+        id: ID,
         embed: '<iframe src="https://evil.example/maps/embed?pb=!1"></iframe>',
       }).success,
     ).toBe(false);
   });
 
-  it("caps the rating at 5", () => {
+  it("leaves omitted fields out and caps the rating at 5", () => {
+    expect(setMapsListingSchema.parse({ id: ID, rating: 4.7 })).toEqual({
+      id: ID,
+      rating: 4.7,
+    });
     expect(
-      addLocationSchema.safeParse({ ...base, embed: null, rating: 5.5 })
-        .success,
+      setMapsListingSchema.safeParse({ id: ID, rating: 5.5 }).success,
     ).toBe(false);
   });
 });

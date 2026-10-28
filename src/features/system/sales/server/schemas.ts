@@ -205,9 +205,9 @@ function isStoredMediaUrl(value: string): boolean {
 }
 
 /**
- * Google Maps locations, entered by hand. `embed` is whatever the operator
- * pasted from Share › Embed a map: the server keeps only the rebuilt iframe
- * `src` (`lib/maps-embed.ts`). On update, `embed: null` removes the map and an
+ * The lead's Google Maps listing, entered by hand. `embed` is whatever the
+ * operator pasted from Share › Embed a map: the server keeps only the rebuilt
+ * iframe `src` (`lib/maps-embed.ts`). `embed: null` removes the map; an
  * omitted field is left as it is.
  */
 const embedSchema = z
@@ -218,30 +218,15 @@ const embedSchema = z
     message: "invalid_embed",
   });
 
-const locationFields = {
-  name: z.string().trim().min(1).max(255),
-  address: z.string().trim().max(1000).nullable(),
-  category: z.string().trim().max(128).nullable(),
-  rating: z.number().min(0).max(5).nullable(),
-  reviewCount: z.number().int().min(0).max(PG_INT_MAX).nullable(),
-  embed: embedSchema.nullable(),
-};
-
-export const addLocationSchema = z.object({
-  leadId: z.string().uuid(),
-  ...locationFields,
-  /** The first location of a lead is always the main one. */
-  isPrimary: z.boolean().default(false),
+export const setMapsListingSchema = z.object({
+  id: z.string().uuid(),
+  address: z.string().trim().max(1000).nullable().optional(),
+  category: z.string().trim().max(128).nullable().optional(),
+  rating: z.number().min(0).max(5).nullable().optional(),
+  reviewCount: z.number().int().min(0).max(PG_INT_MAX).nullable().optional(),
+  embed: embedSchema.nullable().optional(),
 });
-export type AddLocationInput = z.infer<typeof addLocationSchema>;
-
-export const updateLocationSchema = z
-  .object(locationFields)
-  .partial()
-  .extend({ id: z.string().uuid() });
-export type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
-
-export const locationIdSchema = z.object({ id: z.string().uuid() });
+export type SetMapsListingInput = z.infer<typeof setMapsListingSchema>;
 
 /**
  * `sales.today`: the buckets plus what the page needs to show progress for the

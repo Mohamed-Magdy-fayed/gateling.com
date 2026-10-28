@@ -11,14 +11,12 @@ export type CallTipInput = {
   rating: number | null;
   reviewCount: number | null;
   followers: Partial<Record<SocialPlatform, number | null>>;
-  locationCount: number;
 };
 
 export type CallTip =
   | { kind: "askFor"; name: string }
   | { kind: "rating"; rating: number; reviews: number }
-  | { kind: "topPlatform"; platform: SocialPlatform; followers: number }
-  | { kind: "locations"; count: number };
+  | { kind: "topPlatform"; platform: SocialPlatform; followers: number };
 
 export function callTips(input: CallTipInput): CallTip[] {
   const tips: CallTip[] = [];
@@ -45,11 +43,6 @@ export function callTips(input: CallTipInput): CallTip[] {
     .sort((a, b) => b[1] - a[1])[0];
   if (top)
     tips.push({ kind: "topPlatform", platform: top[0], followers: top[1] });
-
-  // One shop has no "which location books?" question to ask.
-  if (input.locationCount > 1) {
-    tips.push({ kind: "locations", count: input.locationCount });
-  }
 
   return tips;
 }

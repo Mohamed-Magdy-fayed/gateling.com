@@ -1,10 +1,12 @@
 import {
   boolean,
+  doublePrecision,
   index,
   integer,
   jsonb,
   pgEnum,
   pgTable,
+  real,
   text,
   timestamp,
   uuid,
@@ -165,6 +167,23 @@ export const LeadsTable = pgTable(
      * because the new queue ranks by it.
      */
     socialProfiles: jsonb().$type<LeadSocialProfiles>().notNull().default({}),
+
+    // ─── Google Maps listing (one per lead, entered by hand) ─────────────
+    // The operator pastes the listing's Share › Embed a map HTML; only the
+    // rebuilt `https://www.google.com/maps/embed?pb=…` src is kept
+    // (`lib/maps-embed.ts`), with the coordinates it carries. Rating, reviews
+    // and category are typed as Maps shows them; `mapsCheckedAt` dates them.
+    // The listing's address is `address` above.
+    mapsEmbedSrc: text(),
+    mapsLat: doublePrecision(),
+    mapsLng: doublePrecision(),
+    /** 0–5, one decimal, as Maps shows it. */
+    mapsRating: real(),
+    mapsReviewCount: integer(),
+    /** Google's category label, e.g. "Bridal shop". */
+    mapsCategory: varchar({ length: 128 }),
+    mapsCheckedAt: timestamp({ withTimezone: true }),
+
     /** Free text for now: rental / sale / both. */
     businessType: varchar({ length: 255 }),
     sourceUrl: text(),

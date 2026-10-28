@@ -33,6 +33,7 @@
   --color-brand-tiktok-red: var(--brand-tiktok-red);
   --color-brand-whatsapp: var(--brand-whatsapp);
   --color-brand-google-star: var(--brand-google-star);
+  --color-brand-google-maps: var(--brand-google-maps);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -115,6 +116,7 @@
   --brand-tiktok-red: #fe2c55;
   --brand-whatsapp: #25d366;
   --brand-google-star: #fbbc04;
+  --brand-google-maps: #ea4335;
   --chart-1: oklch(0.5583 0.1276 42.9956);
   --chart-2: oklch(0.6898 0.1581 290.4107);
   --chart-3: oklch(0.8816 0.0276 93.128);
@@ -187,6 +189,7 @@
   --brand-tiktok-red: #fe2c55;
   --brand-whatsapp: #25d366;
   --brand-google-star: #fbbc04;
+  --brand-google-maps: #ea4335;
   --chart-1: oklch(0.5583 0.1276 42.9956);
   --chart-2: oklch(0.6898 0.1581 290.4107);
   --chart-3: oklch(0.213 0.0078 95.4245);

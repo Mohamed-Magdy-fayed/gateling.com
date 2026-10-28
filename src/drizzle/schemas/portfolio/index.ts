@@ -9,7 +9,6 @@ export * from "./case-study-media-table";
 export * from "./chat-conversations-table";
 export * from "./chat-messages-table";
 export * from "./lead-activities-table";
-export * from "./lead-locations-table";
 export * from "./leads-table";
 export * from "./service-media-table";
 export * from "./services-table";

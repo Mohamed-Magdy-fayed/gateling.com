@@ -396,7 +396,6 @@ export default {
       quickActions: "إجراءات سريعة",
       noPhone: "لا يوجد رقم هاتف.",
 
-      reachRating: "تقييم جوجل",
       reachTotal: "إجمالي الوصول",
       followers: "متابع",
       reviewsCount: dt("{count:plural}", {
@@ -411,35 +410,19 @@ export default {
           },
         },
       }),
-      locationsCount: dt("{count:plural}", {
-        plural: {
-          count: {
-            zero: "لا توجد مواقع",
-            one: "موقع واحد",
-            two: "موقعان",
-            few: "{?} مواقع",
-            many: "{?} موقعًا",
-            other: "{?} موقع",
-          },
-        },
-      }),
 
       mapsHeading: "خرائط جوجل",
+      editMaps: "تعديل بيانات خرائط جوجل",
+      mapsSaved: "تم حفظ بيانات الخرائط.",
+      mapsSaveFailed: "تعذّر حفظ بيانات الخرائط.",
+      mapsDialogLead:
+        "الصق كود التضمين وانسخ ما يظهر في صفحة المكان. الأرقام لقطة بتاريخ الحفظ.",
       mapTitle: dt("خريطة {name}", {}),
       mapMissing: "الصق كود التضمين الخاص بهذا المكان لعرض الخريطة هنا.",
-      noLocations:
-        "لا يوجد مكان على خرائط جوجل بعد. أضف المحل الرئيسي من كود التضمين.",
       addEmbed: "إضافة كود الخريطة",
-      addMainLocation: "إضافة الموقع الرئيسي",
-      addBranch: "إضافة فرع",
-      editLocation: "تعديل الموقع",
       ratingLabel: dt("التقييم {rating} من 5", {}),
-      noRating: "لم يتم إدخال تقييم",
-      directions: "الاتجاهات",
       openInMaps: "فتح في الخرائط",
 
-      locationDialogLead:
-        "انسخ ما يظهر في صفحة المكان على خرائط جوجل. الأرقام لقطة بتاريخ الحفظ.",
       embedLabel: "كود التضمين",
       embedHint: "خرائط جوجل › مشاركة › تضمين خريطة › نسخ HTML",
       embedHintReplace:
@@ -447,26 +430,10 @@ export default {
       embedInvalid:
         "هذا ليس كود تضمين من خرائط جوجل. انسخ HTML من مشاركة › تضمين خريطة.",
       removeMap: "إزالة الخريطة الحالية",
-      locationName: "الاسم",
       category: "التصنيف (كما يظهر على الخرائط)",
       rating: "التقييم (0–5)",
       ratingInvalid: "أدخل تقييمًا بين 0 و5.",
       reviews: "المراجعات",
-      makeMain: "اجعله الموقع الرئيسي",
-      locationSaved: "تم حفظ الموقع.",
-      locationSaveFailed: "تعذّر حفظ الموقع.",
-      locationRemoveFailed: "تعذّر حذف الموقع.",
-
-      branches: "الفروع",
-      branchesLead: "كل المواقع التي يديرها هذا العميل، من خرائط جوجل.",
-      mainTag: "الرئيسي",
-      branchTag: "فرع",
-      noAddress: "لم يتم إدخال عنوان",
-      locationActions: dt("إجراءات {name}", {}),
-      remove: "حذف",
-      mainCannotRemove: "اجعل موقعًا آخر رئيسيًا لحذف هذا",
-      removeLocationTitle: "حذف هذا الموقع؟",
-      removeLocationBody: dt("سيتم حذف {name} من فروع هذا العميل.", {}),
 
       businessAccount: "حساب أعمال",
       whatsappNoName: "لا يوجد اسم واتساب",
@@ -493,23 +460,10 @@ export default {
           },
         },
       ),
-      tipLocations: dt(
-        "لديهم {count:number} مواقع — اسأل أيها يتولى الحجوزات.",
-        {},
-      ),
 
       noAccount: "لا يوجد حساب",
       search: "بحث",
       editWhatsapp: "تعديل بيانات واتساب",
-      openProfileOn: dt("فتح حساب {platform:enum}", {
-        enum: {
-          platform: {
-            facebook: "فيسبوك",
-            instagram: "إنستجرام",
-            tiktok: "تيك توك",
-          },
-        },
-      }),
       editProfileOn: dt("تعديل حساب {platform:enum}", {
         enum: {
           platform: {

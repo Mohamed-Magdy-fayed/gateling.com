@@ -1,7 +1,7 @@
 # ADR-0008: Google Maps locations live in `lead_locations`; branch count is derived
 
 - **Date:** 2026-10-28
-- **Status:** accepted
+- **Status:** accepted; the `lead_locations` table is superseded by ADR-0009
 
 ## Context
 The client account page (`/sales/leads/[id]`, design in `docs/designs/Client account.html`) shows a prospect's Google Maps listing (rating, reviews, category, address, live map) and every branch the business runs. Until now a lead had one free-text `address` and an `integer` `branchCount` typed by hand, which could not hold per-branch data and drifted from reality.

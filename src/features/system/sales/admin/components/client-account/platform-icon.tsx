@@ -1,4 +1,4 @@
-import { MessageCircleIcon } from "lucide-react";
+import { MapPinIcon, MessageCircleIcon } from "lucide-react";
 import { type ComponentProps, useId } from "react";
 
 import type { SocialPlatform } from "@/drizzle/schema";
@@ -78,6 +78,23 @@ export function TiktokIcon(props: IconProps) {
       />
       <path d={TIKTOK_PATH} fill="var(--brand-tiktok)" />
     </svg>
+  );
+}
+
+/** The Google Maps pin, in Maps red. */
+export function GoogleMapsIcon({
+  className,
+  ...props
+}: ComponentProps<typeof MapPinIcon>) {
+  return (
+    <MapPinIcon
+      aria-hidden="true"
+      className={cn(
+        "fill-brand-google-maps text-brand-google-maps [&>circle]:fill-background [&>circle]:stroke-background",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
