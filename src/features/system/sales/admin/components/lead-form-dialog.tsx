@@ -128,6 +128,7 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
   );
 
   const isPending = create.isPending || update.isPending;
+  const isEdit = Boolean(values.id);
 
   function set<K extends keyof LeadFormValues>(
     key: K,
@@ -164,7 +165,16 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
     };
 
     if (values.id) {
-      update.mutate({ ...payload, id: values.id });
+      // These four are edited on the page itself now (locations and the
+      // social tiles); the edit form neither shows nor overwrites them.
+      const {
+        address: _address,
+        socialPlatform: _platform,
+        socialHandle: _handle,
+        socialFollowers: _followers,
+        ...editable
+      } = payload;
+      update.mutate({ ...editable, id: values.id });
     } else {
       create.mutate(payload);
     }
@@ -315,21 +325,25 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
             </Select>
           </div>
 
-          <Text
-            label={t("sales.fieldSocialPlatform")}
-            value={values.socialPlatform}
-            onChange={(v) => set("socialPlatform", v)}
-          />
-          <Text
-            label={t("sales.fieldSocialHandle")}
-            value={values.socialHandle}
-            onChange={(v) => set("socialHandle", v)}
-          />
-          <Text
-            label={t("sales.fieldSocialFollowers")}
-            value={values.socialFollowers}
-            onChange={(v) => set("socialFollowers", v)}
-          />
+          {!isEdit && (
+            <>
+              <Text
+                label={t("sales.fieldSocialPlatform")}
+                value={values.socialPlatform}
+                onChange={(v) => set("socialPlatform", v)}
+              />
+              <Text
+                label={t("sales.fieldSocialHandle")}
+                value={values.socialHandle}
+                onChange={(v) => set("socialHandle", v)}
+              />
+              <Text
+                label={t("sales.fieldSocialFollowers")}
+                value={values.socialFollowers}
+                onChange={(v) => set("socialFollowers", v)}
+              />
+            </>
+          )}
           <Text
             label={t("sales.fieldBusinessType")}
             value={values.businessType}
@@ -341,13 +355,15 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
             onChange={(v) => set("sourceUrl", v)}
           />
 
-          <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <Label>{t("sales.fieldAddress")}</Label>
-            <Input
-              value={values.address}
-              onChange={(event) => set("address", event.target.value)}
-            />
-          </div>
+          {!isEdit && (
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <Label>{t("sales.fieldAddress")}</Label>
+              <Input
+                value={values.address}
+                onChange={(event) => set("address", event.target.value)}
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
             <Label>{t("sales.fieldNotes")}</Label>

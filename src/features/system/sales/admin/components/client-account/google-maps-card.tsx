@@ -99,6 +99,7 @@ export function GoogleMapsCard({ location, onAdd, onEdit, className }: Props) {
                         {decimal.format(location.rating)}
                       </span>
                       <StarRating
+                        fillClassName="fill-brand-google-star text-brand-google-star"
                         value={location.rating}
                         label={t("sales.account.ratingLabel", {
                           rating: decimal.format(location.rating),
