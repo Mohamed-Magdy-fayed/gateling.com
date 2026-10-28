@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -8,10 +9,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { H1 } from "@/components/ui/typography";
+import type { LeadLocation, SocialPlatform } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
+import { callTips } from "@/features/system/sales/lib/call-tips";
+import { socialProfiles } from "@/features/system/sales/lib/social-profiles";
 import { useTRPC } from "@/integrations/trpc/client";
 import { toWhatsAppUrl } from "@/lib/phone";
+import { BeforeYouCallCard } from "./components/client-account/before-you-call-card";
+import { BranchesSection } from "./components/client-account/branches-section";
+import { ClientHero } from "./components/client-account/client-hero";
+import { GoogleMapsCard } from "./components/client-account/google-maps-card";
+import { LocationDialog } from "./components/client-account/location-dialog";
+import { MobileActionBar } from "./components/client-account/mobile-action-bar";
+import { ReachStrip } from "./components/client-account/reach-strip";
+import { SocialProfileCard } from "./components/client-account/social-profile-card";
+import { SocialProfileDialog } from "./components/client-account/social-profile-dialog";
+import { WhatsAppCard } from "./components/client-account/whatsapp-card";
 import { DemoMeetingCard } from "./components/demo-meeting-card";
 import {
   LeadFormDialog,
@@ -19,77 +32,121 @@ import {
 } from "./components/lead-form-dialog";
 import { QuickLogPopover } from "./components/quick-log-popover";
 
+/** Which location dialog is open: adding (`"new"`) or editing one. */
+type LocationTarget = "new" | LeadLocation | null;
+
 export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
   const trpc = useTRPC();
   const { t, locale } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
+  const [locationTarget, setLocationTarget] = useState<LocationTarget>(null);
+  const [socialTarget, setSocialTarget] = useState<SocialPlatform | null>(null);
 
   const { data, isPending } = useQuery(
     trpc.sales.byId.queryOptions({ id: leadId }),
   );
 
-  if (isPending) return <Skeleton className="h-96 w-full" />;
+  if (isPending) return <LeadDetailSkeleton />;
   if (!data) return null;
 
-  const { lead, activities } = data;
-  const whatsappUrl = toWhatsAppUrl(lead.phone);
+  const { lead, activities, locations } = data;
+  const primary = locations.find((l) => l.isPrimary) ?? null;
+  const whatsappNumber = lead.whatsappPhone ?? lead.phone;
+  const whatsappUrl = toWhatsAppUrl(whatsappNumber);
+  const profiles = socialProfiles(lead);
+  const followers = Object.fromEntries(
+    profiles.map((p) => [p.platform, p.kind === "found" ? p.followers : null]),
+  ) as Record<SocialPlatform, number | null>;
+  const facebook = profiles.find((p) => p.platform === "facebook");
+  const tips = callTips({
+    whatsappName: lead.whatsappProfileName,
+    rating: primary?.rating ?? null,
+    reviewCount: primary?.reviewCount ?? null,
+    followers,
+    locationCount: locations.length,
+  });
   const dateFormat = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <Link
-            href="/sales/leads"
-            className="text-muted-foreground text-xs hover:underline"
-          >
-            ← {t("sales.backToPipeline")}
-          </Link>
-          <H1>{lead.name}</H1>
-          {lead.nameAr && (
-            <p className="text-muted-foreground text-sm">{lead.nameAr}</p>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {lead.phone && (
-            <Button
-              size="sm"
-              variant="outline"
-              render={(props) => (
-                <a href={`tel:${lead.phone}`} {...props}>
-                  {t("sales.callNow")}
-                </a>
-              )}
-            />
-          )}
-          {whatsappUrl && (
-            <Button
-              size="sm"
-              variant="outline"
-              render={(props) => (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  {...props}
-                >
-                  {t("sales.openWhatsapp")}
-                </a>
-              )}
-            />
-          )}
-          <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+    <div className="flex flex-col gap-6 pb-24 sm:pb-0">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href="/sales/leads"
+          className="inline-flex min-h-11 items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground focus-visible:underline"
+        >
+          <ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />
+          {t("sales.backToPipeline")}
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button size="lg" variant="outline" onClick={() => setEditOpen(true)}>
+            <PencilIcon aria-hidden="true" />
             {t("common.edit")}
           </Button>
-          <QuickLogPopover leadId={lead.id} />
+          <span className="hidden sm:inline-flex">
+            <QuickLogPopover leadId={lead.id} />
+          </span>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <ClientHero
+        name={lead.name}
+        nameAr={lead.nameAr}
+        avatarUrl={facebook?.kind === "found" ? facebook.avatarUrl : null}
+        status={lead.pipelineStatus}
+        tier={lead.tier}
+        category={primary?.category ?? lead.businessType}
+        city={lead.city}
+        phone={lead.phone}
+        whatsappUrl={whatsappUrl}
+      >
+        <ReachStrip
+          rating={primary?.rating ?? null}
+          reviewCount={primary?.reviewCount ?? null}
+          followers={followers}
+          locationCount={locations.length}
+        />
+      </ClientHero>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <GoogleMapsCard
+          className="lg:col-span-2"
+          location={primary}
+          onAdd={() => setLocationTarget("new")}
+          onEdit={setLocationTarget}
+        />
+        <div className="flex flex-col gap-4">
+          <WhatsAppCard
+            name={lead.whatsappProfileName}
+            number={whatsappNumber}
+            isBusiness={lead.whatsappIsBusiness}
+            chatUrl={whatsappUrl}
+            onEdit={() => setEditOpen(true)}
+          />
+          <BeforeYouCallCard tips={tips} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {profiles.map((profile) => (
+          <SocialProfileCard
+            key={profile.platform}
+            profile={profile}
+            leadName={lead.name}
+            onEdit={() => setSocialTarget(profile.platform)}
+          />
+        ))}
+      </div>
+
+      <BranchesSection
+        locations={locations}
+        onAdd={() => setLocationTarget("new")}
+        onEdit={setLocationTarget}
+      />
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <DemoMeetingCard
           leadId={lead.id}
           meetingUrl={lead.demoMeetingUrl}
@@ -105,20 +162,17 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
             <CardTitle className="text-base">{t("sales.details")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm">
-            <Row label={t("sales.fieldStatus")}>
-              <Badge variant="secondary">
-                {t("sales.statuses", { status: lead.pipelineStatus })}
-              </Badge>
-            </Row>
             <Row label={t("sales.columnCity")}>
               {[lead.city, lead.area].filter(Boolean).join(" · ") || "—"}
             </Row>
             <Row label={t("sales.fieldAddress")}>{lead.address ?? "—"}</Row>
             <Row label={t("sales.fieldPhone")}>
-              <span className="font-mono text-xs">{lead.phone ?? "—"}</span>
+              <span className="font-mono text-xs" dir="ltr">
+                {lead.phone ?? "—"}
+              </span>
             </Row>
             <Row label={t("sales.fieldPhoneSecondary")}>
-              <span className="font-mono text-xs">
+              <span className="font-mono text-xs" dir="ltr">
                 {lead.phoneSecondary ?? "—"}
               </span>
             </Row>
@@ -130,18 +184,6 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
               >
                 {t("sales.whatsappStatuses", { status: lead.whatsappStatus })}
               </Badge>
-            </Row>
-            <Row label={t("sales.fieldWhatsappProfileName")}>
-              {lead.whatsappProfileName ?? "—"}
-            </Row>
-            <Row label={t("sales.fieldTier")}>{lead.tier ?? "—"}</Row>
-            <Row label={t("sales.fieldSocialFollowers")}>
-              {lead.socialFollowers != null
-                ? new Intl.NumberFormat(locale).format(lead.socialFollowers)
-                : "—"}
-            </Row>
-            <Row label={t("sales.fieldBranchCount")}>
-              {lead.branchCount ?? "—"}
             </Row>
             <Row label={t("sales.fieldBusinessType")}>
               {lead.businessType ?? "—"}
@@ -162,6 +204,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="break-all text-xs hover:underline"
+                  dir="ltr"
                 >
                   {lead.sourceUrl}
                 </a>
@@ -177,7 +220,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-1">
           <CardHeader className="gap-1">
             <CardTitle className="text-base">{t("sales.timeline")}</CardTitle>
             <p className="text-muted-foreground text-xs">
@@ -229,11 +272,57 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         </Card>
       </div>
 
+      <MobileActionBar
+        leadId={lead.id}
+        phone={lead.phone}
+        whatsappUrl={whatsappUrl}
+      />
+
       <LeadFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         initial={leadToFormValues(lead)}
       />
+      <LocationDialog
+        open={locationTarget !== null}
+        onOpenChange={(open) => !open && setLocationTarget(null)}
+        leadId={lead.id}
+        location={
+          locationTarget && locationTarget !== "new"
+            ? locationTarget
+            : undefined
+        }
+        isFirst={locations.length === 0}
+      />
+      {socialTarget && (
+        <SocialProfileDialog
+          open
+          onOpenChange={(open) => !open && setSocialTarget(null)}
+          leadId={lead.id}
+          leadName={lead.name}
+          platform={socialTarget}
+          stored={lead.socialProfiles[socialTarget]}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Mirrors the loaded layout so nothing jumps when the data lands. */
+function LeadDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" data-testid="lead-detail-loading">
+      <Skeleton className="h-11 w-48" />
+      <Skeleton className="h-56 w-full" />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton className="h-80 lg:col-span-2" />
+        <Skeleton className="h-80" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Skeleton className="h-44" />
+        <Skeleton className="h-44" />
+        <Skeleton className="h-44" />
+      </div>
     </div>
   );
 }

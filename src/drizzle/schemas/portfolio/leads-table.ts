@@ -82,7 +82,11 @@ export const leadTierValues = ["A", "B", "C"] as const;
 export type LeadTier = (typeof leadTierValues)[number];
 export const leadTierEnum = pgEnum("lead_tier", leadTierValues);
 
-export const socialPlatformValues = ["instagram", "facebook", "tiktok"] as const;
+export const socialPlatformValues = [
+  "instagram",
+  "facebook",
+  "tiktok",
+] as const;
 export type SocialPlatform = (typeof socialPlatformValues)[number];
 
 /**
@@ -98,6 +102,10 @@ export type LeadSocialProfile =
       followers: number | null;
       posts: number | null;
       bio: string | null;
+      /** The name shown on the profile, which can differ from the handle. */
+      displayName?: string | null;
+      /** Our Firebase copy of the profile picture (platform CDN links expire). */
+      avatarUrl?: string | null;
       checkedAt: string;
     }
   | { status: "notFound"; checkedAt: string };
@@ -140,6 +148,10 @@ export const LeadsTable = pgTable(
     whatsappStatus: whatsappStatusEnum().notNull().default("unknown"),
     /** Public WhatsApp display name, used to verify identity before outreach. */
     whatsappProfileName: varchar({ length: 255 }),
+    /** The number WhatsApp is on, when it is not `phone`. Readers fall back to `phone`. */
+    whatsappPhone: varchar({ length: 32 }),
+    /** Shows the "Business account" badge; null when nobody has checked. */
+    whatsappIsBusiness: boolean(),
     tier: leadTierEnum(),
     socialPlatform: varchar({ length: 64 }),
     socialHandle: varchar({ length: 255 }),
@@ -153,7 +165,6 @@ export const LeadsTable = pgTable(
      * because the new queue ranks by it.
      */
     socialProfiles: jsonb().$type<LeadSocialProfiles>().notNull().default({}),
-    branchCount: integer(),
     /** Free text for now: rental / sale / both. */
     businessType: varchar({ length: 255 }),
     sourceUrl: text(),

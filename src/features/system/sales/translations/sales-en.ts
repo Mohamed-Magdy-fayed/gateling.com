@@ -74,13 +74,11 @@ export default {
     socialPlatform: dt("{platform:enum}", {
       enum: {
         platform: {
-
           instagram: "Instagram",
 
           facebook: "Facebook",
 
           tiktok: "TikTok",
-
         },
       },
     }),
@@ -322,7 +320,13 @@ export default {
     fieldSocialPlatform: "Social platform",
     fieldSocialHandle: "Handle",
     fieldSocialFollowers: "Followers",
-    fieldBranchCount: "Branches",
+    fieldWhatsappPhone: "WhatsApp number (if not the primary phone)",
+    fieldWhatsappIsBusiness: "WhatsApp Business account",
+    whatsappBusinessOptions: dt("{option:enum}", {
+      enum: {
+        option: { unknown: "Not checked", yes: "Yes", no: "No" },
+      },
+    }),
     fieldBusinessType: "Business type",
     fieldSourceUrl: "Source URL",
     fieldStatus: "Pipeline status",
@@ -381,5 +385,173 @@ export default {
     countersContactedThisWeek: "Contacted this week",
     countersDemosBooked: "Demos booked",
     countersByStatus: "By status",
+
+    // ─── Client account page (/sales/leads/[id]) ─────────────────────────
+    account: {
+      tierBadge: dt("Tier {tier}", {}),
+      whatsapp: "WhatsApp",
+      quickActions: "Quick actions",
+      noPhone: "No phone on file.",
+
+      reachRating: "Google rating",
+      reachTotal: "Total reach",
+      followers: "followers",
+      reviewsCount: dt("{count:plural}", {
+        plural: { count: { one: "{?} review", other: "{?} reviews" } },
+      }),
+      locationsCount: dt("{count:plural}", {
+        plural: {
+          count: {
+            zero: "No locations",
+            one: "{?} location",
+            other: "{?} locations",
+          },
+        },
+      }),
+
+      mapsHeading: "Google Maps",
+      mapTitle: dt("Map of {name}", {}),
+      mapMissing: "Paste this listing's embed code to show the map here.",
+      noLocations:
+        "No Google Maps listing yet. Add the main shop from its Maps embed.",
+      addEmbed: "Add map embed",
+      addMainLocation: "Add main location",
+      addBranch: "Add a branch",
+      editLocation: "Edit location",
+      ratingLabel: dt("Rated {rating} out of 5", {}),
+      noRating: "No rating entered",
+      directions: "Directions",
+      openInMaps: "Open in Maps",
+
+      locationDialogLead:
+        "Copy what the Google Maps listing shows. The numbers are a snapshot, dated when you save.",
+      embedLabel: "Embed code",
+      embedHint: "Google Maps › Share › Embed a map › Copy HTML",
+      embedHintReplace:
+        "Paste a new embed to replace the current map, or leave empty to keep it.",
+      embedInvalid:
+        "That is not a Google Maps embed. Copy the HTML from Share › Embed a map.",
+      removeMap: "Remove the current map",
+      locationName: "Name",
+      category: "Category (as shown on Maps)",
+      rating: "Rating (0–5)",
+      ratingInvalid: "Enter a rating between 0 and 5.",
+      reviews: "Reviews",
+      makeMain: "Make this the main location",
+      locationSaved: "Location saved.",
+      locationSaveFailed: "Could not save the location.",
+      locationRemoveFailed: "Could not remove the location.",
+
+      branches: "Branches",
+      branchesLead: "Every location this client runs, from Google Maps.",
+      mainTag: "Main",
+      branchTag: "Branch",
+      noAddress: "No address entered",
+      locationActions: dt("Actions for {name}", {}),
+      remove: "Remove",
+      mainCannotRemove: "Make another location main to remove this one",
+      removeLocationTitle: "Remove this location?",
+      removeLocationBody: dt(
+        "{name} will be removed from this client's branches.",
+        {},
+      ),
+
+      businessAccount: "Business account",
+      whatsappNoName: "No WhatsApp name on file",
+      whatsappMissing: "No WhatsApp number on file.",
+      openWhatsappChat: "Open WhatsApp chat",
+
+      beforeYouCall: "Before you call",
+      beforeYouCallLead: "Built from this client's profiles",
+      tipsEmpty: "Add the Maps rating and social profiles to get openers here.",
+      tipAskFor: dt(
+        "Ask for “{name}” — that is the name on their WhatsApp.",
+        {},
+      ),
+      tipRating: dt(
+        "Open with their {rating}★ Google rating from {reviews:number} reviews.",
+        {},
+      ),
+      tipTopPlatform: dt(
+        "Their biggest audience is {platform:enum} ({followers}) — lead with that channel.",
+        {
+          enum: {
+            platform: {
+              facebook: "Facebook",
+              instagram: "Instagram",
+              tiktok: "TikTok",
+            },
+          },
+        },
+      ),
+      tipLocations: dt(
+        "They run {count:number} locations — ask which one handles bookings.",
+        {},
+      ),
+
+      addProfile: "Add profile",
+      openProfileOn: dt("Open {platform:enum} profile", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      editProfileOn: dt("Edit {platform:enum} profile", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      editProfileTitle: dt("{platform:enum} profile", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      editProfileLead: "Enter it as it appears on the profile today.",
+      profilePicture: dt("{platform:enum} profile picture", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      profileUrl: dt("{platform:enum} link", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      profileUrlInvalid: dt("Paste a link on {platform:enum} itself.", {
+        enum: {
+          platform: {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            tiktok: "TikTok",
+          },
+        },
+      }),
+      displayName: "Name on the profile",
+      followersLabel: "Followers",
+      uploadPicture: "Upload picture",
+      removePicture: "Remove picture",
+      markNotFound: "No account exists",
+      profileSaved: "Profile saved.",
+      profileSaveFailed: "Could not save the profile.",
+    },
   },
 } as const satisfies LanguageMessages;

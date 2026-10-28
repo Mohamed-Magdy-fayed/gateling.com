@@ -53,7 +53,7 @@ claude mcp add --transport http gateling-sales https://gateling.com/api/mcp/sale
 | `add_note` | Append a note to the timeline (no status change). |
 | `create_lead` | Add a prospect (`new`). Search first to avoid duplicates. |
 | `update_lead` | Change contact/profile fields; send only what changes. Overwrites without history — confirm first. Not status, notes, do-not-contact or owner; `sourceUrl` must be http(s). |
-| `set_social_profile` | Record research for one platform (`instagram`, `facebook`, `tiktok`): `found` with the profile `url` (on that platform's domain), `handle`, `followers`, `posts`, short `bio`; or `notFound`; or `clear` to remove a wrong entry. Stamps the check time. |
+| `set_social_profile` | Record research for one platform (`instagram`, `facebook`, `tiktok`): `found` with the profile `url` (on that platform's domain), `handle`, `displayName` (the name shown on the profile), `followers`, `posts`, short `bio`; or `notFound`; or `clear` to remove a wrong entry. Stamps the check time. Leaving `displayName` out keeps the stored one, and the profile picture is always kept (only the operator uploads it). |
 
 `log_outcome` and `update_lead` are marked destructive, so your client should
 ask the operator before running them. Lead data partly comes from scraped

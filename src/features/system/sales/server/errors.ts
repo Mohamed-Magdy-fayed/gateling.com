@@ -6,11 +6,18 @@ import { TRPCError } from "@trpc/server";
  * client (the admin UI or an agent) can tell "not found" from "not allowed"
  * without parsing a message.
  */
-export type SalesErrorCode = "SALES_LEAD_NOT_PROSPECT" | "SALES_DO_NOT_CONTACT";
+export type SalesErrorCode =
+  | "SALES_LEAD_NOT_PROSPECT"
+  | "SALES_DO_NOT_CONTACT"
+  | "SALES_LOCATION_NOT_FOUND"
+  | "SALES_PRIMARY_LOCATION_IN_USE";
 
 const TRPC_CODE: Record<SalesErrorCode, TRPCError["code"]> = {
   SALES_LEAD_NOT_PROSPECT: "NOT_FOUND",
   SALES_DO_NOT_CONTACT: "PRECONDITION_FAILED",
+  // Carries the location id in `leadId`: the location is what was not found.
+  SALES_LOCATION_NOT_FOUND: "NOT_FOUND",
+  SALES_PRIMARY_LOCATION_IN_USE: "PRECONDITION_FAILED",
 };
 
 export class SalesError extends Error {

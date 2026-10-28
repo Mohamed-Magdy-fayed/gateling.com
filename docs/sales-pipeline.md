@@ -289,25 +289,10 @@ production.
 
 ## Sourcing new atelier leads
 
-```bash
-npm run leads:source -- --dry-run   # request count only, no API calls
-npm run leads:source                # Cairo, Giza, Alexandria → daily batch CSVs
-npm run leads:source -- --db        # also dedupe against prospects in the DB (read-only)
-```
-
-Google Places (New) Text Search, keyed by `GOOGLE_PLACES_API_KEY`. Writes
-`batch-YYYYMMDD-NNN.csv` files (10 rows by default, most-reviewed first) and a
-`skipped-duplicates-*.csv` to `places-batches/` next to the seed CSV — outside
-the repo, since they hold phone numbers. Dedupes by place id, normalised phone
-and name + city against the seed CSV, earlier batches and (with `--db`) the
-pipeline. Closed and phoneless listings are dropped.
-
-Verify each batch by hand (WhatsApp name, Instagram handle, followers, tier),
-then import it with `npm run seed -- sales-leads <batch file>` — **that import
-writes to whatever `DATABASE_URL` points at**. Only the business's own Maps
-listing is used; Maps Platform terms limit how long Places content may be
-kept, so delete batches you will not contact. Logic and tests:
-`lib/places-leads.ts`; CLI: `cli/source-atelier-leads.ts`.
+By hand: find the shop on Google Maps, add it as a lead, then paste its
+`Share › Embed a map` code on the lead page (see **Client account page**).
+The Places API sourcing CLI was removed on 2026-10-28; nothing in the repo
+calls the Places API any more.
 
 ## Testing
 
@@ -336,6 +321,30 @@ This module intentionally does not follow the standard entity pattern:
   the pipeline table needs bespoke filters.
 - Plain controlled form instead of the `useAppForm` stack — internal tool, no
   validation nuance beyond "name is required", server re-validates with Zod.
+
+## Client account page
+
+`/sales/leads/[id]`, built from `docs/designs/Client account.html`. Sections are
+reusable components in `admin/components/client-account/`: `ClientHero` +
+`ReachStrip`, `GoogleMapsCard` (`MapsEmbed`), `WhatsAppCard`,
+`BeforeYouCallCard`, `SocialProfileCard` (one per platform),
+`BranchesSection`, `MobileActionBar` (phones only), and the `LocationDialog` /
+`SocialProfileDialog` editors. `StarRating` is shared in `components/ui/`.
+
+- **Locations** (`lead_locations`, ADR-0008): main shop plus branches, all
+  entered by hand. Paste the listing's Share › Embed a map HTML; only the
+  rebuilt `https://www.google.com/maps/embed?pb=…` src is kept
+  (`lib/maps-embed.ts`). Rating, reviews, category and address are typed as
+  Maps shows them and dated (`checkedAt`). The first location is the main one;
+  the main one can only be removed when it is the last. The branch count
+  anywhere is the number of locations.
+- **Social profiles**: the pencil on each card edits `socialProfiles` through
+  `setSocialProfile`, the same procedure the agent uses. Facebook takes an
+  uploaded picture (signed-URL upload; Facebook's own image links expire). An
+  agent re-researching numbers keeps the operator's display name and picture.
+- **WhatsApp**: `whatsappPhone` (falls back to `phone`) and
+  `whatsappIsBusiness`, both in the edit dialog.
+- **Before you call**: `lib/call-tips.ts`, built only from what is on file.
 
 ## Demo meetings
 

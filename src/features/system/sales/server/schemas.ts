@@ -9,6 +9,7 @@ import {
   whatsappStatusValues,
 } from "@/drizzle/schema";
 import { BULK_ACTION_LIMIT } from "@/features/core/data-table/lib/limits";
+import { parseMapsEmbed } from "@/features/system/sales/lib/maps-embed";
 import { isPlatformUrl } from "@/features/system/sales/lib/social-profiles";
 import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
 
@@ -51,7 +52,8 @@ const leadFieldsSchema = z.object({
   socialPlatform: z.string().trim().max(64).optional().nullable(),
   socialHandle: z.string().trim().max(255).optional().nullable(),
   socialFollowers: z.number().int().min(0).optional().nullable(),
-  branchCount: z.number().int().min(0).optional().nullable(),
+  whatsappPhone: phoneSchema.optional().nullable(),
+  whatsappIsBusiness: z.boolean().optional().nullable(),
   businessType: z.string().trim().max(255).optional().nullable(),
   sourceUrl: optionalText,
   pipelineStatus: pipelineStatusSchema,
@@ -162,15 +164,84 @@ export const setSocialProfileSchema = z
       followers: z.number().int().min(0).max(PG_INT_MAX).optional().nullable(),
       posts: z.number().int().min(0).max(PG_INT_MAX).optional().nullable(),
       bio: z.string().trim().max(1000).optional().nullable(),
+      /** Omitted keeps the stored value, so re-research does not wipe them. */
+      displayName: z.string().trim().min(1).max(255).optional().nullable(),
+      avatarUrl: z
+        .url({ protocol: /^https$/ })
+        .max(1024)
+        .refine(isStoredMediaUrl, {
+          message: "avatar must be an uploaded image",
+        })
+        .optional()
+        .nullable(),
     }),
     z.object({ ...socialProfileTarget, status: z.literal("notFound") }),
     z.object({ ...socialProfileTarget, status: z.literal("clear") }),
   ])
-  .refine((input) => input.status !== "found" || isPlatformUrl(input.platform, input.url), {
-    message: "url must be a profile link on the chosen platform",
-    path: ["url"],
-  });
+  .refine(
+    (input) =>
+      input.status !== "found" || isPlatformUrl(input.platform, input.url),
+    {
+      message: "url must be a profile link on the chosen platform",
+      path: ["url"],
+    },
+  );
 export type SetSocialProfileInput = z.infer<typeof setSocialProfileSchema>;
+
+/** Our own Cloud Storage objects; never a platform CDN link (those expire). */
+// The router also pins the bucket (`isOwnBucketUrl`): this file stays env-free.
+function isStoredMediaUrl(value: string): boolean {
+  let host: string;
+  try {
+    host = new URL(value).hostname;
+  } catch {
+    // Zod 4 runs refinements even after `z.url()` failed.
+    return false;
+  }
+  return (
+    host === "storage.googleapis.com" ||
+    host === "firebasestorage.googleapis.com"
+  );
+}
+
+/**
+ * Google Maps locations, entered by hand. `embed` is whatever the operator
+ * pasted from Share › Embed a map: the server keeps only the rebuilt iframe
+ * `src` (`lib/maps-embed.ts`). On update, `embed: null` removes the map and an
+ * omitted field is left as it is.
+ */
+const embedSchema = z
+  .string()
+  .trim()
+  .max(4000)
+  .refine((value) => parseMapsEmbed(value) !== null, {
+    message: "invalid_embed",
+  });
+
+const locationFields = {
+  name: z.string().trim().min(1).max(255),
+  address: z.string().trim().max(1000).nullable(),
+  category: z.string().trim().max(128).nullable(),
+  rating: z.number().min(0).max(5).nullable(),
+  reviewCount: z.number().int().min(0).max(PG_INT_MAX).nullable(),
+  embed: embedSchema.nullable(),
+};
+
+export const addLocationSchema = z.object({
+  leadId: z.string().uuid(),
+  ...locationFields,
+  /** The first location of a lead is always the main one. */
+  isPrimary: z.boolean().default(false),
+});
+export type AddLocationInput = z.infer<typeof addLocationSchema>;
+
+export const updateLocationSchema = z
+  .object(locationFields)
+  .partial()
+  .extend({ id: z.string().uuid() });
+export type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
+
+export const locationIdSchema = z.object({ id: z.string().uuid() });
 
 /**
  * `sales.today`: the buckets plus what the page needs to show progress for the
