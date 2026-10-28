@@ -10,21 +10,18 @@ import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
 import { toTRPCError } from "./errors";
-import * as locations from "./locations";
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
-  addLocationSchema,
   bulkSetStatusSchema,
   createLeadSchema,
   leadIdSchema,
   listPipelineSchema,
-  locationIdSchema,
   logActivityInputSchema,
   pipelineFilterSchema,
+  setMapsListingSchema,
   setSocialProfileSchema,
   todayWorkSchema,
   updateLeadSchema,
-  updateLocationSchema,
 } from "./schemas";
 import * as service from "./service";
 
@@ -178,47 +175,12 @@ export const salesRouter = createTRPCRouter({
       return { socialProfiles };
     }),
 
-  addLocation: protectedProcedure
-    .input(addLocationSchema)
+  setMapsListing: protectedProcedure
+    .input(setMapsListingSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
-      return locations
-        .addLocation(ctx.db, input, ctx.session.user.id)
-        .catch((error: unknown) => {
-          throw toTRPCError(error);
-        });
-    }),
-
-  updateLocation: protectedProcedure
-    .input(updateLocationSchema)
-    .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
-      await locations
-        .updateLocation(ctx.db, input, ctx.session.user.id)
-        .catch((error: unknown) => {
-          throw toTRPCError(error);
-        });
-      return { updated: true };
-    }),
-
-  removeLocation: protectedProcedure
-    .input(locationIdSchema)
-    .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
-      await locations
-        .removeLocation(ctx.db, input.id)
-        .catch((error: unknown) => {
-          throw toTRPCError(error);
-        });
-      return { removed: true };
-    }),
-
-  setPrimaryLocation: protectedProcedure
-    .input(locationIdSchema)
-    .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
-      await locations
-        .setPrimaryLocation(ctx.db, input.id, ctx.session.user.id)
+      await service
+        .setMapsListing(ctx.db, input, ctx.session.user.id)
         .catch((error: unknown) => {
           throw toTRPCError(error);
         });

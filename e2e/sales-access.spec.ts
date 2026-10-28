@@ -28,13 +28,7 @@ test("signed out, a sales lead detail URL redirects to /sign-in", async ({
 
 // The client-account page writes through these; the route guard does not
 // cover `/api/trpc`, so each procedure must refuse a signed-out caller itself.
-for (const procedure of [
-  "sales.addLocation",
-  "sales.updateLocation",
-  "sales.removeLocation",
-  "sales.setPrimaryLocation",
-  "sales.setSocialProfile",
-]) {
+for (const procedure of ["sales.setMapsListing", "sales.setSocialProfile"]) {
   test(`signed out, ${procedure} is refused`, async ({ request }) => {
     const response = await request.post(`/api/trpc/${procedure}`, {
       data: { json: { id: "00000000-0000-0000-0000-000000000000" } },

@@ -155,6 +155,27 @@
       "when": 1793205005218,
       "tag": "0021_drop_lead_branch_count",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793210223413,
+      "tag": "0022_lead_maps_listing",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793210226804,
+      "tag": "0023_copy_main_location_to_leads",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793210240037,
+      "tag": "0024_drop_lead_locations",
+      "breakpoints": true
     }
   ]
 }

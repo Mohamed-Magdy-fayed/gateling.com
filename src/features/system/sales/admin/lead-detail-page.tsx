@@ -9,17 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { LeadLocation, SocialPlatform } from "@/drizzle/schema";
+import type { SocialPlatform } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { callTips } from "@/features/system/sales/lib/call-tips";
 import { socialProfiles } from "@/features/system/sales/lib/social-profiles";
 import { useTRPC } from "@/integrations/trpc/client";
 import { toWhatsAppUrl } from "@/lib/phone";
 import { BeforeYouCallCard } from "./components/client-account/before-you-call-card";
-import { BranchesSection } from "./components/client-account/branches-section";
 import { ClientHero } from "./components/client-account/client-hero";
 import { GoogleMapsCard } from "./components/client-account/google-maps-card";
-import { LocationDialog } from "./components/client-account/location-dialog";
+import { MapsListingDialog } from "./components/client-account/maps-listing-dialog";
 import { MobileActionBar } from "./components/client-account/mobile-action-bar";
 import { ReachStrip } from "./components/client-account/reach-strip";
 import { SocialProfileDialog } from "./components/client-account/social-profile-dialog";
@@ -30,14 +29,11 @@ import {
 } from "./components/lead-form-dialog";
 import { QuickLogPopover } from "./components/quick-log-popover";
 
-/** Which location dialog is open: adding (`"new"`) or editing one. */
-type LocationTarget = "new" | LeadLocation | null;
-
 export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
   const trpc = useTRPC();
   const { t, locale } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
-  const [locationTarget, setLocationTarget] = useState<LocationTarget>(null);
+  const [mapsOpen, setMapsOpen] = useState(false);
   const [socialTarget, setSocialTarget] = useState<SocialPlatform | null>(null);
 
   const { data, isPending } = useQuery(
@@ -47,8 +43,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
   if (isPending) return <LeadDetailSkeleton />;
   if (!data) return null;
 
-  const { lead, activities, locations } = data;
-  const primary = locations.find((l) => l.isPrimary) ?? null;
+  const { lead, activities } = data;
   const whatsappNumber = lead.whatsappPhone ?? lead.phone;
   const whatsappUrl = toWhatsAppUrl(whatsappNumber);
   const profiles = socialProfiles(lead);
@@ -58,10 +53,9 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
   const facebook = profiles.find((p) => p.platform === "facebook");
   const tips = callTips({
     whatsappName: lead.whatsappProfileName,
-    rating: primary?.rating ?? null,
-    reviewCount: primary?.reviewCount ?? null,
+    rating: lead.mapsRating,
+    reviewCount: lead.mapsReviewCount,
     followers,
-    locationCount: locations.length,
   });
   const dateFormat = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
@@ -84,7 +78,11 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
             {t("common.edit")}
           </Button>
           <span className="hidden sm:inline-flex">
-            <QuickLogPopover leadId={lead.id} />
+            <QuickLogPopover
+              leadId={lead.id}
+              triggerVariant="outline"
+              triggerSize="lg"
+            />
           </span>
         </div>
       </div>
@@ -95,14 +93,18 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         avatarUrl={facebook?.kind === "found" ? facebook.avatarUrl : null}
         status={lead.pipelineStatus}
         tier={lead.tier}
-        category={primary?.category ?? lead.businessType}
+        category={lead.mapsCategory ?? lead.businessType}
         city={lead.city}
         phone={lead.phone}
         whatsappUrl={whatsappUrl}
       >
         <ReachStrip
-          rating={primary?.rating ?? null}
-          reviewCount={primary?.reviewCount ?? null}
+          maps={{
+            rating: lead.mapsRating,
+            reviewCount: lead.mapsReviewCount,
+            category: lead.mapsCategory,
+            address: lead.address,
+          }}
           profiles={profiles}
           whatsapp={{
             name: lead.whatsappProfileName,
@@ -110,27 +112,23 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
             isBusiness: lead.whatsappIsBusiness,
             chatUrl: whatsappUrl,
           }}
-          locationCount={locations.length}
+          onEditMaps={() => setMapsOpen(true)}
           onEditSocial={(profile) => setSocialTarget(profile.platform)}
           onEditWhatsapp={() => setEditOpen(true)}
         />
       </ClientHero>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <GoogleMapsCard
-          className="lg:col-span-2"
-          location={primary}
-          onAdd={() => setLocationTarget("new")}
-          onEdit={setLocationTarget}
+          name={lead.name}
+          address={lead.address}
+          embedSrc={lead.mapsEmbedSrc}
+          lat={lead.mapsLat}
+          lng={lead.mapsLng}
+          onEdit={() => setMapsOpen(true)}
         />
         <BeforeYouCallCard tips={tips} />
       </div>
-
-      <BranchesSection
-        locations={locations}
-        onAdd={() => setLocationTarget("new")}
-        onEdit={setLocationTarget}
-      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4">
@@ -259,16 +257,11 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         onOpenChange={setEditOpen}
         initial={leadToFormValues(lead)}
       />
-      <LocationDialog
-        open={locationTarget !== null}
-        onOpenChange={(open) => !open && setLocationTarget(null)}
+      <MapsListingDialog
+        open={mapsOpen}
+        onOpenChange={setMapsOpen}
         leadId={lead.id}
-        location={
-          locationTarget && locationTarget !== "new"
-            ? locationTarget
-            : undefined
-        }
-        isFirst={locations.length === 0}
+        listing={lead}
       />
       {socialTarget && (
         <SocialProfileDialog
@@ -290,14 +283,13 @@ function LeadDetailSkeleton() {
     <div className="flex flex-col gap-6" data-testid="lead-detail-loading">
       <Skeleton className="h-11 w-48" />
       <Skeleton className="h-56 w-full" />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Skeleton className="h-80 lg:col-span-2" />
-        <Skeleton className="h-80" />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Skeleton className="h-72" />
+        <Skeleton className="h-72" />
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Skeleton className="h-44" />
-        <Skeleton className="h-44" />
-        <Skeleton className="h-44" />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton className="h-64" />
+        <Skeleton className="h-64 lg:col-span-2" />
       </div>
     </div>
   );
