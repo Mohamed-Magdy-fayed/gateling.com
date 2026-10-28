@@ -24,6 +24,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-facebook: var(--brand-facebook);
+  --color-brand-instagram-from: var(--brand-instagram-from);
+  --color-brand-instagram-via: var(--brand-instagram-via);
+  --color-brand-instagram-to: var(--brand-instagram-to);
+  --color-brand-tiktok: var(--brand-tiktok);
+  --color-brand-tiktok-cyan: var(--brand-tiktok-cyan);
+  --color-brand-tiktok-red: var(--brand-tiktok-red);
+  --color-brand-whatsapp: var(--brand-whatsapp);
+  --color-brand-google-star: var(--brand-google-star);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -96,6 +105,16 @@
   --border: oklch(0.84 0.011 97.3627);
   --input: oklch(0.967 0.001 286.375);
   --ring: oklch(0.705 0.213 47.604);
+  /* Third-party brand marks (sales client account). Not for UI chrome. */
+  --brand-facebook: #1877f2;
+  --brand-instagram-from: #feda75;
+  --brand-instagram-via: #d62976;
+  --brand-instagram-to: #4f5bd5;
+  --brand-tiktok: #000000;
+  --brand-tiktok-cyan: #25f4ee;
+  --brand-tiktok-red: #fe2c55;
+  --brand-whatsapp: #25d366;
+  --brand-google-star: #fbbc04;
   --chart-1: oklch(0.5583 0.1276 42.9956);
   --chart-2: oklch(0.6898 0.1581 290.4107);
   --chart-3: oklch(0.8816 0.0276 93.128);
@@ -158,6 +177,16 @@
   --border: oklch(0.374 0.01 67.558);
   --input: oklch(0.374 0.01 67.558);
   --ring: oklch(0.705 0.213 47.604);
+  --brand-facebook: #1877f2;
+  --brand-instagram-from: #feda75;
+  --brand-instagram-via: #d62976;
+  --brand-instagram-to: #4f5bd5;
+  /* TikTok's mark is white on dark surfaces. */
+  --brand-tiktok: #ffffff;
+  --brand-tiktok-cyan: #25f4ee;
+  --brand-tiktok-red: #fe2c55;
+  --brand-whatsapp: #25d366;
+  --brand-google-star: #fbbc04;
   --chart-1: oklch(0.5583 0.1276 42.9956);
   --chart-2: oklch(0.6898 0.1581 290.4107);
   --chart-3: oklch(0.213 0.0078 95.4245);

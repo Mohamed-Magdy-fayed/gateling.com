@@ -22,9 +22,7 @@ import { GoogleMapsCard } from "./components/client-account/google-maps-card";
 import { LocationDialog } from "./components/client-account/location-dialog";
 import { MobileActionBar } from "./components/client-account/mobile-action-bar";
 import { ReachStrip } from "./components/client-account/reach-strip";
-import { SocialProfileCard } from "./components/client-account/social-profile-card";
 import { SocialProfileDialog } from "./components/client-account/social-profile-dialog";
-import { WhatsAppCard } from "./components/client-account/whatsapp-card";
 import { DemoMeetingCard } from "./components/demo-meeting-card";
 import {
   LeadFormDialog,
@@ -105,8 +103,16 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         <ReachStrip
           rating={primary?.rating ?? null}
           reviewCount={primary?.reviewCount ?? null}
-          followers={followers}
+          profiles={profiles}
+          whatsapp={{
+            name: lead.whatsappProfileName,
+            number: whatsappNumber,
+            isBusiness: lead.whatsappIsBusiness,
+            chatUrl: whatsappUrl,
+          }}
           locationCount={locations.length}
+          onEditSocial={(profile) => setSocialTarget(profile.platform)}
+          onEditWhatsapp={() => setEditOpen(true)}
         />
       </ClientHero>
 
@@ -117,27 +123,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
           onAdd={() => setLocationTarget("new")}
           onEdit={setLocationTarget}
         />
-        <div className="flex flex-col gap-4">
-          <WhatsAppCard
-            name={lead.whatsappProfileName}
-            number={whatsappNumber}
-            isBusiness={lead.whatsappIsBusiness}
-            chatUrl={whatsappUrl}
-            onEdit={() => setEditOpen(true)}
-          />
-          <BeforeYouCallCard tips={tips} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {profiles.map((profile) => (
-          <SocialProfileCard
-            key={profile.platform}
-            profile={profile}
-            leadName={lead.name}
-            onEdit={() => setSocialTarget(profile.platform)}
-          />
-        ))}
+        <BeforeYouCallCard tips={tips} />
       </div>
 
       <BranchesSection
@@ -147,80 +133,70 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DemoMeetingCard
-          leadId={lead.id}
-          meetingUrl={lead.demoMeetingUrl}
-          isPending={
-            lead.pipelineStatus === "demo_scheduled" &&
-            !lead.demoMeetingUrl &&
-            lead.nextActionAt != null &&
-            lead.nextActionAt.getTime() > Date.now()
-          }
-        />
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base">{t("sales.details")}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 text-sm">
-            <Row label={t("sales.columnCity")}>
-              {[lead.city, lead.area].filter(Boolean).join(" · ") || "—"}
-            </Row>
-            <Row label={t("sales.fieldAddress")}>{lead.address ?? "—"}</Row>
-            <Row label={t("sales.fieldPhone")}>
-              <span className="font-mono text-xs" dir="ltr">
-                {lead.phone ?? "—"}
-              </span>
-            </Row>
-            <Row label={t("sales.fieldPhoneSecondary")}>
-              <span className="font-mono text-xs" dir="ltr">
-                {lead.phoneSecondary ?? "—"}
-              </span>
-            </Row>
-            <Row label={t("sales.fieldWhatsappStatus")}>
-              <Badge
-                variant={
-                  lead.whatsappStatus === "confirmed" ? "default" : "outline"
-                }
-              >
-                {t("sales.whatsappStatuses", { status: lead.whatsappStatus })}
-              </Badge>
-            </Row>
-            <Row label={t("sales.fieldBusinessType")}>
-              {lead.businessType ?? "—"}
-            </Row>
-            <Row label={t("sales.columnLastContacted")}>
-              {lead.lastContactedAt
-                ? dateFormat.format(lead.lastContactedAt)
-                : t("sales.neverContacted")}
-            </Row>
-            <Row label={t("sales.columnNextAction")}>
-              {lead.nextActionAt ? dateFormat.format(lead.nextActionAt) : "—"}
-            </Row>
-            <Row label={t("sales.columnFollowUps")}>{lead.followUpCount}</Row>
-            {lead.sourceUrl && (
-              <Row label={t("sales.sourceLink")}>
-                <a
-                  href={lead.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="break-all text-xs hover:underline"
-                  dir="ltr"
-                >
-                  {lead.sourceUrl}
-                </a>
-              </Row>
-            )}
-            {lead.notes && (
-              <Row label={t("sales.fieldNotes")}>
-                <span className="whitespace-pre-line text-xs">
-                  {lead.notes}
+        <div className="flex flex-col gap-4">
+          <DemoMeetingCard
+            leadId={lead.id}
+            meetingUrl={lead.demoMeetingUrl}
+            isPending={
+              lead.pipelineStatus === "demo_scheduled" &&
+              !lead.demoMeetingUrl &&
+              lead.nextActionAt != null &&
+              lead.nextActionAt.getTime() > Date.now()
+            }
+          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t("sales.details")}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 text-sm">
+              <Row label={t("sales.fieldPhoneSecondary")}>
+                <span className="font-mono text-xs" dir="ltr">
+                  {lead.phoneSecondary ?? "—"}
                 </span>
               </Row>
-            )}
-          </CardContent>
-        </Card>
+              <Row label={t("sales.fieldWhatsappStatus")}>
+                <Badge
+                  variant={
+                    lead.whatsappStatus === "confirmed" ? "default" : "outline"
+                  }
+                >
+                  {t("sales.whatsappStatuses", { status: lead.whatsappStatus })}
+                </Badge>
+              </Row>
+              <Row label={t("sales.columnLastContacted")}>
+                {lead.lastContactedAt
+                  ? dateFormat.format(lead.lastContactedAt)
+                  : t("sales.neverContacted")}
+              </Row>
+              <Row label={t("sales.columnNextAction")}>
+                {lead.nextActionAt ? dateFormat.format(lead.nextActionAt) : "—"}
+              </Row>
+              <Row label={t("sales.columnFollowUps")}>{lead.followUpCount}</Row>
+              {lead.sourceUrl && (
+                <Row label={t("sales.sourceLink")}>
+                  <a
+                    href={lead.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-all text-xs hover:underline"
+                    dir="ltr"
+                  >
+                    {lead.sourceUrl}
+                  </a>
+                </Row>
+              )}
+              {lead.notes && (
+                <Row label={t("sales.fieldNotes")}>
+                  <span className="whitespace-pre-line text-xs">
+                    {lead.notes}
+                  </span>
+                </Row>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-2">
           <CardHeader className="gap-1">
             <CardTitle className="text-base">{t("sales.timeline")}</CardTitle>
             <p className="text-muted-foreground text-xs">

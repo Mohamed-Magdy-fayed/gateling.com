@@ -498,7 +498,9 @@ export default {
         {},
       ),
 
-      addProfile: "إضافة حساب",
+      noAccount: "لا يوجد حساب",
+      search: "بحث",
+      editWhatsapp: "تعديل بيانات واتساب",
       openProfileOn: dt("فتح حساب {platform:enum}", {
         enum: {
           platform: {
