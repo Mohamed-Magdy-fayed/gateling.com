@@ -135,7 +135,34 @@ const setSocialProfileInput = z.object({
   posts: z.number().int().min(0).max(2_147_483_647).optional(),
   bio: z.string().trim().max(1000).optional(),
   displayName: z.string().trim().min(1).max(255).optional(),
+  /** A `publicUrl` from the content server's `create_upload_url`, after the PUT. */
+  avatarUrl: z
+    .url({ protocol: /^https$/ })
+    .max(1024)
+    .optional(),
 });
+
+/**
+ * One Google Maps listing. Without `locationId` it adds one (needs `leadId`
+ * and `name`); with it, only the fields sent change. `embed` is the listing's
+ * Share › Embed a map HTML (or its src); the server keeps only the checked
+ * Google embed URL.
+ */
+const setLocationInput = z
+  .object({
+    leadId: z.string().uuid().optional(),
+    locationId: z.string().uuid().optional(),
+    name: z.string().trim().min(1).max(255).optional(),
+    address: z.string().trim().max(1000).optional(),
+    category: z.string().trim().max(128).optional(),
+    rating: z.number().min(0).max(5).optional(),
+    reviewCount: z.number().int().min(0).max(2_147_483_647).optional(),
+    embed: z.string().trim().max(4000).optional(),
+    isPrimary: z.boolean().optional(),
+  })
+  .refine((input) => input.locationId || (input.leadId && input.name), {
+    message: "Send locationId to update, or leadId and name to add.",
+  });
 
 const createCaller = createCallerFactory(appRouter);
 
@@ -194,7 +221,7 @@ export function buildSalesMcpServer(
   readTool(
     "get_lead",
     "Get a lead",
-    "One lead with its full activity timeline (oldest first is not guaranteed; read `occurredAt`).",
+    "One lead with its full activity timeline (oldest first is not guaranteed; read `occurredAt`) and its Google Maps `locations` (main first).",
     leadIdInput,
     ({ leadId }) => caller.sales.byId({ id: leadId }),
   );
@@ -258,7 +285,7 @@ export function buildSalesMcpServer(
   writeTool(
     "set_social_profile",
     "Record a social profile",
-    "Save what research found for a lead on one platform (instagram, facebook, tiktok). Research all three: first follow the links on profiles already found (a Facebook Page lists its Instagram and TikTok under Contact info), then search for the rest. `found` needs `url` (the profile link on that platform) and should carry the public `handle`, `followers`, `posts` and a short `bio` as they appear today. `notFound` records that a search found no account; `clear` removes a wrong entry. Replaces that platform's previous entry; the server stamps the check time. Only public business-profile facts — never personal details of individuals.",
+    "Save what research found for a lead on one platform (instagram, facebook, tiktok). Research all three: first follow the links on profiles already found (a Facebook Page lists its Instagram and TikTok under Contact info), then search for the rest. `found` needs `url` (the profile link on that platform) and should carry the public `handle`, `displayName` (the name shown on the profile), `followers`, `posts` and a short `bio` as they appear today. Facebook only: `avatarUrl` is the page's profile picture, uploaded first with the content server's `create_upload_url` (pass its `publicUrl`); a Facebook image link is refused because it expires. Omitting `displayName` or `avatarUrl` keeps the stored one. `notFound` records that a search found no account; `clear` removes a wrong entry. Replaces that platform's previous entry; the server stamps the check time. Only public business-profile facts — never personal details of individuals.",
     setSocialProfileInput,
     async ({ leadId, ...profile }) =>
       caller.sales.setSocialProfile(
@@ -269,9 +296,35 @@ export function buildSalesMcpServer(
   );
 
   writeTool(
+    "set_location",
+    "Add or update a Google Maps location",
+    'Record a lead\'s Google Maps listing — its main shop or a branch. Check `get_lead` → `locations` first: update an existing one with `locationId` instead of adding a duplicate. To add, send `leadId` and `name`. Copy `address`, `category` (as Maps shows it, e.g. "Bridal shop"), `rating` (0–5) and `reviewCount` from the listing, and `embed` from Share › Embed a map (the HTML or its `https://www.google.com/maps/embed?pb=…` src). The first location of a lead becomes the main one; `isPrimary: true` moves the main to this one. Rating, reviews and category are dated when saved. There is no delete tool: ask the operator to remove a wrong location on the lead page.',
+    setLocationInput,
+    async ({ leadId, locationId, isPrimary, ...fields }) => {
+      if (locationId) {
+        await caller.sales.updateLocation({ id: locationId, ...fields });
+        if (isPrimary)
+          await caller.sales.setPrimaryLocation({ id: locationId });
+        return { locationId, updated: true };
+      }
+      const { id } = await caller.sales.addLocation({
+        leadId: leadId ?? "",
+        name: fields.name ?? "",
+        address: fields.address ?? null,
+        category: fields.category ?? null,
+        rating: fields.rating ?? null,
+        reviewCount: fields.reviewCount ?? null,
+        embed: fields.embed ?? null,
+        isPrimary: isPrimary ?? false,
+      });
+      return { locationId: id, added: true };
+    },
+  );
+
+  writeTool(
     "update_lead",
     "Update a lead's details",
-    "Change contact or profile fields; send only the fields to change. Overwrites the old value (no history), so confirm with the operator. Status goes through `log_outcome`, notes through `add_note`; do-not-contact and owner are not editable here.",
+    "Change contact or profile fields; send only the fields to change. Includes `whatsappProfileName` (the name WhatsApp shows), `whatsappPhone` (only when WhatsApp is on a different number than `phone`) and `whatsappIsBusiness` (a WhatsApp Business account). Overwrites the old value (no history), so confirm with the operator. Status goes through `log_outcome`, notes through `add_note`, Maps data through `set_location`, social profiles through `set_social_profile`; do-not-contact and owner are not editable here.",
     agentLeadUpdate,
     async (input) => {
       await caller.sales.update(input);

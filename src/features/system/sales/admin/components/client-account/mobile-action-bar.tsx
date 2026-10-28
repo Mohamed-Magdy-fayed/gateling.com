@@ -33,11 +33,12 @@ export function MobileActionBar({ leadId, phone, whatsappUrl }: Props) {
           render={(props) => (
             <a href={`tel:${phone}`} {...props}>
               <PhoneIcon aria-hidden="true" />
-              <span className="flex flex-col items-start leading-tight">
-                <span>{t("sales.callNow")}</span>
-                <span className="font-normal text-xs opacity-80" dir="ltr">
-                  {phone}
-                </span>
+              <span className="whitespace-nowrap">{t("sales.callNow")}</span>
+              <span
+                className="truncate whitespace-nowrap font-normal opacity-80"
+                dir="ltr"
+              >
+                {phone}
               </span>
             </a>
           )}
@@ -59,7 +60,7 @@ export function MobileActionBar({ leadId, phone, whatsappUrl }: Props) {
               rel="noopener noreferrer"
               {...props}
             >
-              <WhatsappIcon aria-hidden="true" className="size-5" />
+              <WhatsappIcon className="size-5" />
             </a>
           )}
         />

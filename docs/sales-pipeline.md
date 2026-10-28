@@ -325,11 +325,19 @@ This module intentionally does not follow the standard entity pattern:
 ## Client account page
 
 `/sales/leads/[id]`, built from `docs/designs/Client account.html`. Sections are
-reusable components in `admin/components/client-account/`: `ClientHero` +
-`ReachStrip`, `GoogleMapsCard` (`MapsEmbed`), `WhatsAppCard`,
-`BeforeYouCallCard`, `SocialProfileCard` (one per platform),
-`BranchesSection`, `MobileActionBar` (phones only), and the `LocationDialog` /
-`SocialProfileDialog` editors. `StarRating` is shared in `components/ui/`.
+reusable components in `admin/components/client-account/`: `ClientHero` with
+the six-tile `ReachStrip` (Google rating, Facebook, Instagram, TikTok,
+WhatsApp, total reach; `ReachTile`), `GoogleMapsCard` (`MapsEmbed`) beside
+`BeforeYouCallCard`, `BranchesSection`, `MobileActionBar` (phones only), and
+the `LocationDialog` / `SocialProfileDialog` editors. `StarRating` is shared in
+`components/ui/`. Brand colours are `--brand-*` tokens in `globals.css`. The
+only picture on the page is the Facebook one, in the header. Below sit the
+demo meeting and Details cards (fields shown nowhere else) beside a two-column
+timeline.
+
+The **Edit** dialog no longer shows address or the legacy social
+platform/handle/followers; those are edited on the page (locations, social
+tiles). The **Create** dialog still has them.
 
 - **Locations** (`lead_locations`, ADR-0008): main shop plus branches, all
   entered by hand. Paste the listing's Share › Embed a map HTML; only the
@@ -338,12 +346,15 @@ reusable components in `admin/components/client-account/`: `ClientHero` +
   Maps shows them and dated (`checkedAt`). The first location is the main one;
   the main one can only be removed when it is the last. The branch count
   anywhere is the number of locations.
-- **Social profiles**: the pencil on each card edits `socialProfiles` through
+- **Social profiles**: the pencil on each tile edits `socialProfiles` through
   `setSocialProfile`, the same procedure the agent uses. Facebook takes an
   uploaded picture (signed-URL upload; Facebook's own image links expire). An
   agent re-researching numbers keeps the operator's display name and picture.
 - **WhatsApp**: `whatsappPhone` (falls back to `phone`) and
-  `whatsappIsBusiness`, both in the edit dialog.
+  `whatsappIsBusiness`, both in the edit dialog (the WhatsApp tile's pencil).
+- **Agents**: everything here is also writable over MCP — `set_location`,
+  `set_social_profile` (incl. an uploaded Facebook picture), `update_lead`
+  for WhatsApp. See [sales-mcp.md](sales-mcp.md).
 - **Before you call**: `lib/call-tips.ts`, built only from what is on file.
 
 ## Demo meetings

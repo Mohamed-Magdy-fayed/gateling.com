@@ -489,7 +489,9 @@ export default {
         {},
       ),
 
-      addProfile: "Add profile",
+      noAccount: "No account found",
+      search: "Search",
+      editWhatsapp: "Edit WhatsApp details",
       openProfileOn: dt("Open {platform:enum} profile", {
         enum: {
           platform: {
