@@ -10,17 +10,21 @@ import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
 import { toTRPCError } from "./errors";
+import * as locations from "./locations";
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
+  addLocationSchema,
   bulkSetStatusSchema,
   createLeadSchema,
   leadIdSchema,
   listPipelineSchema,
+  locationIdSchema,
   logActivityInputSchema,
   pipelineFilterSchema,
   setSocialProfileSchema,
   todayWorkSchema,
   updateLeadSchema,
+  updateLocationSchema,
 } from "./schemas";
 import * as service from "./service";
 
@@ -41,6 +45,18 @@ export type PipelineGridRow = Awaited<
  */
 function assertAdmin(role: string | undefined) {
   if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+}
+
+/**
+ * An uploaded avatar must be in *our* bucket: the storage hosts serve every
+ * bucket, so the schema's host check alone would accept anyone's image.
+ */
+function isOwnBucketUrl(value: string): boolean {
+  const bucket = encodeURIComponent(env.FIREBASE_STORAGE_BUCKET);
+  return (
+    value.startsWith(`https://storage.googleapis.com/${bucket}/`) ||
+    value.startsWith(`https://firebasestorage.googleapis.com/v0/b/${bucket}/o/`)
+  );
 }
 
 export const salesRouter = createTRPCRouter({
@@ -144,12 +160,69 @@ export const salesRouter = createTRPCRouter({
     .input(setSocialProfileSchema)
     .mutation(async ({ ctx, input }) => {
       assertAdmin(ctx.session?.user.role);
+      if (
+        input.status === "found" &&
+        input.avatarUrl &&
+        !isOwnBucketUrl(input.avatarUrl)
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "avatar_not_ours",
+        });
+      }
       const socialProfiles = await service
         .setSocialProfile(ctx.db, input, ctx.session.user.id)
         .catch((error: unknown) => {
           throw toTRPCError(error);
         });
       return { socialProfiles };
+    }),
+
+  addLocation: protectedProcedure
+    .input(addLocationSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      return locations
+        .addLocation(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+    }),
+
+  updateLocation: protectedProcedure
+    .input(updateLocationSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      await locations
+        .updateLocation(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+      return { updated: true };
+    }),
+
+  removeLocation: protectedProcedure
+    .input(locationIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      await locations
+        .removeLocation(ctx.db, input.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+      return { removed: true };
+    }),
+
+  setPrimaryLocation: protectedProcedure
+    .input(locationIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertAdmin(ctx.session?.user.role);
+      await locations
+        .setPrimaryLocation(ctx.db, input.id, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+      return { updated: true };
     }),
 
   logActivity: protectedProcedure

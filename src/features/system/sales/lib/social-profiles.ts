@@ -33,6 +33,9 @@ export type SocialProfile =
       followers: number | null;
       posts: number | null;
       bio: string | null;
+      displayName: string | null;
+      /** Uploaded profile picture (Facebook); null for the legacy value. */
+      avatarUrl: string | null;
       /** Null when the stored value cannot be turned into a safe link. */
       profileUrl: string | null;
       /** ISO time it was researched; null for the legacy CSV/form value. */
@@ -160,6 +163,8 @@ export function socialProfiles(lead: SocialLeadFields): SocialProfile[] {
         followers: stored.followers,
         posts: stored.posts,
         bio: stored.bio,
+        displayName: stored.displayName ?? null,
+        avatarUrl: stored.avatarUrl ?? null,
         profileUrl: isPlatformUrl(platform, stored.url) ? stored.url : null,
         checkedAt: stored.checkedAt,
       };
@@ -180,6 +185,8 @@ export function socialProfiles(lead: SocialLeadFields): SocialProfile[] {
         followers: lead.socialFollowers,
         posts: null,
         bio: null,
+        displayName: null,
+        avatarUrl: null,
         profileUrl: profileUrl(platform, legacyHandle),
         checkedAt: null,
       };
