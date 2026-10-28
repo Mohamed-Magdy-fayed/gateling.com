@@ -57,7 +57,8 @@ export type LeadFormValues = {
   socialPlatform: string;
   socialHandle: string;
   socialFollowers: string;
-  branchCount: string;
+  whatsappPhone: string;
+  whatsappIsBusiness: "unknown" | "yes" | "no";
   businessType: string;
   sourceUrl: string;
   pipelineStatus: LeadPipelineStatus;
@@ -79,7 +80,8 @@ const EMPTY: LeadFormValues = {
   socialPlatform: "",
   socialHandle: "",
   socialFollowers: "",
-  branchCount: "",
+  whatsappPhone: "",
+  whatsappIsBusiness: "unknown",
   businessType: "",
   sourceUrl: "",
   pipelineStatus: "new",
@@ -149,7 +151,11 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
       socialPlatform: orNull(values.socialPlatform),
       socialHandle: orNull(values.socialHandle),
       socialFollowers: orNullNumber(values.socialFollowers),
-      branchCount: orNullNumber(values.branchCount),
+      whatsappPhone: orNull(values.whatsappPhone),
+      whatsappIsBusiness:
+        values.whatsappIsBusiness === "unknown"
+          ? null
+          : values.whatsappIsBusiness === "yes",
       businessType: orNull(values.businessType),
       sourceUrl: orNull(values.sourceUrl),
       pipelineStatus: values.pipelineStatus,
@@ -238,6 +244,36 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
             </p>
           </div>
 
+          <Text
+            label={t("sales.fieldWhatsappPhone")}
+            value={values.whatsappPhone}
+            onChange={(v) => set("whatsappPhone", v)}
+          />
+
+          <div className="flex flex-col gap-1.5">
+            <Label>{t("sales.fieldWhatsappIsBusiness")}</Label>
+            <Select
+              value={values.whatsappIsBusiness}
+              onValueChange={(v) =>
+                set(
+                  "whatsappIsBusiness",
+                  v as LeadFormValues["whatsappIsBusiness"],
+                )
+              }
+            >
+              <SelectTrigger size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(["unknown", "yes", "no"] as const).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {t("sales.whatsappBusinessOptions", { option: value })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <Label>{t("sales.fieldTier")}</Label>
             <Select
@@ -293,11 +329,6 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
             label={t("sales.fieldSocialFollowers")}
             value={values.socialFollowers}
             onChange={(v) => set("socialFollowers", v)}
-          />
-          <Text
-            label={t("sales.fieldBranchCount")}
-            value={values.branchCount}
-            onChange={(v) => set("branchCount", v)}
           />
           <Text
             label={t("sales.fieldBusinessType")}
@@ -387,7 +418,8 @@ type LeadRecord = {
   socialPlatform: string | null;
   socialHandle: string | null;
   socialFollowers: number | null;
-  branchCount: number | null;
+  whatsappPhone: string | null;
+  whatsappIsBusiness: boolean | null;
   businessType: string | null;
   sourceUrl: string | null;
   pipelineStatus: LeadFormValues["pipelineStatus"];
@@ -413,7 +445,13 @@ export function leadToFormValues(lead: LeadRecord): LeadFormValues {
     socialHandle: lead.socialHandle ?? "",
     socialFollowers:
       lead.socialFollowers != null ? String(lead.socialFollowers) : "",
-    branchCount: lead.branchCount != null ? String(lead.branchCount) : "",
+    whatsappPhone: lead.whatsappPhone ?? "",
+    whatsappIsBusiness:
+      lead.whatsappIsBusiness == null
+        ? "unknown"
+        : lead.whatsappIsBusiness
+          ? "yes"
+          : "no",
     businessType: lead.businessType ?? "",
     sourceUrl: lead.sourceUrl ?? "",
     pipelineStatus: lead.pipelineStatus,

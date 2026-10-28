@@ -146,7 +146,6 @@ export type MappedLead = {
   socialPlatform: string | null;
   socialHandle: string | null;
   socialFollowers: number | null;
-  branchCount: number | null;
   businessType: string | null;
   sourceUrl: string | null;
   pipelineStatus: LeadPipelineStatus;
@@ -199,7 +198,6 @@ export function mapRecord(record: Record<string, string>): MappedRecord | null {
     socialPlatform: orNull(record.social_platform),
     socialHandle: orNull(record.social_handle),
     socialFollowers: toInt(record.social_followers),
-    branchCount: toInt(record.branch_count),
     businessType: orNull(record.business_type),
     sourceUrl: orNull(record.source_url),
     pipelineStatus,

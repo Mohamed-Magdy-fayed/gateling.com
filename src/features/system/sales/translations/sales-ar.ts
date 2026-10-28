@@ -72,13 +72,11 @@ export default {
     socialPlatform: dt("{platform:enum}", {
       enum: {
         platform: {
-
           instagram: "إنستجرام",
 
           facebook: "فيسبوك",
 
           tiktok: "تيك توك",
-
         },
       },
     }),
@@ -325,7 +323,13 @@ export default {
     fieldSocialPlatform: "منصة التواصل",
     fieldSocialHandle: "المعرّف",
     fieldSocialFollowers: "المتابعون",
-    fieldBranchCount: "الفروع",
+    fieldWhatsappPhone: "رقم واتساب (لو مختلف عن الرقم الأساسي)",
+    fieldWhatsappIsBusiness: "حساب واتساب للأعمال",
+    whatsappBusinessOptions: dt("{option:enum}", {
+      enum: {
+        option: { unknown: "لم يتم التحقق", yes: "نعم", no: "لا" },
+      },
+    }),
     fieldBusinessType: "نوع النشاط",
     fieldSourceUrl: "رابط المصدر",
     fieldStatus: "حالة خط المبيعات",
@@ -384,5 +388,179 @@ export default {
     countersContactedThisWeek: "تم التواصل هذا الأسبوع",
     countersDemosBooked: "عروض محجوزة",
     countersByStatus: "حسب الحالة",
+
+    // ─── صفحة حساب العميل (/sales/leads/[id]) ────────────────────────────
+    account: {
+      tierBadge: dt("الفئة {tier}", {}),
+      whatsapp: "واتساب",
+      quickActions: "إجراءات سريعة",
+      noPhone: "لا يوجد رقم هاتف.",
+
+      reachRating: "تقييم جوجل",
+      reachTotal: "إجمالي الوصول",
+      followers: "متابع",
+      reviewsCount: dt("{count:plural}", {
+        plural: {
+          count: {
+            zero: "لا توجد مراجعات",
+            one: "مراجعة واحدة",
+            two: "مراجعتان",
+            few: "{?} مراجعات",
+            many: "{?} مراجعة",
+            other: "{?} مراجعة",
+          },
+        },
+      }),
+      locationsCount: dt("{count:plural}", {
+        plural: {
+          count: {
+            zero: "لا توجد مواقع",
+            one: "موقع واحد",
+            two: "موقعان",
+            few: "{?} مواقع",
+            many: "{?} موقعًا",
+            other: "{?} موقع",
+          },
+        },
+      }),
+
+      mapsHeading: "خرائط جوجل",
+      mapTitle: dt("خريطة {name}", {}),
+      mapMissing: "الصق كود التضمين الخاص بهذا المكان لعرض الخريطة هنا.",
+      noLocations:
+        "لا يوجد مكان على خرائط جوجل بعد. أضف المحل الرئيسي من كود التضمين.",
+      addEmbed: "إضافة كود الخريطة",
+      addMainLocation: "إضافة الموقع الرئيسي",
+      addBranch: "إضافة فرع",
+      editLocation: "تعديل الموقع",
+      ratingLabel: dt("التقييم {rating} من 5", {}),
+      noRating: "لم يتم إدخال تقييم",
+      directions: "الاتجاهات",
+      openInMaps: "فتح في الخرائط",
+
+      locationDialogLead:
+        "انسخ ما يظهر في صفحة المكان على خرائط جوجل. الأرقام لقطة بتاريخ الحفظ.",
+      embedLabel: "كود التضمين",
+      embedHint: "خرائط جوجل › مشاركة › تضمين خريطة › نسخ HTML",
+      embedHintReplace:
+        "الصق كودًا جديدًا لاستبدال الخريطة الحالية، أو اتركه فارغًا للإبقاء عليها.",
+      embedInvalid:
+        "هذا ليس كود تضمين من خرائط جوجل. انسخ HTML من مشاركة › تضمين خريطة.",
+      removeMap: "إزالة الخريطة الحالية",
+      locationName: "الاسم",
+      category: "التصنيف (كما يظهر على الخرائط)",
+      rating: "التقييم (0–5)",
+      ratingInvalid: "أدخل تقييمًا بين 0 و5.",
+      reviews: "المراجعات",
+      makeMain: "اجعله الموقع الرئيسي",
+      locationSaved: "تم حفظ الموقع.",
+      locationSaveFailed: "تعذّر حفظ الموقع.",
+      locationRemoveFailed: "تعذّر حذف الموقع.",
+
+      branches: "الفروع",
+      branchesLead: "كل المواقع التي يديرها هذا العميل، من خرائط جوجل.",
+      mainTag: "الرئيسي",
+      branchTag: "فرع",
+      noAddress: "لم يتم إدخال عنوان",
+      locationActions: dt("إجراءات {name}", {}),
+      remove: "حذف",
+      mainCannotRemove: "اجعل موقعًا آخر رئيسيًا لحذف هذا",
+      removeLocationTitle: "حذف هذا الموقع؟",
+      removeLocationBody: dt("سيتم حذف {name} من فروع هذا العميل.", {}),
+
+      businessAccount: "حساب أعمال",
+      whatsappNoName: "لا يوجد اسم واتساب",
+      whatsappMissing: "لا يوجد رقم واتساب.",
+      openWhatsappChat: "فتح محادثة واتساب",
+
+      beforeYouCall: "قبل الاتصال",
+      beforeYouCallLead: "من حسابات هذا العميل",
+      tipsEmpty: "أضف تقييم الخرائط وحسابات التواصل لتظهر هنا نقاط البداية.",
+      tipAskFor: dt("اسأل عن «{name}» — هذا الاسم الظاهر على واتساب.", {}),
+      tipRating: dt(
+        "ابدأ بتقييمهم {rating}★ على جوجل من {reviews:number} مراجعة.",
+        {},
+      ),
+      tipTopPlatform: dt(
+        "أكبر جمهور لهم على {platform:enum} ({followers}) — ابدأ بهذه القناة.",
+        {
+          enum: {
+            platform: {
+              facebook: "فيسبوك",
+              instagram: "إنستجرام",
+              tiktok: "تيك توك",
+            },
+          },
+        },
+      ),
+      tipLocations: dt(
+        "لديهم {count:number} مواقع — اسأل أيها يتولى الحجوزات.",
+        {},
+      ),
+
+      addProfile: "إضافة حساب",
+      openProfileOn: dt("فتح حساب {platform:enum}", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      editProfileOn: dt("تعديل حساب {platform:enum}", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      editProfileTitle: dt("حساب {platform:enum}", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      editProfileLead: "أدخله كما يظهر على الحساب اليوم.",
+      profilePicture: dt("صورة حساب {platform:enum}", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      profileUrl: dt("رابط {platform:enum}", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      profileUrlInvalid: dt("الصق رابطًا من {platform:enum} نفسه.", {
+        enum: {
+          platform: {
+            facebook: "فيسبوك",
+            instagram: "إنستجرام",
+            tiktok: "تيك توك",
+          },
+        },
+      }),
+      displayName: "الاسم على الحساب",
+      followersLabel: "المتابعون",
+      uploadPicture: "رفع صورة",
+      removePicture: "إزالة الصورة",
+      markNotFound: "لا يوجد حساب",
+      profileSaved: "تم حفظ الحساب.",
+      profileSaveFailed: "تعذّر حفظ الحساب.",
+    },
   },
 } as const satisfies LanguageMessages;

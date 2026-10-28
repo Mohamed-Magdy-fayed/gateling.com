@@ -1,6 +1,16 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, inArray, isNull, ne, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  ne,
+  sql,
+} from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
@@ -18,11 +28,11 @@ import {
   startOfNextLocalDay,
 } from "@/features/system/sales/lib/day-window";
 import { CONTACT_ACTIVITY_TYPES } from "@/features/system/sales/lib/derived";
-import { largestFollowers } from "@/features/system/sales/lib/social-profiles";
 import {
   isBlockedOutbound,
   shouldDischargePromises,
 } from "@/features/system/sales/lib/pipeline-status";
+import { largestFollowers } from "@/features/system/sales/lib/social-profiles";
 import {
   computeTodayBuckets,
   DEFAULT_TODAY_RULES_CONFIG,
@@ -31,6 +41,7 @@ import {
 
 import { SalesError } from "./errors";
 import { buildPipelineWhere, pipelineSortExpr } from "./filters";
+import { listLocations } from "./locations";
 import { type Executor, recomputeLeadDerived } from "./recompute";
 import type {
   BulkSetStatusInput,
@@ -231,7 +242,8 @@ export async function setSocialProfile(
       .for("update");
     if (!lead) throw new SalesError("SALES_LEAD_NOT_PROSPECT", input.id);
 
-    const { [input.platform]: _previous, ...others } = lead.socialProfiles;
+    const { [input.platform]: previous, ...others } = lead.socialProfiles;
+    const kept = previous?.status === "found" ? previous : null;
     const checkedAt = new Date().toISOString();
     const socialProfiles: LeadSocialProfiles =
       input.status === "clear"
@@ -247,6 +259,16 @@ export async function setSocialProfile(
                     followers: input.followers ?? null,
                     posts: input.posts ?? null,
                     bio: input.bio ?? null,
+                    // Omitted (an agent re-researching numbers) keeps the
+                    // operator's name and uploaded picture; null clears them.
+                    displayName:
+                      input.displayName === undefined
+                        ? (kept?.displayName ?? null)
+                        : input.displayName,
+                    avatarUrl:
+                      input.avatarUrl === undefined
+                        ? (kept?.avatarUrl ?? null)
+                        : input.avatarUrl,
                     checkedAt,
                   }
                 : { status: "notFound", checkedAt },
@@ -256,7 +278,8 @@ export async function setSocialProfile(
       .update(LeadsTable)
       .set({
         socialProfiles,
-        socialFollowers: largestFollowers(socialProfiles) ?? lead.socialFollowers,
+        socialFollowers:
+          largestFollowers(socialProfiles) ?? lead.socialFollowers,
         updatedBy: actorId,
       })
       .where(eq(LeadsTable.id, input.id));
@@ -283,7 +306,9 @@ export async function getLead(db: Db, id: string) {
       desc(LeadActivitiesTable.createdAt),
     );
 
-  return { lead, activities };
+  const locations = await listLocations(db, id);
+
+  return { lead, activities, locations };
 }
 
 /**

@@ -126,11 +126,15 @@ const setSocialProfileInput = z.object({
   leadId: z.string().uuid(),
   platform: z.enum(socialPlatformValues),
   status: z.enum(["found", "notFound", "clear"]),
-  url: z.url({ protocol: /^https?$/ }).max(512).optional(),
+  url: z
+    .url({ protocol: /^https?$/ })
+    .max(512)
+    .optional(),
   handle: z.string().trim().min(1).max(255).optional(),
   followers: z.number().int().min(0).max(2_147_483_647).optional(),
   posts: z.number().int().min(0).max(2_147_483_647).optional(),
   bio: z.string().trim().max(1000).optional(),
+  displayName: z.string().trim().min(1).max(255).optional(),
 });
 
 const createCaller = createCallerFactory(appRouter);
