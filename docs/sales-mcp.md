@@ -54,7 +54,7 @@ claude mcp add --transport http gateling-sales https://gateling.com/api/mcp/sale
 | `create_lead` | Add a prospect (`new`). Search first to avoid duplicates. |
 | `update_lead` | Change contact/profile fields; send only what changes. Overwrites without history — confirm first. Not status, notes, do-not-contact or owner; `sourceUrl` must be http(s). |
 | `set_social_profile` | Record research for one platform (`instagram`, `facebook`, `tiktok`): `found` with the profile `url` (on that platform's domain), `handle`, `displayName` (the name shown on the profile), `followers`, `posts`, short `bio`, and for Facebook `avatarUrl` (see below); or `notFound`; or `clear` to remove a wrong entry. Stamps the check time. Leaving `displayName` or `avatarUrl` out keeps the stored one. |
-| `set_maps_listing` | Record the lead's one Google Maps listing: `address`, `category`, `rating`, `reviewCount`, `embed` (Share › Embed a map HTML or its src). Send only what you found; omitted fields keep their value. Overwrites, so confirm with the operator. |
+| `set_maps_listing` | Record the lead's one Google Maps listing: `address`, `category`, `rating`, `reviewCount`. The map is drawn from name + address; there is no embed. Send only what you found; omitted fields keep their value. Overwrites, so confirm with the operator. |
 
 `log_outcome` and `update_lead` are marked destructive, so your client should
 ask the operator before running them. Lead data partly comes from scraped
@@ -148,10 +148,10 @@ then:
 
 1. **Google Maps.** `get_lead` shows what is on file (`address` and the
    `maps*` fields). Find the business's own listing and copy `address`,
-   `category`, `rating` and `reviewCount` exactly as Maps shows them. For
-   `embed`, the operator usually pastes it; if you can read the listing's
-   Share › Embed a map HTML, send it. Save with `set_maps_listing`. One
-   listing per client: there are no branches.
+   `category`, `rating` and `reviewCount` exactly as Maps shows them, and
+   save with `set_maps_listing`. There is no embed: the lead page draws the
+   map from the lead's name and `address`, so a correct address is what
+   places it. One listing per client: there are no branches.
 2. **WhatsApp.** `update_lead` with `whatsappProfileName` (the name WhatsApp
    shows), `whatsappIsBusiness`, and `whatsappPhone` only when WhatsApp is on
    a different number than `phone`. Confirm with the operator first: this

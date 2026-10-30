@@ -28,7 +28,6 @@ import {
   startOfNextLocalDay,
 } from "@/features/system/sales/lib/day-window";
 import { CONTACT_ACTIVITY_TYPES } from "@/features/system/sales/lib/derived";
-import { parseMapsEmbed } from "@/features/system/sales/lib/maps-embed";
 import {
   isBlockedOutbound,
   shouldDischargePromises,
@@ -311,32 +310,21 @@ export async function getLead(db: Db, id: string) {
 }
 
 /**
- * The lead's Google Maps listing. Only the fields sent change; a pasted embed
- * is re-parsed here and stored as the rebuilt src with its coordinates. Typed
- * Maps numbers are dated, like researched social numbers.
+ * The lead's Google Maps listing. Only the fields sent change. Typed Maps
+ * numbers are dated, like researched social numbers.
  */
 export async function setMapsListing(
   db: Db,
   input: SetMapsListingInput,
   actorId: string,
 ): Promise<void> {
-  const { id, embed, rating, reviewCount, category, address } = input;
-  const parsed = embed ? parseMapsEmbed(embed) : null;
-  const embedColumns =
-    embed === undefined
-      ? {}
-      : {
-          mapsEmbedSrc: parsed?.src ?? null,
-          mapsLat: parsed?.lat ?? null,
-          mapsLng: parsed?.lng ?? null,
-        };
+  const { id, rating, reviewCount, category, address } = input;
   const numbersTouched =
     rating !== undefined || reviewCount !== undefined || category !== undefined;
 
   const updated = await db
     .update(LeadsTable)
     .set({
-      ...embedColumns,
       ...(address !== undefined ? { address } : {}),
       ...(rating !== undefined ? { mapsRating: rating } : {}),
       ...(reviewCount !== undefined ? { mapsReviewCount: reviewCount } : {}),

@@ -289,8 +289,9 @@ production.
 
 ## Sourcing new atelier leads
 
-By hand: find the shop on Google Maps, add it as a lead, then paste its
-`Share › Embed a map` code on the lead page (see **Client account page**).
+By hand: find the shop on Google Maps, add it as a lead with its address, and
+copy the listing's category, rating and reviews on the lead page (see
+**Client account page**). The map draws itself from name + address.
 The Places API sourcing CLI was removed on 2026-10-28; nothing in the repo
 calls the Places API any more.
 
@@ -327,7 +328,7 @@ This module intentionally does not follow the standard entity pattern:
 `/sales/leads/[id]`, built from `docs/designs/Client account.html`. Sections are
 reusable components in `admin/components/client-account/`: `ClientHero` with
 the six-tile `ReachStrip` (Google Maps, Facebook, Instagram, TikTok, WhatsApp,
-total reach; `ReachTile`), then `GoogleMapsCard` (`MapsEmbed`) beside
+total reach; `ReachTile`), then `GoogleMapsCard` beside
 `BeforeYouCallCard`, `MobileActionBar` (phones only), and the
 `MapsListingDialog` / `SocialProfileDialog` editors. `StarRating` is shared in
 `components/ui/`. Brand colours are `--brand-*` tokens in `globals.css`. The
@@ -344,12 +345,12 @@ The **Edit** dialog no longer shows address or the legacy social
 platform/handle/followers; those are edited on the page (Maps tile, social
 tiles). The **Create** dialog still has them.
 
-- **Google Maps** (ADR-0009): one listing per lead, on `leads` itself
-  (`mapsEmbedSrc`, `mapsLat`/`mapsLng`, `mapsRating`, `mapsReviewCount`,
-  `mapsCategory`, `mapsCheckedAt`; the address is `address`). Entered by hand:
-  paste the listing's Share › Embed a map HTML; only the rebuilt
-  `https://www.google.com/maps/embed?pb=…` src is kept (`lib/maps-embed.ts`).
-  Rating, reviews and category are typed as Maps shows them and dated.
+- **Google Maps** (ADR-0009, ADR-0010): one listing per lead, on `leads`
+  itself (`mapsRating`, `mapsReviewCount`, `mapsCategory`, `mapsCheckedAt`;
+  the address is `address`). Rating, reviews and category are typed as Maps
+  shows them and dated. Nothing about the map is stored: the card renders
+  Google's keyless `maps?q=<name, address>&output=embed` page
+  (`lib/maps-embed.ts`), and shows "Add address" when there is no address.
 - **Social profiles**: the platform name on each tile edits
   `setSocialProfile`, the same procedure the agent uses. Facebook takes an
   uploaded picture (signed-URL upload; Facebook's own image links expire). An

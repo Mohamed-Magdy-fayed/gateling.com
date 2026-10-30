@@ -143,9 +143,7 @@ const setSocialProfileInput = z.object({
 });
 
 /**
- * The lead's one Google Maps listing; only the fields sent change. `embed` is
- * the listing's Share › Embed a map HTML (or its src); the server keeps only
- * the checked Google embed URL.
+ * The lead's one Google Maps listing; only the fields sent change.
  */
 const setMapsListingInput = z.object({
   leadId: z.string().uuid(),
@@ -153,7 +151,6 @@ const setMapsListingInput = z.object({
   category: z.string().trim().max(128).optional(),
   rating: z.number().min(0).max(5).optional(),
   reviewCount: z.number().int().min(0).max(2_147_483_647).optional(),
-  embed: z.string().trim().max(4000).optional(),
 });
 
 const createCaller = createCallerFactory(appRouter);
@@ -290,7 +287,7 @@ export function buildSalesMcpServer(
   writeTool(
     "set_maps_listing",
     "Record the Google Maps listing",
-    'Save a lead\'s Google Maps listing (one per lead). Copy `address`, `category` (as Maps shows it, e.g. "Bridal shop"), `rating` (0–5) and `reviewCount` from the listing, and `embed` from Share › Embed a map (the HTML or its `https://www.google.com/maps/embed?pb=…` src). Send only what you found: omitted fields keep their stored value. Rating, reviews and category are dated when saved. `get_lead` shows the current values (`maps*` fields and `address`).',
+    'Save a lead\'s Google Maps listing (one per lead). Copy `address`, `category` (as Maps shows it, e.g. "Bridal shop"), `rating` (0–5) and `reviewCount` from the listing. There is no embed: the lead page draws its map from the lead\'s name and `address`. Send only what you found: omitted fields keep their stored value. Rating, reviews and category are dated when saved. `get_lead` shows the current values (`maps*` fields and `address`).',
     setMapsListingInput,
     async ({ leadId, ...fields }) =>
       caller.sales.setMapsListing({ id: leadId, ...fields }),
