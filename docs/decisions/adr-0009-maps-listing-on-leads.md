@@ -1,7 +1,7 @@
 # ADR-0009: One Google Maps listing per lead, stored on `leads`; branches dropped
 
 - **Date:** 2026-10-28
-- **Status:** accepted. Supersedes the `lead_locations` part of ADR-0008.
+- **Status:** accepted. Supersedes the `lead_locations` part of ADR-0008. Its embed columns (`mapsEmbedSrc`, `mapsLat`, `mapsLng`) are superseded by ADR-0010.
 
 ## Context
 ADR-0008 added `lead_locations` (a main location plus branches) for the client account page. In use, the owner found the branches section added bulk without value. They asked for a compact page: the Maps data in the header strip, the map alone in its own card, and no branches. A table holding one row per lead no longer earns its keep.

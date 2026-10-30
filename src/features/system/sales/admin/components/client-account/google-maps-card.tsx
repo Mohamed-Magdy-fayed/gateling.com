@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "@/features/core/i18n/client";
 import {
-  isMapsEmbedSrc,
+  mapsEmbedUrl,
   mapsSearchUrl,
 } from "@/features/system/sales/lib/maps-embed";
 import { cn } from "@/lib/utils";
@@ -17,23 +17,19 @@ import { GoogleMapsIcon } from "./platform-icon";
 type Props = {
   name: string;
   address: string | null;
-  embedSrc: string | null;
-  lat: number | null;
-  lng: number | null;
   onEdit: () => void;
   className?: string;
 };
 
-/** A live Google Maps embed. Only ever a `src` this app rebuilt and re-checked. */
-export function MapsEmbed({ src, title }: { src: string; title: string }) {
-  if (!isMapsEmbedSrc(src)) return null;
+/** Google's keyless map for a search, built by `mapsEmbedUrl`. */
+function MapsEmbed({ src, title }: { src: string; title: string }) {
   return (
     <iframe
       src={src}
       title={title}
       className="size-full border-0"
       loading="lazy"
-      // The pb= embed needs no referrer; don't leak the admin URL to Google.
+      // Don't leak the admin URL to Google.
       referrerPolicy="strict-origin-when-cross-origin"
       tabIndex={-1}
       // Scripts + same-origin are Google's own origin inside the frame; no
@@ -44,22 +40,16 @@ export function MapsEmbed({ src, title }: { src: string; title: string }) {
 }
 
 /**
- * The client's listing on a map. The rating, reviews and category sit in the
- * header strip; this card is the map alone, and clicking it opens the place in
- * Google Maps. Edit lives in the card header.
+ * The client's listing on a map, drawn from the lead's name + address. The
+ * rating, reviews and category sit in the header strip; this card is the map
+ * alone, and clicking it opens the place in Google Maps. Edit lives in the
+ * card header.
  */
-export function GoogleMapsCard({
-  name,
-  address,
-  embedSrc,
-  lat,
-  lng,
-  onEdit,
-  className,
-}: Props) {
+export function GoogleMapsCard({ name, address, onEdit, className }: Props) {
   const { t } = useTranslation();
   const headingId = useId();
-  const openUrl = mapsSearchUrl({ name, address, lat, lng });
+  const embedSrc = mapsEmbedUrl({ name, address });
+  const openUrl = mapsSearchUrl({ name, address });
 
   return (
     <section aria-labelledby={headingId} className={className}>
@@ -117,10 +107,10 @@ export function GoogleMapsCard({
                   size="lg"
                   variant="outline"
                   onClick={onEdit}
-                  data-testid="maps-add-embed"
+                  data-testid="maps-add-address"
                 >
                   <PlusIcon aria-hidden="true" />
-                  {t("sales.account.addEmbed")}
+                  {t("sales.account.addAddress")}
                 </Button>
               </div>
             )}
