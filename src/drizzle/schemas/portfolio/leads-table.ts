@@ -1,6 +1,5 @@
 import {
   boolean,
-  doublePrecision,
   index,
   integer,
   jsonb,
@@ -169,14 +168,10 @@ export const LeadsTable = pgTable(
     socialProfiles: jsonb().$type<LeadSocialProfiles>().notNull().default({}),
 
     // ─── Google Maps listing (one per lead, entered by hand) ─────────────
-    // The operator pastes the listing's Share › Embed a map HTML; only the
-    // rebuilt `https://www.google.com/maps/embed?pb=…` src is kept
-    // (`lib/maps-embed.ts`), with the coordinates it carries. Rating, reviews
-    // and category are typed as Maps shows them; `mapsCheckedAt` dates them.
-    // The listing's address is `address` above.
-    mapsEmbedSrc: text(),
-    mapsLat: doublePrecision(),
-    mapsLng: doublePrecision(),
+    // Rating, reviews and category are typed as Maps shows them;
+    // `mapsCheckedAt` dates them. The listing's address is `address` above,
+    // and the lead page builds its map from name + address
+    // (`lib/maps-embed.ts`), so nothing about the map itself is stored.
     /** 0–5, one decimal, as Maps shows it. */
     mapsRating: real(),
     mapsReviewCount: integer(),

@@ -404,20 +404,13 @@ export default {
       mapsSaved: "Maps listing saved.",
       mapsSaveFailed: "Could not save the Maps listing.",
       mapsDialogLead:
-        "Paste the embed and copy what the listing shows. The numbers are a snapshot, dated when you save.",
+        "Copy what the listing shows. The map is drawn from the name and address; the numbers are a snapshot, dated when you save.",
       mapTitle: dt("Map of {name}", {}),
-      mapMissing: "Paste this listing's embed code to show the map here.",
-      addEmbed: "Add map embed",
+      mapMissing: "Add this client's address to show the map here.",
+      addAddress: "Add address",
       ratingLabel: dt("Rated {rating} out of 5", {}),
       openInMaps: "Open in Maps",
 
-      embedLabel: "Embed code",
-      embedHint: "Google Maps › Share › Embed a map › Copy HTML",
-      embedHintReplace:
-        "Paste a new embed to replace the current map, or leave empty to keep it.",
-      embedInvalid:
-        "That is not a Google Maps embed. Copy the HTML from Share › Embed a map.",
-      removeMap: "Remove the current map",
       category: "Category (as shown on Maps)",
       rating: "Rating (0–5)",
       ratingInvalid: "Enter a rating between 0 and 5.",

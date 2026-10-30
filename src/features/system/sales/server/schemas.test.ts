@@ -10,17 +10,16 @@ import {
 const ID = "3f1c2b7e-9a4d-4c1e-8b2a-1d2e3f4a5b6c";
 
 describe("setMapsListingSchema", () => {
-  it("accepts a Google Maps embed and rejects anything else", () => {
-    const embed =
-      '<iframe src="https://www.google.com/maps/embed?pb=!1m2!2sSASHA"></iframe>';
-    expect(setMapsListingSchema.safeParse({ id: ID, embed }).success).toBe(
-      true,
-    );
+  it("takes the listing fields and no longer carries an embed", () => {
+    const parsed = setMapsListingSchema.safeParse({
+      id: ID,
+      rating: 4.8,
+      embed: '<iframe src="https://www.google.com/maps/embed?pb=!1"></iframe>',
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.data).toEqual({ id: ID, rating: 4.8 });
     expect(
-      setMapsListingSchema.safeParse({
-        id: ID,
-        embed: '<iframe src="https://evil.example/maps/embed?pb=!1"></iframe>',
-      }).success,
+      setMapsListingSchema.safeParse({ id: ID, rating: 5.5 }).success,
     ).toBe(false);
   });
 

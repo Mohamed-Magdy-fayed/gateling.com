@@ -9,7 +9,6 @@ import {
   whatsappStatusValues,
 } from "@/drizzle/schema";
 import { BULK_ACTION_LIMIT } from "@/features/core/data-table/lib/limits";
-import { parseMapsEmbed } from "@/features/system/sales/lib/maps-embed";
 import { isPlatformUrl } from "@/features/system/sales/lib/social-profiles";
 import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
 
@@ -205,26 +204,16 @@ function isStoredMediaUrl(value: string): boolean {
 }
 
 /**
- * The lead's Google Maps listing, entered by hand. `embed` is whatever the
- * operator pasted from Share › Embed a map: the server keeps only the rebuilt
- * iframe `src` (`lib/maps-embed.ts`). `embed: null` removes the map; an
- * omitted field is left as it is.
+ * The lead's Google Maps listing, entered by hand. An omitted field is left
+ * as it is. The map itself is built from name + address, so nothing about it
+ * is sent.
  */
-const embedSchema = z
-  .string()
-  .trim()
-  .max(4000)
-  .refine((value) => parseMapsEmbed(value) !== null, {
-    message: "invalid_embed",
-  });
-
 export const setMapsListingSchema = z.object({
   id: z.string().uuid(),
   address: z.string().trim().max(1000).nullable().optional(),
   category: z.string().trim().max(128).nullable().optional(),
   rating: z.number().min(0).max(5).nullable().optional(),
   reviewCount: z.number().int().min(0).max(PG_INT_MAX).nullable().optional(),
-  embed: embedSchema.nullable().optional(),
 });
 export type SetMapsListingInput = z.infer<typeof setMapsListingSchema>;
 

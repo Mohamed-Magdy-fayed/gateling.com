@@ -122,9 +122,6 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         <GoogleMapsCard
           name={lead.name}
           address={lead.address}
-          embedSrc={lead.mapsEmbedSrc}
-          lat={lead.mapsLat}
-          lng={lead.mapsLng}
           onEdit={() => setMapsOpen(true)}
         />
         <BeforeYouCallCard tips={tips} />
