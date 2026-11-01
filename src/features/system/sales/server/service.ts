@@ -1,16 +1,6 @@
 import "server-only";
 
-import {
-  and,
-  count,
-  desc,
-  eq,
-  gte,
-  inArray,
-  isNull,
-  ne,
-  sql,
-} from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 import type { db as database } from "@/drizzle";
 import {
@@ -287,6 +277,22 @@ export async function setSocialProfile(
   });
 }
 
+/** The fields `leadFieldViolation` compares against; null when not a prospect. */
+export async function getLeadGuardFields(
+  db: Db,
+  id: string,
+): Promise<{ doNotContact: boolean; ownerId: string | null } | null> {
+  const [row] = await db
+    .select({
+      doNotContact: LeadsTable.doNotContact,
+      ownerId: LeadsTable.ownerId,
+    })
+    .from(LeadsTable)
+    .where(and(eq(LeadsTable.id, id), prospectScope))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function getLead(db: Db, id: string) {
   const [lead] = await db
     .select()
@@ -465,6 +471,7 @@ export async function getTodayWork(
       now,
       { ...DEFAULT_TODAY_RULES_CONFIG, newQueueCap },
       startOfLocalDay(now, settings.timeZone),
+      startOfNextLocalDay(now, settings.timeZone),
     ),
     ...stats,
     timeZone: settings.timeZone,
@@ -528,8 +535,8 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
       and(
         sql`${A.occurredAt} >= ${dayStart}::timestamptz`,
         sql`${A.occurredAt} < ${dayEnd}::timestamptz`,
-        // A note is research, not work on the lead: it must not count as done.
-        ne(A.type, "note"),
+        // Notes count: any log takes a lead off today's list, so it counts
+        // as done (`computeTodayBuckets`, `lastWorkedAt`).
       ),
     );
 
@@ -543,10 +550,22 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
   };
 }
 
+/**
+ * Fully qualified references for the per-lead subqueries below. In a
+ * single-table select Drizzle renders `${Table.column}` without its table
+ * name, so `${LeadActivitiesTable.leadId} = ${LeadsTable.id}` became
+ * `"leadId" = "id"` — both resolving to `lead_activities` — and every
+ * subquery silently matched nothing.
+ */
+const leadIdRef = sql`${LeadsTable}.${sql.identifier(LeadsTable.id.name)}`;
+function act(column: keyof typeof LeadActivitiesTable.$inferSelect) {
+  return sql`act.${sql.identifier(LeadActivitiesTable[column].name)}`;
+}
+
 /** Every prospect as the rules module's input. */
 async function todayLeadInputs(db: Db): Promise<TodayLeadInput[]> {
-  // Two boolean facts per lead that the cache columns cannot express. Computed
-  // as aggregates so this stays a single round trip rather than N+1.
+  // Per-lead facts the cache columns cannot express. Computed as subqueries
+  // so this stays a single round trip rather than N+1.
   const rows = await db
     .select({
       id: LeadsTable.id,
@@ -571,24 +590,51 @@ async function todayLeadInputs(db: Db): Promise<TodayLeadInput[]> {
       followUpCount: LeadsTable.followUpCount,
       nextActionAt: LeadsTable.nextActionAt,
       hasDemoScheduledActivity: sql<boolean>`exists (
-        select 1 from ${LeadActivitiesTable}
-        where ${LeadActivitiesTable.leadId} = ${LeadsTable.id}
-          and ${LeadActivitiesTable.type} = 'demo_scheduled'
+        select 1 from ${LeadActivitiesTable} act
+        where ${act("leadId")} = ${leadIdRef} and ${act("type")} = 'demo_scheduled'
       )`,
       hasInboundReply: sql<boolean>`exists (
-        select 1 from ${LeadActivitiesTable}
-        where ${LeadActivitiesTable.leadId} = ${LeadsTable.id}
-          and ${LeadActivitiesTable.type} = 'whatsapp_reply'
+        select 1 from ${LeadActivitiesTable} act
+        where ${act("leadId")} = ${leadIdRef} and ${act("type")} = 'whatsapp_reply'
       )`,
+      // Anything logged, notes included: a lead worked today is done for today.
+      // Raw-subquery timestamps come back as epoch milliseconds so nothing
+      // depends on how the driver renders a bare `max(timestamptz)`.
+      lastWorkedAtMs: sql<number | null>`(
+        select extract(epoch from max(${act("createdAt")})) * 1000
+        from ${LeadActivitiesTable} act
+        where ${act("leadId")} = ${leadIdRef}
+      )`.mapWith(Number),
+      // Funnel facts (`lib/funnel.ts`): the VIDEO outcome convention and the
+      // latest demo, which the trial is counted from.
+      hasVideoSent: sql<boolean>`exists (
+        select 1 from ${LeadActivitiesTable} act
+        where ${act("leadId")} = ${leadIdRef}
+          and ${act("type")} = 'whatsapp_sent'
+          and upper(btrim(${act("outcome")})) like 'VIDEO%'
+      )`,
+      lastDemoDoneAtMs: sql<number | null>`(
+        select extract(epoch from max(${act("occurredAt")})) * 1000
+        from ${LeadActivitiesTable} act
+        where ${act("leadId")} = ${leadIdRef} and ${act("type")} = 'demo_done'
+      )`.mapWith(Number),
     })
     .from(LeadsTable)
     .where(prospectScope);
 
-  return rows.map((row) => ({
+  return rows.map(({ lastWorkedAtMs, lastDemoDoneAtMs, ...row }) => ({
     ...row,
     hasDemoScheduledActivity: Boolean(row.hasDemoScheduledActivity),
     hasInboundReply: Boolean(row.hasInboundReply),
+    hasVideoSent: Boolean(row.hasVideoSent),
+    lastWorkedAt: msToDate(lastWorkedAtMs),
+    lastDemoDoneAt: msToDate(lastDemoDoneAtMs),
   }));
+}
+
+/** `mapWith(Number)` turns SQL null into 0 for some drivers; treat both as none. */
+function msToDate(ms: number | null): Date | null {
+  return ms ? new Date(ms) : null;
 }
 
 export type PipelineCounters = {

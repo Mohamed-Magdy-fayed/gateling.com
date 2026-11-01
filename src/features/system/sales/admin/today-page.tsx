@@ -1,8 +1,7 @@
 "use client";
 
-import { KeyboardIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -11,37 +10,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { H1, Lead } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
-import { outcomeById } from "@/features/system/sales/lib/outcomes";
-import { canSave } from "@/features/system/sales/lib/today-session";
+import { useTRPC } from "@/integrations/trpc/client";
 
+import { TodayLeadCard } from "./components/today-lead-card";
 import { TodayProgress } from "./components/today-progress";
-import { TodayQueue } from "./components/today-queue";
-import { TodayShortcutsDialog } from "./components/today-shortcuts-dialog";
-import { TodayUpNextCard } from "./components/today-up-next-card";
-import { useTodaySession } from "./hooks/use-today-session";
+import { BUCKET_COPY } from "./components/today-reason";
 
-const SHORTCUTS_PREF_KEY = "sales-today-shortcuts";
-
-/** Per-viewer on/off for keyboard shortcuts; default on, works without storage. */
-function useShortcutPreference(): [boolean, (on: boolean) => void] {
-  const [enabled, setEnabled] = useState(true);
-  useEffect(() => {
-    try {
-      setEnabled(window.localStorage.getItem(SHORTCUTS_PREF_KEY) !== "off");
-    } catch {
-      // Storage unavailable: keep the default.
-    }
-  }, []);
-  const update = (on: boolean) => {
-    setEnabled(on);
-    try {
-      window.localStorage.setItem(SHORTCUTS_PREF_KEY, on ? "on" : "off");
-    } catch {
-      // The choice then lasts for this page view.
-    }
-  };
-  return [enabled, update];
-}
+const SKELETON_ROWS = ["s1", "s2", "s3", "s4", "s5", "s6"];
 
 type Props = {
   /**
@@ -54,44 +29,63 @@ type Props = {
   };
 };
 
+/**
+ * Today's list: every lead the funnel says needs work today, as thin cards
+ * that open the lead page. The work and the log happen there; a lead logged
+ * today drops off this list, and the rules bring it back on the day its next
+ * action (or follow-up) falls due. Shared by everyone — no per-user split.
+ */
 export function SalesTodayPage({ callingWindow }: Props) {
   const { t } = useTranslation();
-  const { query, summary, state, view, actions } = useTodaySession();
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [shortcutsOn, setShortcutsOn] = useShortcutPreference();
+  const trpc = useTRPC();
+  // Refetch on every visit and on focus: coming back from a lead page must
+  // show the list without the lead just logged.
+  const query = useQuery({
+    ...trpc.sales.today.queryOptions({}),
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+  });
+  const summary = query.data;
 
   const callingAdvice = callingWindow.isBeforeCallingHours
     ? t("sales.callingWindowTooEarly")
     : callingWindow.isAfterCallingHours
       ? t("sales.callingWindowTooLate")
       : null;
-  const upNext = view?.upNext ?? null;
+
+  // The daily new-atelier goal is shared: leads first contacted today count
+  // against it, so the new queue never refills past it during the day.
+  const newTarget = summary
+    ? Math.max(0, summary.newQueueCap - summary.newTouchedToday)
+    : 0;
+  const groups = (summary?.buckets ?? [])
+    .map((bucket) => ({
+      id: bucket.id,
+      rows:
+        bucket.id === "newQueue"
+          ? bucket.rows.slice(0, newTarget)
+          : bucket.rows,
+    }))
+    .filter((group) => group.rows.length > 0);
+  const left = groups.reduce((sum, group) => sum + group.rows.length, 0);
+  const done = summary?.doneToday ?? 0;
+  const total = done + left;
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <H1>{t("sales.todayTitle")}</H1>
-            {query.isFetching && !query.isPending && (
-              <Spinner role="status" aria-label={t("sales.refreshing")} />
-            )}
-          </div>
-          <Lead>{t("sales.todayLead")}</Lead>
+      <header className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <H1>{t("sales.todayTitle")}</H1>
+          {query.isFetching && !query.isPending && (
+            <output aria-label={t("sales.refreshing")}>
+              <Spinner aria-hidden="true" aria-label={undefined} />
+            </output>
+          )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-keyshortcuts="Shift+Slash"
-          onClick={() => setHelpOpen(true)}
-          className="pointer-coarse:hidden"
-        >
-          <KeyboardIcon aria-hidden="true" />
-          {t("sales.shortcutsOpen")}
-        </Button>
+        <Lead>{t("sales.todayLead")}</Lead>
       </header>
 
-      {/* Advice, never a gate — the queue stays visible either way. */}
+      {/* Advice, never a gate — the list stays visible either way. */}
       {callingAdvice && (
         <Alert>
           <AlertDescription>{callingAdvice}</AlertDescription>
@@ -99,11 +93,10 @@ export function SalesTodayPage({ callingWindow }: Props) {
       )}
 
       {query.isPending && (
-        <div className="flex flex-col gap-4" aria-busy="true">
+        <div className="flex flex-col gap-3" aria-busy="true">
           <Skeleton className="h-2 w-full" />
-          <Skeleton className="h-80 w-full rounded-lg" />
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+          {SKELETON_ROWS.map((key) => (
+            <Skeleton key={key} className="h-16 w-full rounded-lg" />
           ))}
         </div>
       )}
@@ -123,7 +116,7 @@ export function SalesTodayPage({ callingWindow }: Props) {
         </Alert>
       )}
 
-      {summary && view && !summary.hasProspects && (
+      {summary && !summary.hasProspects && (
         <Card>
           <CardContent className="flex flex-col items-start gap-2">
             <h2 className="font-semibold text-base">{t("sales.noLeadsYet")}</h2>
@@ -142,105 +135,66 @@ export function SalesTodayPage({ callingWindow }: Props) {
         </Card>
       )}
 
-      {summary && view && summary.hasProspects && (
+      {summary?.hasProspects && (
         <>
           <TodayProgress
-            done={view.progress.done}
-            left={view.progress.left}
-            ratio={view.progress.ratio}
+            done={done}
+            left={left}
+            ratio={total === 0 ? 1 : done / total}
             conversations={summary.conversationsToday}
           />
 
-          <section
-            aria-labelledby="today-up-next-heading"
-            className="flex flex-col gap-3"
-          >
-            <h2 id="today-up-next-heading" className="font-semibold text-base">
-              {t("sales.upNext")}
-            </h2>
+          {groups.length === 0 && (
+            <Card>
+              <CardContent className="flex flex-col items-start gap-2">
+                <p className="font-semibold text-base">
+                  {t("sales.allDoneTitle")}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {t("sales.allDoneRecap", {
+                    conversations: summary.conversationsToday,
+                    demos: summary.demosBookedToday,
+                    due: summary.dueTomorrow,
+                  })}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
-            {upNext && (
-              <div
-                key={upNext.row.lead.id}
-                className="fade-in-0 animate-in duration-200 motion-reduce:animate-none"
+          {groups.map((group) => {
+            const headingId = `today-${group.id}-heading`;
+            return (
+              <section
+                key={group.id}
+                aria-labelledby={headingId}
+                className="flex flex-col gap-2"
               >
-                <TodayUpNextCard
-                  item={upNext}
-                  timeZone={summary.timeZone}
-                  startedChannel={state.started[upNext.row.lead.id]}
-                  channel={state.channel[upNext.row.lead.id]}
-                  saving={!canSave(state, upNext.row.lead.id)}
-                  shortcutsEnabled={shortcutsOn}
-                  onStarted={(channel) =>
-                    actions.started(upNext.row.lead.id, channel)
-                  }
-                  onSwitchChannel={(channel) =>
-                    actions.switchChannel(upNext.row.lead.id, channel)
-                  }
-                  onSave={(outcome, at) =>
-                    void actions.save(upNext, outcome, at)
-                  }
-                  onSkip={() => actions.skip(upNext.row.lead.id)}
-                  onHelp={() => setHelpOpen(true)}
-                />
-              </div>
-            )}
-
-            {!upNext && view.allSkipped && (
-              <Card>
-                <CardContent className="flex flex-col items-start gap-2">
-                  <p className="font-semibold text-base">
-                    {t("sales.allSkippedTitle")}
-                  </p>
+                <div className="flex flex-col gap-0.5">
+                  <h2
+                    id={headingId}
+                    className="flex items-center gap-2 font-semibold text-base"
+                  >
+                    {t(BUCKET_COPY[group.id].title)}
+                    <span className="font-normal text-muted-foreground text-sm tabular-nums">
+                      {group.rows.length}
+                    </span>
+                  </h2>
                   <p className="text-muted-foreground text-sm">
-                    {t("sales.allSkippedHint")}
+                    {t(BUCKET_COPY[group.id].hint)}
                   </p>
-                  <Button variant="outline" onClick={actions.startOver}>
-                    {t("sales.startOver")}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {!upNext && view.allDone && (
-              <Card>
-                <CardContent className="flex flex-col items-start gap-2">
-                  <p className="font-semibold text-base">
-                    {t("sales.allDoneTitle")}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {t("sales.allDoneRecap", {
-                      conversations: summary.conversationsToday,
-                      demos: summary.demosBookedToday,
-                      due: summary.dueTomorrow,
-                    })}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </section>
-
-          <TodayQueue
-            groups={view.groups}
-            skipped={view.skipped}
-            extra={view.extra}
-            saving={false}
-            onPromote={actions.promote}
-            onStart={actions.started}
-            onPark={(item) =>
-              void actions.save(item, outcomeById("park"), null)
-            }
-            onSkip={actions.skip}
-          />
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {group.rows.map((row) => (
+                    <li key={row.lead.id}>
+                      <TodayLeadCard lead={row.lead} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
         </>
       )}
-
-      <TodayShortcutsDialog
-        open={helpOpen}
-        onOpenChange={setHelpOpen}
-        enabled={shortcutsOn}
-        onEnabledChange={setShortcutsOn}
-      />
     </div>
   );
 }

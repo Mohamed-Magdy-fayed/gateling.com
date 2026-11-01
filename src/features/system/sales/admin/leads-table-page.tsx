@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { H1, Lead } from "@/components/ui/typography";
 import type { LeadPipelineStatus } from "@/drizzle/schema";
+import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
 import {
   DataTable,
   DataTableActionBar,
@@ -67,6 +68,9 @@ export function SalesLeadsTablePage() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { t, locale } = useTranslation();
+  const { isAuthenticated, session } = useAuth();
+  // Operators (employees) work leads; export and bulk actions are admin-only.
+  const isAdmin = isAuthenticated && session.user.role === "admin";
 
   const {
     pagination,
@@ -287,26 +291,30 @@ export function SalesLeadsTablePage() {
                 filterSlot={<PipelineGridFilters table={table} />}
               >
                 <DataTableViewOptions table={table} />
-                <DataTableExportButton
-                  table={table}
-                  exportFileName="sales-pipeline.csv"
-                  fetchAllRows={fetchAllRows}
-                  getExportRow={(row) => ({
-                    name: row.nameAr ? `${row.name} / ${row.nameAr}` : row.name,
-                    businessType: row.businessType,
-                    city: [row.city, row.area].filter(Boolean).join(" · "),
-                    phone: row.phone,
-                    whatsappStatus: row.whatsappStatus,
-                    tier: row.tier,
-                    pipelineStatus: row.pipelineStatus,
-                    followUpCount: row.followUpCount,
-                    lastContactedAt: row.lastContactedAt,
-                    nextActionAt: row.nextActionAt,
-                    socialFollowers: row.socialFollowers,
-                    createdAt: row.createdAt,
-                    doNotContact: row.doNotContact,
-                  })}
-                />
+                {isAdmin && (
+                  <DataTableExportButton
+                    table={table}
+                    exportFileName="sales-pipeline.csv"
+                    fetchAllRows={fetchAllRows}
+                    getExportRow={(row) => ({
+                      name: row.nameAr
+                        ? `${row.name} / ${row.nameAr}`
+                        : row.name,
+                      businessType: row.businessType,
+                      city: [row.city, row.area].filter(Boolean).join(" · "),
+                      phone: row.phone,
+                      whatsappStatus: row.whatsappStatus,
+                      tier: row.tier,
+                      pipelineStatus: row.pipelineStatus,
+                      followUpCount: row.followUpCount,
+                      lastContactedAt: row.lastContactedAt,
+                      nextActionAt: row.nextActionAt,
+                      socialFollowers: row.socialFollowers,
+                      createdAt: row.createdAt,
+                      doNotContact: row.doNotContact,
+                    })}
+                  />
+                )}
               </DataTableToolbar>
               {truncatedAt !== null && (
                 <Alert>
@@ -319,9 +327,11 @@ export function SalesLeadsTablePage() {
           }
           footer={<DataTablePagination table={table} />}
           actionBar={
-            <DataTableActionBar table={table}>
-              <PipelineBulkActions table={table} />
-            </DataTableActionBar>
+            isAdmin ? (
+              <DataTableActionBar table={table}>
+                <PipelineBulkActions table={table} />
+              </DataTableActionBar>
+            ) : undefined
           }
         />
       </div>

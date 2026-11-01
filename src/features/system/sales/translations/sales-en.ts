@@ -5,15 +5,14 @@ export default {
     // ─── Today's Work ────────────────────────────────────────────────────
     todayTitle: "Today's Work",
     todayLead:
-      "Computed from pipeline state — not a list anyone maintains by hand.",
-    todayEmpty: "Nothing to work right now. Add leads or check back tomorrow.",
-    bucketEmpty: "Nothing in this bucket today.",
+      "Tap a client to open it. Once you log anything, it leaves today's list and comes back by itself on its next action day.",
 
     bucketRescue: "Rescue",
     bucketRescueHint:
       "Said yes to a demo and is going cold. Highest value, most perishable.",
-    bucketOverdue: "Overdue commitment",
-    bucketOverdueHint: "You promised to follow up and the date has passed.",
+    bucketOverdue: "Scheduled for today",
+    bucketOverdueHint:
+      "A call-back or follow-up scheduled for today, or promised and not done yet.",
     bucketFollowUp: "Follow-up due",
     bucketFollowUpHint: "Warm but unanswered.",
     bucketNewQueue: "New queue",
@@ -22,55 +21,24 @@ export default {
     bucketAutoParkHint:
       "Chased twice with no reply. Park rather than risk a WhatsApp ban.",
 
-    // Why a lead is in its bucket.
-    reasonRescue: dt("Demo agreed, {days:number} days without contact", {}),
-    reasonRescueNeverContacted: "Demo agreed, never contacted",
-    reasonOverdue: dt("Follow-up was due {days:number} days ago", {}),
-    reasonOverdueToday: "Follow-up was due today",
-    reasonFollowUp: dt(
-      "Awaiting reply for {days:number} days, {count:number} follow-up sent",
-      {},
-    ),
-    reasonNewQueue: "Never contacted",
-    reasonAutoPark: dt("{count:number} follow-ups, no reply", {}),
-
-    capNotice: dt("Showing {shown:number} of {total:number} — daily cap", {}),
-
     callingWindowTooEarly:
       "Too early to call. Egyptian ateliers typically open between 11:00 and 12:00 — work the WhatsApp items below until then.",
     callingWindowTooLate:
       "Most ateliers have closed for the night. WhatsApp is the safer channel now.",
 
-    daysSinceContact: dt("{days:number}d since contact", {}),
     neverContacted: "Never contacted",
 
     // Progress header.
     progressLabel: "Today's progress",
     progressDone: dt("{done:number} of {total:number} done", {}),
     conversationsToday: dt("Conversations today: {count:number}", {}),
+    todayCardFollowers: dt("{count} followers", {}),
     refreshing: "Refreshing",
     loadFailed: "Could not load today's work.",
     retry: "Retry",
     pipelineSummary: "Pipeline summary",
 
-    // Up next.
-    upNext: "Up next",
-    primaryAction: dt("{action:enum}", {
-      enum: {
-        action: {
-          call: "Call",
-          whatsapp: "WhatsApp",
-          park: "Park",
-          openLead: "Open lead",
-        },
-      },
-    }),
-    copyNumber: "Copy number",
-    numberCopied: "Number copied.",
-    copyFailed: "Could not copy the number.",
-
-    // Social profiles (Up next).
-    socialTitle: "Social profiles",
+    // Social profiles.
     socialPlatform: dt("{platform:enum}", {
       enum: {
         platform: {
@@ -82,77 +50,18 @@ export default {
         },
       },
     }),
-    socialPosts: "Posts",
-    socialCheckedAt: dt("Checked {date}", {}),
-    socialNotFound: "Searched — no account found.",
     socialNotOnFile: "Not on file yet.",
-    socialSearchGoogle: "Search on Google",
     socialOpenProfile: "Open profile",
 
-    channelLabel: "Channel",
-    channel: dt("{channel:enum}", {
-      enum: { channel: { call: "Call", whatsapp: "WhatsApp" } },
-    }),
-    outcomesPromptCall: "After you call: how did it go?",
-    outcomesPromptWhatsapp: "After you message: what happened?",
-    outcomesPromptAutoPark: "Chased twice with no reply. What now?",
-    outcome: dt("{outcome:enum}", {
-      enum: {
-        outcome: {
-          interested: "Interested",
-          bookDemo: "Book demo",
-          callBack: "Call back",
-          noAnswer: "No answer",
-          notInterested: "Not interested",
-          wrongNumber: "Wrong number",
-          whatsappSent: "Sent",
-          whatsappReplied: "Replied",
-          park: "Park",
-          theyReplied: "They replied",
-          answeredCall: "Answered a call",
-        },
-      },
-    }),
-    disabledNoPhone: "No phone number on this lead.",
-    whatsappUnconfirmed: "WhatsApp not confirmed for this number.",
-    skipForNow: "Skip for now",
-    moreDetails: "More details",
     rowActions: "More actions",
 
-    // Time picker.
-    pickTime: "When?",
-    timePreset: dt("{preset:enum}", {
-      enum: {
-        preset: {
-          today5pm: "Today 5 pm",
-          tomorrow11am: "Tomorrow 11 am",
-          in2Days11am: "In 2 days, 11 am",
-        },
-      },
-    }),
-    customTime: "Custom time",
-    businessTimeNote: dt("Times are in {zone}.", {}),
-    cairoTime: "Cairo time",
-    noPresetsLeft: "No quick picks left today. Choose a time.",
-    timeRequired: "Pick a time first.",
-    timeInPast: "Pick a time in the future.",
-    saveOutcome: "Save",
+    // Shared buttons.
     cancel: "Cancel",
 
     // Saving and undo.
-    outcomeSaved: dt("Logged for {name}.", {}),
-    undo: "Undo",
-    undone: "Restored.",
-    undoFailed: "Could not undo. Reopen the lead from its page.",
-    leadNotFound: "That lead is no longer in the pipeline.",
     doNotContactBlocked: "This lead asked not to be contacted.",
 
     // Queue and states.
-    queueTitle: "Queue",
-    queueSkipped: "Skipped",
-    queueExtra: "Extra (daily goal met)",
-    queueExtraHint: "Optional: today's new-lead goal is done.",
-    newMarker: "New",
     noLeadsYet: "No leads yet",
     noLeadsYetHint: "Add prospects in the pipeline to start working them here.",
     openPipeline: "Open pipeline",
@@ -161,26 +70,6 @@ export default {
       "{conversations:number} conversations · {demos:number} demos booked · {due:number} follow-ups due tomorrow",
       {},
     ),
-    allSkippedTitle: "All remaining leads skipped",
-    allSkippedHint: "Everything left today is skipped.",
-    startOver: "Start over",
-
-    // Keyboard shortcuts.
-    shortcutsTitle: "Keyboard shortcuts",
-    shortcutsOpen: "Shortcuts",
-    shortcutsEnabled: "Keyboard shortcuts on",
-    shortcutsHint: "Shortcuts work when no field is focused.",
-    shortcut: dt("{id:enum}", {
-      enum: {
-        id: {
-          call: "Start call (copies the number on a computer)",
-          whatsapp: "Open WhatsApp",
-          outcome: "Log the numbered outcome",
-          skip: "Skip for now",
-          help: "Show this list",
-        },
-      },
-    }),
 
     // ─── Quick log ───────────────────────────────────────────────────────
     quickLog: "Log",
@@ -331,6 +220,8 @@ export default {
     fieldSourceUrl: "Source URL",
     fieldStatus: "Pipeline status",
     fieldDoNotContact: "Do not contact",
+    fieldDoNotContactLocked:
+      "This client asked not to be contacted. Only an admin can lift it.",
     fieldNotes: "Notes",
 
     statuses: dt("{status:enum}", {
@@ -361,14 +252,9 @@ export default {
       },
     }),
 
-    filterStatus: "Status",
-    filterTier: "Tier",
     filterCity: "City",
-    filterWhatsapp: "WhatsApp",
-    filterAll: "All",
 
     // ─── Detail ──────────────────────────────────────────────────────────
-    detailTitle: "Lead",
     backToPipeline: "Back to pipeline",
     timeline: "Activity timeline",
     timelineEmpty: "No activity logged yet.",
@@ -378,13 +264,10 @@ export default {
     openWhatsapp: "Open WhatsApp",
     callNow: "Call",
     sourceLink: "Source",
-    noPhone: "No phone number",
 
     // ─── Counters ────────────────────────────────────────────────────────
-    countersTotal: "Total prospects",
     countersContactedThisWeek: "Contacted this week",
     countersDemosBooked: "Demos booked",
-    countersByStatus: "By status",
 
     // ─── Client account page (/sales/leads/[id]) ─────────────────────────
     account: {
@@ -501,6 +384,96 @@ export default {
       markNotFound: "No account exists",
       profileSaved: "Profile saved.",
       profileSaveFailed: "Could not save the profile.",
+    },
+
+    // ─── Funnel stage and next step (lib/funnel.ts) ──────────────────────
+    funnel: {
+      title: "Where this client is",
+      nextLabel: "Next",
+      stage: dt("{stage:enum}", {
+        enum: {
+          stage: {
+            discovery: "Discovery",
+            outreach: "Outreach",
+            demo: "Demo",
+            trial: "Trial",
+            paying: "Paying",
+            closed: "Closed",
+          },
+        },
+      }),
+      stageProgress: dt("Stage {current} of {total}", {}),
+      startDiscovery: {
+        now: "Not contacted yet.",
+        next: "Start a discovery chat: ask how she manages bookings, deposits and returns. Don't pitch, and write down her exact words.",
+      },
+      awaitDiscoveryReply: {
+        now: "Discovery message sent. Waiting for her reply.",
+        next: dt("No reply by {date}? Send one follow-up only.", {}),
+      },
+      awaitDiscoveryReplyChased: {
+        now: "Discovery message and one follow-up sent. No more messages.",
+        next: "Still silent after a few days? Park it.",
+      },
+      sendVideo: {
+        now: "She told us about her problem. Make sure her exact words are in the notes.",
+        next: "Send the 60-second video and Aalaa's case study link.",
+      },
+      awaitVideoReply: {
+        now: "Video and case study sent. Waiting for her reply.",
+        next: dt("No reply by {date}? Send one follow-up only.", {}),
+      },
+      awaitVideoReplyChased: {
+        now: "Video sent and followed up once. No more messages.",
+        next: "Still silent after a few days? Park it.",
+      },
+      offerDemo: {
+        now: "She replied after the video.",
+        next: "Offer a 15-minute demo of her own problem only.",
+      },
+      callBack: {
+        now: "She asked us to call back.",
+        next: dt("Call her back {date}.", {}),
+      },
+      callBackNoTime: {
+        now: "She asked us to call back.",
+        next: "Call her back and agree what happens next.",
+      },
+      bookDemo: {
+        now: "She agreed to a demo.",
+        next: "Fix the day and time, then log it as a booked demo.",
+      },
+      runDemo: {
+        now: dt("Demo booked for {date} on Gateling Meetings.", {}),
+        next: "Show only her problem, then offer free setup and a 1-month trial.",
+      },
+      runDemoNoTime: {
+        now: "Demo booked.",
+        next: "Show only her problem, then offer free setup and a 1-month trial.",
+      },
+      runTrial: {
+        now: "Demo done: free setup and a 1-month trial.",
+        next: dt(
+          "Check in on {week1} and {week4}. Ask her to subscribe on {day30}.",
+          {},
+        ),
+      },
+      startTrial: {
+        now: "Demo done.",
+        next: "Offer free setup and a 1-month trial, then check in after week 1.",
+      },
+      askReferral: {
+        now: "Paying client.",
+        next: "After about 2 weeks, ask for the names of other owners she knows.",
+      },
+      closed: {
+        now: "Closed. Nothing to do.",
+        next: "Reopen it only if she gets back in touch.",
+      },
+      followUpNow: "No reply yet. Send the one follow-up now (only one).",
+      markVideoSent: "Sent video + case study",
+      videoSentSaved: "Logged: video and case study sent.",
+      videoSentFailed: "Could not log it. Try again.",
     },
   },
 } as const satisfies LanguageMessages;

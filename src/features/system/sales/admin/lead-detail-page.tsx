@@ -12,6 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { SocialPlatform } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { callTips } from "@/features/system/sales/lib/call-tips";
+import {
+  funnelFactsFromActivities,
+  funnelPositionFor,
+} from "@/features/system/sales/lib/funnel";
 import { socialProfiles } from "@/features/system/sales/lib/social-profiles";
 import { useTRPC } from "@/integrations/trpc/client";
 import { toWhatsAppUrl } from "@/lib/phone";
@@ -23,6 +27,7 @@ import { MobileActionBar } from "./components/client-account/mobile-action-bar";
 import { ReachStrip } from "./components/client-account/reach-strip";
 import { SocialProfileDialog } from "./components/client-account/social-profile-dialog";
 import { DemoMeetingCard } from "./components/demo-meeting-card";
+import { FunnelStageCard } from "./components/funnel-stage";
 import {
   LeadFormDialog,
   leadToFormValues,
@@ -56,6 +61,10 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
     rating: lead.mapsRating,
     reviewCount: lead.mapsReviewCount,
     followers,
+  });
+  const funnelPosition = funnelPositionFor({
+    ...lead,
+    ...funnelFactsFromActivities(activities),
   });
   const dateFormat = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
@@ -117,6 +126,8 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
           onEditWhatsapp={() => setEditOpen(true)}
         />
       </ClientHero>
+
+      <FunnelStageCard leadId={lead.id} position={funnelPosition} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <GoogleMapsCard
