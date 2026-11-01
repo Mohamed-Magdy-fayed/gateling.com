@@ -8,6 +8,7 @@ import {
   profileUrl,
   type SocialLeadFields,
   socialProfiles,
+  topFollowerPlatform,
 } from "./social-profiles";
 
 function lead(extra: Partial<SocialLeadFields> = {}): SocialLeadFields {
@@ -244,5 +245,40 @@ describe("links never leave the platform", () => {
       ),
     ).toBe(false);
     expect(isPlatformUrl("tiktok", "https://vm.tiktok.com/ZMabc/")).toBe(false);
+  });
+});
+
+describe("topFollowerPlatform", () => {
+  it("picks the platform with the most followers", () => {
+    expect(
+      topFollowerPlatform(
+        lead({
+          socialProfiles: {
+            instagram: {
+              status: "found",
+              url: "https://instagram.com/a",
+              handle: "a",
+              followers: 9_000,
+              posts: null,
+              bio: null,
+              checkedAt: "",
+            },
+            facebook: {
+              status: "found",
+              url: "https://facebook.com/a",
+              handle: "a",
+              followers: 21_000,
+              posts: null,
+              bio: null,
+              checkedAt: "",
+            },
+          },
+        }),
+      ),
+    ).toEqual({ platform: "facebook", followers: 21_000 });
+  });
+
+  it("returns null when no follower count is on file", () => {
+    expect(topFollowerPlatform(lead())).toBeNull();
   });
 });

@@ -4,15 +4,15 @@ export default {
   sales: {
     // ─── عمل اليوم ────────────────────────────────────────────────────────
     todayTitle: "عمل اليوم",
-    todayLead: "محسوبة من حالة خط المبيعات — وليست قائمة يحدّثها أحد يدويًا.",
-    todayEmpty: "لا يوجد عمل الآن. أضف عملاء محتملين أو عد غدًا.",
-    bucketEmpty: "لا يوجد شيء في هذه المجموعة اليوم.",
+    todayLead:
+      "اضغط على العميل علشان تفتحه. أول ما تسجّل أي حاجة، بيختفي من قايمة النهارده ويرجع لوحده يوم الخطوة الجاية.",
 
     bucketRescue: "إنقاذ",
     bucketRescueHint:
       "وافق على العرض التوضيحي وبدأ يفتر. الأعلى قيمة والأسرع ضياعًا.",
-    bucketOverdue: "التزام متأخر",
-    bucketOverdueHint: "وعدت بالمتابعة وفات الموعد.",
+    bucketOverdue: "معاده النهارده",
+    bucketOverdueHint:
+      "مكالمة أو متابعة معادها النهارده، أو اتوعدنا بيها ولسه ما اتعملتش.",
     bucketFollowUp: "متابعة مستحقة",
     bucketFollowUpHint: "مهتم لكنه لم يرد بعد.",
     bucketNewQueue: "قائمة جديدة",
@@ -21,54 +21,24 @@ export default {
     bucketAutoParkHint:
       "تمت متابعتهم مرتين دون رد. أجّلهم بدل المخاطرة بحظر رقم واتساب.",
 
-    reasonRescue: dt("وافق على العرض، {days:number} أيام دون تواصل", {}),
-    reasonRescueNeverContacted: "وافق على العرض، ولم يتم التواصل معه إطلاقًا",
-    reasonOverdue: dt("كانت المتابعة مستحقة منذ {days:number} أيام", {}),
-    reasonOverdueToday: "المتابعة مستحقة اليوم",
-    reasonFollowUp: dt(
-      "في انتظار الرد منذ {days:number} أيام، وتم إرسال {count:number} متابعة",
-      {},
-    ),
-    reasonNewQueue: "لم يتم التواصل معه بعد",
-    reasonAutoPark: dt("{count:number} متابعات دون رد", {}),
-
-    capNotice: dt("عرض {shown:number} من {total:number} — الحد اليومي", {}),
-
     callingWindowTooEarly:
       "الوقت مبكر على الاتصال. أتيليهات مصر تفتح عادة بين الحادية عشرة والثانية عشرة — اعمل على عناصر واتساب أدناه حتى ذلك الحين.",
     callingWindowTooLate:
       "أغلب الأتيليهات أغلقت. واتساب هو القناة الأنسب الآن.",
 
-    daysSinceContact: dt("{days:number} يوم منذ آخر تواصل", {}),
     neverContacted: "لم يتم التواصل",
 
     // شريط التقدّم.
     progressLabel: "تقدّم اليوم",
     progressDone: dt("تم {done:number} من {total:number}", {}),
     conversationsToday: dt("محادثات اليوم: {count:number}", {}),
+    todayCardFollowers: dt("{count} متابع", {}),
     refreshing: "جارٍ التحديث",
     loadFailed: "تعذّر تحميل عمل اليوم.",
     retry: "إعادة المحاولة",
     pipelineSummary: "ملخص خط المبيعات",
 
-    // التالي.
-    upNext: "التالي",
-    primaryAction: dt("{action:enum}", {
-      enum: {
-        action: {
-          call: "اتصال",
-          whatsapp: "واتساب",
-          park: "تأجيل",
-          openLead: "فتح العميل",
-        },
-      },
-    }),
-    copyNumber: "نسخ الرقم",
-    numberCopied: "تم نسخ الرقم.",
-    copyFailed: "تعذّر نسخ الرقم.",
-
-    // حسابات التواصل (التالي).
-    socialTitle: "حسابات التواصل الاجتماعي",
+    // حسابات التواصل.
     socialPlatform: dt("{platform:enum}", {
       enum: {
         platform: {
@@ -80,77 +50,18 @@ export default {
         },
       },
     }),
-    socialPosts: "المنشورات",
-    socialCheckedAt: dt("آخر تحقق {date}", {}),
-    socialNotFound: "تم البحث — لا يوجد حساب.",
     socialNotOnFile: "غير مسجّل بعد.",
-    socialSearchGoogle: "ابحث على جوجل",
     socialOpenProfile: "فتح الحساب",
 
-    channelLabel: "القناة",
-    channel: dt("{channel:enum}", {
-      enum: { channel: { call: "اتصال", whatsapp: "واتساب" } },
-    }),
-    outcomesPromptCall: "بعد الاتصال: كيف كانت المكالمة؟",
-    outcomesPromptWhatsapp: "بعد الرسالة: ماذا حدث؟",
-    outcomesPromptAutoPark: "تمت المتابعة مرتين دون رد. ما الخطوة التالية؟",
-    outcome: dt("{outcome:enum}", {
-      enum: {
-        outcome: {
-          interested: "مهتم",
-          bookDemo: "حجز عرض",
-          callBack: "معاودة الاتصال",
-          noAnswer: "لا رد",
-          notInterested: "غير مهتم",
-          wrongNumber: "رقم خاطئ",
-          whatsappSent: "تم الإرسال",
-          whatsappReplied: "تم الرد",
-          park: "تأجيل",
-          theyReplied: "ردّوا",
-          answeredCall: "ردّوا على مكالمة",
-        },
-      },
-    }),
-    disabledNoPhone: "لا يوجد رقم هاتف لهذا العميل.",
-    whatsappUnconfirmed: "لم يتم تأكيد واتساب لهذا الرقم.",
-    skipForNow: "تخطٍّ الآن",
-    moreDetails: "تفاصيل أكثر",
     rowActions: "إجراءات أخرى",
 
-    // اختيار الوقت.
-    pickTime: "متى؟",
-    timePreset: dt("{preset:enum}", {
-      enum: {
-        preset: {
-          today5pm: "اليوم 5 مساءً",
-          tomorrow11am: "غدًا 11 صباحًا",
-          in2Days11am: "بعد يومين، 11 صباحًا",
-        },
-      },
-    }),
-    customTime: "وقت مخصص",
-    businessTimeNote: dt("الأوقات حسب {zone}.", {}),
-    cairoTime: "توقيت القاهرة",
-    noPresetsLeft: "لم يتبقَّ اختيار سريع اليوم. اختر وقتًا.",
-    timeRequired: "اختر وقتًا أولًا.",
-    timeInPast: "اختر وقتًا في المستقبل.",
-    saveOutcome: "حفظ",
+    // أزرار مشتركة.
     cancel: "إلغاء",
 
     // الحفظ والتراجع.
-    outcomeSaved: dt("تم التسجيل لـ {name}.", {}),
-    undo: "تراجع",
-    undone: "تمت الاستعادة.",
-    undoFailed: "تعذّر التراجع. افتح العميل من صفحته.",
-    leadNotFound: "هذا العميل لم يعد في خط المبيعات.",
     doNotContactBlocked: "طلب هذا العميل عدم التواصل معه.",
 
     // القائمة والحالات.
-    queueTitle: "القائمة",
-    queueSkipped: "تم تخطيها",
-    queueExtra: "إضافي (تم تحقيق هدف اليوم)",
-    queueExtraHint: "اختياري: تم تحقيق هدف اليوم من العملاء الجدد.",
-    newMarker: "جديد",
     noLeadsYet: "لا يوجد عملاء محتملون بعد",
     noLeadsYetHint: "أضف عملاء محتملين في خط المبيعات لتبدأ العمل عليهم هنا.",
     openPipeline: "فتح خط المبيعات",
@@ -159,26 +70,6 @@ export default {
       "{conversations:number} محادثات · {demos:number} عروض محجوزة · {due:number} متابعات مستحقة غدًا",
       {},
     ),
-    allSkippedTitle: "تم تخطي كل العملاء المتبقين",
-    allSkippedHint: "كل ما تبقى اليوم تم تخطيه.",
-    startOver: "البدء من جديد",
-
-    // اختصارات لوحة المفاتيح.
-    shortcutsTitle: "اختصارات لوحة المفاتيح",
-    shortcutsOpen: "الاختصارات",
-    shortcutsEnabled: "تفعيل اختصارات لوحة المفاتيح",
-    shortcutsHint: "تعمل الاختصارات عندما لا يكون أي حقل نشطًا.",
-    shortcut: dt("{id:enum}", {
-      enum: {
-        id: {
-          call: "بدء الاتصال (ينسخ الرقم على الكمبيوتر)",
-          whatsapp: "فتح واتساب",
-          outcome: "تسجيل النتيجة المرقّمة",
-          skip: "تخطٍّ الآن",
-          help: "عرض هذه القائمة",
-        },
-      },
-    }),
 
     // ─── تسجيل سريع ───────────────────────────────────────────────────────
     quickLog: "تسجيل",
@@ -334,6 +225,8 @@ export default {
     fieldSourceUrl: "رابط المصدر",
     fieldStatus: "حالة خط المبيعات",
     fieldDoNotContact: "عدم التواصل",
+    fieldDoNotContactLocked:
+      "العميل طلب ما نتواصلش معاه. الأدمن بس يقدر يلغي ده.",
     fieldNotes: "ملاحظات",
 
     statuses: dt("{status:enum}", {
@@ -364,14 +257,9 @@ export default {
       },
     }),
 
-    filterStatus: "الحالة",
-    filterTier: "الفئة",
     filterCity: "المدينة",
-    filterWhatsapp: "واتساب",
-    filterAll: "الكل",
 
     // ─── التفاصيل ─────────────────────────────────────────────────────────
-    detailTitle: "العميل المحتمل",
     backToPipeline: "العودة إلى خط المبيعات",
     timeline: "سجل الأنشطة",
     timelineEmpty: "لم يتم تسجيل أي نشاط بعد.",
@@ -381,13 +269,10 @@ export default {
     openWhatsapp: "فتح واتساب",
     callNow: "اتصال",
     sourceLink: "المصدر",
-    noPhone: "لا يوجد رقم هاتف",
 
     // ─── العدادات ─────────────────────────────────────────────────────────
-    countersTotal: "إجمالي العملاء المحتملين",
     countersContactedThisWeek: "تم التواصل هذا الأسبوع",
     countersDemosBooked: "عروض محجوزة",
-    countersByStatus: "حسب الحالة",
 
     // ─── صفحة حساب العميل (/sales/leads/[id]) ────────────────────────────
     account: {
@@ -510,6 +395,96 @@ export default {
       markNotFound: "لا يوجد حساب",
       profileSaved: "تم حفظ الحساب.",
       profileSaveFailed: "تعذّر حفظ الحساب.",
+    },
+
+    // ─── مرحلة العميل والخطوة الجاية (lib/funnel.ts) ──────────────────────
+    funnel: {
+      title: "العميل فين دلوقتي",
+      nextLabel: "الخطوة الجاية",
+      stage: dt("{stage:enum}", {
+        enum: {
+          stage: {
+            discovery: "التعارف",
+            outreach: "التواصل",
+            demo: "الديمو",
+            trial: "فترة التجربة",
+            paying: "عميل دافع",
+            closed: "مقفول",
+          },
+        },
+      }),
+      stageProgress: dt("مرحلة {current} من {total}", {}),
+      startDiscovery: {
+        now: "لسه ما اتكلمناش معاها.",
+        next: "ابدأ دردشة تعارف: اسألها بتنظم الحجوزات والعرابين والمرتجعات إزاي. من غير ما تبيع، واكتب كلامها بالظبط.",
+      },
+      awaitDiscoveryReply: {
+        now: "رسالة التعارف اتبعتت. مستنيين ردها.",
+        next: dt("ما ردتش لحد {date}؟ ابعت متابعة واحدة بس.", {}),
+      },
+      awaitDiscoveryReplyChased: {
+        now: "اتبعت رسالة التعارف ومتابعة واحدة. مفيش رسايل تاني.",
+        next: "لو فضلت ساكتة كام يوم، اركنها.",
+      },
+      sendVideo: {
+        now: "حكتلنا عن مشكلتها. اتأكد إن كلامها بالظبط مكتوب في الملاحظات.",
+        next: "ابعت الفيديو (٦٠ ثانية) ولينك قصة نجاح أتيليه آلاء.",
+      },
+      awaitVideoReply: {
+        now: "الفيديو وقصة النجاح اتبعتوا. مستنيين ردها.",
+        next: dt("ما ردتش لحد {date}؟ ابعت متابعة واحدة بس.", {}),
+      },
+      awaitVideoReplyChased: {
+        now: "الفيديو اتبعت واتعمل متابعة مرة. مفيش رسايل تاني.",
+        next: "لو فضلت ساكتة كام يوم، اركنها.",
+      },
+      offerDemo: {
+        now: "ردت بعد الفيديو.",
+        next: "اعرض عليها ديمو ١٥ دقيقة على مشكلتها هي بس.",
+      },
+      callBack: {
+        now: "طلبت نكلمها تاني.",
+        next: dt("كلمها {date}.", {}),
+      },
+      callBackNoTime: {
+        now: "طلبت نكلمها تاني.",
+        next: "كلمها واتفقوا على الخطوة الجاية.",
+      },
+      bookDemo: {
+        now: "وافقت على ديمو.",
+        next: "حدد اليوم والساعة، وسجّله ديمو محجوز.",
+      },
+      runDemo: {
+        now: dt("الديمو محجوز {date} على Gateling Meetings.", {}),
+        next: "اعرض مشكلتها هي بس، وبعدها اعرض التجهيز ببلاش وشهر تجربة.",
+      },
+      runDemoNoTime: {
+        now: "الديمو محجوز.",
+        next: "اعرض مشكلتها هي بس، وبعدها اعرض التجهيز ببلاش وشهر تجربة.",
+      },
+      runTrial: {
+        now: "الديمو اتعمل: تجهيز ببلاش وشهر تجربة.",
+        next: dt(
+          "اطمّن عليها يوم {week1} ويوم {week4}، واطلب منها تشترك يوم {day30}.",
+          {},
+        ),
+      },
+      startTrial: {
+        now: "الديمو اتعمل.",
+        next: "اعرض التجهيز ببلاش وشهر تجربة، واطمّن عليها بعد أول أسبوع.",
+      },
+      askReferral: {
+        now: "عميل دافع.",
+        next: "بعد حوالي أسبوعين، اطلب منها أسامي أصحاب أتيليهات تانيين تعرفهم.",
+      },
+      closed: {
+        now: "مقفول. مفيش حاجة نعملها.",
+        next: "افتحه تاني بس لو هي رجعت كلمتنا.",
+      },
+      followUpNow: "لسه ما ردتش. ابعت المتابعة دلوقتي (مرة واحدة بس).",
+      markVideoSent: "بعت الفيديو وقصة النجاح",
+      videoSentSaved: "اتسجل: الفيديو وقصة النجاح اتبعتوا.",
+      videoSentFailed: "ما اتسجلش. جرّب تاني.",
     },
   },
 } as const satisfies LanguageMessages;

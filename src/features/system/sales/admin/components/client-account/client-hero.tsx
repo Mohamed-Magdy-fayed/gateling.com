@@ -86,6 +86,7 @@ export function ClientHero({
               <Button
                 size="lg"
                 className="h-11 px-4"
+                nativeButton={false}
                 render={(props) => (
                   <a href={`tel:${phone}`} {...props}>
                     <PhoneIcon aria-hidden="true" />
@@ -108,6 +109,7 @@ export function ClientHero({
                 size="lg"
                 variant="outline"
                 className="h-11 px-4"
+                nativeButton={false}
                 render={(props) => (
                   <a
                     href={whatsappUrl}

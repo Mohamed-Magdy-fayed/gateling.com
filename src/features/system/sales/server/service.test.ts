@@ -350,6 +350,101 @@ describeWithDb("sales service (database)", () => {
     it("reports an empty pipeline", async () => {
       expect((await getTodayWork(db, { now: NOW })).hasProspects).toBe(false);
     });
+
+    it("hides a lead logged today and brings it back with its funnel facts", async () => {
+      // `lastWorkedAt` is the log's createdAt (the real clock), so this test
+      // judges "today" against the real clock too.
+      const now = new Date();
+      const id = await prospect({ phone: "01000000000" });
+      await logActivity(
+        db,
+        {
+          leadId: id,
+          type: "whatsapp_sent",
+          channel: "whatsapp",
+          outcome: "VIDEO: sent video + case study",
+          occurredAt: new Date(now.getTime() - 5 * DAY),
+          pipelineStatus: "awaiting_reply",
+        },
+        ACTOR,
+      );
+
+      const today = await getTodayWork(db, { now });
+      expect(today.totalActionable).toBe(0);
+
+      const tomorrow = await getTodayWork(db, {
+        now: new Date(now.getTime() + DAY),
+      });
+      const row = tomorrow.buckets
+        .flatMap((bucket) => bucket.rows)
+        .find((r) => r.lead.id === id);
+      expect(row?.lead.hasVideoSent).toBe(true);
+      expect(row?.lead.lastWorkedAt).toBeInstanceOf(Date);
+      expect(row?.lead.lastDemoDoneAt).toBeNull();
+    });
+
+    it("sees each lead's own activities in the per-lead subqueries", async () => {
+      // Regression: unqualified columns made every subquery match nothing,
+      // so a lead that replied still looked silent to Auto-park.
+      const now = new Date();
+      const id = await prospect({ phone: "01000000001" });
+      for (const type of ["whatsapp_sent", "whatsapp_sent"] as const) {
+        await logActivity(
+          db,
+          {
+            leadId: id,
+            type,
+            occurredAt: new Date(now.getTime() - 9 * DAY),
+            pipelineStatus: "awaiting_reply",
+          },
+          ACTOR,
+        );
+      }
+      await logActivity(
+        db,
+        {
+          leadId: id,
+          type: "whatsapp_reply",
+          occurredAt: new Date(now.getTime() - 8 * DAY),
+        },
+        ACTOR,
+      );
+      await logActivity(
+        db,
+        {
+          leadId: id,
+          type: "demo_done",
+          occurredAt: new Date(now.getTime() - 7 * DAY),
+          pipelineStatus: "demo_done",
+        },
+        ACTOR,
+      );
+      await logActivity(
+        db,
+        {
+          leadId: id,
+          type: "demo_scheduled",
+          occurredAt: new Date(now.getTime() - 7 * DAY),
+          nextActionAt: new Date(now.getTime() - 6 * DAY),
+          pipelineStatus: "demo_scheduled",
+        },
+        ACTOR,
+      );
+
+      // Overdue (the demo time passed); judged a day later so today's logs
+      // do not hide it.
+      const later = await getTodayWork(db, {
+        now: new Date(now.getTime() + DAY),
+      });
+      const lead = later.buckets
+        .flatMap((bucket) => bucket.rows)
+        .find((r) => r.lead.id === id)?.lead;
+      expect(lead).toMatchObject({
+        hasInboundReply: true,
+        hasDemoScheduledActivity: true,
+      });
+      expect(lead?.lastDemoDoneAt?.getTime()).toBe(now.getTime() - 7 * DAY);
+    });
   });
 
   it("resets the follow-up count after an answered call", async () => {

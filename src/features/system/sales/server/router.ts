@@ -9,6 +9,12 @@ import { getWebsiteMeetingHost } from "@/features/system/meetings/host";
 import { inngest, leadDemoScheduledEvent } from "@/integrations/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "@/integrations/trpc/init";
 
+import {
+  assertAdmin,
+  assertSalesStaff,
+  type LeadFieldViolation,
+  leadFieldViolation,
+} from "./access";
 import { toTRPCError } from "./errors";
 import { getLeadDemoMeetingCode, leadDemoHostJoinLink } from "./meeting";
 import {
@@ -35,13 +41,9 @@ export type PipelineGridRow = Awaited<
  * `service.ts` so a future MCP wrapper calls the same functions.
  */
 
-/**
- * The sales pipeline is admin-only. `src/proxy.ts` already blocks the `/sales`
- * routes by screen permission, but a tRPC procedure is reachable directly —
- * the route guard is not the authorisation.
- */
-function assertAdmin(role: string | undefined) {
-  if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+/** Operators may not lift do-not-contact or assign leads to someone else. */
+function refuse(violation: LeadFieldViolation | null) {
+  if (violation) throw new TRPCError({ code: "FORBIDDEN", message: violation });
 }
 
 /**
@@ -60,19 +62,19 @@ export const salesRouter = createTRPCRouter({
   today: protectedProcedure
     .input(todayWorkSchema)
     .query(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       return service.getTodayWork(ctx.db, { newQueueCap: input.newQueueCap });
     }),
 
   counters: protectedProcedure.query(async ({ ctx }) => {
-    assertAdmin(ctx.session?.user.role);
+    assertSalesStaff(ctx.session?.user.role);
     return service.getPipelineCounters(ctx.db);
   }),
 
   list: protectedProcedure
     .input(listPipelineSchema)
     .query(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       return service.listPipeline(ctx.db, input);
     }),
 
@@ -128,7 +130,7 @@ export const salesRouter = createTRPCRouter({
     }),
 
   byId: protectedProcedure.input(leadIdSchema).query(async ({ ctx, input }) => {
-    assertAdmin(ctx.session?.user.role);
+    assertSalesStaff(ctx.session?.user.role);
     const result = await service.getLead(ctx.db, input.id);
     if (!result) throw new TRPCError({ code: "NOT_FOUND" });
     return result;
@@ -137,14 +139,34 @@ export const salesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createLeadSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
+      refuse(
+        leadFieldViolation(
+          ctx.session.user.role,
+          ctx.session.user.id,
+          input,
+          null,
+        ),
+      );
       return service.createLead(ctx.db, input, ctx.session.user.id);
     }),
 
   update: protectedProcedure
     .input(updateLeadSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
+      if (ctx.session.user.role !== "admin") {
+        const current = await service.getLeadGuardFields(ctx.db, input.id);
+        if (!current) throw new TRPCError({ code: "NOT_FOUND" });
+        refuse(
+          leadFieldViolation(
+            ctx.session.user.role,
+            ctx.session.user.id,
+            input,
+            current,
+          ),
+        );
+      }
       await service
         .updateLead(ctx.db, input, ctx.session.user.id)
         .catch((error: unknown) => {
@@ -156,7 +178,7 @@ export const salesRouter = createTRPCRouter({
   setSocialProfile: protectedProcedure
     .input(setSocialProfileSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       if (
         input.status === "found" &&
         input.avatarUrl &&
@@ -178,7 +200,7 @@ export const salesRouter = createTRPCRouter({
   setMapsListing: protectedProcedure
     .input(setMapsListingSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       await service
         .setMapsListing(ctx.db, input, ctx.session.user.id)
         .catch((error: unknown) => {
@@ -190,7 +212,7 @@ export const salesRouter = createTRPCRouter({
   logActivity: protectedProcedure
     .input(logActivityInputSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       const result = await service
         .logActivity(ctx.db, input, ctx.session.user.id)
         .catch((error: unknown) => {
@@ -224,7 +246,7 @@ export const salesRouter = createTRPCRouter({
   demoHostJoinLink: protectedProcedure
     .input(leadIdSchema)
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       const meetingCode = await getLeadDemoMeetingCode(ctx.db, input.id);
       if (meetingCode === undefined) throw new TRPCError({ code: "NOT_FOUND" });
       if (!meetingCode)
@@ -261,7 +283,7 @@ export const salesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      assertAdmin(ctx.session?.user.role);
+      assertSalesStaff(ctx.session?.user.role);
       await service
         .parkLead(ctx.db, input.leadId, ctx.session.user.id, input.reason)
         .catch((error: unknown) => {

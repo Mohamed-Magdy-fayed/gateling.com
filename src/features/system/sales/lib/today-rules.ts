@@ -44,6 +44,15 @@ export type TodayLeadInput = {
   hasDemoScheduledActivity: boolean;
   /** True when a `whatsapp_reply` has ever been received. */
   hasInboundReply: boolean;
+  /**
+   * When anything was last logged on the lead, notes included (`createdAt`,
+   * so a call logged after the fact still counts as today's work). A lead
+   * worked today is done for the day.
+   */
+  lastWorkedAt?: Date | null;
+  /** Funnel facts for the stage line (`lib/funnel.ts`). */
+  hasVideoSent?: boolean;
+  lastDemoDoneAt?: Date | null;
 };
 
 export type TodayBucketId =
@@ -129,6 +138,12 @@ function isStalerThan(now: Date, then: Date | null, days: number): boolean {
   return now.getTime() - then.getTime() > days * MS_PER_DAY;
 }
 
+function latest(a: Date | null, b: Date | null): Date | null {
+  if (!a) return b;
+  if (!b) return a;
+  return a.getTime() >= b.getTime() ? a : b;
+}
+
 /** Tier sort weight. Untiered leads sort last — they are unqualified, not big. */
 function tierRank(tier: LeadTier | null): number {
   if (tier === "A") return 0;
@@ -175,15 +190,21 @@ function toRow(lead: TodayLeadInput, reason: TodayReason, now: Date): TodayRow {
  *
  * `dayStart` freezes the list for the business day: staleness is judged as of
  * the day start, so nothing crosses a threshold while the list is being
- * worked, and a lead contacted today is done for the day. Only a promised
- * follow-up (Overdue) still surfaces later the same day, when it falls due.
- * Defaults to `now`, which judges everything against the current moment.
+ * worked, and a lead contacted or logged today is done for the day. Only a
+ * promised follow-up (Overdue) still surfaces later the same day, when it
+ * falls due. Defaults to `now`, which judges everything against the current
+ * moment.
+ *
+ * `dayEnd` brings a promise due later today onto the list from the start of
+ * the day ("scheduled for today"), as long as the lead was not already
+ * worked today. Defaults to `now`, i.e. only promises already past.
  */
 export function computeTodayBuckets(
   leads: readonly TodayLeadInput[],
   now: Date,
   config: TodayRulesConfig = DEFAULT_TODAY_RULES_CONFIG,
   dayStart: Date = now,
+  dayEnd: Date = now,
 ): TodayBuckets {
   const rescue: TodayRow[] = [];
   const overdue: TodayRow[] = [];
@@ -194,13 +215,16 @@ export function computeTodayBuckets(
   for (const lead of leads) {
     if (isSuppressed(lead)) continue;
 
-    const contactedToday =
-      lead.lastContactedAt !== null &&
-      lead.lastContactedAt.getTime() >= dayStart.getTime();
+    const lastWorkedAt = latest(
+      lead.lastContactedAt,
+      lead.lastWorkedAt ?? null,
+    );
+    const workedToday =
+      lastWorkedAt !== null && lastWorkedAt.getTime() >= dayStart.getTime();
 
     // 1. Rescue — someone said yes and is going cold. Most perishable.
     if (
-      !contactedToday &&
+      !workedToday &&
       lead.pipelineStatus === "demo_agreed" &&
       !lead.hasDemoScheduledActivity &&
       isStalerThan(dayStart, lead.lastContactedAt, config.rescueStaleDays)
@@ -221,22 +245,35 @@ export function computeTodayBuckets(
     }
 
     // 2. Overdue commitment — a promise made and not kept. Breaks trust fastest.
-    if (
-      lead.nextActionAt !== null &&
-      lead.nextActionAt.getTime() < now.getTime()
-    ) {
-      overdue.push(
-        toRow(
-          lead,
-          { kind: "overdue", daysOverdue: daysBetween(now, lead.nextActionAt) },
-          now,
-        ),
-      );
-      continue;
+    // Due now, unless it was already handled by today's work; or due later
+    // today on a lead nobody has touched yet today.
+    if (lead.nextActionAt !== null) {
+      const due = lead.nextActionAt.getTime();
+      const dueNow =
+        due < now.getTime() &&
+        !(
+          workedToday &&
+          lastWorkedAt !== null &&
+          lastWorkedAt.getTime() >= due
+        );
+      const dueLaterToday = due < dayEnd.getTime() && !workedToday;
+      if (dueNow || dueLaterToday) {
+        overdue.push(
+          toRow(
+            lead,
+            {
+              kind: "overdue",
+              daysOverdue: Math.max(0, daysBetween(now, lead.nextActionAt)),
+            },
+            now,
+          ),
+        );
+        continue;
+      }
     }
 
     // Worked today: done until tomorrow, unless a promise above fell due.
-    if (contactedToday) continue;
+    if (workedToday) continue;
 
     // 3. Follow-up due — warm but unanswered, still under the safety limit.
     if (

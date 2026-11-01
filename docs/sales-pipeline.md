@@ -11,28 +11,45 @@ why it shares the `leads` table.
 
 | Route | Purpose |
 |---|---|
-| `/sales/today` | **The point of the module.** Computed call list, five buckets. |
+| `/sales/today` | **The point of the module.** Today's list: thin cards, grouped by bucket, each linking to the lead page. |
 | `/sales/leads` | Pipeline table on the shared data-table kit: quick-view chips with counts, filters, search, export, bulk close, create, edit. |
-| `/sales/leads/[id]` | Detail + append-only activity timeline. |
+| `/sales/leads/[id]` | Where the work happens: funnel stage + next step, log, append-only activity timeline. |
 | `/dashboard` | Sales overview (see [Dashboard](#dashboard)) above the recent inbound leads. |
 
-Admin-only. Enforced in three independent places — a route guard alone is not
-authorisation:
+Staff-only: admins and **operators** (a normal `employee` user created on the
+Users screen). Enforced in three independent places — a route guard alone is
+not authorisation:
 
 1. `src/proxy.ts` — screen-permission check. **Load-bearing:**
    `getProtectedScreenDefinitionByPathname` returns `undefined` for paths not in
    `SYSTEM_SCREEN_DEFINITIONS` and the middleware then lets the request through.
    The `sales` entry with `pathPrefixes: ["/sales"]` is what protects it.
 2. `(system-pages)/layout.tsx` — redirects anonymous requests to `/sign-in`.
-3. `assertAdmin()` in the sales tRPC router — procedures are reachable directly.
+3. `assertSalesStaff()` (`server/access.ts`) in the sales tRPC router and
+   `dashboard.getSales` — procedures are reachable directly. Customers get
+   `FORBIDDEN`.
 
-`sales` is in `EMPLOYEE_BLOCKED_SCREENS`, so employees get `/unauthorized`.
+`sales` is deliberately **not** in `EMPLOYEE_BLOCKED_SCREENS`. Export
+(`sales.exportRows`) and bulk status changes (`sales.bulkSetStatus`) stay
+admin-only (`assertAdmin`), and the pipeline table hides both controls from
+operators. Everyone sees every lead and the same Today list; there is no
+per-user split.
+
+Operators also may not (`leadFieldViolation` in `server/access.ts`, checked in
+`sales.create` / `sales.update`): lift a lead's **do-not-contact** block (an
+opt-out; the edit dialog locks the box and says so), or assign a lead to
+anyone but themselves or nobody. Known, accepted limits from the 2026-11-01
+security review: `sales.list` pages up to 100 rows, so admin-only export does
+not stop a determined operator from paging through every name and phone;
+`sales.update` can set any status one lead at a time; and `demoHostJoinLink`
+lets operators host demos under the single website host identity.
 
 ## Structure
 
 ```
 src/features/system/sales/
   lib/today-rules.ts     ← pure bucket logic, `now` injected, no DB
+  lib/funnel.ts          ← pure funnel stage + next step per lead (see Funnel stage)
   lib/derived.ts         ← pure derivation of the cached columns
   lib/pipeline-status.ts ← closed statuses, promise discharge, do-not-contact rule
   lib/recompute-plan.ts  ← pure planning for `sales:recompute`
@@ -43,6 +60,7 @@ src/features/system/sales/
   cli/recompute-derived.ts ← `npm run sales:recompute`
   server/filters.ts      ← pipeline grid where/sort (whitelisted column ids)
   server/schemas.ts      ← Zod inputs, shared by router and any future caller
+  server/access.ts       ← `assertSalesStaff` / `assertAdmin`
   server/router.ts       ← thin tRPC wrapper: authorise, delegate
   admin/                 ← pages and components
   translations/          ← sales-en.ts + sales-ar.ts
@@ -64,7 +82,7 @@ Thresholds live in `TodayRulesConfig` and are meant to be tuned.
 | # | Bucket | Rule |
 |---|---|---|
 | 1 | Rescue | `demo_agreed`, no `demo_scheduled` activity, last contact > 2 days (never contacted counts as stale) |
-| 2 | Overdue commitment | any `nextActionAt` in the past that is unfulfilled |
+| 2 | Scheduled for today (`overdue`) | an unfulfilled `nextActionAt` that is past, or due later today on a lead not yet worked today |
 | 3 | Follow-up due | `awaiting_reply`, last contact > 3 days, `followUpCount < 2` |
 | 4 | New queue | `new`, not do-not-contact, has a phone — ordered tier A→C then followers desc, **capped** |
 | 5 | Auto-park candidates | `followUpCount >= 2` and no inbound reply — offers one-click Park |
@@ -78,62 +96,70 @@ The `followUpCount >= 2` cutoff is a **safety limit, not a preference** —
 chasing past two unanswered WhatsApp messages risks a ban on the business
 number.
 
+**Any log takes a lead off today's list.** A lead with any activity
+*created* today (`lastWorkedAt`, notes included — a call logged after the
+fact still counts as today's work) is done for the day. It comes back by
+itself on the right day: the day its `nextActionAt` falls due (call-back,
+demo), or the day a rule makes it due again (Follow-up after 3 days of
+silence, Auto-park after the follow-up). A promise made today for later today
+reappears once its time passes. Nobody moves leads by hand.
+
+The per-lead facts (`hasInboundReply`, `hasDemoScheduledActivity`,
+`lastWorkedAt`, `hasVideoSent`, `lastDemoDoneAt`) are subqueries in
+`todayLeadInputs`. **Qualify their columns explicitly** (`act()` and
+`leadIdRef` in `service.ts`): in a single-table select Drizzle renders
+`${Table.column}` without its table name, and until 2026-11-01 that made
+`"leadId" = "id"` compare two `lead_activities` columns, so
+`hasInboundReply` and `hasDemoScheduledActivity` were always false.
+
 ## Working the Today page
 
-`/sales/today` is a guided session: one pinned **Up next** lead, one primary
-action, outcome buttons that log in one tap, then the next lead. The tables
-below are read from `lib/outcomes.ts` and `lib/today-shortcuts.ts`, which the
-UI and the `?` panel also read, so they cannot drift.
+`/sales/today` is a list, not a session. Each bucket is a section (title,
+hint, count) of thin cards: name, number, the biggest audience (top platform
+icon + followers, `topFollowerPlatform`) and the funnel line (stage · next
+step). A card is a link to `/sales/leads/[id]`; the work and the log happen
+there (Call / WhatsApp / Log on mobile, the Log popover on desktop). Coming
+back refetches the list (`refetchOnMount: "always"`), and the logged lead is
+gone.
 
-| Bucket | Primary action | Outcome set shown |
-|---|---|---|
-| Rescue, Overdue, New queue | Call | Call set |
-| Follow-up due | WhatsApp if `whatsappStatus = confirmed`, else Call | WhatsApp set / Call set |
-| Auto-park | Park | Auto-park set (never another outbound message) |
-| any, no phone | Open lead (Call/WhatsApp disabled with a reason) | — |
+The new queue is the **shared daily goal**: it shows `newQueueCap −
+newTouchedToday` rows (setting `00017`, default 10), whoever is working.
 
-Pressing Call or WhatsApp (or the Call/WhatsApp switch) changes the outcome
-set. Every outcome is one `sales.logActivity` call (or `sales.park`):
-
-| Outcome | Type | Channel | New status | Needs time |
-|---|---|---|---|---|
-| Interested | `demo_agreed` | phone | `demo_agreed` | |
-| Book demo | `demo_scheduled` | phone | `demo_scheduled` | demo time |
-| Call back | `call` | phone | `callback_scheduled` | call-back time |
-| No answer | `no_answer` | phone | `awaiting_reply` | |
-| Not interested ↶ | `call` | phone | `lost` | |
-| Wrong number ↶ | `call_unclear` | phone | `blocked_no_number` | |
-| Sent | `whatsapp_sent` | whatsapp | `awaiting_reply` | |
-| Replied | `whatsapp_reply` | whatsapp | `contacted` | |
-| Park ↶ (Auto-park) | via `sales.park` | — | `parked` | |
-| They replied (Auto-park) | `whatsapp_reply` | whatsapp | `contacted` | |
-| Answered a call (Auto-park) | `call` | phone | `contacted` | |
-
-↶ = offers **Undo** for 5 s. Undo is compensating, not a deletion: it logs a
-`status_change` back to the previous status, carrying the previous
-`nextActionAt` so a discharged promise returns. The timeline shows both rows.
-Times are entered in business time (Cairo); presets already past are hidden
-and a past time is refused.
-
-| Key (`event.code`, so any layout) | Action | Ignored when |
-|---|---|---|
-| `C` | Start call: dials on a touch device, copies the number on a computer | no phone, Auto-park |
-| `W` | Open WhatsApp | no WhatsApp link, Auto-park |
-| `1`–`9` (and numpad) | The numbered visible outcome | beyond the visible count, time picker open |
-| `S` | Skip for now (persists for the local day) | — |
-| `?` | Shortcut list, with an on/off switch | — |
-
-All keys are ignored while typing in a field, in an open dialog/menu, or
-with Ctrl/Alt/Meta. Hints and the `?` panel are hidden on touch screens.
-
-**Progress** = `doneToday` (distinct leads with any activity today) of
-`done + left`, where *left* counts the remaining bucket rows with the new
-queue limited to today's goal (`newQueueCap − newTouchedToday`); new leads
-beyond the goal show as "Extra (daily goal met)". A lead logged today that is
-due again the same day counts in both, so the bar can dip — accepted.
+**Progress** = `doneToday` (distinct leads with any activity today, notes
+included) of `done + left`, where *left* counts the cards still listed.
 "Conversations today" (answered call, reply, demo agreed/booked) sits beside
-it so parks alone cannot fill the headline. The session state (pinning,
-skips, stale-refetch guard) is the pure reducer in `lib/today-session.ts`.
+it so parks alone cannot fill the headline.
+
+The 2026-10-23 guided session (pinned Up next, one-tap outcomes, Undo,
+keyboard shortcuts) was removed on 2026-11-01 in favour of working on the lead
+page. `lib/outcomes.ts` stays: the sales MCP server's `log_outcome` uses it.
+
+## Funnel stage
+
+`lib/funnel.ts` places every lead on the founder's atelier funnel
+(Discovery → Outreach → Demo → Trial → Paying, plus Closed) from data that
+already exists — **no stage column**. The lead page shows it as a card under
+the header (stage, "stage N of 5", what is happening now, the next step); a
+Today card shows "stage · next step" on one line. Copy lives in
+`sales.funnel.*` (EN + AR); `admin/components/funnel-copy.ts` turns the
+structured step into the two sentences.
+
+| Stage | Derived from |
+|---|---|
+| Discovery | `new`; or `awaiting_reply` / `contacted` / `callback_scheduled` before the video was sent |
+| Outreach | the same statuses after the video was sent |
+| Demo | `demo_agreed`, `demo_scheduled` (with the demo time) |
+| Trial | `demo_done`; check-ins at demo + 7 and + 28 days, subscribe ask at + 30 |
+| Paying | `won`; next step is the referral ask |
+| Closed | `lost`, `parked`, `blocked_no_number` |
+
+"Video sent" is an **outcome-text convention**, like the `DEPOSIT` note: a
+`whatsapp_sent` whose `outcome` starts with `VIDEO`. The lead page's stage
+card offers it as a one-tap button ("Sent video + case study") at the
+"send the video" step. Follow-up dates are last contact + 3 days, and only
+while fewer than 2 messages are unanswered. "Proof ready" (the case study page
+and videos) and "Referral and scale" from the funnel doc are company steps,
+not lead stages.
 
 **Why build, not buy:** the pipeline already owns the bucket rules, the
 WhatsApp follow-up safety limit, Meetings demo provisioning and bilingual
@@ -241,8 +267,8 @@ the lead id and cause, and the script exits non-zero.
 
 ## Dashboard
 
-`dashboard.getSales` (admin-only, same check as `assertAdmin`) feeds six cards
-from `src/features/system/sales/server/dashboard.ts`; non-admins see only the
+`dashboard.getSales` (staff: admins and operators, `assertSalesStaff`) feeds six cards
+from `src/features/system/sales/server/dashboard.ts`; customers see only the
 inbound-leads card. All read-only.
 
 - **Sprint scorecard** — the day-14 gate inputs from

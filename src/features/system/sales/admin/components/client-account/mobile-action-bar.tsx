@@ -30,6 +30,7 @@ export function MobileActionBar({ leadId, phone, whatsappUrl }: Props) {
       {phone ? (
         <Button
           className="h-11 flex-1 px-4"
+          nativeButton={false}
           render={(props) => (
             <a href={`tel:${phone}`} {...props}>
               <PhoneIcon aria-hidden="true" />
@@ -53,6 +54,7 @@ export function MobileActionBar({ leadId, phone, whatsappUrl }: Props) {
           variant="outline"
           className="size-11"
           aria-label={t("sales.account.openWhatsappChat")}
+          nativeButton={false}
           render={(props) => (
             <a
               href={whatsappUrl}
