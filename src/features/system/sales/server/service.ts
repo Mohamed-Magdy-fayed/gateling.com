@@ -500,7 +500,12 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
 
   const [row] = await db
     .select({
-      doneToday: sql<number>`count(distinct ${A.leadId})`.mapWith(Number),
+      // Closing a lead (park, bulk park/lost) is bookkeeping, not work: it
+      // drops the lead from today's total instead. Counting it let one bulk
+      // park of 240 leads read as "240 done".
+      doneToday: sql<number>`count(distinct ${A.leadId}) filter (where ${A.type} <> 'status_change')`.mapWith(
+        Number,
+      ),
       conversationsToday:
         sql<number>`count(distinct ${A.leadId}) filter (where ${inArray(A.type, CONVERSATION_TODAY_TYPES)})`.mapWith(
           Number,
