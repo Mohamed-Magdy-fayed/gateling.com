@@ -382,7 +382,12 @@ describe("frozen per business day", () => {
   const DAY_START = new Date("2026-08-16T21:00:00.000Z");
 
   function bucketsOf(leads: TodayLeadInput[]) {
-    return computeTodayBuckets(leads, NOW, DEFAULT_TODAY_RULES_CONFIG, DAY_START);
+    return computeTodayBuckets(
+      leads,
+      NOW,
+      DEFAULT_TODAY_RULES_CONFIG,
+      DAY_START,
+    );
   }
 
   it("does not move a lead chased for the second time today into Auto-park", () => {
@@ -397,9 +402,22 @@ describe("frozen per business day", () => {
   it("does not resurface any lead contacted earlier today", () => {
     const contactedToday = new Date(DAY_START.getTime() + HOUR);
     const leads = [
-      lead({ id: "rescue", pipelineStatus: "demo_agreed", lastContactedAt: contactedToday }),
-      lead({ id: "new", pipelineStatus: "new", lastContactedAt: contactedToday }),
-      lead({ id: "park", pipelineStatus: "awaiting_reply", lastContactedAt: contactedToday, followUpCount: 3 }),
+      lead({
+        id: "rescue",
+        pipelineStatus: "demo_agreed",
+        lastContactedAt: contactedToday,
+      }),
+      lead({
+        id: "new",
+        pipelineStatus: "new",
+        lastContactedAt: contactedToday,
+      }),
+      lead({
+        id: "park",
+        pipelineStatus: "awaiting_reply",
+        lastContactedAt: contactedToday,
+        followUpCount: 3,
+      }),
     ];
     expect(bucketsOf(leads).totalActionable).toBe(0);
   });
@@ -411,7 +429,9 @@ describe("frozen per business day", () => {
       lastContactedAt: daysAgo(3, HOUR),
       followUpCount: 1,
     });
-    expect(bucketById(bucketsOf([goesStaleToday]), "followUp").rows).toHaveLength(0);
+    expect(
+      bucketById(bucketsOf([goesStaleToday]), "followUp").rows,
+    ).toHaveLength(0);
   });
 
   it("keeps a follow-up that was already stale when the day started", () => {
@@ -440,6 +460,101 @@ describe("frozen per business day", () => {
       lastContactedAt: daysAgo(3, HOUR),
       followUpCount: 1,
     });
-    expect(bucketById(computeTodayBuckets([goesStaleToday], NOW), "followUp").rows).toHaveLength(1);
+    expect(
+      bucketById(computeTodayBuckets([goesStaleToday], NOW), "followUp").rows,
+    ).toHaveLength(1);
+  });
+});
+
+describe("any log takes a lead off today; promises bring it back", () => {
+  const DAY_START = new Date("2026-08-16T21:00:00.000Z");
+  const DAY_END = new Date("2026-08-17T21:00:00.000Z");
+  const loggedThisMorning = new Date(DAY_START.getTime() + 10 * HOUR);
+
+  function bucketsOf(leads: TodayLeadInput[]) {
+    return computeTodayBuckets(
+      leads,
+      NOW,
+      DEFAULT_TODAY_RULES_CONFIG,
+      DAY_START,
+      DAY_END,
+    );
+  }
+
+  it("drops a follow-up lead once a note was logged today", () => {
+    const followUp = lead({
+      pipelineStatus: "awaiting_reply",
+      lastContactedAt: daysAgo(5),
+      followUpCount: 1,
+    });
+    expect(bucketsOf([followUp]).totalActionable).toBe(1);
+    expect(
+      bucketsOf([{ ...followUp, lastWorkedAt: loggedThisMorning }])
+        .totalActionable,
+    ).toBe(0);
+  });
+
+  it("drops an overdue promise once the lead was worked today", () => {
+    const overdue = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: daysAgo(4),
+      nextActionAt: daysAgo(1),
+      lastWorkedAt: loggedThisMorning,
+    });
+    expect(bucketsOf([overdue]).totalActionable).toBe(0);
+  });
+
+  it("brings the overdue promise back tomorrow if the note did not discharge it", () => {
+    const tomorrow = new Date(NOW.getTime() + DAY);
+    const overdue = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: daysAgo(4),
+      nextActionAt: daysAgo(1),
+      lastWorkedAt: loggedThisMorning,
+    });
+    const buckets = computeTodayBuckets(
+      [overdue],
+      tomorrow,
+      DEFAULT_TODAY_RULES_CONFIG,
+      DAY_END,
+      new Date(DAY_END.getTime() + DAY),
+    );
+    expect(bucketById(buckets, "overdue").rows).toHaveLength(1);
+  });
+
+  it("lists a call-back scheduled for later today from the start of the day", () => {
+    const laterToday = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: daysAgo(2),
+      nextActionAt: new Date(NOW.getTime() + 5 * HOUR),
+    });
+    const [row] = bucketById(bucketsOf([laterToday]), "overdue").rows;
+    expect(row.reason).toEqual({ kind: "overdue", daysOverdue: 0 });
+  });
+
+  it("waits for a call-back promised today until it falls due", () => {
+    const promisedThisMorning = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: loggedThisMorning,
+      nextActionAt: new Date(NOW.getTime() + 5 * HOUR),
+    });
+    expect(bucketsOf([promisedThisMorning]).totalActionable).toBe(0);
+    const later = computeTodayBuckets(
+      [promisedThisMorning],
+      new Date(NOW.getTime() + 6 * HOUR),
+      DEFAULT_TODAY_RULES_CONFIG,
+      DAY_START,
+      DAY_END,
+    );
+    expect(bucketById(later, "overdue").rows).toHaveLength(1);
+  });
+
+  it("leaves promises for tomorrow off today's list", () => {
+    const tomorrow = lead({
+      pipelineStatus: "callback_scheduled",
+      lastContactedAt: daysAgo(2),
+      nextActionAt: new Date(DAY_END.getTime() + HOUR),
+    });
+    expect(bucketsOf([tomorrow]).totalActionable).toBe(0);
   });
 });

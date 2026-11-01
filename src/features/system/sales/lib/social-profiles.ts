@@ -205,3 +205,21 @@ export function largestFollowers(profiles: LeadSocialProfiles): number | null {
   });
   return counts.length > 0 ? Math.max(...counts) : null;
 }
+
+/**
+ * The platform with the biggest audience, for the one-line reach on a Today
+ * card. Reads the same merged view as the lead page (researched profiles,
+ * then the legacy single platform), so the two never disagree.
+ */
+export function topFollowerPlatform(
+  lead: SocialLeadFields,
+): { platform: SocialPlatform; followers: number } | null {
+  let top: { platform: SocialPlatform; followers: number } | null = null;
+  for (const profile of socialProfiles(lead)) {
+    if (profile.kind !== "found" || profile.followers === null) continue;
+    if (!top || profile.followers > top.followers) {
+      top = { platform: profile.platform, followers: profile.followers };
+    }
+  }
+  return top;
+}

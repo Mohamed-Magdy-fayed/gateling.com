@@ -33,6 +33,7 @@ import {
   type WhatsappStatus,
   whatsappStatusValues,
 } from "@/drizzle/schema";
+import { useAuth } from "@/features/core/auth/nextjs/components/auth-provider";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 
@@ -107,7 +108,12 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const { isAuthenticated, session } = useAuth();
   const [values, setValues] = useState<LeadFormValues>(initial ?? EMPTY);
+  // An opt-out stays until an admin lifts it (enforced in the sales router).
+  const isDoNotContactLocked =
+    Boolean(initial?.doNotContact) &&
+    !(isAuthenticated && session.user.role === "admin");
 
   useEffect(() => {
     if (open) setValues(initial ?? EMPTY);
@@ -378,12 +384,24 @@ export function LeadFormDialog({ open, onOpenChange, initial }: Props) {
             <Checkbox
               id="doNotContact"
               checked={values.doNotContact}
+              disabled={isDoNotContactLocked}
+              aria-describedby={
+                isDoNotContactLocked ? "doNotContactLocked" : undefined
+              }
               onCheckedChange={(checked) =>
                 set("doNotContact", checked === true)
               }
             />
             <Label htmlFor="doNotContact">{t("sales.fieldDoNotContact")}</Label>
           </div>
+          {isDoNotContactLocked && (
+            <p
+              id="doNotContactLocked"
+              className="text-muted-foreground text-xs sm:col-span-2"
+            >
+              {t("sales.fieldDoNotContactLocked")}
+            </p>
+          )}
         </div>
 
         <DialogFooter>
