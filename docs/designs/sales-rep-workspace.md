@@ -1,6 +1,6 @@
 # Sales operator workspace: funnel stage on every lead
 
-Status: Phase 1 BUILT on `feat/sales-funnel-stage` (2026-11-01, uncommitted); Phase 2 (dashboard funnel) not started
+Status: Phase 1 BUILT (2026-11-01). Phase 2 superseded 2026-11-03: the dashboard now shows the **yes funnel** (seven yeses ticked per lead), see `docs/sales-pipeline.md` → The yeses / Dashboard
 Owner: Mohamed
 Tier: **M**. Branch flow is `feat/<slug>` → `preview` → `main`.
 Funnel source: the "Gateling Atelier System – Sales Funnel" doc (7 stages).
@@ -33,12 +33,12 @@ Discovery apart from Outreach without a schema change.
 | 1. Discovery | `new` | Start a discovery chat. Ask how she manages bookings, deposits and returns. Don't pitch. → Next: write down her exact words. |
 | 1. Discovery | `awaiting_reply`, no `VIDEO` yet, no conversation yet | Discovery message sent, waiting for a reply. One follow-up after 3 days, then park. → Next: she replies. |
 | 1. Discovery | `contacted` / `callback_scheduled`, no `VIDEO` yet | She talked about her problem. Put her exact words in the notes. → Next: send the video and Aalaa's case-study link. |
-| 3. Outreach | `awaiting_reply`, `VIDEO` sent | Video sent. If there's no reply in 3 days, send one follow-up, then stop. → Next: a 15-minute demo. |
-| 3. Outreach | `contacted` / `callback_scheduled`, `VIDEO` sent | She replied after the video. → Next: offer a 15-minute demo of **her** problem only. |
+| 3. Outreach | `awaiting_reply`, `VIDEO` sent | Video sent. If there's no reply in 3 days, send one follow-up, then stop. → Next: a demo. |
+| 3. Outreach | `contacted` / `callback_scheduled`, `VIDEO` sent | She replied after the video. → Next: offer a demo of **her** problem only. |
 | 4. Demo | `demo_agreed` | She agreed to a demo. → Next: fix the day and time and book it. |
 | 4. Demo | `demo_scheduled` | Demo on {date} at {time}, on meetings.gateling.com. Show only her problem. → Next: offer the free setup and the trial. |
 | 5. Trial | `demo_done` | Free setup and data entry, 1-month trial. Check in during week 1 and week 4 (from {demo date}). → Next: ask her to subscribe on day 30. |
-| 6. Paying | `won` | Paying client. → Next: ask for a referral after 2 weeks. |
+| 6. Paying | `won` | Paying client. → Next: ask for a referral after a month or two. |
 | 6. Paying → 7. Referral | `won`, 14+ days since won | Ask for the names of other owners she knows. |
 | Closed | `lost`, `parked`, `blocked_no_number` | Closed, nothing to do. |
 

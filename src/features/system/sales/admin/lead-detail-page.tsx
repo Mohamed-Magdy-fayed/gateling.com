@@ -17,6 +17,10 @@ import {
   funnelPositionFor,
 } from "@/features/system/sales/lib/funnel";
 import { socialProfiles } from "@/features/system/sales/lib/social-profiles";
+import {
+  parseYesOutcome,
+  yesAnswersFromActivities,
+} from "@/features/system/sales/lib/yeses";
 import { useTRPC } from "@/integrations/trpc/client";
 import { toWhatsAppUrl } from "@/lib/phone";
 import { BeforeYouCallCard } from "./components/client-account/before-you-call-card";
@@ -27,7 +31,7 @@ import { MobileActionBar } from "./components/client-account/mobile-action-bar";
 import { ReachStrip } from "./components/client-account/reach-strip";
 import { SocialProfileDialog } from "./components/client-account/social-profile-dialog";
 import { DemoMeetingCard } from "./components/demo-meeting-card";
-import { FunnelStageCard } from "./components/funnel-stage";
+import { LeadProgressCard } from "./components/funnel-stage";
 import {
   LeadFormDialog,
   leadToFormValues,
@@ -127,19 +131,18 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
         />
       </ClientHero>
 
-      <FunnelStageCard leadId={lead.id} position={funnelPosition} />
+      <LeadProgressCard
+        leadId={lead.id}
+        position={funnelPosition}
+        yesAnswers={yesAnswersFromActivities(activities)}
+      />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GoogleMapsCard
-          name={lead.name}
-          address={lead.address}
-          onEdit={() => setMapsOpen(true)}
-        />
-        <BeforeYouCallCard tips={tips} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4">
+      {/* Record layout: the timeline in the main column, everything you
+          glance at in a side column. On phones the side column comes first,
+          so the call tips sit above the history. */}
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
+        <aside className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1">
+          <BeforeYouCallCard tips={tips} />
           <DemoMeetingCard
             leadId={lead.id}
             meetingUrl={lead.demoMeetingUrl}
@@ -200,9 +203,14 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
               )}
             </CardContent>
           </Card>
-        </div>
+          <GoogleMapsCard
+            name={lead.name}
+            address={lead.address}
+            onEdit={() => setMapsOpen(true)}
+          />
+        </aside>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 lg:col-start-1 lg:row-start-1">
           <CardHeader className="gap-1">
             <CardTitle className="text-base">{t("sales.timeline")}</CardTitle>
             <p className="text-muted-foreground text-xs">
@@ -234,7 +242,9 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
                   </span>
                 </div>
                 {activity.outcome && (
-                  <p className="text-sm">{activity.outcome}</p>
+                  <p className="text-sm">
+                    {timelineOutcome(activity.type, activity.outcome, t)}
+                  </p>
                 )}
                 {activity.notes && (
                   <p className="whitespace-pre-line text-muted-foreground text-xs">
@@ -285,19 +295,30 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
   );
 }
 
+/** An outcome as the timeline shows it: yes ticks in words, the rest as typed. */
+function timelineOutcome(
+  type: string,
+  outcome: string,
+  t: ReturnType<typeof useTranslation>["t"],
+): string {
+  const tick = parseYesOutcome(type, outcome);
+  if (!tick) return outcome;
+  const step = t("sales.yeses.stepShort", { step: tick.step });
+  if (tick.answer === "yes") return t("sales.yeses.timelineYes", { step });
+  if (tick.answer === "no") return t("sales.yeses.timelineNo", { step });
+  return t("sales.yeses.timelineClear", { step });
+}
+
 /** Mirrors the loaded layout so nothing jumps when the data lands. */
 function LeadDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6" data-testid="lead-detail-loading">
       <Skeleton className="h-11 w-48" />
       <Skeleton className="h-56 w-full" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Skeleton className="h-72" />
-        <Skeleton className="h-72" />
-      </div>
+      <Skeleton className="h-64 w-full" />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64" />
-        <Skeleton className="h-64 lg:col-span-2" />
+        <Skeleton className="h-96 lg:col-span-2" />
+        <Skeleton className="h-96" />
       </div>
     </div>
   );

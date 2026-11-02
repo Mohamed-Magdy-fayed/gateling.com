@@ -263,31 +263,45 @@ the lead id and cause, and the script exits non-zero.
 |---|---|---|
 | Daily new-dial cap | `00017` | 10 |
 | Business timezone (calling window) | `00003` | `Africa/Cairo` |
-| Sales sprint start (`YYYY-MM-DD`, day 1) | `00021` | unset — the scorecard asks for it |
+| Sales sprint start (`YYYY-MM-DD`, day 1) | `00021` | unused since 2026-11-03 (the sprint scorecard was removed) |
+
+## The yeses
+
+Every lead carries the founder's seven yeses, in order (`lib/yeses.ts`):
+10-minute call · shares her problems · watches the video and Aalaa's case
+study · her own demo with a time set · free setup and 1-month trial ·
+subscribes · referrals (after a month or two).
+
+The operator ticks each as ✓ (yes) or ✗ (no) on the lead page; tapping the lit
+mark clears it. **No schema change**: each tick appends a `note` activity whose
+outcome is `YES:<step>:yes|no|clear`, and the latest tick per step wins. Ticks
+are bookkeeping, not contact — they never touch the derived columns and do not
+count as "worked today" (`lastWorkedAt`, `doneToday` both exclude them). The
+timeline shows them in words.
+
+Where it shows: the lead page's progress card (stage, the yes path, now → next),
+a 7-segment bar on every Today card and in the pipeline grid's "Her yeses"
+column. The bar fills green per yes and turns red once any step got a no. The
+lead page ticks optimistically (the cached lead gets the tick before the server
+answers; a failure rolls back with a toast).
 
 ## Dashboard
 
-`dashboard.getSales` (staff: admins and operators, `assertSalesStaff`) feeds six cards
-from `src/features/system/sales/server/dashboard.ts`; customers see only the
-inbound-leads card. All read-only.
+`dashboard.getSales` (staff: admins and operators, `assertSalesStaff`) feeds two
+cards from `src/features/system/sales/server/dashboard.ts`; customers see only
+the inbound-leads card. All read-only. **Ateliers only**: leads with
+`businessType = 'distributor'` are left out.
 
-- **Sprint scorecard** — the day-14 gate inputs from
-  `docs/designs/distributor-offer-sell-first.md`: distinct leads per metric,
-  activities with `createdAt` in the 14 local days from setting `00021`,
-  atelier and distributor (`businessType = 'distributor'`) never mixed.
-  Deposits are `note` rows whose outcome starts `DEPOSIT` (case-insensitive);
-  `won` status is never counted. Window, pace and conversion maths live in
-  `lib/sprint.ts` (tested). The Atelier Alaa reference record is **not**
-  excluded — the design doc excludes it by id, and no id is recorded.
-- **Today's work** — bucket sizes from `getTodayWork`, so it can't disagree
-  with `/sales/today`.
+- **Atelier yes funnel** — every atelier prospect, then one bar per yes:
+  how many said yes there, the rate from the step before, `+N this week`
+  (yes ticked in the last 7 days), how many said no, and the weakest step (the
+  lowest step-to-step rate among steps fed at least 3 leads). Maths in
+  `yesFunnel()` (tested).
 - **Upcoming demos** — leads in `demo_scheduled` whose latest `demo_scheduled`
   log's `nextActionAt` falls from today's local midnight to now + 7 days.
-- **Risks** — Auto-park bucket size, `blocked_no_number`, and open contactable
-  prospects with `whatsappStatus = 'not_confirmed'`.
-- **Pipeline by stage** — `getPipelineCounters().byStatus`.
-- **Daily touches** — `whatsapp_sent`/`call`/`no_answer`/`call_unclear`
-  per business-local day by `occurredAt`, last 14 days.
+
+Removed 2026-11-03 at the founder's request: the sprint scorecard (and its
+distributor track), today's workload, risks, pipeline by stage, daily touches.
 
 Calling window: ateliers open ~11:00–12:00, close ~22:00–23:00. Before 12:00
 Cairo the page shows a banner advising WhatsApp instead of calls. It advises —
