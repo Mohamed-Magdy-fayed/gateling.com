@@ -28,6 +28,12 @@ import {
   DEFAULT_TODAY_RULES_CONFIG,
   type TodayLeadInput,
 } from "@/features/system/sales/lib/today-rules";
+import {
+  YES_ACTIVITY_TYPE,
+  YES_OUTCOME_LIKE,
+  type YesAnswers,
+  yesAnswersFromActivities,
+} from "@/features/system/sales/lib/yeses";
 
 import { SalesError } from "./errors";
 import { buildPipelineWhere, pipelineSortExpr } from "./filters";
@@ -387,7 +393,57 @@ export async function listPipeline(db: Db, input: ListPipelineInput) {
     .limit(input.perPage)
     .offset((page - 1) * input.perPage);
 
-  return { rows, pageCount, total: Number(total) };
+  const yeses = await yesAnswersByLead(
+    db,
+    rows.map((row) => row.id),
+  );
+  return {
+    rows: rows.map((row) => ({
+      ...row,
+      yesAnswers: yeses.get(row.id) ?? {},
+    })),
+    pageCount,
+    total: Number(total),
+  };
+}
+
+/** A tick on the yes checklist (`lib/yeses.ts`): bookkeeping, not contact. */
+export const isYesTick = sql`(${LeadActivitiesTable.type} = ${YES_ACTIVITY_TYPE} and coalesce(${LeadActivitiesTable.outcome}, '') like ${YES_OUTCOME_LIKE})`;
+
+/**
+ * Each lead's current yes answers, from its ticks. `leadIds` limits it to one
+ * page; null loads every prospect (Today).
+ */
+async function yesAnswersByLead(
+  db: Db,
+  leadIds: readonly string[] | null,
+): Promise<Map<string, YesAnswers>> {
+  if (leadIds?.length === 0) return new Map();
+  const ticks = await db
+    .select({
+      leadId: LeadActivitiesTable.leadId,
+      type: LeadActivitiesTable.type,
+      outcome: LeadActivitiesTable.outcome,
+      createdAt: LeadActivitiesTable.createdAt,
+    })
+    .from(LeadActivitiesTable)
+    .where(
+      and(
+        isYesTick,
+        leadIds ? inArray(LeadActivitiesTable.leadId, [...leadIds]) : undefined,
+      ),
+    );
+
+  const byLead = new Map<string, typeof ticks>();
+  for (const row of ticks) {
+    byLead.set(row.leadId, [...(byLead.get(row.leadId) ?? []), row]);
+  }
+  return new Map(
+    [...byLead].map(([leadId, rows]) => [
+      leadId,
+      yesAnswersFromActivities(rows),
+    ]),
+  );
 }
 
 /**
@@ -407,7 +463,16 @@ export async function exportPipeline(
     .limit(limit + 1);
 
   const truncated = rows.length > limit;
-  return { rows: truncated ? rows.slice(0, limit) : rows, truncated, limit };
+  const kept = truncated ? rows.slice(0, limit) : rows;
+  const yeses = await yesAnswersByLead(
+    db,
+    kept.map((row) => row.id),
+  );
+  return {
+    rows: kept.map((row) => ({ ...row, yesAnswers: yeses.get(row.id) ?? {} })),
+    truncated,
+    limit,
+  };
 }
 
 const BULK_PARK_REASON = "Parked from the pipeline (bulk)";
@@ -460,14 +525,18 @@ export async function getTodayWork(
   const settings = await getSalesSettings(db);
   const newQueueCap = options.newQueueCap ?? settings.newQueueCap;
 
-  const [leads, stats] = await Promise.all([
+  const [leads, stats, yeses] = await Promise.all([
     todayLeadInputs(db),
     todayStats(db, now, settings.timeZone),
+    yesAnswersByLead(db, null),
   ]);
 
   return {
     ...computeTodayBuckets(
-      leads,
+      leads.map((lead) => ({
+        ...lead,
+        yesAnswers: yeses.get(lead.id) ?? {},
+      })),
       now,
       { ...DEFAULT_TODAY_RULES_CONFIG, newQueueCap },
       startOfLocalDay(now, settings.timeZone),
@@ -500,7 +569,13 @@ async function todayStats(db: Db, now: Date, timeZone: string) {
 
   const [row] = await db
     .select({
-      doneToday: sql<number>`count(distinct ${A.leadId})`.mapWith(Number),
+      // Closing a lead (park, bulk park/lost) is bookkeeping, not work: it
+      // drops the lead from today's total instead. Counting it let one bulk
+      // park of 240 leads read as "240 done". Yes ticks are bookkeeping too.
+      doneToday:
+        sql<number>`count(distinct ${A.leadId}) filter (where ${A.type} <> 'status_change' and not ${isYesTick})`.mapWith(
+          Number,
+        ),
       conversationsToday:
         sql<number>`count(distinct ${A.leadId}) filter (where ${inArray(A.type, CONVERSATION_TODAY_TYPES)})`.mapWith(
           Number,
@@ -598,12 +673,14 @@ async function todayLeadInputs(db: Db): Promise<TodayLeadInput[]> {
         where ${act("leadId")} = ${leadIdRef} and ${act("type")} = 'whatsapp_reply'
       )`,
       // Anything logged, notes included: a lead worked today is done for today.
+      // Yes ticks are not work (`lib/yeses.ts`), so they don't count.
       // Raw-subquery timestamps come back as epoch milliseconds so nothing
       // depends on how the driver renders a bare `max(timestamptz)`.
       lastWorkedAtMs: sql<number | null>`(
         select extract(epoch from max(${act("createdAt")})) * 1000
         from ${LeadActivitiesTable} act
         where ${act("leadId")} = ${leadIdRef}
+          and not (${act("type")} = ${YES_ACTIVITY_TYPE} and coalesce(${act("outcome")}, '') like ${YES_OUTCOME_LIKE})
       )`.mapWith(Number),
       // Funnel facts (`lib/funnel.ts`): the VIDEO outcome convention and the
       // latest demo, which the trial is counted from.

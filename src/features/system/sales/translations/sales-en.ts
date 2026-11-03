@@ -405,7 +405,7 @@ export default {
       stageProgress: dt("Stage {current} of {total}", {}),
       startDiscovery: {
         now: "Not contacted yet.",
-        next: "Start a discovery chat: ask how she manages bookings, deposits and returns. Don't pitch, and write down her exact words.",
+        next: "Ask for 10 minutes of her time for a call, then ask how she manages bookings, deposits and returns. Don't pitch, and write down her exact words.",
       },
       awaitDiscoveryReply: {
         now: "Discovery message sent. Waiting for her reply.",
@@ -429,7 +429,7 @@ export default {
       },
       offerDemo: {
         now: "She replied after the video.",
-        next: "Offer a 15-minute demo of her own problem only.",
+        next: "Offer her a demo of her own problem only, and fix a time.",
       },
       callBack: {
         now: "She asked us to call back.",
@@ -464,7 +464,7 @@ export default {
       },
       askReferral: {
         now: "Paying client.",
-        next: "After about 2 weeks, ask for the names of other owners she knows.",
+        next: "Once she's been happy with us for a month or two, ask for the names of other owners she knows.",
       },
       closed: {
         now: "Closed. Nothing to do.",
@@ -474,6 +474,47 @@ export default {
       markVideoSent: "Sent video + case study",
       videoSentSaved: "Logged: video and case study sent.",
       videoSentFailed: "Could not log it. Try again.",
+    },
+
+    // ─── The owner's yeses (lib/yeses.ts) ────────────────────────────────
+    yeses: {
+      title: "Her yeses",
+      hint: "Tick each one as it happens: ✓ for yes, ✗ for no. Tap again to clear.",
+      summary: dt("{yes} yes, {no} no, out of {total}", {}),
+      step: dt("{step:enum}", {
+        enum: {
+          step: {
+            callTime: "Gives us 10 minutes for a call",
+            shareProblems:
+              "Shares her problems with bookings, deposits and returns",
+            watchVideo: "Watches the video and Aalaa's case study",
+            demo: "Agrees to her own demo, with a time set",
+            trial: "Agrees to free setup and a 1-month trial",
+            subscribe: "Subscribes after the trial",
+            referrals: "Refers other owners (after a month or two)",
+          },
+        },
+      }),
+      stepShort: dt("{step:enum}", {
+        enum: {
+          step: {
+            callTime: "10-minute call",
+            shareProblems: "Shares her problems",
+            watchVideo: "Watches the video",
+            demo: "Demo booked",
+            trial: "Free trial",
+            subscribe: "Subscribes",
+            referrals: "Referrals",
+          },
+        },
+      }),
+      timelineYes: dt("Ticked yes: {step}", {}),
+      timelineNo: dt("Ticked no: {step}", {}),
+      timelineClear: dt("Cleared: {step}", {}),
+      markYes: "Yes",
+      markNo: "No",
+      saved: "Saved.",
+      saveFailed: "Could not save. Try again.",
     },
   },
 } as const satisfies LanguageMessages;

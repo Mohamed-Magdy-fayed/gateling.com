@@ -204,40 +204,21 @@ export default {
   },
   dashboard: {
     title: "Dashboard",
-    lead: "Sales at a glance: the sprint, today's work and what's coming up.",
+    lead: "How many ateliers said yes at each step, and what's coming up.",
     salesLoadFailed:
       "Couldn't load the sales numbers. Refresh the page to try again.",
-    openToday: "Open Today's Work",
 
-    sprintTitle: "Sprint scorecard",
-    sprintDesc:
-      "Distinct leads per gate metric, counting only activities logged during the sprint.",
-    sprintNotSet:
-      "Set the sprint's day 1 in Settings (Sales Sprint Start) to start the scorecard.",
-    sprintOpenSettings: "Open settings",
-    sprintDay: dt("Day {day:number} of {total:number}", {}),
-    sprintUpcoming: "Starts {date}",
-    sprintEnded: "Sprint over. Run the day-14 gate.",
-    trackAtelier: "Ateliers",
-    trackDistributor: "Distributors",
-    metricContacted: "Contacted",
-    metricReplied: "Replied",
-    metricBooked: "Demos booked",
-    metricHeld: "Demos held",
-    metricDeposits: "Deposits",
-    contactProgress: dt("{done:number} of {target:number} contacted", {}),
-    paceNeeded: dt("Needs {pace:number} a day to reach the target", {}),
-    targetMet: "Contact target met",
-    conversion: dt("{rate:number}% of previous step", {}),
-
-    workloadTitle: "Today's work",
-    workloadDesc: "What Today's Work is asking for right now.",
-    workloadClear: "Nothing waiting. Add leads or check back tomorrow.",
-    newQueueCapped: dt(
-      "{shown:number} of {total:number} shown (daily cap)",
-      {},
-    ),
-    dueTomorrow: dt("{count:number} due tomorrow", {}),
+    funnelTitle: "Atelier yes funnel",
+    funnelDesc:
+      "Every atelier in the pipeline, from the first call to a referral. Each bar is how many said yes at that step.",
+    funnelLeads: "Ateliers in the pipeline",
+    funnelRate: dt("{rate}% of the step before", {}),
+    funnelRecent: dt("+{count} this week", {}),
+    funnelNo: dt("{count} said no", {}),
+    funnelWeakest: "Weakest step",
+    funnelEmpty:
+      "No yeses ticked yet. Tick them on each lead page as the conversation goes.",
+    funnelOpenPipeline: "Open the pipeline",
 
     demosTitle: "Upcoming demos",
     demosDesc: "Booked demos from today through the next 7 days.",
@@ -245,24 +226,6 @@ export default {
     demoGuestLink: "Guest link",
     demoRoomPending: "Room pending",
     demoOpenLead: "Open lead",
-
-    stagesTitle: "Pipeline by stage",
-    stagesDesc: "Where every prospect sits right now.",
-    stagesEmpty: "No prospects yet.",
-
-    touchesTitle: "Daily touches",
-    touchesDesc: "Calls and WhatsApp messages sent, last 14 days.",
-    touchesAverage: dt("{avg:number} a day on average", {}),
-    touchesBar: "{date}: {count}",
-
-    risksTitle: "Risks",
-    risksDesc: "Leads that need care before the next message.",
-    riskAutoPark: "Chased twice, no reply",
-    riskAutoParkHint: "No third WhatsApp. Park or call instead.",
-    riskNoNumber: "No number",
-    riskNoNumberHint: "Can't be reached until a number is found.",
-    riskWhatsapp: "WhatsApp not confirmed",
-    riskWhatsappHint: "Call first; a message may not arrive.",
 
     recentLeads: "Recent inbound leads",
     recentLeadsDesc: dt(

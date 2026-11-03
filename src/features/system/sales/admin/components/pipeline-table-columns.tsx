@@ -19,6 +19,7 @@ import {
   PipelineRowActions,
   type SetPipelineRowAction,
 } from "./pipeline-row-actions";
+import { YesProgress } from "./yes-checklist";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 
@@ -196,6 +197,15 @@ export function buildPipelineColumns(opts: {
       meta: { label: t("sales.columnStatus") },
       cell: ({ row }) => (
         <PipelineStatusBadge status={row.original.pipelineStatus} t={t} />
+      ),
+    },
+    {
+      id: "yeses",
+      header: () => t("sales.yeses.title"),
+      meta: { label: t("sales.yeses.title") },
+      enableSorting: false,
+      cell: ({ row }) => (
+        <YesProgress answers={row.original.yesAnswers} className="w-32" />
       ),
     },
     {
