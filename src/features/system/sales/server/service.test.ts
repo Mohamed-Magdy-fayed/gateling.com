@@ -347,6 +347,17 @@ describeWithDb("sales service (database)", () => {
       expect((await getTodayWork(db, { now: NOW })).doneToday).toBe(1);
     });
 
+    it("does not count a park or bulk close as done", async () => {
+      const parked = await prospect();
+      const bulk = await prospect();
+      const worked = await prospect();
+      await parkLead(db, parked, ACTOR);
+      await bulkSetStatus(db, { ids: [bulk], status: "lost" }, ACTOR);
+      await logActivity(db, { leadId: worked, type: "note" }, ACTOR);
+
+      expect((await getTodayWork(db)).doneToday).toBe(1);
+    });
+
     it("reports an empty pipeline", async () => {
       expect((await getTodayWork(db, { now: NOW })).hasProspects).toBe(false);
     });

@@ -6,6 +6,7 @@ import type {
 } from "@/drizzle/schema";
 
 import { isTerminalPipelineStatus } from "./pipeline-status";
+import type { YesAnswers } from "./yeses";
 
 /**
  * The whole point of the sales module: given pipeline state, decide who to
@@ -53,6 +54,8 @@ export type TodayLeadInput = {
   /** Funnel facts for the stage line (`lib/funnel.ts`). */
   hasVideoSent?: boolean;
   lastDemoDoneAt?: Date | null;
+  /** The owner's yeses so far (`lib/yeses.ts`), for the progress bar. */
+  yesAnswers?: YesAnswers;
 };
 
 export type TodayBucketId =

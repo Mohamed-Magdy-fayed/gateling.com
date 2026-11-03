@@ -11,6 +11,7 @@ import type { TodayLeadInput } from "@/features/system/sales/lib/today-rules";
 
 import { PlatformIcon } from "./client-account/platform-icon";
 import { FunnelStageLine } from "./funnel-stage";
+import { YesProgress } from "./yes-checklist";
 
 /**
  * One Today row: a thin link to the lead page, where the work and the log
@@ -62,6 +63,7 @@ export function TodayLeadCard({ lead }: { lead: TodayLeadInput }) {
             )}
           </div>
           <FunnelStageLine position={position} />
+          <YesProgress answers={lead.yesAnswers ?? {}} className="max-w-xs" />
         </div>
         <ChevronRightIcon
           aria-hidden="true"

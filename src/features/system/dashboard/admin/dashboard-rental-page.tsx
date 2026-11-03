@@ -9,13 +9,9 @@ import { H2, Muted } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 
-import { DailyTouchesCard } from "./components/daily-touches-card";
-import { PipelineStagesCard } from "./components/pipeline-stages-card";
 import { RecentInboundCard } from "./components/recent-inbound-card";
-import { RisksCard } from "./components/risks-card";
-import { SprintScorecard } from "./components/sprint-scorecard";
 import { UpcomingDemosCard } from "./components/upcoming-demos-card";
-import { WorkloadCard } from "./components/workload-card";
+import { YesFunnelCard } from "./components/yes-funnel-card";
 
 /** Non-admins can't read the pipeline; they get the inbound section only. */
 function isForbidden(error: unknown): boolean {
@@ -24,17 +20,9 @@ function isForbidden(error: unknown): boolean {
 
 function SalesSkeleton() {
   return (
-    <div className="flex flex-col gap-4" aria-busy>
-      <Skeleton className="h-56 w-full rounded-xl" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Skeleton className="h-72 rounded-xl" />
-        <Skeleton className="h-72 rounded-xl" />
-        <Skeleton className="h-72 rounded-xl" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Skeleton className="h-72 rounded-xl" />
-        <Skeleton className="h-72 rounded-xl" />
-      </div>
+    <div className="flex flex-col gap-6" aria-busy>
+      <Skeleton className="h-[26rem] w-full rounded-xl" />
+      <Skeleton className="h-40 w-full rounded-xl" />
     </div>
   );
 }
@@ -62,19 +50,11 @@ export function DashboardRentalPage() {
     const data = sales.data;
     return (
       <>
-        <SprintScorecard sprint={data.sprint} />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <WorkloadCard workload={data.workload} />
-          <UpcomingDemosCard
-            demos={data.upcomingDemos}
-            timeZone={data.timeZone}
-          />
-          <RisksCard risks={data.risks} />
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <PipelineStagesCard stages={data.stages} />
-          <DailyTouchesCard touches={data.touches} />
-        </div>
+        <YesFunnelCard funnel={data.funnel} />
+        <UpcomingDemosCard
+          demos={data.upcomingDemos}
+          timeZone={data.timeZone}
+        />
       </>
     );
   })();

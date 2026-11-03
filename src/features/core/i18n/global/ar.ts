@@ -199,39 +199,20 @@ export default {
   },
   dashboard: {
     title: "لوحة التحكم",
-    lead: "المبيعات في لمحة: الدورة الحالية، وعمل اليوم، وما هو قادم.",
+    lead: "كام أتيليه وافق في كل خطوة، وإيه اللي جاي.",
     salesLoadFailed: "تعذر تحميل أرقام المبيعات. حدّث الصفحة وحاول مرة أخرى.",
-    openToday: "فتح عمل اليوم",
 
-    sprintTitle: "مؤشرات الدورة",
-    sprintDesc:
-      "عدد العملاء المميزين لكل مؤشر، مع احتساب الأنشطة المسجلة خلال الدورة فقط.",
-    sprintNotSet:
-      "حدد اليوم الأول للدورة من الإعدادات (بداية دورة المبيعات) لبدء احتساب المؤشرات.",
-    sprintOpenSettings: "فتح الإعدادات",
-    sprintDay: dt("اليوم {day:number} من {total:number}", {}),
-    sprintUpcoming: "تبدأ في {date}",
-    sprintEnded: "انتهت الدورة. طبّق قرار اليوم الرابع عشر.",
-    trackAtelier: "الأتيليهات",
-    trackDistributor: "الموزعون",
-    metricContacted: "تم التواصل",
-    metricReplied: "ردّوا",
-    metricBooked: "عروض محجوزة",
-    metricHeld: "عروض تمت",
-    metricDeposits: "عربون",
-    contactProgress: dt("{done:number} من {target:number} تم التواصل معهم", {}),
-    paceNeeded: dt("يلزم {pace:number} يوميًا للوصول إلى الهدف", {}),
-    targetMet: "تم بلوغ هدف التواصل",
-    conversion: dt("{rate:number}% من الخطوة السابقة", {}),
-
-    workloadTitle: "عمل اليوم",
-    workloadDesc: "ما تطلبه صفحة عمل اليوم الآن.",
-    workloadClear: "لا يوجد ما ينتظر. أضف عملاء أو عُد غدًا.",
-    newQueueCapped: dt(
-      "يُعرض {shown:number} من {total:number} (الحد اليومي)",
-      {},
-    ),
-    dueTomorrow: dt("{count:number} مستحقة غدًا", {}),
+    funnelTitle: "قمع موافقات الأتيليهات",
+    funnelDesc:
+      "كل أتيليه في البايبلاين، من أول مكالمة لحد الترشيحات. كل شريط هو عدد اللي وافقوا في الخطوة دي.",
+    funnelLeads: "أتيليهات في البايبلاين",
+    funnelRate: dt("{rate}% من الخطوة اللي قبلها", {}),
+    funnelRecent: dt("+{count} الأسبوع ده", {}),
+    funnelNo: dt("{count} رفضوا", {}),
+    funnelWeakest: "أضعف خطوة",
+    funnelEmpty:
+      "لسه مفيش موافقات متعلَّمة. علّم عليها في صفحة كل عميل أول بأول.",
+    funnelOpenPipeline: "افتح البايبلاين",
 
     demosTitle: "العروض القادمة",
     demosDesc: "العروض المحجوزة من اليوم وحتى الأيام السبعة القادمة.",
@@ -239,25 +220,6 @@ export default {
     demoGuestLink: "رابط الضيف",
     demoRoomPending: "الغرفة قيد التجهيز",
     demoOpenLead: "فتح العميل",
-
-    stagesTitle: "خط المبيعات حسب المرحلة",
-    stagesDesc: "أين يقف كل عميل محتمل الآن.",
-    stagesEmpty: "لا يوجد عملاء محتملون بعد.",
-
-    touchesTitle: "التواصل اليومي",
-    touchesDesc: "المكالمات ورسائل واتساب المرسلة خلال آخر 14 يومًا.",
-    touchesAverage: dt("{avg:number} يوميًا في المتوسط", {}),
-    touchesBar: "{date}: {count}",
-
-    risksTitle: "مخاطر",
-    risksDesc: "عملاء يحتاجون إلى حذر قبل الرسالة التالية.",
-    riskAutoPark: "متابعتان دون رد",
-    riskAutoParkHint:
-      "لا ترسل رسالة واتساب ثالثة. أوقفه مؤقتًا أو اتصل بدلًا من ذلك.",
-    riskNoNumber: "بلا رقم",
-    riskNoNumberHint: "لا يمكن الوصول إليه حتى يتوفر رقم.",
-    riskWhatsapp: "واتساب غير مؤكد",
-    riskWhatsappHint: "اتصل أولًا؛ قد لا تصل الرسالة.",
 
     recentLeads: "أحدث العملاء الواردين",
     recentLeadsDesc: dt("{count:number} طلب تواصل هذا الشهر", {}),
