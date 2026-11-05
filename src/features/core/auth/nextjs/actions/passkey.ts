@@ -432,11 +432,6 @@ export async function completePasskeyAuthenticationAction(
 
   await revokeChallengeToken(challenge.id);
 
-  await db
-    .update(UsersTable)
-    .set({ lastSignInAt: new Date() })
-    .where(eq(UsersTable.id, user.id));
-
   await createUserSession(user, await cookies());
 
   redirect(getPostAuthRedirect(user, returnTo));

@@ -1,4 +1,7 @@
 import crypto from "node:crypto";
+import { eq } from "drizzle-orm";
+import { db } from "@/drizzle";
+import { UsersTable } from "@/drizzle/schema";
 import { env } from "@/env/server";
 import { sessionSchema } from "@/features/core/auth/schemas";
 
@@ -71,6 +74,13 @@ export async function createUserSession(
   );
 
   setCookie(sessionId, cookies);
+
+  // Every sign-in path (password, OAuth, passkey, sign-up, magic link) ends
+  // here, so this is the one place that keeps "last sign-in" truthful.
+  await db
+    .update(UsersTable)
+    .set({ lastSignInAt: new Date() })
+    .where(eq(UsersTable.id, user.id));
 }
 
 export async function updateUserSessionExpiration(
