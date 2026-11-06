@@ -142,6 +142,13 @@ export function createMetaWebhookHandler({
 
     const header = request.headers.get(META_SIGNATURE_HEADER);
     if (!verifyMetaSignature({ appSecret, header, body })) {
+      // Without this a wrong META_APP_SECRET is invisible: Meta's deliveries
+      // just vanish. Shape only — never the body (customer PII).
+      console.warn("[meta-webhook] rejected: invalid signature", {
+        hasSignature: Boolean(header),
+        bytes: Buffer.byteLength(body),
+        userAgent: request.headers.get("user-agent")?.slice(0, 80) ?? null,
+      });
       return new Response(null, { status: 401 });
     }
 
