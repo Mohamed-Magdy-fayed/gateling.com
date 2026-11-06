@@ -279,6 +279,21 @@ are bookkeeping, not contact — they never touch the derived columns and do not
 count as "worked today" (`lastWorkedAt`, `doneToday` both exclude them). The
 timeline shows them in words.
 
+**Ticks move the status forward** (`lib/yes-status.ts`, applied by
+`sales.setYes` in the same transaction as the tick, never backwards):
+✓ Demo booked → `demo_scheduled` (asks for the demo time; the Meetings room is
+provisioned as for a logged demo) · ✓ Free trial → `demo_done` · ✓ Subscribes →
+`won` · ✗ on an open lead → asks "mark lost?" and closes it only on yes. Steps
+1–3 and Referrals change nothing. A yes on a closed lead reopens it. The status
+change is its own activity row (outcome "Moved by a yes tick").
+
+**Backfill**: data migration `0026_backfill_lead_yeses.sql` ticks existing
+leads from their status and history (the evidence per step is in the file's
+header; lost leads get a no on the step after their furthest yes). Dated at
+the lead's last contact, created by `system:yes-backfill`, idempotent.
+Migrations are not run by the build: apply with `npm run db:migrate` against
+each environment.
+
 Where it shows: the lead page's progress card (stage, the yes path, now → next),
 a 7-segment bar on every Today card and in the pipeline grid's "Her yeses"
 column. The bar fills green per yes and turns red once any step got a no. The

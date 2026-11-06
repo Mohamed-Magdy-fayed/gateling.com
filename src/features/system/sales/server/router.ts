@@ -26,6 +26,7 @@ import {
   pipelineFilterSchema,
   setMapsListingSchema,
   setSocialProfileSchema,
+  setYesSchema,
   todayWorkSchema,
   updateLeadSchema,
 } from "./schemas";
@@ -56,6 +57,34 @@ function isOwnBucketUrl(value: string): boolean {
     value.startsWith(`https://storage.googleapis.com/${bucket}/`) ||
     value.startsWith(`https://firebasestorage.googleapis.com/v0/b/${bucket}/o/`)
   );
+}
+
+/**
+ * A scheduled demo gets a Meetings room, provisioned in the background
+ * (external HTTP never runs inline). Non-fatal: the log is the truth.
+ */
+async function provisionDemoRoom(
+  leadId: string,
+  activityId: string,
+  scheduledAt: Date,
+): Promise<void> {
+  try {
+    await inngest.send(
+      leadDemoScheduledEvent.create({
+        leadId,
+        activityId,
+        scheduledAt: scheduledAt.toISOString(),
+      }),
+    );
+  } catch (error) {
+    // The activity is saved; only the room is missing. Logged so a
+    // permanently "pending" demo card can be traced to its cause.
+    console.warn("lead/demo-scheduled send failed", {
+      leadId,
+      activityId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 export const salesRouter = createTRPCRouter({
@@ -218,28 +247,34 @@ export const salesRouter = createTRPCRouter({
         .catch((error: unknown) => {
           throw toTRPCError(error);
         });
-      // A scheduled demo gets a Meetings room, provisioned in the background
-      // (external HTTP never runs inline). Non-fatal: the log is the truth.
       if (input.type === "demo_scheduled" && input.nextActionAt) {
-        try {
-          await inngest.send(
-            leadDemoScheduledEvent.create({
-              leadId: input.leadId,
-              activityId: result.activityId,
-              scheduledAt: input.nextActionAt.toISOString(),
-            }),
-          );
-        } catch (error) {
-          // The activity is saved; only the room is missing. Logged so a
-          // permanently "pending" demo card can be traced to its cause.
-          console.warn("lead/demo-scheduled send failed", {
-            leadId: input.leadId,
-            activityId: result.activityId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
+        await provisionDemoRoom(
+          input.leadId,
+          result.activityId,
+          input.nextActionAt,
+        );
       }
       return result;
+    }),
+
+  /** Tick one of the owner's yeses; may move the lead's status (`lib/yes-status.ts`). */
+  setYes: protectedProcedure
+    .input(setYesSchema)
+    .mutation(async ({ ctx, input }) => {
+      assertSalesStaff(ctx.session?.user.role);
+      const result = await service
+        .setYes(ctx.db, input, ctx.session.user.id)
+        .catch((error: unknown) => {
+          throw toTRPCError(error);
+        });
+      if (result.demo) {
+        await provisionDemoRoom(
+          input.leadId,
+          result.demo.activityId,
+          result.demo.at,
+        );
+      }
+      return { movedTo: result.movedTo };
     }),
 
   /** Single-use host link for the lead's demo room — minted per click, never stored. */
