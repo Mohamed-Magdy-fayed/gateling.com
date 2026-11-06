@@ -39,6 +39,13 @@ export const env = createEnv({
     // token check without it); required on the production deployment below.
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
 
+    // Meta (WhatsApp / Messenger / Instagram) webhooks. Unset, the endpoint
+    // answers 503 and Meta keeps retrying. APP_SECRET is the Meta app's
+    // secret (App settings → Basic); VERIFY_TOKEN is any string you choose
+    // and paste into the webhook form.
+    META_APP_SECRET: z.string().min(1).optional(),
+    META_WEBHOOK_VERIFY_TOKEN: z.string().min(16).optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
