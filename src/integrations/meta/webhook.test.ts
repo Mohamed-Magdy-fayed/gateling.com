@@ -226,6 +226,34 @@ describe("createMetaWebhookHandler", () => {
     expect(onDelivery).not.toHaveBeenCalled();
   });
 
+  it("logs a rejected signature by shape only, never the payload", async () => {
+    const handler = createMetaWebhookHandler({
+      appSecret: APP_SECRET,
+      onDelivery: vi.fn(),
+    });
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await handler(
+      post(body, {
+        [META_SIGNATURE_HEADER]: signMetaWebhook("other_secret", body),
+        "user-agent": "facebookexternalua",
+      }),
+    );
+
+    expect(spy).toHaveBeenCalledWith(
+      "[meta-webhook] rejected: invalid signature",
+      {
+        hasSignature: true,
+        bytes: Buffer.byteLength(body),
+        userAgent: "facebookexternalua",
+      },
+    );
+    const logged = JSON.stringify(spy.mock.calls);
+    expect(logged).not.toContain("201000000000");
+    expect(logged).not.toContain("Hello");
+    spy.mockRestore();
+  });
+
   it("answers 503 when the app secret is not configured", async () => {
     const onDelivery = vi.fn();
     const handler = createMetaWebhookHandler({
