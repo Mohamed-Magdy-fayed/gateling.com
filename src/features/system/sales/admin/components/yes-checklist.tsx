@@ -2,11 +2,14 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import type { LeadPipelineStatus } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
+import { statusEffectForTick } from "@/features/system/sales/lib/yes-status";
 import {
   YES_ACTIVITY_TYPE,
   YES_STEPS,
@@ -18,6 +21,8 @@ import {
 } from "@/features/system/sales/lib/yeses";
 import { useTRPC } from "@/integrations/trpc/client";
 import { cn } from "@/lib/utils";
+
+import { DemoTimeDialog, NoAnswerDialog } from "./yes-tick-dialogs";
 
 /**
  * Segment colours. The project has no success token, so emerald is the
@@ -99,21 +104,27 @@ export function YesProgress({
  */
 export function YesPath({
   leadId,
+  status,
   answers,
 }: {
   leadId: string;
+  /** The lead's pipeline status: decides what a tick does to it. */
+  status: LeadPipelineStatus;
   answers: YesAnswers;
 }) {
   const { t } = useTranslation();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const leadKey = trpc.sales.byId.queryKey({ id: leadId });
+  const [demoStep, setDemoStep] = useState<YesStep | null>(null);
+  const [noStep, setNoStep] = useState<YesStep | null>(null);
 
-  // Optimistic: the tick is appended to the cached lead as if the server had
-  // already logged it, so the dot, the bar and the timeline change on click.
-  // A failure restores the snapshot; either way the lead is then refetched.
+  // Optimistic: the tick (and the status it moves the lead to) is written to
+  // the cached lead as if the server had already saved it, so the dot, the
+  // bar, the status and the timeline change on click. A failure restores the
+  // snapshot; either way the lead is then refetched.
   const saveTick = useMutation(
-    trpc.sales.logActivity.mutationOptions({
+    trpc.sales.setYes.mutationOptions({
       onMutate: async (input) => {
         await queryClient.cancelQueries({ queryKey: leadKey });
         const previous = queryClient.getQueryData(leadKey);
@@ -121,21 +132,37 @@ export function YesPath({
           if (!data) return data;
           const now = new Date();
           const tick: (typeof data.activities)[number] = {
-            id: `optimistic-${now.getTime()}-${input.outcome}`,
+            id: `optimistic-${now.getTime()}-${input.step}`,
             leadId,
             type: YES_ACTIVITY_TYPE,
             channel: null,
             occurredAt: now,
-            outcome: input.outcome ?? null,
+            outcome: yesOutcome(input.step, input.answer),
             notes: null,
             nextActionAt: null,
             nextActionDoneAt: null,
             createdBy: "",
             createdAt: now,
           };
-          return { ...data, activities: [tick, ...data.activities] };
+          const movedTo = expectedStatus(input, data.lead.pipelineStatus);
+          return {
+            ...data,
+            lead: movedTo
+              ? { ...data.lead, pipelineStatus: movedTo }
+              : data.lead,
+            activities: [tick, ...data.activities],
+          };
         });
         return { previous };
+      },
+      onSuccess: ({ movedTo }) => {
+        if (movedTo) {
+          toast.success(
+            t("sales.yeses.statusMoved", {
+              status: t("sales.statuses", { status: movedTo }),
+            }),
+          );
+        }
       },
       onError: (_error, _input, context) => {
         if (context?.previous) {
@@ -147,7 +174,7 @@ export function YesPath({
       // earlier one would briefly undo the later ticks still optimistic.
       onSettled: () => {
         const inFlight = queryClient.isMutating({
-          mutationKey: trpc.sales.logActivity.mutationKey(),
+          mutationKey: trpc.sales.setYes.mutationKey(),
         });
         if (inFlight <= 1) return queryClient.invalidateQueries();
       },
@@ -155,13 +182,61 @@ export function YesPath({
   );
 
   function setAnswer(step: YesStep, answer: YesAnswer) {
-    saveTick.mutate({
-      leadId,
-      type: YES_ACTIVITY_TYPE,
-      outcome: yesOutcome(step, answers[step] === answer ? null : answer),
-    });
+    const next = answers[step] === answer ? null : answer;
+    const effect = statusEffectForTick(step, next, status);
+    if (effect.kind === "bookDemo") return setDemoStep(step);
+    if (effect.kind === "offerLost") return setNoStep(step);
+    saveTick.mutate({ leadId, step, answer: next });
   }
 
+  return (
+    <>
+      <YesSteps answers={answers} onAnswer={setAnswer} />
+      <DemoTimeDialog
+        key={demoStep ?? "closed"}
+        open={demoStep !== null}
+        onOpenChange={(open) => !open && setDemoStep(null)}
+        onConfirm={(demoAt) => {
+          if (demoStep) {
+            saveTick.mutate({ leadId, step: demoStep, answer: "yes", demoAt });
+          }
+          setDemoStep(null);
+        }}
+      />
+      <NoAnswerDialog
+        step={noStep}
+        onOpenChange={(open) => !open && setNoStep(null)}
+        onConfirm={(closeLead) => {
+          if (noStep) {
+            saveTick.mutate({ leadId, step: noStep, answer: "no", closeLead });
+          }
+          setNoStep(null);
+        }}
+      />
+    </>
+  );
+}
+
+/** The status a tick will move the lead to, for the optimistic update. */
+function expectedStatus(
+  input: { step: YesStep; answer: YesAnswer | null; closeLead?: boolean },
+  status: LeadPipelineStatus,
+): LeadPipelineStatus | null {
+  const effect = statusEffectForTick(input.step, input.answer, status);
+  if (effect.kind === "bookDemo") return "demo_scheduled";
+  if (effect.kind === "advance") return effect.to;
+  if (effect.kind === "offerLost" && input.closeLead) return "lost";
+  return null;
+}
+
+function YesSteps({
+  answers,
+  onAnswer,
+}: {
+  answers: YesAnswers;
+  onAnswer: (step: YesStep, answer: YesAnswer) => void;
+}) {
+  const { t } = useTranslation();
   return (
     <ol
       data-testid="yes-path"
@@ -204,13 +279,13 @@ export function YesPath({
                   kind="yes"
                   isOn={answer === "yes"}
                   label={t("sales.yeses.markYes")}
-                  onClick={() => setAnswer(step, "yes")}
+                  onClick={() => onAnswer(step, "yes")}
                 />
                 <ToggleMark
                   kind="no"
                   isOn={answer === "no"}
                   label={t("sales.yeses.markNo")}
-                  onClick={() => setAnswer(step, "no")}
+                  onClick={() => onAnswer(step, "no")}
                 />
               </ButtonGroup>
             </div>

@@ -511,6 +511,18 @@ export default {
       timelineYes: dt("Ticked yes: {step}", {}),
       timelineNo: dt("Ticked no: {step}", {}),
       timelineClear: dt("Cleared: {step}", {}),
+      statusMoved: dt("Status moved to {status}.", {}),
+      demoDialogTitle: "When is the demo?",
+      demoDialogDesc:
+        "Ticking this books the demo: the lead moves to Demo scheduled and its Meetings room is set up.",
+      demoDialogLabel: "Demo date and time",
+      demoDialogHint: "Pick a time in the future.",
+      demoDialogConfirm: "Book the demo",
+      noDialogTitle: dt("She said no: {step}", {}),
+      noDialogDesc:
+        "The no is recorded either way. Mark the lead lost only if this ends it; a no now can still turn into a yes later.",
+      noDialogKeep: "Just record the no",
+      noDialogLost: "Mark lead lost",
       markYes: "Yes",
       markNo: "No",
       saved: "Saved.",

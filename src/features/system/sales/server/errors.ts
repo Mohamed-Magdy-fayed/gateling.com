@@ -6,11 +6,15 @@ import { TRPCError } from "@trpc/server";
  * client (the admin UI or an agent) can tell "not found" from "not allowed"
  * without parsing a message.
  */
-export type SalesErrorCode = "SALES_LEAD_NOT_PROSPECT" | "SALES_DO_NOT_CONTACT";
+export type SalesErrorCode =
+  | "SALES_LEAD_NOT_PROSPECT"
+  | "SALES_DO_NOT_CONTACT"
+  | "SALES_DEMO_TIME_REQUIRED";
 
 const TRPC_CODE: Record<SalesErrorCode, TRPCError["code"]> = {
   SALES_LEAD_NOT_PROSPECT: "NOT_FOUND",
   SALES_DO_NOT_CONTACT: "PRECONDITION_FAILED",
+  SALES_DEMO_TIME_REQUIRED: "BAD_REQUEST",
 };
 
 export class SalesError extends Error {

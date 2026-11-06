@@ -11,6 +11,7 @@ import {
 import { BULK_ACTION_LIMIT } from "@/features/core/data-table/lib/limits";
 import { isPlatformUrl } from "@/features/system/sales/lib/social-profiles";
 import type { TodayBuckets } from "@/features/system/sales/lib/today-rules";
+import { YES_STEPS } from "@/features/system/sales/lib/yeses";
 
 /**
  * Typed inputs for every sales operation, defined once and shared by the tRPC
@@ -101,6 +102,21 @@ export const logActivityInputSchema = logActivitySchema.refine(
   (val) => val.type !== "demo_scheduled" || val.nextActionAt != null,
   { message: "demo_time_required", path: ["nextActionAt"] },
 );
+
+/**
+ * Tick one of the owner's yeses (`lib/yeses.ts`); null clears it. The status
+ * rules (`lib/yes-status.ts`) may need `demoAt` (ticking "Demo booked" before
+ * a demo exists) or `closeLead` (the operator chose to mark the lead lost on a
+ * no). Both are ignored where the rule does not apply.
+ */
+export const setYesSchema = z.object({
+  leadId: z.string().uuid(),
+  step: z.enum(YES_STEPS),
+  answer: z.enum(["yes", "no"]).nullable(),
+  demoAt: z.date().optional(),
+  closeLead: z.boolean().optional(),
+});
+export type SetYesInput = z.infer<typeof setYesSchema>;
 
 /**
  * The shared data-table grid shape (same as the users table): column ids in
