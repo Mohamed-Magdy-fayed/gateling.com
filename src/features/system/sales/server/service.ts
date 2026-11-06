@@ -28,11 +28,13 @@ import {
   DEFAULT_TODAY_RULES_CONFIG,
   type TodayLeadInput,
 } from "@/features/system/sales/lib/today-rules";
+import { statusEffectForTick } from "@/features/system/sales/lib/yes-status";
 import {
   YES_ACTIVITY_TYPE,
   YES_OUTCOME_LIKE,
   type YesAnswers,
   yesAnswersFromActivities,
+  yesOutcome,
 } from "@/features/system/sales/lib/yeses";
 
 import { SalesError } from "./errors";
@@ -46,6 +48,7 @@ import type {
   PipelineFilterInput,
   SetMapsListingInput,
   SetSocialProfileInput,
+  SetYesInput,
   TodayWorkSummary,
   UpdateLeadInput,
 } from "./schemas";
@@ -189,6 +192,97 @@ export async function parkLeadInTx(
     actorId,
   );
 }
+
+export type SetYesResult = {
+  /** The status the lead moved to, or null when the tick changed none. */
+  movedTo: LeadPipelineStatus | null;
+  /** Set when a demo was booked, so the router can provision its room. */
+  demo: { activityId: string; at: Date } | null;
+};
+
+/**
+ * Tick one of the owner's yeses and apply its status rule
+ * (`lib/yes-status.ts`) in the same transaction, so the checklist and the
+ * pipeline status never disagree. The status change is a normal activity row
+ * (`demo_scheduled`, `demo_done` or `status_change`), like any other log.
+ */
+export async function setYes(
+  db: Db,
+  input: SetYesInput,
+  actorId: string,
+): Promise<SetYesResult> {
+  return db.transaction(async (tx) => {
+    const [lead] = await tx
+      .select({ status: LeadsTable.pipelineStatus })
+      .from(LeadsTable)
+      .where(and(eq(LeadsTable.id, input.leadId), prospectScope))
+      .for("update");
+    if (!lead) throw new SalesError("SALES_LEAD_NOT_PROSPECT", input.leadId);
+
+    const effect = statusEffectForTick(input.step, input.answer, lead.status);
+    if (effect.kind === "bookDemo" && !input.demoAt) {
+      throw new SalesError("SALES_DEMO_TIME_REQUIRED", input.leadId);
+    }
+
+    await logActivityInTx(
+      tx,
+      {
+        leadId: input.leadId,
+        type: YES_ACTIVITY_TYPE,
+        outcome: yesOutcome(input.step, input.answer),
+      },
+      actorId,
+    );
+
+    if (effect.kind === "bookDemo" && input.demoAt) {
+      const { activityId } = await logActivityInTx(
+        tx,
+        {
+          leadId: input.leadId,
+          type: "demo_scheduled",
+          outcome: YES_STATUS_OUTCOME,
+          nextActionAt: input.demoAt,
+          pipelineStatus: "demo_scheduled",
+        },
+        actorId,
+      );
+      return {
+        movedTo: "demo_scheduled",
+        demo: { activityId, at: input.demoAt },
+      };
+    }
+    if (effect.kind === "advance") {
+      await logActivityInTx(
+        tx,
+        {
+          leadId: input.leadId,
+          type: effect.to === "demo_done" ? "demo_done" : "status_change",
+          outcome: YES_STATUS_OUTCOME,
+          pipelineStatus: effect.to,
+        },
+        actorId,
+      );
+      return { movedTo: effect.to, demo: null };
+    }
+    if (effect.kind === "offerLost" && input.closeLead) {
+      await logActivityInTx(
+        tx,
+        {
+          leadId: input.leadId,
+          type: "status_change",
+          outcome: `Said no: ${input.step}`,
+          pipelineStatus: "lost",
+        },
+        actorId,
+      );
+      return { movedTo: "lost", demo: null };
+    }
+    return { movedTo: null, demo: null };
+  });
+}
+
+/** Outcome text on the status row a yes tick writes. */
+const YES_STATUS_OUTCOME = "Moved by a yes tick";
 
 export async function createLead(
   db: Db,

@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LoadingSwap } from "@/components/ui/loading-swap";
+import type { LeadPipelineStatus } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import {
   type FunnelPosition,
@@ -56,10 +57,12 @@ function useFunnelCopy(position: FunnelPosition) {
  */
 export function LeadProgressCard({
   leadId,
+  status,
   position,
   yesAnswers,
 }: {
   leadId: string;
+  status: LeadPipelineStatus;
   position: FunnelPosition;
   yesAnswers: YesAnswers;
 }) {
@@ -96,7 +99,7 @@ export function LeadProgressCard({
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <YesPath leadId={leadId} answers={yesAnswers} />
+          <YesPath leadId={leadId} status={status} answers={yesAnswers} />
           <p className="text-muted-foreground text-xs lg:text-center">
             {t("sales.yeses.hint")}
           </p>

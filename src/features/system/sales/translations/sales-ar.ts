@@ -521,6 +521,18 @@ export default {
       timelineYes: dt("وافقت: {step}", {}),
       timelineNo: dt("رفضت: {step}", {}),
       timelineClear: dt("اتمسحت: {step}", {}),
+      statusMoved: dt("الحالة اتغيرت لـ {status}.", {}),
+      demoDialogTitle: "الديمو إمتى؟",
+      demoDialogDesc:
+        "العلامة دي بتحجز الديمو: العميل هيتنقل لـ «ديمو محجوز» وأوضة الاجتماع هتتجهز.",
+      demoDialogLabel: "تاريخ ووقت الديمو",
+      demoDialogHint: "اختار وقت جاي، مش فات.",
+      demoDialogConfirm: "احجز الديمو",
+      noDialogTitle: dt("رفضت: {step}", {}),
+      noDialogDesc:
+        "الرفض هيتسجل في الحالتين. اقفل العميل كـ «خسرناه» بس لو ده آخر الكلام؛ الرفض النهارده ممكن يبقى موافقة بعدين.",
+      noDialogKeep: "سجّل الرفض بس",
+      noDialogLost: "اقفله كـ «خسرناه»",
       markYes: "موافقة",
       markNo: "رفض",
       saved: "اتحفظ.",

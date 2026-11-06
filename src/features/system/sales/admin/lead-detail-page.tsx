@@ -133,6 +133,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
 
       <LeadProgressCard
         leadId={lead.id}
+        status={lead.pipelineStatus}
         position={funnelPosition}
         yesAnswers={yesAnswersFromActivities(activities)}
       />
