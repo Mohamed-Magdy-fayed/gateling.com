@@ -191,8 +191,18 @@ export const templateInputSchema = z.object({
   active: z.boolean().default(true),
 });
 
-export const updateTemplateSchema = templateInputSchema.partial().extend({
+/**
+ * Written out, not `templateInputSchema.partial()`: Zod 4 still applies a
+ * `.default()` inside `.partial()`, so an update sending only `body` would
+ * silently reset `step` to "problem" and `active` to true.
+ */
+export const updateTemplateSchema = z.object({
   id: z.uuid(),
+  studyId: z.uuid().nullable().optional(),
+  step: z.enum(discoveryStepValues).optional(),
+  title: z.string().trim().min(1).max(255).optional(),
+  body: z.string().trim().min(1).max(8000).optional(),
+  active: z.boolean().optional(),
 });
 
 export const listTemplatesSchema = z.object({
