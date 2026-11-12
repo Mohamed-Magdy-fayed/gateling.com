@@ -36,6 +36,17 @@ describe("discovery schemas", () => {
     ).toBe(true);
   });
 
+  // Zod 4 applies `.default()` even inside `.partial()`, so a partial update
+  // must not inherit the create schema's defaults: sending only `body` would
+  // otherwise reset `step` to "problem" and `active` to true.
+  it("a partial template update carries only the fields sent", () => {
+    const id = "00000000-0000-4000-8000-000000000001";
+    expect(schemas.updateTemplateSchema.parse({ id, body: "x" })).toEqual({
+      id,
+      body: "x",
+    });
+  });
+
   it("refuses non-http links", () => {
     expect(
       schemas.logTouchpointSchema.safeParse({
