@@ -7,6 +7,7 @@ import solutionsIndexEn from "@/app/(landing-pages)/solutions/_translations/solu
 import deliverySolutionsEn from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-en";
 import workEn from "@/app/(landing-pages)/work/_translations/work-en";
 import authEn from "@/features/core/auth/translations/auth-en";
+import discoveryEn from "@/features/system/discovery/translations/discovery-en";
 import salesEn from "@/features/system/sales/translations/sales-en";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -540,6 +541,7 @@ export default {
     navSales: "Sales",
     navSalesToday: "Today's Work",
     navSalesLeads: "Pipeline",
+    navDiscovery: "Discovery",
     navBookings: "Bookings",
     navSubscribers: "Subscribers",
     navUsers: "Users",
@@ -555,6 +557,7 @@ export default {
     breadcrumbSales: "Sales",
     breadcrumbSalesToday: "Today's Work",
     breadcrumbSalesLeads: "Pipeline",
+    breadcrumbDiscovery: "Discovery",
     breadcrumbBookings: "Bookings",
     breadcrumbSubscribers: "Subscribers",
     breadcrumbUsers: "Users",
@@ -716,6 +719,9 @@ export default {
     apiKeysScopeSales: "Sales",
     apiKeysScopeSalesHint:
       "Read prospects, including names and phone numbers, and log call outcomes. That data is sent to whichever AI service runs the agent: grant only to an agent you trust with customer data.",
+    apiKeysScopeDiscovery: "Discovery",
+    apiKeysScopeDiscoveryHint:
+      "The discovery log: studies, contacts and what they said. Grant only to an agent that logs conversations for you.",
     apiKeysScopeRequired: "Choose at least one kind of access.",
     apiKeysName: "Name",
     apiKeysPrefix: "Key",
@@ -1287,5 +1293,6 @@ export default {
   }),
   ...authEn,
   ...aboutEn,
+  ...discoveryEn,
   ...salesEn,
 } as const satisfies LanguageMessages;

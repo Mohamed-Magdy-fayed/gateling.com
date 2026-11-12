@@ -3,6 +3,7 @@ import {
   Briefcase,
   Building2,
   CalendarClock,
+  Compass,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -28,6 +29,7 @@ type NavTranslationKey =
   | "navSales"
   | "navSalesToday"
   | "navSalesLeads"
+  | "navDiscovery"
   | "navBookings"
   | "navSubscribers"
   | "navUsers"
@@ -46,6 +48,7 @@ type BreadcrumbTranslationKey =
   | "breadcrumbSales"
   | "breadcrumbSalesToday"
   | "breadcrumbSalesLeads"
+  | "breadcrumbDiscovery"
   | "breadcrumbBookings"
   | "breadcrumbSubscribers"
   | "breadcrumbUsers"
@@ -156,6 +159,16 @@ export const SYSTEM_SCREEN_DEFINITIONS: SystemScreenRecord[] = [
         breadcrumbTranslationKey: "breadcrumbSalesLeads",
       },
     ],
+  },
+  {
+    // Problem-first validation (docs/designs/discovery-module.md). Separate from
+    // Sales on purpose; registering the prefix is what makes proxy.ts guard it.
+    key: "discovery",
+    href: "/discovery",
+    pathPrefixes: ["/discovery"],
+    Icon: Compass,
+    navTranslationKey: "navDiscovery",
+    breadcrumbTranslationKey: "breadcrumbDiscovery",
   },
   {
     key: "bookings",

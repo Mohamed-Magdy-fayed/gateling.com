@@ -3,6 +3,7 @@ import { z } from "zod";
 import { LOCALE_COOKIE_NAME } from "@/features/core/i18n/lib";
 import { apiKeysRouter } from "@/features/system/api-keys/server/router";
 import { dashboardRouter } from "@/features/system/dashboard/server";
+import { discoveryRouter } from "@/features/system/discovery/server/router";
 import { salesRouter } from "@/features/system/sales/server/router";
 import { assertAdminRole } from "@/features/system/shared/staff-access";
 import {
@@ -76,6 +77,7 @@ export const appRouter = createTRPCRouter({
   clientFeedback: clientFeedbackRouter,
   caseStudies: caseStudiesRouter,
   dashboard: dashboardRouter,
+  discovery: discoveryRouter,
   leads: leadsRouter,
   sales: salesRouter,
   servicesMgmt: servicesMgmtRouter,
