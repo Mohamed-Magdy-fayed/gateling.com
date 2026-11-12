@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
   // The content MCP server serves its guide from docs/ at runtime.
   outputFileTracingIncludes: {
     "/api/mcp": ["./docs/content-mcp.md"],
+    "/api/mcp/discovery": ["./docs/discovery-mcp.md"],
   },
   images: {
     remotePatterns: [

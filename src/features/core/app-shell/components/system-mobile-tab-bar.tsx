@@ -3,7 +3,7 @@
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { LinkButton } from "@/components/general/link-button";
 import {
@@ -23,7 +23,10 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { User } from "@/drizzle/schema";
-import { SYSTEM_MOBILE_PRIMARY_SCREEN_KEYS } from "@/features/core/app-shell/lib/mobile-nav";
+import {
+  flattenToPages,
+  SYSTEM_MOBILE_PRIMARY_SCREEN_KEYS,
+} from "@/features/core/app-shell/lib/mobile-nav";
 import { SYSTEM_NAV_ITEMS } from "@/features/core/app-shell/lib/nav";
 import { hasPermission } from "@/features/core/auth/core/permissions";
 import { AuthManagerSheetPanel } from "@/features/core/auth/nextjs/components/auth-manager/auth-manager-sheet-panel";
@@ -42,13 +45,24 @@ export function SystemMobileTabBar({ user }: { user: User }) {
   const pathname = usePathname() ?? "/";
   const { t } = useTranslation();
 
+  // Real pages, not section parents: "Content" or "Sales" alone only ever
+  // opened one child, which is why the bar and More sheet missed pages.
   const visibleNav = useMemo(
     () =>
-      SYSTEM_NAV_ITEMS.filter((item) =>
-        hasPermission(user, "screens", "view", { screenKey: item.screenKey }),
+      flattenToPages(SYSTEM_NAV_ITEMS, (screenKey) =>
+        hasPermission(user, "screens", "view", { screenKey }),
       ),
     [user],
   );
+
+  // Both sheets close when a link inside them navigates.
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger: close on navigation
+  useEffect(() => {
+    setAccountOpen(false);
+    setMoreOpen(false);
+  }, [pathname]);
 
   const primaryNav = useMemo(
     () =>
@@ -81,7 +95,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
       columnCount={tabColumnCount}
     >
       {/* Column 1: Profile / Account */}
-      <Sheet>
+      <Sheet open={accountOpen} onOpenChange={setAccountOpen}>
         <SheetTrigger
           render={
             <button
@@ -111,7 +125,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
         </SheetContent>
       </Sheet>
 
-      {/* Columns 2–(n+1): Primary nav — Leads | Dashboard | Work */}
+      {/* Columns 2–(n+1): Primary nav — Dashboard | Today | Discovery */}
       {primaryNav.map(({ href, translationKey, Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
@@ -126,7 +140,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
       })}
 
       {/* Last column: More */}
-      <Sheet>
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetTrigger
           render={
             <button
@@ -156,6 +170,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
                 className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium hover:bg-muted"
                 href={href}
                 key={href}
+                onClick={() => setMoreOpen(false)}
               >
                 <Icon
                   className="size-5 shrink-0 text-muted-foreground"
@@ -186,6 +201,7 @@ export function SystemMobileTabBar({ user }: { user: User }) {
               className="w-full justify-center"
               href="/"
               variant="outline"
+              onClick={() => setMoreOpen(false)}
             >
               {t("landing.tabHome")}
             </LinkButton>
