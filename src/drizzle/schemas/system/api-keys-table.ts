@@ -15,7 +15,8 @@ import { createdAt, createdBy, id } from "@/drizzle/schemas/helpers";
  * numbers, so it is granted per key, never implied: keys created before
  * scopes existed keep `content` only.
  */
-export const apiKeyScopeValues = ["content", "sales"] as const;
+/** `discovery` reaches what people said in interviews: granted per key too. */
+export const apiKeyScopeValues = ["content", "sales", "discovery"] as const;
 export type ApiKeyScope = (typeof apiKeyScopeValues)[number];
 
 /**

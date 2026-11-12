@@ -7,6 +7,7 @@ import solutionsIndexAr from "@/app/(landing-pages)/solutions/_translations/solu
 import deliverySolutionsAr from "@/app/(landing-pages)/solutions/delivery/_translations/delivery-ar";
 import workAr from "@/app/(landing-pages)/work/_translations/work-ar";
 import authAr from "@/features/core/auth/translations/auth-ar";
+import discoveryAr from "@/features/system/discovery/translations/discovery-ar";
 import salesAr from "@/features/system/sales/translations/sales-ar";
 import { dt, type LanguageMessages } from "../lib";
 
@@ -526,6 +527,7 @@ export default {
     navSales: "المبيعات",
     navSalesToday: "عمل اليوم",
     navSalesLeads: "خط المبيعات",
+    navDiscovery: "الاستكشاف",
     navBookings: "الحجوزات",
     navSubscribers: "المشتركون",
     navUsers: "المستخدمون",
@@ -541,6 +543,7 @@ export default {
     breadcrumbSales: "المبيعات",
     breadcrumbSalesToday: "عمل اليوم",
     breadcrumbSalesLeads: "خط المبيعات",
+    breadcrumbDiscovery: "الاستكشاف",
     breadcrumbBookings: "الحجوزات",
     breadcrumbSubscribers: "المشتركون",
     breadcrumbUsers: "المستخدمون",
@@ -699,6 +702,9 @@ export default {
     apiKeysScopeSales: "المبيعات",
     apiKeysScopeSalesHint:
       "قراءة العملاء المحتملين، بما في ذلك الأسماء وأرقام الهواتف، وتسجيل نتائج المكالمات. تُرسل هذه البيانات إلى خدمة الذكاء الاصطناعي التي يعمل عليها الوكيل: امنحها فقط لوكيل تثق به في بيانات العملاء.",
+    apiKeysScopeDiscovery: "الاستكشاف",
+    apiKeysScopeDiscoveryHint:
+      "سجل الاستكشاف: الدراسات وجهات الاتصال وكلامهم. اديه بس لوكيل بيسجل المحادثات بالنيابة عنك.",
     apiKeysScopeRequired: "اختر نوع صلاحية واحدًا على الأقل.",
     apiKeysName: "الاسم",
     apiKeysPrefix: "المفتاح",
@@ -1254,5 +1260,6 @@ export default {
   }),
   ...authAr,
   ...aboutAr,
+  ...discoveryAr,
   ...salesAr,
 } as const satisfies LanguageMessages;

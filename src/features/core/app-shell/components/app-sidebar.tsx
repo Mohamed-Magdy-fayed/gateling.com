@@ -2,7 +2,7 @@
 
 import { ChevronsUpDownIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import type { User } from "@/drizzle/schema";
 import { useNavRender } from "@/features/core/app-shell/hooks/useNavRender";
@@ -45,6 +46,14 @@ function userInitials(user: User): string {
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname() ?? "/";
   const { dir } = useTranslation();
+
+  // On a phone the sidebar is an overlay sheet: tapping a link must close it,
+  // so close it whenever the route changes (covers every link inside it).
+  const { isMobile, setOpenMobile } = useSidebar();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger: close on navigation
+  useEffect(() => {
+    if (isMobile) setOpenMobile(false);
+  }, [pathname, isMobile, setOpenMobile]);
 
   const visibleNav = useMemo(
     () =>
