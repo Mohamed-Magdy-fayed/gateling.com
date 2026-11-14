@@ -42,13 +42,37 @@ runs the same day; compare at the 22:15 wrap-up.
 
 ## Status (2026-11-14)
 
-- Conversations: 2 real (Asma Sleem via Instagram, Madame Minna of La Perla by phone).
-  The readout shows 3 until the Sama staff call is removed. Stories 0, commitments 0.
-- Waiting on call-backs (Jarvis reminders): Mona's (Sun 2:00), Satsha (Sun 2:15),
-  La Perla / Madame Minna (Mon 1:30: she's moving the atelier and reopening differently, a strong
-  discovery opening), Kelly / manager Reham (Mon 2:00, needs owner approval).
+Updated Sat 14 Nov, evening.
+
+- **Conversations: 2 real** (Asma Sleem via Instagram; Madame Minna, La Perla owner, by phone).
+  The readout shows 3 until Mohamed removes the Sama staff call in the app. Stories 0, commitments 0.
+- **Day 1 calls (1–5 PM):** 11 shops. 1 owner reached (La Perla). Staff answered at Sama, Mona's,
+  Satsha, Kelly (manager Reham) and Styliiiiish; none would give the owner's number. No answer:
+  Dressy (both branches), Golden (phone off), Joe Bride (silent pickup).
+- **Waiting on** (each has a one-time Jarvis reminder):
+
+  | Shop | What we're waiting for | Follow-up |
+  |---|---|---|
+  | Atelier Sama (Faisal) | Owner to reply to the WhatsApp sent to 01149444780 | Check replies at the 22:15 wrap-up |
+  | Dressy (Abbas El-Akkad) | Reply to the WhatsApp sent to 01038278448 | Alf Maskan branch call at 15:05 |
+  | Styliiiiish | Staff said owners are reached only via Instagram; DM @styliiish.egypt | Log the DM once sent |
+  | Mona's dresses | Staff passing Mohamed's number to the owner | Sun 15 Nov 2:00 PM call |
+  | Satsha | Staff took a message for the owner | Sun 15 Nov 2:15 PM call |
+  | La Perla, Madame Minna (owner) | She said she'd call back; she's moving the atelier and reopening differently | Mon 16 Nov 1:30 PM call |
+  | Kelly, manager Reham | Asking the owner for permission; will WhatsApp | Mon 16 Nov 2:00 PM call |
+
+- **Tonight 8–10 PM:** evening call batches (Victoria Celeste, Twig, Moller, Princess, Amour, La Novia,
+  White House, Golden, Joe Bride, Chantelle, Valeria, Miss Reem, Fasateen), then the 22:15 wrap-up,
+  which compares afternoon and evening reach rates.
+- **Learned on day 1:** saying "soiree" made a wedding shop answer "we're different". Managers
+  press for the real reason (answer it honestly, see the script). Big brands need owner approval.
 - Rental evidence for every lead on the list is noted on its sales lead (checked in Chrome).
   Glamour Bridal and The Wedding Shop show no renting, so they're deprioritised.
+
+## Tooling notes
+
+- Jarvis reminders are **one-time** (`on_date`) unless Mohamed asks for a repeat (megz-assistant PR #1, 14 Nov).
+- Wrong Discovery rows: remove them in the study page or with MCP `remove_touchpoint` (gateling.com #62/#63).
 
 ## Deferred (not now)
 
