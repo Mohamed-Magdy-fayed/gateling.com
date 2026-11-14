@@ -56,6 +56,7 @@ research. Otherwise do the work yourself with the relevant standard loaded.
 
 - Load a `standards/` file only when the task touches its domain.
 - Load `docs/` project-memory files listed in `docs/STATE.md` — start there, not with a full read.
+- **Current focus (Nov 2026): the business discovery sprint.** For any sales, discovery, outreach, call or Jarvis request, read `docs/STATE.md` then `docs/discovery-sprint.md` before acting. Claude runs this sprint as manager and keeps that doc current.
 - Never paste file contents into documentation; reference paths.
 - One source of truth: if two documents could disagree, one of them is wrong — fix the structure.
 
