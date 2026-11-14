@@ -12,6 +12,8 @@ export type ReplyStatInput = {
   channel: DiscoveryChannel;
   occurredAt: Date;
   repliedAt: Date | null;
+  /** Removed rows were logged by mistake and are skipped. */
+  removedAt?: Date | null;
 };
 
 export type ReplyStat = {
@@ -41,7 +43,7 @@ export function replyStatsBy(
 ): ReplyStat[] {
   const groups = new Map<string, ReplyStatInput[]>();
   for (const row of rows) {
-    if (row.direction !== "outbound") continue;
+    if (row.direction !== "outbound" || row.removedAt != null) continue;
     const key = keyOf(row);
     if (key === null) continue;
     groups.set(key, [...(groups.get(key) ?? []), row]);

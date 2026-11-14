@@ -246,8 +246,23 @@ export default {
     noReply: "لسه مردّوش",
     inStudy: dt("في: {study}", {}),
     openLink: "افتح اللينك",
-    deleteTouchpoint: "احذف التواصل",
-    deleteTouchpointConfirm: "تحذف التواصل ده؟ الأدلة اللي اتعلّمت منه هتفضل.",
+    removeTouchpoint: "شيل",
+    removeTouchpointLabel: dt("شيل التواصل ده مع {contact}", {}),
+    removeTouchpointTitle: "تشيل التواصل ده؟",
+    removeTouchpointDesc:
+      "استخدمها لتواصل اتسجّل بالغلط، زي مكالمة محدش رد فيها أو رد عليها موظف بس. مش هيتحسب في النتيجة ولا في نسب الرد. الأدلة اللي اتعلّمت منه هتفضل؛ امسحها لوحدها لو جت من نفس الغلطة.",
+    removeReason: "بتشيله ليه؟",
+    removeReasonHint:
+      "السبب بيتحفظ مع التواصل، علشان نعرف بعدين النتيجة اتغيرت ليه.",
+    removeReasonPlaceholder: "رد موظف مش صاحبة المحل",
+    removeReasonRequired: "اكتب سبب قصير (٣ حروف على الأقل).",
+    removeReasonTooLong: "خلّي السبب أقل من ٥٠٠ حرف.",
+    removeConfirm: "شيل التواصل",
+    touchpointRemoved: "اتشال التواصل واتحسبت النتيجة من جديد.",
+    touchpointRemovedKeptEvidence: dt(
+      "اتشال التواصل. لسه فيه {count} دليل منه بيتحسب.",
+      {},
+    ),
 
     // ─── الرسائل الجاهزة ───────────────────────────────────────────────────
     templatesTitle: "رسائل التواصل الجاهزة",

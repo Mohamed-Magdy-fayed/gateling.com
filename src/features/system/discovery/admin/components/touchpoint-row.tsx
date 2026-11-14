@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon, ExternalLinkIcon, TagIcon } from "lucide-react";
+import { CheckIcon, ExternalLinkIcon, TagIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 
 import { CHANNEL_KEY, durationParts, FORMAT_KEY, PERSONA_KEY } from "../labels";
+import { RemoveTouchpointDialog } from "./remove-touchpoint-dialog";
 
 export type TouchpointView = {
   id: string;
@@ -36,7 +38,10 @@ export type TouchpointView = {
   studyTitle?: string;
 };
 
-/** One message or call, with the one-tap "they replied" and "tag evidence". */
+/**
+ * One message or call, with the one-tap "they replied" and "tag evidence",
+ * and "remove" for a row logged by mistake.
+ */
 export function TouchpointRow({
   touchpoint: tp,
   showContact = true,
@@ -54,6 +59,7 @@ export function TouchpointRow({
     timeStyle: "short",
   });
   const number = new Intl.NumberFormat(locale);
+  const [removing, setRemoving] = useState(false);
 
   const replied = useMutation(
     trpc.discovery.markReplied.mutationOptions({
@@ -180,7 +186,24 @@ export function TouchpointRow({
             {t("discovery.openLink")}
           </Button>
         )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-destructive ms-auto min-h-11 sm:min-h-6"
+          aria-label={t("discovery.removeTouchpointLabel", {
+            contact: tp.contactName,
+          })}
+          onClick={() => setRemoving(true)}
+        >
+          <Trash2Icon aria-hidden="true" />
+          {t("discovery.removeTouchpoint")}
+        </Button>
       </div>
+      <RemoveTouchpointDialog
+        touchpointId={tp.id}
+        open={removing}
+        onOpenChange={setRemoving}
+      />
     </article>
   );
 }

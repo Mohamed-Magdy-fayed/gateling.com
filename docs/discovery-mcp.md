@@ -17,7 +17,8 @@ A study's `step` moves only by the operator's decision. The readout suggests a s
 
 ## What counts
 
-- **Conversation**: a contact with a two-way exchange. That means an outbound message with a reply, an inbound message, a call, or a meeting.
+- **Conversation**: a contact with a two-way exchange. That means an outbound message with a reply, an inbound message, a call, or a meeting. **Every `call` or `meeting` touchpoint counts**, so log one only after a real two-way talk with the person the study targets (the owner or decision-maker). A no-answer, a voicemail, or a call where only staff or a gatekeeper answered is **not** a call to log: note it on the contact (`update_contact` → `notes`) instead.
+- **Removed** touchpoints (see `remove_touchpoint`) count for nothing: not as a conversation, not in reply rates, not in lists.
 - **Story**: a contact with at least one `incident` evidence (a specific, recent event).
 - **Commitment**: a contact with a **paid** deposit or pre-order, or who accepted the price. A promised deposit does not count until it is paid.
 
@@ -45,7 +46,7 @@ The quote is **their exact words**, usually Egyptian Arabic. Never translate, su
 
 1. `list_studies` to pick the study (ask if there is more than one active).
 2. `find_contact` with the profile URL or the name in the chat header. Create the contact only if nothing matches. Use `newContact` inside `log_touchpoint` or `create_contact`.
-3. `log_touchpoint`:
+3. `log_touchpoint` (for a phone call, only if the target person actually talked with you; see **What counts**):
    - `channel`: where the chat is (facebook, instagram, whatsapp, phone, in_person, group_forum, linkedin).
    - `persona`: `personal` if sent from Mohamed's own profile, `gateling` if sent from the brand Page or account.
    - `message`: what was sent.
@@ -64,5 +65,10 @@ Every outbound touchpoint records who it was sent as. `get_readout` → `replySt
 ## Safety
 
 - Never send a message. Draft it for the operator and log only what they report.
-- `update_study` (step or status), `set_hypothesis_verdict` and `set_commitment_status` are the operator's decisions. Confirm before calling them.
-- No delete tools here. Wrong rows are removed in the app.
+- `update_study` (step or status), `set_hypothesis_verdict`, `set_commitment_status` and `remove_touchpoint` are the operator's decisions. Confirm before calling them.
+- `remove_touchpoint` is for a row logged by mistake (a no-answer, a staff-only call, the wrong contact or study). Show the operator the row first (contact, format, date, message) and pass a short `reason`; the row is hidden, not erased, and the reason is kept. Afterwards:
+  - Removing an inbound row also clears the "replied" mark it put on the earlier outbound message (`unmarkedReplyIds`). If a later inbound message from the same contact exists, that one becomes the reply instead (`rematchedReplyIds`). Removing an outbound row does not move its reply onto an older message; use `mark_replied` if needed.
+  - Evidence tagged from that touchpoint is **kept** and listed in `linkedEvidence`; ask the operator whether it came from the same mistake (evidence is deleted in the app).
+  - If `contactStillInStudy` is false, the contact has no live touchpoint left in the study, but their evidence and commitments still count: tell the operator.
+  - Report the new readout from `get_readout`.
+- Nothing is hard-deleted through this server. Evidence and studies are deleted in the app.

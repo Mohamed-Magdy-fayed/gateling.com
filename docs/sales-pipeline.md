@@ -291,8 +291,10 @@ change is its own activity row (outcome "Moved by a yes tick").
 leads from their status and history (the evidence per step is in the file's
 header; lost leads get a no on the step after their furthest yes). Dated at
 the lead's last contact, created by `system:yes-backfill`, idempotent.
-Migrations are not run by the build: apply with `npm run db:migrate` against
-each environment.
+Migrations run on deploy: the Vercel project's build command is
+`npm run db:migrate && next build`, so a merged migration is applied to that
+environment's database before the build. Locally, run `npm run db:migrate`
+against the local container.
 
 Where it shows: the lead page's progress card (stage, the yes path, now → next),
 a 7-segment bar on every Today card and in the pipeline grid's "Her yeses"

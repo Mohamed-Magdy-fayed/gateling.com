@@ -6,6 +6,7 @@ import {
   asc,
   desc,
   eq,
+  gte,
   ilike,
   inArray,
   isNull,
@@ -32,7 +33,10 @@ import {
   handleForUrl,
   normalizeUrl,
 } from "@/features/system/discovery/lib/links";
-import { computeReadout } from "@/features/system/discovery/lib/readout";
+import {
+  computeReadout,
+  isLiveTouchpoint,
+} from "@/features/system/discovery/lib/readout";
 import { replyStats } from "@/features/system/discovery/lib/reply-stats";
 
 import type {
@@ -41,6 +45,7 @@ import type {
   LogCommitmentInput,
   LogTouchpointInput,
   NewContactInput,
+  RemoveTouchpointInput,
   TemplateInput,
   UpdateContactInput,
   UpdateStudyInput,
@@ -171,6 +176,8 @@ async function studyFacts(db: Db, studyIds: string[]) {
         templateId: DiscoveryTouchpointsTable.templateId,
         persona: DiscoveryTouchpointsTable.persona,
         channel: DiscoveryTouchpointsTable.channel,
+        // Kept in the facts so the pure readout and reply stats skip them.
+        removedAt: DiscoveryTouchpointsTable.removedAt,
       })
       .from(DiscoveryTouchpointsTable)
       .where(inArray(DiscoveryTouchpointsTable.studyId, studyIds)),
@@ -245,7 +252,9 @@ export async function listStudies(db: Db, includeArchived = false) {
   );
   return studies.map((study) => {
     const readout = readoutFor(study, facts);
-    const touchpoints = facts.touchpoints.filter((t) => t.studyId === study.id);
+    const touchpoints = facts.touchpoints.filter(
+      (t) => t.studyId === study.id && isLiveTouchpoint(t),
+    );
     return {
       ...study,
       touchpointCount: touchpoints.length,
@@ -341,6 +350,7 @@ export async function listTouchpoints(
     .where(
       and(
         eq(DiscoveryTouchpointsTable.studyId, studyId),
+        isNull(DiscoveryTouchpointsTable.removedAt),
         waitingOnly
           ? and(
               eq(DiscoveryTouchpointsTable.direction, "outbound"),
@@ -528,7 +538,12 @@ export async function getContact(db: Db, id: string) {
         DiscoveryStudiesTable,
         eq(DiscoveryStudiesTable.id, DiscoveryTouchpointsTable.studyId),
       )
-      .where(eq(DiscoveryTouchpointsTable.contactId, id))
+      .where(
+        and(
+          eq(DiscoveryTouchpointsTable.contactId, id),
+          isNull(DiscoveryTouchpointsTable.removedAt),
+        ),
+      )
       .orderBy(desc(DiscoveryTouchpointsTable.occurredAt)),
     db
       .select()
@@ -681,6 +696,7 @@ export async function logTouchpoint(
             eq(DiscoveryTouchpointsTable.studyId, input.studyId),
             eq(DiscoveryTouchpointsTable.direction, "outbound"),
             isNull(DiscoveryTouchpointsTable.repliedAt),
+            isNull(DiscoveryTouchpointsTable.removedAt),
           ),
         )
         .orderBy(desc(DiscoveryTouchpointsTable.occurredAt))
@@ -710,18 +726,159 @@ export async function markReplied(
       and(
         eq(DiscoveryTouchpointsTable.id, input.id),
         eq(DiscoveryTouchpointsTable.direction, "outbound"),
+        isNull(DiscoveryTouchpointsTable.removedAt),
       ),
     )
     .returning();
   return row ?? notFound("touchpoint");
 }
 
-export async function deleteTouchpoint(db: Db, id: string) {
-  const [row] = await db
-    .delete(DiscoveryTouchpointsTable)
-    .where(eq(DiscoveryTouchpointsTable.id, id))
-    .returning({ id: DiscoveryTouchpointsTable.id });
-  return row ?? notFound("touchpoint");
+/**
+ * Undoes the "replied" mark a removed inbound row put on an outbound one
+ * (same contact and study, `repliedAt` equal to the inbound's `occurredAt`,
+ * no captured reply text). If another live inbound row came after that
+ * outbound message, it becomes the reply instead, so a real later answer —
+ * or a second inbound logged at the same minute — is not lost.
+ */
+async function undoInboundReply(
+  tx: Tx,
+  inbound: { studyId: string; contactId: string; occurredAt: Date },
+) {
+  const sameThread = and(
+    eq(DiscoveryTouchpointsTable.studyId, inbound.studyId),
+    eq(DiscoveryTouchpointsTable.contactId, inbound.contactId),
+    isNull(DiscoveryTouchpointsTable.removedAt),
+  );
+  const cleared = await tx
+    .update(DiscoveryTouchpointsTable)
+    .set({ repliedAt: null })
+    .where(
+      and(
+        sameThread,
+        eq(DiscoveryTouchpointsTable.direction, "outbound"),
+        eq(DiscoveryTouchpointsTable.repliedAt, inbound.occurredAt),
+        isNull(DiscoveryTouchpointsTable.replyText),
+      ),
+    )
+    .returning({
+      id: DiscoveryTouchpointsTable.id,
+      occurredAt: DiscoveryTouchpointsTable.occurredAt,
+    });
+
+  const unmarkedReplyIds: string[] = [];
+  const rematchedReplyIds: string[] = [];
+  for (const outbound of cleared) {
+    const [next] = await tx
+      .select({ occurredAt: DiscoveryTouchpointsTable.occurredAt })
+      .from(DiscoveryTouchpointsTable)
+      .where(
+        and(
+          sameThread,
+          eq(DiscoveryTouchpointsTable.direction, "inbound"),
+          gte(DiscoveryTouchpointsTable.occurredAt, outbound.occurredAt),
+        ),
+      )
+      .orderBy(asc(DiscoveryTouchpointsTable.occurredAt))
+      .limit(1);
+    if (!next) {
+      unmarkedReplyIds.push(outbound.id);
+      continue;
+    }
+    await tx
+      .update(DiscoveryTouchpointsTable)
+      .set({ repliedAt: next.occurredAt })
+      .where(eq(DiscoveryTouchpointsTable.id, outbound.id));
+    rematchedReplyIds.push(outbound.id);
+  }
+  return { unmarkedReplyIds, rematchedReplyIds };
+}
+
+/**
+ * Soft-removes a touchpoint logged by mistake, with the reason, so it stops
+ * counting in the readout, reply stats and lists but stays auditable.
+ *
+ * - Evidence linked to it is kept (the quote may still be real) and returned,
+ *   so the operator can delete it separately if it came from the same mistake.
+ * - Removing an inbound row undoes the "replied" mark it set, moving it to a
+ *   later live inbound row when there is one (see `undoInboundReply`).
+ * - `contactStillInStudy` is false when this was the contact's last live
+ *   touchpoint in the study: their evidence and commitments still count, so
+ *   the operator should review those too.
+ */
+export async function removeTouchpoint(
+  db: Db,
+  input: RemoveTouchpointInput,
+  userId: string,
+) {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({
+        id: DiscoveryTouchpointsTable.id,
+        studyId: DiscoveryTouchpointsTable.studyId,
+        contactId: DiscoveryTouchpointsTable.contactId,
+        direction: DiscoveryTouchpointsTable.direction,
+        occurredAt: DiscoveryTouchpointsTable.occurredAt,
+        removedAt: DiscoveryTouchpointsTable.removedAt,
+      })
+      .from(DiscoveryTouchpointsTable)
+      .where(eq(DiscoveryTouchpointsTable.id, input.id))
+      .for("update");
+    if (!current) notFound("touchpoint");
+    if (current.removedAt) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "touchpoint_already_removed",
+      });
+    }
+
+    const [row] = await tx
+      .update(DiscoveryTouchpointsTable)
+      .set({
+        removedAt: new Date(),
+        removedBy: userId,
+        removedReason: input.reason,
+      })
+      .where(eq(DiscoveryTouchpointsTable.id, input.id))
+      .returning({
+        id: DiscoveryTouchpointsTable.id,
+        studyId: DiscoveryTouchpointsTable.studyId,
+        contactId: DiscoveryTouchpointsTable.contactId,
+        removedAt: DiscoveryTouchpointsTable.removedAt,
+        removedReason: DiscoveryTouchpointsTable.removedReason,
+      });
+    if (!row) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+    const replies =
+      current.direction === "inbound"
+        ? await undoInboundReply(tx, current)
+        : { unmarkedReplyIds: [], rematchedReplyIds: [] };
+
+    const linkedEvidence = await tx
+      .select({
+        id: DiscoveryEvidenceTable.id,
+        kind: DiscoveryEvidenceTable.kind,
+      })
+      .from(DiscoveryEvidenceTable)
+      .where(eq(DiscoveryEvidenceTable.touchpointId, input.id));
+    const [remaining] = await tx
+      .select({ id: DiscoveryTouchpointsTable.id })
+      .from(DiscoveryTouchpointsTable)
+      .where(
+        and(
+          eq(DiscoveryTouchpointsTable.studyId, current.studyId),
+          eq(DiscoveryTouchpointsTable.contactId, current.contactId),
+          isNull(DiscoveryTouchpointsTable.removedAt),
+        ),
+      )
+      .limit(1);
+
+    return {
+      ...row,
+      ...replies,
+      linkedEvidence,
+      contactStillInStudy: Boolean(remaining),
+    };
+  });
 }
 
 // ─── Evidence and commitments ──────────────────────────────────────────────
@@ -742,6 +899,7 @@ async function assertContactInStudy(
       and(
         eq(DiscoveryTouchpointsTable.studyId, input.studyId),
         eq(DiscoveryTouchpointsTable.contactId, input.contactId),
+        isNull(DiscoveryTouchpointsTable.removedAt),
         input.touchpointId
           ? eq(DiscoveryTouchpointsTable.id, input.touchpointId)
           : undefined,
@@ -891,6 +1049,7 @@ export async function templateStats(db: Db) {
       occurredAt: DiscoveryTouchpointsTable.occurredAt,
       repliedAt: DiscoveryTouchpointsTable.repliedAt,
     })
-    .from(DiscoveryTouchpointsTable);
+    .from(DiscoveryTouchpointsTable)
+    .where(isNull(DiscoveryTouchpointsTable.removedAt));
   return replyStats(rows);
 }

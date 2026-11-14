@@ -17,6 +17,10 @@ import {
   discoveryTouchpointFormatValues,
   discoveryVerdictValues,
 } from "@/drizzle/schema";
+import {
+  REMOVE_REASON_MAX,
+  REMOVE_REASON_MIN,
+} from "@/features/system/discovery/lib/remove-reason";
 
 /** Profile and post links only ever point out to http(s). */
 const httpUrl = z.url({ protocol: /^https?$/ }).max(2048);
@@ -147,6 +151,16 @@ export const markRepliedSchema = z.object({
   replyText: optionalText(8000),
 });
 
+/** A removal always says why, so the audit trail explains the recount. */
+export const removeTouchpointSchema = z.object({
+  id: z.uuid(),
+  reason: z
+    .string()
+    .trim()
+    .min(REMOVE_REASON_MIN, "discovery.removeReasonRequired")
+    .max(REMOVE_REASON_MAX, "discovery.removeReasonTooLong"),
+});
+
 export const studyScopedSchema = z.object({ studyId: z.uuid() });
 
 export const addEvidenceSchema = z.object({
@@ -215,6 +229,7 @@ export type UpdateStudyInput = z.infer<typeof updateStudySchema>;
 export type NewContactInput = z.infer<typeof newContactSchema>;
 export type UpdateContactInput = z.infer<typeof updateContactSchema>;
 export type LogTouchpointInput = z.infer<typeof logTouchpointSchema>;
+export type RemoveTouchpointInput = z.infer<typeof removeTouchpointSchema>;
 export type AddEvidenceInput = z.infer<typeof addEvidenceSchema>;
 export type LogCommitmentInput = z.infer<typeof logCommitmentSchema>;
 export type TemplateInput = z.infer<typeof templateInputSchema>;
