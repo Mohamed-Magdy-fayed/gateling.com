@@ -91,6 +91,14 @@ export const DiscoveryTouchpointsTable = pgTable(
     attachments: jsonb().$type<string[]>().notNull().default([]),
     createdBy,
     createdAt,
+    /**
+     * Soft removal of a wrongly logged row (e.g. a call that only reached
+     * staff). The row stays for the audit trail but counts nowhere: not in
+     * readouts, reply stats, lists or the reply matching.
+     */
+    removedAt: timestamp({ withTimezone: true }),
+    removedBy: varchar(),
+    removedReason: text(),
   },
   (table) => [
     index("discovery_touchpoints_study_idx").on(

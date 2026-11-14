@@ -54,6 +54,19 @@ describe("replyStats", () => {
     expect(stats.byChannel[0]?.sent).toBe(2);
   });
 
+  it("skips removed touchpoints in every grouping", () => {
+    const stats = replyStats([
+      row({ repliedAt: at(10) }),
+      row({ removedAt: at(60) }),
+      row({ repliedAt: at(20), removedAt: at(60), persona: "gateling" }),
+    ]);
+    expect(stats.byTemplate).toEqual([
+      { key: "t1", sent: 1, replied: 1, rate: 1, medianReplyMinutes: 10 },
+    ]);
+    expect(stats.byPersona.map((s) => s.key)).toEqual(["personal"]);
+    expect(stats.byChannel[0]?.sent).toBe(1);
+  });
+
   it("median handles even and empty lists", () => {
     expect(median([])).toBeNull();
     expect(median([10, 20])).toBe(15);

@@ -245,9 +245,22 @@ export default {
     noReply: "No reply yet",
     inStudy: dt("In: {study}", {}),
     openLink: "Open link",
-    deleteTouchpoint: "Delete touchpoint",
-    deleteTouchpointConfirm:
-      "Delete this touchpoint? Evidence tagged from it stays.",
+    removeTouchpoint: "Remove",
+    removeTouchpointLabel: dt("Remove this touchpoint with {contact}", {}),
+    removeTouchpointTitle: "Remove this touchpoint?",
+    removeTouchpointDesc:
+      "Use this for a row logged by mistake, like a no-answer or a call only staff picked up. It stops counting in the readout and reply rates. Evidence tagged from it stays; delete that separately if it came from the same mistake.",
+    removeReason: "Why are you removing it?",
+    removeReasonHint: "Kept with the row, so the recount is explained later.",
+    removeReasonPlaceholder: "Only staff answered, not the owner",
+    removeReasonRequired: "Write a short reason (at least 3 characters).",
+    removeReasonTooLong: "Keep the reason under 500 characters.",
+    removeConfirm: "Remove touchpoint",
+    touchpointRemoved: "Touchpoint removed. The readout has been recounted.",
+    touchpointRemovedKeptEvidence: dt(
+      "Touchpoint removed. {count} evidence from it still counts.",
+      {},
+    ),
 
     // ─── Templates ─────────────────────────────────────────────────────────
     templatesTitle: "Outreach templates",

@@ -15,6 +15,7 @@ import {
   logTouchpointSchema,
   markRepliedSchema,
   newContactSchema,
+  removeTouchpointSchema,
   searchContactsSchema,
   searchLeadsSchema,
   setCommitmentStatusSchema,
@@ -133,9 +134,13 @@ export const discoveryRouter = createTRPCRouter({
   markReplied: staffProcedure
     .input(markRepliedSchema)
     .mutation(({ ctx, input }) => service.markReplied(ctx.db, input)),
-  deleteTouchpoint: adminProcedure
-    .input(idSchema)
-    .mutation(({ ctx, input }) => service.deleteTouchpoint(ctx.db, input.id)),
+  // Soft removal with a reason: reversible in the DB and audited, so it sits
+  // with the staff who log rows rather than behind the admin-only hard deletes.
+  removeTouchpoint: staffProcedure
+    .input(removeTouchpointSchema)
+    .mutation(({ ctx, input }) =>
+      service.removeTouchpoint(ctx.db, input, ctx.userId),
+    ),
 
   // Evidence and commitments
   addEvidence: staffProcedure
