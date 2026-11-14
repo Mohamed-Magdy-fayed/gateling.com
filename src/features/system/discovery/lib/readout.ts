@@ -15,7 +15,7 @@ import type {
  * show the same numbers. The rules are the validation kit's 10-call rule:
  *
  * - Conversation: a contact with a two-way exchange (a reply, an inbound
- *   message, a call or a meeting).
+ *   message, a call or a meeting). Removed touchpoints never count.
  * - Story: a contact with at least one `incident` evidence.
  * - Commitment: a contact with a paid deposit / pre-order, or a price accepted.
  * - Go: H1 or H2 passed (the "core pain" hypotheses = the first two by order)
@@ -29,7 +29,14 @@ export type ReadoutTouchpoint = {
   direction: DiscoveryDirection;
   format: DiscoveryTouchpointFormat;
   repliedAt: Date | null;
+  /** Set when the row was removed as logged by mistake. */
+  removedAt?: Date | null;
 };
+
+/** A removed touchpoint was logged by mistake: it counts for nothing. */
+export function isLiveTouchpoint(tp: { removedAt?: Date | null }): boolean {
+  return tp.removedAt == null;
+}
 
 export type ReadoutEvidence = {
   contactId: string;
@@ -159,7 +166,7 @@ export function computeReadout(input: {
 }): StudyReadout {
   const { study } = input;
   const conversations = distinct(
-    input.touchpoints.filter(isTwoWay),
+    input.touchpoints.filter((t) => isLiveTouchpoint(t) && isTwoWay(t)),
     (t) => t.contactId,
   );
   const stories = distinct(

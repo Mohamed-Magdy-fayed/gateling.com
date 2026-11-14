@@ -204,6 +204,13 @@
       "when": 1794475280663,
       "tag": "0028_discovery",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794654564833,
+      "tag": "0029_discovery_touchpoint_removal",
+      "breakpoints": true
     }
   ]
 }

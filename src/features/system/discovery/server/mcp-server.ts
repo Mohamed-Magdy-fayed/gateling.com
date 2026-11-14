@@ -25,6 +25,7 @@ import {
   logTouchpointSchema,
   markRepliedSchema,
   newContactSchema,
+  removeTouchpointSchema,
   setCommitmentStatusSchema,
   setVerdictSchema,
   templateInputSchema,
@@ -204,7 +205,7 @@ export function buildDiscoveryMcpServer(
   writeTool(
     "log_touchpoint",
     "Log a touchpoint",
-    'One message, comment, call or meeting. Give `contactId` (from `find_contact`) or `newContact`. `persona` is who it was sent as: `personal` (Mohamed\'s own profile) or `gateling` (the brand). Put what was sent in `message`; if they answered in the same screenshot set `replied: true`, `replyText` (exact words) and `repliedAt` when the timestamp is visible. An `inbound` touchpoint marks the latest unanswered outbound one as replied. Use `source: "mcp"`.',
+    'One message, comment, call or meeting. Log a `call` or `meeting` only after a real two-way talk with the person the study targets (the owner or decision-maker): never a no-answer, voicemail or a call where only staff or a gatekeeper answered, since every call counts as a conversation. Give `contactId` (from `find_contact`) or `newContact`. `persona` is who it was sent as: `personal` (Mohamed\'s own profile) or `gateling` (the brand). Put what was sent in `message`; if they answered in the same screenshot set `replied: true`, `replyText` (exact words) and `repliedAt` when the timestamp is visible. An `inbound` touchpoint marks the latest unanswered outbound one as replied. Use `source: "mcp"`.',
     logTouchpointSchema,
     (input) => caller.discovery.logTouchpoint(input),
   );
@@ -215,6 +216,15 @@ export function buildDiscoveryMcpServer(
     "Record that an outbound touchpoint got a reply, with the reply time when known and optionally their words.",
     markRepliedSchema,
     (input) => caller.discovery.markReplied(input),
+  );
+
+  writeTool(
+    "remove_touchpoint",
+    "Remove a wrongly logged touchpoint",
+    "Soft-removes a touchpoint that should not have been logged (e.g. a no-answer, or a call where only staff or a gatekeeper answered) with a short `reason`. It then counts nowhere: not in the readout, reply stats or lists. Removing an inbound row also undoes the 'replied' mark it set on the earlier outbound message. Evidence linked to it is kept and returned in `linkedEvidence`; if `contactStillInStudy` is false, tell the operator their evidence and commitments in this study still count. The operator's decision: show them the row (contact, format, date) and confirm before calling.",
+    removeTouchpointSchema,
+    (input) => caller.discovery.removeTouchpoint(input),
+    { destructive: true },
   );
 
   writeTool(

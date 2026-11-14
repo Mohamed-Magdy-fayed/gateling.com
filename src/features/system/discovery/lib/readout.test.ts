@@ -124,6 +124,93 @@ describe("computeReadout", () => {
     expect(r.conversations).toBe(3);
   });
 
+  it("does not count a removed call as a conversation", () => {
+    const removedAt = new Date("2026-11-14T09:00:00Z");
+    const r = computeReadout({
+      study,
+      hypotheses,
+      touchpoints: [
+        // Only staff answered: logged by mistake, then removed.
+        {
+          contactId: "staff-only",
+          direction: "outbound",
+          format: "call",
+          repliedAt: null,
+          removedAt,
+        },
+        {
+          contactId: "owner",
+          direction: "outbound",
+          format: "call",
+          repliedAt: null,
+          removedAt: null,
+        },
+        {
+          contactId: "dm",
+          direction: "outbound",
+          format: "dm",
+          repliedAt: new Date("2026-11-13T10:00:00Z"),
+          removedAt,
+        },
+      ],
+      evidence: [],
+      commitments: [],
+    });
+    expect(r.conversations).toBe(1);
+  });
+
+  it("still counts a contact whose other touchpoint is live", () => {
+    const r = computeReadout({
+      study,
+      hypotheses,
+      touchpoints: [
+        {
+          contactId: "c1",
+          direction: "outbound",
+          format: "call",
+          repliedAt: null,
+          removedAt: new Date("2026-11-14T09:00:00Z"),
+        },
+        {
+          contactId: "c1",
+          direction: "inbound",
+          format: "dm",
+          repliedAt: null,
+        },
+      ],
+      evidence: [],
+      commitments: [],
+    });
+    expect(r.conversations).toBe(1);
+  });
+
+  it("drops to collecting when a removal takes conversations below target", () => {
+    const touchpoints: ReadoutTouchpoint[] = [
+      ...replied(contacts(9)),
+      {
+        contactId: "c10",
+        direction: "outbound",
+        format: "call",
+        repliedAt: null,
+      },
+    ];
+    const input = {
+      study,
+      hypotheses,
+      evidence: incidents(contacts(5)),
+      commitments: [],
+    };
+    expect(computeReadout({ ...input, touchpoints }).verdict).not.toBe(
+      "collecting",
+    );
+    const removed = touchpoints.map((t) =>
+      t.contactId === "c10" ? { ...t, removedAt: new Date() } : t,
+    );
+    const r = computeReadout({ ...input, touchpoints: removed });
+    expect(r.conversations).toBe(9);
+    expect(r.verdict).toBe("collecting");
+  });
+
   it("returns kill when fewer than 3 contacts told a real story", () => {
     const r = computeReadout({
       study,
