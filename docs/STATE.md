@@ -17,7 +17,9 @@ docs current.
 
 ## How to pick up mid-sprint
 
-1. Read [`discovery-sprint.md`](discovery-sprint.md), especially Status and "Waiting on".
+1. Read [`discovery-sprint.md`](discovery-sprint.md): **"Next call plan"** is the ready-to-run list of
+   calls for the next session; Status and "Waiting on" give the context. If Mohamed just wants to
+   start calling, give him the first call from that list straight away.
 2. Get live numbers with the Discovery MCP `get_readout` (study `91467c01-653f-4370-862f-8ee99eb5e382`) and today's Jarvis schedule with `get_reminders`.
 3. Ask Mohamed what happened since the last update, log it, then update `discovery-sprint.md`.
 
