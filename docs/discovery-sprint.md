@@ -15,10 +15,48 @@ A "conversation" counts only when Mohamed talked two-way with the **owner** (or 
 Staff and gatekeeper calls are not logged as calls (they inflate the count). Remove a wrong row in
 the app (study page → remove, with a reason) or with the MCP tool `remove_touchpoint`.
 
+## Next call plan (Mon 16 Nov)
+
+When Mohamed says "put me on the line" / "يلا نكلم" / "start calls": check today's Jarvis reminders
+(`get_reminders`), then give him the first call below with the opener from the script. After each
+call: log it (Discovery only if he talked to the owner; sales note always), set the next-day Jarvis
+reminder, and give the next call in the same reply. No answer: hand over one wa.me link right away.
+
+**Afternoon (last afternoon test):**
+
+| Time | Shop | Number | Do |
+|---|---|---|---|
+| 13:30 | La Perla, Madame Minna (owner) | 01110444866 | She agreed to talk; she's moving the atelier, ask what's changing |
+| 13:40 | Princess Dress, Ms Ahd (New Cairo) | 01064920648 | Check IG thread first; call once, no WhatsApp |
+| 13:50 | Dresses By Ranah (Heliopolis) | 01207110451 | Check WA reply; else call once |
+| 14:00 | Kelly, manager Reham (Nasr City) | 01061055000 | Did the owner agree? |
+| 14:30 | Satsha (Nasr City) | 01050901462 | Owner's name + time |
+
+**Evening:**
+
+| Time | Shop | Number | Do |
+|---|---|---|---|
+| 19:30 | La Novia, Ms Manal (owner) | 01224681198 | Lock a start date for her 2-week trial (= first commitment) |
+| 20:00 | Lilly's (owner, engineer) | 01013836113 | Reply to the free-for-3-intros offer; get her name |
+| 20:00 | Chantelle Cocktail (New Cairo) | 01004441226 | Did the owner call back? Else call, get her name |
+| 20:15 | El-Kattan, أستاذ غيث (New Cairo) | 01206444868 | Check WA reply; else call once |
+| 20:30 | Soiree (Abbas El-Akkad) | 01006647828 | Retry call |
+| then | Cataleya Atelier (Nasr City) | 01154699332 | New. Small, sale + rent |
+| then | GEGE Bridal (Nasr City) | 01128842553 | New. Wedding dress rental |
+| then | Nilay Wedding Dress (Al Golf, Heliopolis) | 01222757008 | New. Sale + rent, small |
+| then | La Sposa (Heliopolis, Almaza) | 01005251818 | New. WhatsApp confirmed |
+| then | Turki Rizk (Nasr City) | 01111149689 | New. Wedding dress rental |
+
+Tue 17 Nov: Styliiish, check WhatsApp only. Dropped: Mona's and Atelier Sidra (Imbaba), Atelier Nour
+(Ain Shams): low-spend areas.
+
 ## How we reach owners
 
 - **Channel:** phone from Mohamed's **personal** number. Instagram DMs got 1 reply in 14.
   The 012 business number is not used: some leads already ignored sales WhatsApps from Gateling.
+- **Areas (from 15 Nov):** upscale only: Nasr City, New Cairo / Fifth Settlement, Heliopolis,
+  Zamalek, Mohandessin, Dokki. Skip lower-spend areas (Ain Shams, Matareya, Shubra, Imbaba):
+  their pain is customer reliability, not organisation. Prefer soiree over bridal-only.
 - **Persona:** personal ("أنا محمد"), never "Gateling". Log `persona: personal`.
 - **Opener:** a friend's rental atelier. Title line: "أنا اللي ماسك الجانب التقني لأتيليه صاحبي"
   (not "مبرمج"). Say "أتيليه تأجير" only. Naming the niche (soiree) made Kelly's manager say "we're different".
@@ -83,9 +121,11 @@ Updated Sun 15 Nov, ~20:30.
   | Chantelle Cocktail | Staff said the owner would call back | Mon 16 Nov 8:00 PM call if not |
   | La Perla, Madame Minna | Call back; she's moving the atelier | Mon 16 Nov 1:30 PM |
   | Kelly, manager Reham | Owner's permission | Mon 16 Nov 2:00 PM |
-  | Princess (Ms Ahd), Ranah, Mona's, Satsha | Owner reach | Mon 16 Nov 1:30–2:30 PM, one call each, no WhatsApp |
+  | Princess (Ms Ahd), Ranah, Satsha | Owner reach | Mon 16 Nov 1:40–2:30 PM, one call each |
+  | El-Kattan (Ghaith, per Truecaller) | No answer Sun; one WhatsApp sent | Mon 16 Nov 8:15 PM |
   | Styliiish | Manager asked to answer on WhatsApp; Q1 sent 9:02 AM, no reply (2 unanswered) | Tue 17 Nov: check only, send nothing |
-  | Moller | Personal number 01098245913; declined call, WA unanswered | One call Sun night, then parked for the week |
+  | Moller | Declined the call, WA unanswered | Parked for this sprint (no more contact) |
+  | Soiree (Abbas El-Akkad) | No answer Sun night; WA unknown | Mon 16 Nov 8:30 PM retry |
 
 - **Learned:** saying "soiree" made a wedding shop answer "we're different". Managers press for the
   real reason (answer it honestly). Staff never give the owner's number; get her name instead.
