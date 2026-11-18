@@ -16,6 +16,9 @@ const valid = {
   currentTool: "Notebook",
   biggestPain: "Double bookings",
   priceReaction: "fair",
+  contactPreference: "call",
+  socialLink: "https://instagram.com/atelier",
+  demoStepsCompleted: ["add-dress", "book"],
   locale: "ar",
   consent: true,
   website: "",
@@ -39,6 +42,21 @@ describe("self-serve lead", () => {
     ).toBe(false);
   });
 
+  it("accepts only the known price reactions and safe links", () => {
+    for (const v of ["fair", "expensive", "think"])
+      expect(
+        selfServeLeadSchema.safeParse({ ...valid, priceReaction: v }).success,
+      ).toBe(true);
+    for (const bad of [
+      { priceReaction: "cheap" },
+      { contactPreference: "email" },
+      { socialLink: "javascript:alert(1)" },
+    ])
+      expect(selfServeLeadSchema.safeParse({ ...valid, ...bad }).success).toBe(
+        false,
+      );
+  });
+
   it("detects a filled honeypot", () => {
     expect(isHoneypotFilled({ website: "http://spam" })).toBe(true);
     expect(isHoneypotFilled({ website: "  " })).toBe(false);
@@ -50,6 +68,8 @@ describe("self-serve lead", () => {
     expect(row.source).toBe("self-serve");
     expect(row.kind).toBe("prospect");
     expect(row.notes).toContain("Owner: Aalaa");
+    expect(row.notes).toContain("Contact preference: call");
+    expect(row.notes).toContain("Demo steps completed: add-dress, book");
     expect(row.notes).toContain("Biggest pain: Double bookings");
   });
 });

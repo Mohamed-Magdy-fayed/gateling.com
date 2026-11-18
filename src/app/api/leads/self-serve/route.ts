@@ -22,8 +22,6 @@ import { redisClient } from "@/integrations/redis";
  *
  * Auth: `Authorization: Bearer <SELF_SERVE_LEAD_KEY>`. Unset key → 503.
  */
-export const dynamic = "force-dynamic";
-
 const WINDOW_SECONDS = 600;
 const BAD_KEY_PER_IP = 20;
 const CALLS_PER_WINDOW = 120;

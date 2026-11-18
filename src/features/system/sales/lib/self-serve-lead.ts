@@ -27,7 +27,21 @@ export const selfServeLeadSchema = z.object({
   dressVolume: optionalText(64),
   currentTool: optionalText(255),
   biggestPain: optionalText(1000),
-  priceReaction: optionalText(255),
+  priceReaction: z.enum(["fair", "expensive", "think"]).optional().nullable(),
+  contactPreference: z.enum(["whatsapp", "call"]).optional().nullable(),
+  socialLink: z
+    .string()
+    .trim()
+    .max(500)
+    .url()
+    .refine((v) => /^https?:\/\//i.test(v), "http(s) only")
+    .optional()
+    .nullable(),
+  demoStepsCompleted: z
+    .array(z.string().trim().min(1).max(64))
+    .max(30)
+    .optional()
+    .nullable(),
   locale: z.enum(["ar", "en"]).default("ar"),
   consent: z.literal(true),
   /** Honeypot: hidden on the form, so only bots fill it. */
@@ -50,7 +64,15 @@ export function formatSelfServeNotes(input: SelfServeLeadInput): string {
     ["Dresses", input.dressVolume],
     ["Current tool", input.currentTool],
     ["Biggest pain", input.biggestPain],
-    ["Price reaction", input.priceReaction],
+    ["Price reaction", input.priceReaction ?? null],
+    ["Contact preference", input.contactPreference ?? null],
+    ["Social link", input.socialLink ?? null],
+    [
+      "Demo steps completed",
+      input.demoStepsCompleted?.length
+        ? input.demoStepsCompleted.join(", ")
+        : null,
+    ],
     ["Locale", input.locale],
   ];
   return rows
