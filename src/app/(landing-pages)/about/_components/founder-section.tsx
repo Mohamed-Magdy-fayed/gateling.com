@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { H2, H3, P } from "@/components/ui/typography";
 import { getT } from "@/features/core/i18n/server";
-import { FOUNDER_SOCIALS } from "@/lib/company";
 import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import { FOUNDER_ID, ORG_REF } from "@/lib/seo";
 
@@ -21,7 +20,6 @@ export async function AboutFounderSection() {
         image: absoluteUrl("/images/mohamed_magdy_studio_headshot_final.png"),
         url: absoluteUrl("/about"),
         worksFor: ORG_REF,
-        sameAs: [FOUNDER_SOCIALS.linkedin],
     };
 
     return (
