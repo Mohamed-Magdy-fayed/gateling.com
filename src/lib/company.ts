@@ -11,9 +11,12 @@
  * Every URL here was verified to resolve on 2026-08-14. The previous footer
  * values did not: `youtube.com/@mohamedfayed` returned 404, and Facebook and
  * Instagram pointed at the founder's personal accounts while company pages
- * existed. `linkedin.com/company/gateling` and `github.com/gateling` — both
- * suggested in `docs/seo-blueprint.md` — do not exist at all and are
- * deliberately absent.
+ * existed. `github.com/gateling`, suggested in `docs/seo-blueprint.md`, does
+ * not exist and is deliberately absent.
+ *
+ * The site presents only as Gateling: no founder-personal profile is linked
+ * anywhere. LinkedIn is the company page, set through
+ * `NEXT_PUBLIC_LINKEDIN_COMPANY_URL`; until it is set the link is hidden.
  */
 
 import { env } from "@/env/client";
