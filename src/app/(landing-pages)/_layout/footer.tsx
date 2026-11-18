@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { GatelingLogoLink } from "@/components/ui/logo";
 import { getT } from "@/features/core/i18n/server";
-import { COMPANY, FOUNDER_SOCIALS } from "@/lib/company";
+import { COMPANY } from "@/lib/company";
 
 import { FooterNewsletterForm } from "./footer-newsletter-form";
 
@@ -63,11 +63,16 @@ function InstagramIcon({ className }: { className?: string }) {
 //
 // The old values were wrong. `youtube.com/@mohamedfayed` returned 404, and
 // Facebook/Instagram pointed at the founder's personal accounts while company
-// pages existed. LinkedIn stays personal — there is no company page.
-const socialLinks = [
+// pages existed. LinkedIn is the company page and is hidden until
+// NEXT_PUBLIC_LINKEDIN_COMPANY_URL is set; no personal profile is linked.
+const socialLinks: {
+  name: string;
+  href: string | undefined;
+  icon: typeof FacebookIcon;
+}[] = [
   { name: "Facebook", href: COMPANY.facebook, icon: FacebookIcon },
   { name: "YouTube", href: COMPANY.youtube, icon: YoutubeIcon },
-  { name: "LinkedIn", href: FOUNDER_SOCIALS.linkedin, icon: LinkedinIcon },
+  { name: "LinkedIn", href: COMPANY.linkedin, icon: LinkedinIcon },
   { name: "Instagram", href: COMPANY.instagram, icon: InstagramIcon },
 ];
 
@@ -145,7 +150,9 @@ export async function PublicFooter() {
 
               {/* Social links */}
               <div className="mt-6 flex items-center gap-3">
-                {socialLinks.map((social) => (
+                {socialLinks.map(
+                  (social) =>
+                    social.href && (
                   <Link
                     key={social.name}
                     href={social.href}
@@ -156,7 +163,8 @@ export async function PublicFooter() {
                     <social.icon className="h-4 w-4" />
                     <span className="sr-only">{social.name}</span>
                   </Link>
-                ))}
+                    ),
+                )}
               </div>
             </div>
 

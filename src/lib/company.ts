@@ -16,22 +16,27 @@
  * deliberately absent.
  */
 
+import { env } from "@/env/client";
 import { BUSINESS_WHATSAPP_NUMBER } from "@/lib/phone";
+
+/**
+ * Company LinkedIn page, or undefined until configured. Only a
+ * `linkedin.com/company/...` URL is accepted, so a personal `/in/` profile can
+ * not be wired in by mistake.
+ */
+const linkedinCompanyUrl = (() => {
+  const url = env.NEXT_PUBLIC_LINKEDIN_COMPANY_URL;
+  return url && /^https:\/\/([a-z]+\.)?linkedin\.com\/company\//i.test(url)
+    ? url
+    : undefined;
+})();
 
 /** Profiles belonging to the company itself. Safe for Organization `sameAs`. */
 export const COMPANY_SOCIALS = {
   facebook: "https://www.facebook.com/GatelingSolutions/",
   instagram: "https://www.instagram.com/gatelingsolutions/",
   youtube: "https://www.youtube.com/@gatelingsolutions",
-} as const;
-
-/**
- * Profiles belonging to the founder personally. These go on the Person node,
- * never on Organization — conflating the two entities is what `sameAs` exists
- * to prevent.
- */
-export const FOUNDER_SOCIALS = {
-  linkedin: "https://www.linkedin.com/in/mohamed-magdy-fayed/",
+  linkedin: linkedinCompanyUrl,
 } as const;
 
 export const COMPANY = {
@@ -55,4 +60,5 @@ export const COMPANY_SAME_AS: readonly string[] = [
   COMPANY_SOCIALS.facebook,
   COMPANY_SOCIALS.youtube,
   COMPANY_SOCIALS.instagram,
+  ...(COMPANY_SOCIALS.linkedin ? [COMPANY_SOCIALS.linkedin] : []),
 ];
