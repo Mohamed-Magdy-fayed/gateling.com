@@ -46,6 +46,10 @@ export const env = createEnv({
     META_APP_SECRET: z.string().min(1).optional(),
     META_WEBHOOK_VERIFY_TOKEN: z.string().min(16).optional(),
 
+    // Shared secret for POST /api/leads/self-serve (the Atelier /try page).
+    // Unset, the endpoint answers 503. Generate: `openssl rand -hex 32`.
+    SELF_SERVE_LEAD_KEY: z.string().min(24).optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
