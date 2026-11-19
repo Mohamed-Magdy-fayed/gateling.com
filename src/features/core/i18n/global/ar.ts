@@ -705,6 +705,9 @@ export default {
     apiKeysScopeDiscovery: "الاستكشاف",
     apiKeysScopeDiscoveryHint:
       "سجل الاستكشاف: الدراسات وجهات الاتصال وكلامهم. اديه بس لوكيل بيسجل المحادثات بالنيابة عنك.",
+    apiKeysScopeLeads: "عملاء التسجيل الذاتي",
+    apiKeysScopeLeadsHint:
+      "تسمح لنظام أتيليه بإرسال عملاء التسجيل إلى هذا الموقع. تضيف عملاء فقط ولا تقرأ أي شيء.",
     apiKeysScopeRequired: "اختر نوع صلاحية واحدًا على الأقل.",
     apiKeysName: "الاسم",
     apiKeysPrefix: "المفتاح",
