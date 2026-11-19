@@ -45,13 +45,17 @@ const createKeySchema = z
     content: z.boolean(),
     sales: z.boolean(),
     discovery: z.boolean(),
+    leads: z.boolean(),
   })
-  .refine((value) => value.content || value.sales || value.discovery, {
-    message: translationKey("systemPages.apiKeysScopeRequired"),
-    path: ["sales"],
-  });
+  .refine(
+    (value) => value.content || value.sales || value.discovery || value.leads,
+    {
+      message: translationKey("systemPages.apiKeysScopeRequired"),
+      path: ["sales"],
+    },
+  );
 
-type KeyScope = "content" | "sales" | "discovery";
+type KeyScope = "content" | "sales" | "discovery" | "leads";
 
 type Props = {
   open: boolean;
@@ -72,13 +76,20 @@ export function ApiKeyCreateDialog({ open, onOpenChange }: Props) {
 
   const form = useAppForm({
     // Sales is off by default: it reaches customer phone numbers.
-    defaultValues: { name: "", content: true, sales: false, discovery: false },
+    defaultValues: {
+      name: "",
+      content: true,
+      sales: false,
+      discovery: false,
+      leads: false,
+    },
     validators: { onSubmit: createKeySchema },
     onSubmit: async ({ value }) => {
       const scopes: KeyScope[] = [];
       if (value.content) scopes.push("content");
       if (value.sales) scopes.push("sales");
       if (value.discovery) scopes.push("discovery");
+      if (value.leads) scopes.push("leads");
       try {
         const { key } = await createMut.mutateAsync({
           name: value.name,
@@ -208,6 +219,14 @@ export function ApiKeyCreateDialog({ open, onOpenChange }: Props) {
                       <field.BooleanField
                         label={t("systemPages.apiKeysScopeDiscovery")}
                         description={t("systemPages.apiKeysScopeDiscoveryHint")}
+                      />
+                    )}
+                  </form.AppField>
+                  <form.AppField name="leads">
+                    {(field) => (
+                      <field.BooleanField
+                        label={t("systemPages.apiKeysScopeLeads")}
+                        description={t("systemPages.apiKeysScopeLeadsHint")}
                       />
                     )}
                   </form.AppField>

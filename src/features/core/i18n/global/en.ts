@@ -722,6 +722,9 @@ export default {
     apiKeysScopeDiscovery: "Discovery",
     apiKeysScopeDiscoveryHint:
       "The discovery log: studies, contacts and what they said. Grant only to an agent that logs conversations for you.",
+    apiKeysScopeLeads: "Self-serve leads",
+    apiKeysScopeLeadsHint:
+      "Lets the Atelier system send signup leads to this site. It can only add leads; it reads nothing.",
     apiKeysScopeRequired: "Choose at least one kind of access.",
     apiKeysName: "Name",
     apiKeysPrefix: "Key",
