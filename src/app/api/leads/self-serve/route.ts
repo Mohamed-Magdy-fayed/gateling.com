@@ -1,12 +1,15 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import { and, eq, gt } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle";
 import { LeadsTable } from "@/drizzle/schema";
-import { env } from "@/env/server";
 import { clientIpFrom } from "@/features/core/auth/core/passwordResetLimits";
+import {
+  ApiKeyAuthError,
+  resolveApiKeyRequest,
+} from "@/features/system/api-keys/server/auth";
 import {
   isHoneypotFilled,
   SELF_SERVE_SOURCE,
@@ -20,19 +23,13 @@ import { redisClient } from "@/integrations/redis";
  * signup questionnaire here (server to server). Stored as a sales prospect
  * tagged `source = self-serve`. See docs/self-serve-leads.md.
  *
- * Auth: `Authorization: Bearer <SELF_SERVE_LEAD_KEY>`. Unset key → 503.
+ * Auth: `Authorization: Bearer <gl_live_… key>` created on gateling.com /settings
+ * with the "Self-serve leads" scope. No environment variables.
  */
 const WINDOW_SECONDS = 600;
-const BAD_KEY_PER_IP = 20;
 const CALLS_PER_WINDOW = 120;
 const PER_PHONE_PER_HOUR = 5;
 const MAX_BODY_BYTES = 8_000;
-
-const digest = (value: string) => createHash("sha256").update(value).digest();
-
-function keyMatches(given: string, expected: string): boolean {
-  return timingSafeEqual(digest(given), digest(expected));
-}
 
 /** Counts one hit in a fixed window; true once over `limit`. Fails open. */
 async function overLimit(
@@ -56,16 +53,17 @@ const json = (body: Record<string, unknown>, status: number) =>
   NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 export async function POST(request: Request): Promise<Response> {
-  const expected = env.SELF_SERVE_LEAD_KEY;
-  if (!expected) return json({ error: "not_configured" }, 503);
-
   const ip = clientIpFrom(request.headers);
-  const bearer = (request.headers.get("authorization") ?? "").match(
-    /^Bearer\s+(.+)$/i,
-  )?.[1];
-  if (!bearer || !keyMatches(bearer, expected)) {
-    await overLimit(`ratelimit:self-serve:badkey:${ip}`, BAD_KEY_PER_IP, 60);
-    return json({ error: "unauthorized" }, 401);
+  try {
+    await resolveApiKeyRequest(request, "leads");
+  } catch (error) {
+    if (error instanceof ApiKeyAuthError) {
+      return json(
+        { error: error.status === 429 ? "rate_limited" : "unauthorized" },
+        error.status,
+      );
+    }
+    throw error;
   }
 
   if (

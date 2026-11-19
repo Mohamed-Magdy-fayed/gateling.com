@@ -16,7 +16,13 @@ import { createdAt, createdBy, id } from "@/drizzle/schemas/helpers";
  * scopes existed keep `content` only.
  */
 /** `discovery` reaches what people said in interviews: granted per key too. */
-export const apiKeyScopeValues = ["content", "sales", "discovery"] as const;
+/** `leads` can only submit self-serve signups (POST /api/leads/self-serve); it reads nothing. */
+export const apiKeyScopeValues = [
+  "content",
+  "sales",
+  "discovery",
+  "leads",
+] as const;
 export type ApiKeyScope = (typeof apiKeyScopeValues)[number];
 
 /**

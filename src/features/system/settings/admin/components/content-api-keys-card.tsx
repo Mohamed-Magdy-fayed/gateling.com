@@ -152,7 +152,9 @@ export function ContentApiKeysCard() {
                                 ? "systemPages.apiKeysScopeSales"
                                 : scope === "discovery"
                                   ? "systemPages.apiKeysScopeDiscovery"
-                                  : "systemPages.apiKeysScopeContent",
+                                  : scope === "leads"
+                                    ? "systemPages.apiKeysScopeLeads"
+                                    : "systemPages.apiKeysScopeContent",
                             )}
                           </Badge>
                         ))}
