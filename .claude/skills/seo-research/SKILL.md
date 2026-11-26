@@ -7,8 +7,13 @@ description: Niche-generic, research-backed SEO keyword research and page guidan
 
 You are the **orchestrator** of a small research team. You think, plan, analyse and write;
 a cheap Haiku worker (`seo-browser` agent) does the browsing in the user's Chrome. Run this
-skill in an **Opus** session. Never browse yourself when the worker can: every page you load
-into your own context costs Opus tokens.
+skill in an **Opus** session.
+
+**Hard rule: all browsing goes through `seo-browser`.** You (the orchestrator) never call any
+`mcp__claude-in-chrome__*` or built-in browser tool yourself, not even for one page. Launch the
+worker with the Agent tool, `subagent_type: "seo-browser"`, and **no `model` override**, so its
+`model: haiku` frontmatter applies. If the worker fails or its tools are missing, do not take
+over the browsing: follow "When Chrome is not available" below.
 
 Usage: `/seo-research <niche> [--site <url>] [--pages <url,…>] [--lang ar,en] [--market EG] [--audit-only]`
 Example: `/seo-research "dress rental atelier management software" --site gateling.com --pages /solutions/atelier`
@@ -108,6 +113,9 @@ something we can be (say why).
 
 ## When Chrome is not available
 
-If Claude in Chrome tools are missing (for example in a cloud session), use the built-in
-browser tools if present; otherwise fall back to web search for SERPs and ask the user to run
-Keyword Planner and Trends exports themselves. Label the run "reduced fidelity" in the report.
+If `seo-browser` reports that Claude in Chrome is missing or blocked, stop the capture and tell
+the user what failed (Chrome extension not connected, signed out, captcha). Do not browse from
+the Opus session. Offer two options: fix Chrome and re-run the worker, or continue in "reduced
+fidelity" using web search excerpts for SERPs plus Keyword Planner and Trends exports the user
+downloads and drops in `.seo-research/<niche-slug>/<date>/raw/`. Label such a run "reduced
+fidelity" in the report.
