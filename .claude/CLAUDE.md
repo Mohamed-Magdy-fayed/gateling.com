@@ -25,6 +25,7 @@ workflow already defines.
 | CI, hosting, environment, Docker changes | `/infra` |
 | Task finished — capture lessons | `/retro` |
 | New or unfamiliar codebase | `/onboard` |
+| Keyword research, "what do X search for", SEO page audit | `/seo-research` |
 
 Trivial requests (typo, one-line tweak, question) don't need a workflow — but the
 quality gates in `standards/quality-gates.md` still apply to any code change.
@@ -70,3 +71,5 @@ research. Otherwise do the work yourself with the relevant standard loaded.
 5. Security review (agent: `security`) is mandatory for auth, payments, file upload, user input handling, and new external integrations.
 6. Report outcomes honestly: failing tests, skipped steps, and known limitations go in the summary, not under the rug.
 7. **No interactive browser tools** (Chrome automation, preview/screenshot/snapshot tools) — they burn tokens for one-off looks. UI verification is (a) Playwright scripts, which force testable markup, and (b) a human test-case checklist delivered to the user for the UX pass (see `standards/design.md`).
+   Exception (owner request, 2026-11-26): `/seo-research` may use Claude in Chrome for web
+   research capture, only through the Haiku `seo-browser` worker, never for UI verification.

@@ -53,3 +53,7 @@ next-env.d.ts
 # Playwright run artifacts (failure screenshots, traces).
 test-results/
 playwright-report/
+
+# Raw SERP, Keyword Planner and social captures from /seo-research.
+# The summarised research lives in docs/seo-research/ instead.
+.seo-research/

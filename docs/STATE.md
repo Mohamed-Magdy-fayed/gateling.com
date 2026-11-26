@@ -30,7 +30,7 @@ docs current.
 | Sales pipeline (leads, buckets, WhatsApp safety) | [`sales-pipeline.md`](sales-pipeline.md), [`sales-mcp.md`](sales-mcp.md) |
 | Discovery module | [`discovery-mcp.md`](discovery-mcp.md) |
 | Website content via MCP | [`content-mcp.md`](content-mcp.md) |
-| SEO program | [`seo-program.md`](seo-program.md), [`seo-blueprint.md`](seo-blueprint.md) |
+| SEO program | [`seo-program.md`](seo-program.md), [`seo-blueprint.md`](seo-blueprint.md); keyword research runs via `/seo-research`, results in [`seo-research/`](seo-research/) |
 | Architecture and decisions | [`decisions/`](decisions/), [`entity-blueprint.md`](entity-blueprint.md), [`scaling-guide.md`](scaling-guide.md) |
 | Background jobs | [`inngest-offload-policy.md`](inngest-offload-policy.md) |
 | Media uploads | [`media-uploads.md`](media-uploads.md) |

@@ -11,6 +11,7 @@ in the same change (non-negotiable #4).
 | Per-page SEO targets | `docs/seo-blueprint.md` |
 | Pillar-page pattern | `docs/portfolio-blueprint.md` |
 | Branch flow | `.claude/standards/git.md` |
+| Keyword research agent | `/seo-research` skill (`.claude/skills/seo-research/`) with the `seo-browser` Haiku worker; reports in `docs/seo-research/`. Phase 5 should start with a run of it. |
 
 ## Standing rules for every phase
 
