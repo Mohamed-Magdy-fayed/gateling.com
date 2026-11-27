@@ -38,6 +38,35 @@
   --back-big: cubic-bezier(0.3, 2, 0.55, 1);
   --in-out: cubic-bezier(0.77, 0, 0.18, 1);
   --intro: 1.4s; /* hero entrance waits for the logo intro to open */
+  /* Background wordmark: width as a multiple of the screen, and the sticky
+     header's height (the hero starts below it). The intro curtain's word
+     lands on exactly this spot, so both read these. */
+  --wm-scale: 1.6;
+  --header-h: 4rem;
+  /* Hero content padding (px-4 / md:px-8 / lg:px-16 inside max-w-7xl). The
+     wordmark starts at the start padding and scrolls until its far end
+     meets the end padding. These resolve against the element's container
+     (the hero's wordmark anchor, or the intro curtain: both full width). */
+  --wm-pad: 1rem;
+  --wm-w: calc(var(--wm-scale) * 100cqw);
+  --wm-inset: max(var(--wm-pad), calc((100cqw - 80rem) / 2 + var(--wm-pad)));
+  /* Start position is nudged in from the start padding by --wm-shift. */
+  --wm-shift: -14rem;
+  --wm-start: calc(var(--wm-inset) + var(--wm-shift));
+  --wm-travel: calc(var(--wm-w) - 100cqw + var(--wm-start) + var(--wm-inset));
+}
+
+@media (min-width: 768px) {
+  .page {
+    --wm-pad: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    --wm-scale: 1.25;
+    --wm-pad: 4rem;
+  }
 }
 
 .page:dir(rtl) {
@@ -50,14 +79,13 @@
 
 .curtain {
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto;
+  height: 100svh;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
-  /* Hidden once the zoom through the logo has finished. */
-  animation: curtain-done 0s linear 3.5s forwards;
+  container-type: size;
+  /* Hidden once the word has landed on the background wordmark. */
+  animation: curtain-done 0s linear 3.2s forwards;
 }
 
 /*
@@ -66,27 +94,60 @@
  *  1.25–1.55  the "A" fills in
  *  1.20–1.75  the hook flies in from the right and knocks the "A"
  *  1.65–2.05  the dot drops in from above; "ateling" rises meanwhile
- *  2.20       the logo turns into a window onto the site
- *  2.45–3.45  zoom through the window
+ *  2.20–3.20  the orange fades away while the word glides down, grows and
+ *             turns into the faint outline of the hero's background wordmark
+ *  3.20       hand-off: the curtain hides, the real background wordmark shows
  */
+.curtainBg {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  animation: curtain-fade 0.8s ease-in-out 2.2s forwards;
+}
+
 .curtainSvg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: visible;
-}
-
-.curtainZoom {
-  transform-box: view-box;
-  transform-origin: 600px 1420px; /* inside the "A" foot, so the window fills the screen */
-  animation: curtain-zoom 1s cubic-bezier(0.7, 0, 0.84, 0) 2.45s both;
-}
-
-.curtainHole {
-  animation: curtain-hole 0s linear 2.2s both;
+  animation: curtain-land 1s cubic-bezier(0.77, 0, 0.18, 1) 2.2s forwards;
 }
 
 .curtainLogo {
-  animation: curtain-logo-out 0.3s ease-out 2.2s forwards;
+  stroke-opacity: 0;
+  animation: curtain-to-outline 1s ease-in-out 2.2s forwards;
+}
+
+.curtainLogo > *,
+.wordmarkSvg > * {
+  vector-effect: non-scaling-stroke;
+}
+
+/* Bottom edge sits 1.5rem above the bottom of the first screen. */
+.wordmarkAnchor {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100svh - var(--header-h) - 1.5rem);
+  height: 0;
+  container-type: inline-size;
+}
+
+.wordmarkMover {
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: var(--wm-start);
+  width: var(--wm-w);
+}
+
+.wordmarkSvg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  opacity: 0.15;
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
 }
 
 .curtainTrace {
@@ -203,7 +264,8 @@
 @media (prefers-reduced-motion: no-preference) {
   /* Hero intro: time-based, plays once after the curtain lifts. */
   .introWordmark {
-    animation: wordmark-in 2.2s var(--expo) calc(var(--intro) + 0.95s) both;
+    /* Shows the moment the intro's word lands on it. */
+    animation: wordmark-appear 0s linear 3.2s both;
   }
 
   .introLine1 [data-word] {
@@ -313,6 +375,9 @@
 
     .wordmarkOut {
       animation-name: wordmark-out;
+      /* Reaches the end padding before the hero has fully left, so it travels
+         faster than the hero scrolls away. Lower = faster. */
+      animation-range: exit 0% exit 60%;
     }
 
     /* Capabilities ride: pinned stage, vertical scroll drives the cards
@@ -679,37 +744,36 @@
   }
 }
 
-@keyframes curtain-hole {
+/* Moves the word from mid-screen onto the background wordmark's start spot. The
+   curtain's word is 100cqw wide (viewBox 7800 × 1800, so 23.077cqw tall). */
+@keyframes curtain-land {
+  to {
+    transform: translate(
+        calc(var(--s) * (var(--wm-start) + var(--wm-w) / 2 - 50cqw)),
+        calc(50cqh - 1.5rem - var(--wm-scale) * 11.538cqw)
+      )
+      scale(var(--wm-scale));
+  }
+}
+
+@keyframes curtain-to-outline {
+  to {
+    fill: transparent;
+    stroke-opacity: 1;
+    opacity: 0.15;
+  }
+}
+
+@keyframes wordmark-appear {
   from {
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
 }
 
-@keyframes curtain-logo-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes curtain-zoom {
-  to {
-    transform: scale(250);
-  }
-}
-
-@keyframes wordmark-in {
-  from {
-    opacity: 0;
-    translate: calc(var(--s) * 40%) 0;
-  }
-}
-
+/* Start padding → end padding over the hero's exit. */
 @keyframes wordmark-out {
   to {
-    translate: calc(var(--s) * -45%) 0;
+    translate: calc(var(--s) * -1 * var(--wm-travel)) 0;
   }
 }
 

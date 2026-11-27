@@ -6,6 +6,7 @@ import styles from "./motion.module.css";
 import { MotionCurtain } from "./motion-curtain";
 import { cssVars } from "./motion-style";
 import { SplitWords } from "./split-words";
+import { WORDMARK_VIEWBOX, WordmarkShapes } from "./wordmark";
 
 type Props = {
   trust: string[];
@@ -46,22 +47,25 @@ export function MotionHero({
           "relative flex min-h-svh items-center overflow-clip py-16",
         )}
       >
-        {/* Giant outlined wordmark behind everything */}
+        {/* Giant outlined wordmark behind everything. It starts at the page's
+            start padding and scrolls until its far end meets the end padding.
+            The intro curtain's word lands exactly here (.wordmarkAnchor). */}
         <div
           aria-hidden
           className={cn(
-            styles.wordmarkOut,
-            "pointer-events-none absolute inset-x-0 bottom-6 select-none text-center",
+            styles.wordmarkAnchor,
+            "pointer-events-none select-none",
           )}
         >
-          <div
-            className={cn(
-              styles.introWordmark,
-              styles.outline,
-              "whitespace-nowrap text-[28vw] font-black leading-none opacity-15 lg:text-[22vw]",
-            )}
-          >
-            GATELING
+          <div className={cn(styles.wordmarkOut, styles.wordmarkMover)}>
+            <svg
+              aria-hidden="true"
+              viewBox={WORDMARK_VIEWBOX}
+              direction="ltr"
+              className={cn(styles.introWordmark, styles.wordmarkSvg)}
+            >
+              <WordmarkShapes />
+            </svg>
           </div>
         </div>
 
