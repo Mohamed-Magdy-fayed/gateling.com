@@ -6,12 +6,14 @@
 2. Data fetching on the server (RSC or route loaders); client fetch only for genuinely dynamic post-load data.
 3. State lives at the lowest level that needs it. URL is state too — filters, tabs, and pagination belong in searchParams, not useState.
 4. Derive, don't sync: no `useEffect` mirroring props into state; compute during render.
+5. Hooks, keys, the RSC boundary and React security follow `~/.claude/rules/ecc/react/` (`hooks.md`, `patterns.md`, `security.md`). In short: stable non-index keys for lists that change, cleanup in every effect, no `dangerouslySetInnerHTML` without sanitizing, validate URL schemes on user-supplied `href`, and `rel="noopener noreferrer"` on `target="_blank"`.
 
 ## Design system
 
 - Use the component system (shadcn/ui + project components) — never raw-div reimplementations of `Card`, `Alert`, `Badge`, `Dialog`.
 - Semantic color tokens only (`primary`, `destructive`, `muted`, project-defined `warning`/success) — no hardcoded palette classes.
 - `className` additions minimal: layout/spacing only, not restyling the component.
+- **Theme-flipping tokens never sit on a fixed surface.** A section that keeps one colour in both themes (`bg-primary`, a brand colour, an image or gradient) takes only its paired tokens for children (`text-primary-foreground`, or `bg-primary-foreground text-primary` for an inverted button). `bg-background`, `bg-card`, `text-foreground` and `text-muted-foreground` flip with the theme, so they pass in one mode and fail contrast in the other. (Found live 2026-11-27: the homepage final CTA's main button was orange-on-dark-brown in dark mode.)
 
 ## i18n & RTL (gate — see quality-gates.md)
 

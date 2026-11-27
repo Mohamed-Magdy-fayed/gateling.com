@@ -23,6 +23,7 @@ maintain, or extend it. Not loaded by default — read when working *on* the OS.
 | `templates/` | Document shapes (9) | Producing that document |
 | `playbooks/` | External service guides (8) | Using that service |
 | `docs/README.md` | Spec for per-project memory | Running `/onboard` |
+| `~/.claude/` (global, ECC) | Owner-wide rules (`rules/ecc/`), `/ui-scan`, specialist agents | Always loaded; the kernel's "global ECC layer" section says what is adopted and what is overridden |
 
 ## Per-project memory (`docs/` at project root)
 

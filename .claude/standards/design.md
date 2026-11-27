@@ -13,7 +13,7 @@ the visual bar; `standards/frontend.md` defines correctness. Both apply to all U
 ## Typography & color
 
 - Maximum ~4 type sizes per screen, with clear roles (page title, section heading, body, caption). Weight and color create hierarchy before size does.
-- Body text is `foreground` on `background`; secondary text is `muted-foreground` — never gray-on-gray you have to squint at. Contrast per a11y rules is the floor, not the goal.
+- Body text is `foreground` on `background`; secondary text is `muted-foreground` — never gray-on-gray you have to squint at. Contrast per a11y rules is the floor, not the goal, and it is checked in **both** themes (see the fixed-surface rule in `standards/frontend.md`).
 - Semantic tokens carry meaning (destructive, warning, primary); decoration doesn't get random palette colors.
 
 ## States are the design (where amateur UIs fail)
@@ -28,7 +28,9 @@ Every view ships all of these, styled, not defaulted:
 
 - Everything clickable looks clickable and responds: hover, focus-visible, active, disabled states on all interactive elements (design-system components give you these — another reason to use them).
 - Async actions acknowledge instantly: pending state on the button that was pressed, success/error feedback (toast or inline) always.
-- Motion: subtle and purposeful (`transition-colors`, small reveals); nothing bounces, nothing takes >300ms.
+- Motion on app UI (controls, state changes): subtle and purposeful (`transition-colors`, small reveals); nothing bounces, nothing takes >300ms.
+- Motion on marketing pages may be expressive (the homepage uses pure-CSS scroll-triggered entrances), with these rules: play once and settle fully, never scroll-snap or leave a scrubbed half-state, no animation library, and every effect has a `prefers-reduced-motion` fallback that shows the final state.
+- Marketing surfaces also meet the anti-template bar in `~/.claude/rules/ecc/web/design-quality.md`.
 
 ## The verification gate (mandatory for UI work)
 

@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Target clients: cafes, schools, retail, events businesses in Egypt and MENA.
 
-Read [`CLAUDE.md`](CLAUDE.md) for full stack, env, repo map, and architecture rules.
+Claude Code sessions are governed by [`.claude/CLAUDE.md`](.claude/CLAUDE.md) (routing, effort tiers, quality gates). This file is for other agent tools and for the product facts below.
 
 ## App conventions
 
@@ -22,18 +22,17 @@ Read [`CLAUDE.md`](CLAUDE.md) for full stack, env, repo map, and architecture ru
 
 ## Agent workflow (required)
 
-Always follow [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc). In short:
+The gates are in [`.claude/standards/quality-gates.md`](.claude/standards/quality-gates.md). In short:
 
 - Run **`npm run build`** after substantive changes; fix type/build errors before finishing.
 - Use normal file edits, not ad-hoc shell scripts, for source patches.
 - Keep system screens aligned with entity blueprint and registry (`EntityPageHeader`, audit-only info dialogs, selection/action bar rules).
-- **When you discover a repeatable mistake or convention, document it in `agent-workflow.mdc`** so future sessions follow it.
+- **When you discover a repeatable mistake or convention, record it in the matching `.claude/standards/` file** so future sessions follow it.
 - **Inline form/system notices**: use shadcn `Alert` with the proper variant (`default` vs `destructive`).
 
 ## Project appendix
 
 - **Product:** Gateling Solutions portfolio + admin
-- **Reference repo (patterns):** `C:\Users\moham\OneDrive\Desktop\apps\gateling-solutions-portfolio`
 - **Build command:** `npm run build`
 - **Locales:** EN + AR (both required on every user-visible string)
 - **Roles:** `super_admin` (root@gateling.com) / `admin` / `employee` / `customer`
