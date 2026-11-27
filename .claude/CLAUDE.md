@@ -53,6 +53,39 @@ hold Product, Project Management, and Chief-of-Staff duties by default. Delegate
 independent review, security audit, parallel implementation, or large read-heavy
 research. Otherwise do the work yourself with the relevant standard loaded.
 
+## The global ECC layer (`~/.claude`)
+
+Both layers load in every session: the owner's global `~/.claude/CLAUDE.md`, its
+`rules/ecc/` (common, web, react, typescript), skills and agents, plus this kernel.
+Nothing is silently replaced. Where they conflict, **this file wins** (the global
+file says so itself). The explicit merge is below.
+
+**Adopted from ECC (use them):**
+- Rules: `rules/ecc/react/*` (hooks discipline, RSC boundary, XSS, unsafe URLs),
+  `typescript/*`, `common/security.md` pre-commit checklist, `common/coding-style.md`
+  (immutability, early returns, no `console.log`, named constants), `web/design-quality.md`
+  (anti-template bar for marketing pages).
+- `/ui-scan` skill: the UI gate (see `standards/quality-gates.md`).
+- Specialist agents, which count as this company's staff when the delegation criteria
+  above hold: `build-error-resolver` (build or typecheck red after one honest attempt),
+  `react-reviewer` + `typescript-reviewer` (independent review of a non-trivial React/TS
+  diff, instead of the generic `reviewer`), `database-reviewer` (inside `/migration`),
+  `silent-failure-hunter` (error-handling-heavy diffs: jobs, webhooks, integrations),
+  `e2e-runner` (writing or repairing Playwright journeys), `refactor-cleaner` (inside `/refactor`).
+  Project agents keep their roles: `security` stays the mandatory security reviewer;
+  `architect` here shadows ECC's `architect` on purpose.
+
+**Overridden here (don't follow the ECC version):**
+- "Agent-first / use agents proactively / MUST BE USED for every change" → effort tiers above.
+- "TDD for everything, 80% coverage" → `standards/testing.md` (regression test for every
+  bug fix; unit tests for business logic; coverage is a flashlight, not a target).
+- "Generate PRD / architecture / system_design docs before coding" and "GitHub code search
+  first" → the `/feature` workflow, sized by tier.
+- ECC model-tier advice in `common/performance.md` is stale; use the session's model.
+
+Next.js here is newer than training data: read the relevant page in
+`node_modules/next/dist/docs/` before writing Next.js code.
+
 ## Context discipline
 
 - Load a `standards/` file only when the task touches its domain.

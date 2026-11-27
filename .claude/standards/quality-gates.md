@@ -20,8 +20,8 @@ in the final summary.
 | Change touches… | Extra gate |
 |---|---|
 | Auth, payments, uploads, user input, new integration | `security` agent review — verdict recorded |
-| Non-trivial diff (rule of thumb: >100 lines or any tricky logic) | `reviewer` agent review — must-fix findings addressed |
-| UI | Verification per `standards/design.md`: Playwright script for flows/states (no interactive browser tools) + human UI/UX checklist delivered in the summary; accessibility per `standards/frontend.md`; RTL-safe styles |
+| Non-trivial diff (rule of thumb: >100 lines or any tricky logic) | Independent review — `react-reviewer` / `typescript-reviewer` for React/TS, else `reviewer` — must-fix findings addressed |
+| UI | `/ui-scan --plan` before writing UI; `/ui-scan` on every touched UI file after, with every critical and major fixed and the score table in the summary. Contrast reasoned in **both** light and dark token values. Then verification per `standards/design.md`: Playwright script for flows/states (no interactive browser tools) + human UI/UX checklist in the summary; accessibility per `standards/frontend.md`; RTL-safe styles |
 | Schema/data | `/migration` workflow followed; migration applied and verified |
 | Hot paths, lists, queries at scale | Performance sanity per the relevant standard (no N+1, no unbounded fetches) |
 | Production deploy | Post-deploy verification with evidence (`/release` phase 3) |

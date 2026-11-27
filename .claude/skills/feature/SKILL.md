@@ -35,7 +35,7 @@ re-enacted per screen.
 - Tests per `standards/testing.md`: business logic covered, acceptance criteria verified against running behavior.
 - Run the full quality gates: `standards/quality-gates.md`.
 
-### 5. Review (role: Reviewer — `reviewer` agent earns its spawn on L or tricky diffs; S/M get your own critical re-read of the diff instead. `security` agent stays **mandatory** regardless of size if the feature touches auth, payments, uploads, user input, or new integrations)
+### 5. Review (role: Reviewer — an independent reviewer earns its spawn on L or tricky diffs: `react-reviewer` / `typescript-reviewer` for React/TS, else `reviewer`; S/M get your own critical re-read of the diff instead. `security` agent stays **mandatory** regardless of size if the feature touches auth, payments, uploads, user input, or new integrations)
 - Address must-fix findings; re-run gates after fixes.
 
 ### 6. Close
