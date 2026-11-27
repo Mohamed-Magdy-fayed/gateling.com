@@ -147,7 +147,7 @@ export default {
     invalidEmail: "Please enter a valid email address.",
   },
   finalCta: {
-    mainCtaTitle: "Let's architect the system your team keeps asking for",
+    mainCtaTitle: "Let’s architect the system your team keeps asking for",
     mainCtaDescription:
       "Share where the friction lives, and we'll help you design, build, and roll out a platform that unlocks the next stage of growth.",
     ctaButton: "Book a strategy call",

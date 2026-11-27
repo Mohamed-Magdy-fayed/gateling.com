@@ -94,9 +94,8 @@ export function MotionFinalCta({
             >
               <LinkButton
                 href="/contact"
-                variant="outline"
                 size="lg"
-                className="h-14 w-full border-transparent bg-background px-8 text-lg text-primary hover:bg-background/90 hover:text-primary sm:w-auto"
+                className="h-14 w-full border-transparent bg-primary-foreground px-8 text-lg text-primary-ink hover:bg-primary-foreground/90 hover:text-primary-ink sm:w-auto"
               >
                 {primary}
                 <ArrowRightIcon
@@ -113,7 +112,7 @@ export function MotionFinalCta({
                 href="/work"
                 variant="outline"
                 size="lg"
-                className="h-14 w-full border-primary-foreground/50 bg-transparent px-8 text-lg text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:w-auto"
+                className="h-14 w-full border-primary-foreground/50 bg-transparent px-8 text-lg dark:bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:w-auto"
               >
                 {secondary}
               </LinkButton>
@@ -136,7 +135,7 @@ export function MotionFinalCta({
                 const Icon = METHOD_ICONS[icon];
                 const isExternal = !href.startsWith("/");
                 const linkClassName =
-                  "border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground";
+                  "border-primary-foreground/50 bg-transparent text-primary-foreground dark:bg-transparent hover:bg-primary-foreground/10 hover:text-primary-foreground";
                 return (
                   <li
                     key={title}

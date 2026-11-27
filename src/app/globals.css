@@ -13,6 +13,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ink: var(--primary-ink);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -95,6 +96,9 @@
   --popover-foreground: oklch(0.2671 0.0196 98.939);
   --primary: oklch(0.705 0.213 47.604);
   --primary-foreground: oklch(1 0 0);
+  /* Deep brand orange for text on a primary-foreground fill (inverted CTA).
+     Same in both themes; ≥4.5:1 on white and on the dark-mode cream. */
+  --primary-ink: oklch(0.52 0.16 47.604);
   --secondary: oklch(0.448 0.119 151.328);
   --secondary-foreground: oklch(0.982 0.018 155.826);
   --muted: oklch(0.97 0.001 106.424);
@@ -168,6 +172,7 @@
   --popover-foreground: oklch(0.9211 0.004 106.4781);
   --primary: oklch(0.705 0.213 47.604);
   --primary-foreground: oklch(0.9663 0.008 98.8792);
+  --primary-ink: oklch(0.52 0.16 47.604);
   --secondary: oklch(0.448 0.119 151.328);
   --secondary-foreground: oklch(0.982 0.018 155.826);
   --muted: oklch(0.147 0.004 49.25);
