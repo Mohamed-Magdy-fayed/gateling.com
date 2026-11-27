@@ -1,6 +1,11 @@
-import { ArrowRightIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CalendarIcon,
+  MailIcon,
+  MessageCircleIcon,
+} from "lucide-react";
 
-import { LinkButton } from "@/components/general/link-button";
+import { AnchorButton, LinkButton } from "@/components/general/link-button";
 import { cn } from "@/lib/utils";
 import styles from "./motion.module.css";
 import { cssVars } from "./motion-style";
@@ -12,6 +17,21 @@ type Props = {
   primary: string;
   secondary: string;
   perks: string[];
+  methodsHeading: string;
+  methods: ContactMethod[];
+};
+
+type ContactMethod = {
+  icon: keyof typeof METHOD_ICONS;
+  title: string;
+  action: string;
+  href: string;
+};
+
+const METHOD_ICONS = {
+  calendar: CalendarIcon,
+  mail: MailIcon,
+  whatsapp: MessageCircleIcon,
 };
 
 /**
@@ -24,6 +44,8 @@ export function MotionFinalCta({
   primary,
   secondary,
   perks,
+  methodsHeading,
+  methods,
 }: Props) {
   return (
     <section
@@ -96,6 +118,65 @@ export function MotionFinalCta({
                 {secondary}
               </LinkButton>
             </span>
+          </div>
+
+          {/* Other ways to reach us */}
+          <div className="mt-16">
+            <h3
+              className={cn(
+                styles.methodIn,
+                "text-sm font-bold uppercase text-primary-foreground/80",
+              )}
+              style={cssVars({ "--i": 0 })}
+            >
+              {methodsHeading}
+            </h3>
+            <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+              {methods.map(({ icon, title, action, href }, i) => {
+                const Icon = METHOD_ICONS[icon];
+                const isExternal = !href.startsWith("/");
+                const linkClassName =
+                  "border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground";
+                return (
+                  <li
+                    key={title}
+                    className={cn(
+                      styles.methodIn,
+                      "flex flex-col items-center gap-3 rounded-2xl border border-primary-foreground/25 bg-primary-foreground/10 p-5",
+                    )}
+                    style={cssVars({ "--i": i + 1 })}
+                  >
+                    <Icon aria-hidden className="size-6" />
+                    <span className="font-bold">{title}</span>
+                    {isExternal ? (
+                      <AnchorButton
+                        href={href}
+                        target={href.startsWith("http") ? "_blank" : undefined}
+                        rel={
+                          href.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
+                        variant="outline"
+                        size="sm"
+                        className={linkClassName}
+                      >
+                        {action}
+                      </AnchorButton>
+                    ) : (
+                      <LinkButton
+                        href={href}
+                        variant="outline"
+                        size="sm"
+                        className={linkClassName}
+                      >
+                        {action}
+                      </LinkButton>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
       </div>

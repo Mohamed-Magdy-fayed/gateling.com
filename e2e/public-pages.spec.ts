@@ -15,7 +15,7 @@ test.describe("Home", () => {
 
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: /design systems/i }),
+      page.getByRole("heading", { level: 1, name: /custom software/i }),
     ).toBeVisible();
 
     // Desktop shows a top nav; mobile swaps it for a bottom tab bar (no
