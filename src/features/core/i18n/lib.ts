@@ -213,9 +213,9 @@ function performSubstitution(
           locale,
           params.plural?.[argKey]?.formatter,
         );
-        return result.replace(
+        return result.replaceAll(
           replaceKey,
-          replacement.replace(`{?}`, numberFormatter.format(argValue)),
+          replacement.replaceAll(`{?}`, numberFormatter.format(argValue)),
         );
       }
       case "enum": {
@@ -229,7 +229,7 @@ function performSubstitution(
           throw new Error(
             `Missing replacement value for enum key "${argValue}"`,
           );
-        return result.replace(replaceKey, replacement);
+        return result.replaceAll(replaceKey, replacement);
       }
       case "number": {
         if (typeof argValue !== "number")
@@ -240,7 +240,7 @@ function performSubstitution(
           locale,
           params.number?.[argKey],
         );
-        return result.replace(replaceKey, numberFormat.format(argValue));
+        return result.replaceAll(replaceKey, numberFormat.format(argValue));
       }
       case "date": {
         if (!(argValue instanceof Date))
@@ -251,7 +251,7 @@ function performSubstitution(
           locale,
           params.date?.[argKey],
         );
-        return result.replace(replaceKey, dateFormat.format(argValue));
+        return result.replaceAll(replaceKey, dateFormat.format(argValue));
       }
       case "list": {
         if (!Array.isArray(argValue))
@@ -259,10 +259,10 @@ function performSubstitution(
             `Invalid argument for list: expected array, got ${typeof argValue}`,
           );
         const formatter = new Intl.ListFormat(locale, params.list?.[argKey]);
-        return result.replace(replaceKey, formatter.format(argValue));
+        return result.replaceAll(replaceKey, formatter.format(argValue));
       }
       default:
-        return result.replace(`{${argKey}}`, String(argValue));
+        return result.replaceAll(`{${argKey}}`, String(argValue));
     }
   }, str);
 }
