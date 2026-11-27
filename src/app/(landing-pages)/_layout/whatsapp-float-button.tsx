@@ -8,7 +8,7 @@ import { trackPixelEvent } from "@/lib/meta-pixel";
 import { BUSINESS_WHATSAPP_NUMBER, generateWhatsAppUrl } from "@/lib/phone";
 
 const buttonClassName =
-  "fixed h-12 w-12 rounded-full overflow-visible shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex bottom-4 right-4";
+  "fixed h-12 w-12 rounded-full overflow-visible shadow-lg duration-500 transition-transform hover:scale-110 active:scale-95 flex bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 md:bottom-4";
 
 function trackContact() {
   trackPixelEvent("Contact", { content_name: "WhatsApp" });
