@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTranslation } from "@/features/core/i18n/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 export type EntityAuditRecord = {
   id: string;
@@ -44,7 +44,7 @@ export function EntityAuditInfoDialog({
   const { t, locale } = useTranslation();
   const dateTimeFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+      new Intl.DateTimeFormat(withLatinDigits(locale === "ar" ? "ar" : "en"), {
         dateStyle: "medium",
         timeStyle: "short",
       }),

@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -10,6 +9,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { BlogPostRow } from "@/integrations/trpc/routers/blog-posts";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   BlogPostRowActions,
@@ -24,9 +24,12 @@ export function buildBlogPostColumns(opts: {
   setRowAction: SetBlogPostRowAction;
 }): ColumnDef<BlogPostRow>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
 
   return [
     createSelectColumn<BlogPostRow>(),
@@ -43,20 +46,14 @@ export function buildBlogPostColumns(opts: {
     {
       accessorKey: "authorName",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("blogPosts.author")}
-        />
+        <DataTableColumnHeader column={column} title={t("blogPosts.author")} />
       ),
       meta: { label: t("blogPosts.author"), filterVariant: "text" },
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("blogPosts.status")}
-        />
+        <DataTableColumnHeader column={column} title={t("blogPosts.status")} />
       ),
       meta: { label: t("blogPosts.status") },
       cell: ({ row }) => (
@@ -72,10 +69,7 @@ export function buildBlogPostColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.createdAt")} />
       ),
       meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>

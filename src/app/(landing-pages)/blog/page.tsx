@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -100,7 +100,9 @@ export default async function BlogPage() {
                           <span>
                             {post.publishedAt &&
                               new Date(post.publishedAt).toLocaleDateString(
-                                locale === "ar" ? "ar-EG" : undefined,
+                                withLatinDigits(
+                                  locale === "ar" ? "ar-EG" : undefined,
+                                ),
                                 {
                                   year: "numeric",
                                   month: "long",

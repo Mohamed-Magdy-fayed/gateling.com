@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { BanIcon, KeyRoundIcon, PlusIcon } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,7 @@ import {
 import { InlineCode, Muted } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { ApiKeyCreateDialog } from "./api-key-create-dialog";
 import { ApiKeyRevokeDialog } from "./api-key-revoke-dialog";
 
@@ -62,7 +62,7 @@ export function ContentApiKeysCard() {
 
   const formatDate = (value: Date | null) =>
     value
-      ? new Intl.DateTimeFormat(locale, {
+      ? new Intl.DateTimeFormat(withLatinDigits(locale), {
           dateStyle: "medium",
           timeStyle: "short",
         }).format(value)

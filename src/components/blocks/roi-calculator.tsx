@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-
 import { LinkButton } from "@/components/general/link-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import {
 import { useTranslation } from "@/features/core/i18n/client";
 import { ROI_CALCULATOR_DEFAULTS } from "@/features/system/shared/content-blocks";
 import { trackGaEvent } from "@/lib/ga4";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { trackPixelEvent } from "@/lib/meta-pixel";
 
 type RoiCurrency = "EGP" | "USD";
@@ -36,7 +36,7 @@ type RoiCalculatorProps = {
  */
 function formatCurrency(amount: number, currency: RoiCurrency, locale: string) {
   const formatter = new Intl.NumberFormat(
-    locale === "ar" ? "ar-EG" : "en-US",
+    withLatinDigits(locale === "ar" ? "ar-EG" : "en-US"),
     { style: "currency", currency, maximumFractionDigits: 0 },
   );
   return formatter.format(amount);
@@ -50,7 +50,7 @@ export function RoiCalculator({
   currency: initialCurrency = ROI_CALCULATOR_DEFAULTS.currency,
 }: RoiCalculatorProps = {}) {
   const { locale } = useTranslation();
-  const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
+  const numberLocale = withLatinDigits(locale === "ar" ? "ar-EG" : "en-US");
   const [teamSize, setTeamSize] = useState(initialTeamSize);
   const [hoursPerWeek, setHoursPerWeek] = useState(initialHoursPerWeek);
   const [hourlyRate, setHourlyRate] = useState(initialHourlyRate);

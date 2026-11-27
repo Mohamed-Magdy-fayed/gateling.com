@@ -1,3 +1,5 @@
+import { withLatinDigits } from "@/lib/intl-locale";
+
 const HTML_ESCAPES: Record<string, string> = {
   "&": "&amp;",
   "<": "&lt;",
@@ -23,7 +25,7 @@ export function formatBookingTime(
 ): string {
   try {
     const formatted = new Intl.DateTimeFormat(
-      locale === "ar" ? "ar-EG" : "en",
+      withLatinDigits(locale === "ar" ? "ar-EG" : "en"),
       {
         dateStyle: "full",
         timeStyle: "short",

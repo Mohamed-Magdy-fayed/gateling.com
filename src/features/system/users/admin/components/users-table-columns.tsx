@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -13,6 +12,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { UserGridRow } from "@/integrations/trpc/routers/users";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { type SetUserRowAction, UserRowActions } from "./user-row-actions";
 
@@ -31,13 +31,19 @@ export function buildUserGridColumns(opts: {
   setRowAction: SetUserRowAction;
 }): ColumnDef<UserGridRow>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
-  const dateTimeFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
+  const dateTimeFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
   const verifiedOptions = verifiedFilterOptions(t);
 
   return [
@@ -45,10 +51,7 @@ export function buildUserGridColumns(opts: {
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.name")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.name")} />
       ),
       meta: { label: t("forms.name"), filterVariant: "text" },
       filterFn: (row, _id, value) => {
@@ -83,10 +86,7 @@ export function buildUserGridColumns(opts: {
     {
       accessorKey: "phone",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("dataTable.phone")}
-        />
+        <DataTableColumnHeader column={column} title={t("dataTable.phone")} />
       ),
       meta: { label: t("dataTable.phone"), filterVariant: "text" },
       cell: ({ row }) => row.original.phone ?? "—",
@@ -133,9 +133,7 @@ export function buildUserGridColumns(opts: {
       },
       cell: ({ row }) =>
         row.original.emailVerifiedAt ? (
-          <Badge variant="secondary">
-            {t("dataTable.verifiedYes")}
-          </Badge>
+          <Badge variant="secondary">{t("dataTable.verifiedYes")}</Badge>
         ) : (
           <Badge variant="outline">{t("dataTable.verifiedNo")}</Badge>
         ),
@@ -149,10 +147,7 @@ export function buildUserGridColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.createdAt")} />
       ),
       meta: { label: t("forms.createdAt"), filterVariant: "dateRange" },
       cell: ({ row }) =>

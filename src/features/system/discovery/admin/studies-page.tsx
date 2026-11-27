@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { MessageSquarePlusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { Status, StatusIndicator, StatusLabel } from "@/components/ui/status";
 import { H1, H3, Muted } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { CreateStudyDialog } from "./components/create-study-dialog";
 import { STEP_KEY, VERDICT_KEY, VERDICT_STATUS_VARIANT } from "./labels";
@@ -24,7 +24,7 @@ export function DiscoveryStudiesPage() {
   const trpc = useTRPC();
   const [creating, setCreating] = useState(false);
   const studies = useQuery(trpc.discovery.listStudies.queryOptions());
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
 
   return (
     <div className="flex flex-col gap-6">

@@ -5,7 +5,6 @@ import { CheckIcon, ExternalLinkIcon, TagIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
@@ -17,6 +16,7 @@ import type {
 } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { CHANNEL_KEY, durationParts, FORMAT_KEY, PERSONA_KEY } from "../labels";
 import { RemoveTouchpointDialog } from "./remove-touchpoint-dialog";
@@ -54,11 +54,11 @@ export function TouchpointRow({
   const { t, locale } = useTranslation();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const date = new Intl.DateTimeFormat(locale, {
+  const date = new Intl.DateTimeFormat(withLatinDigits(locale), {
     dateStyle: "medium",
     timeStyle: "short",
   });
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const [removing, setRemoving] = useState(false);
 
   const replied = useMutation(

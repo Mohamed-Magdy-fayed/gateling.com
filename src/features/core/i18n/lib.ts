@@ -1,3 +1,4 @@
+import { withLatinDigits } from "@/lib/intl-locale";
 export const LOCALE_COOKIE_NAME = "NEXT_LOCALE"; // Change if needed
 
 export type ParamOptions = {
@@ -210,7 +211,7 @@ function performSubstitution(
         if (replacement == null)
           throw new Error("Missing replacement value for plural");
         const numberFormatter = new Intl.NumberFormat(
-          locale,
+          withLatinDigits(locale),
           params.plural?.[argKey]?.formatter,
         );
         return result.replaceAll(
@@ -237,7 +238,7 @@ function performSubstitution(
             `Invalid argument for number: expected number, got ${typeof argValue}`,
           );
         const numberFormat = new Intl.NumberFormat(
-          locale,
+          withLatinDigits(locale),
           params.number?.[argKey],
         );
         return result.replaceAll(replaceKey, numberFormat.format(argValue));
@@ -248,7 +249,7 @@ function performSubstitution(
             `Invalid argument for date: expected Date object, got ${typeof argValue}`,
           );
         const dateFormat = new Intl.DateTimeFormat(
-          locale,
+          withLatinDigits(locale),
           params.date?.[argKey],
         );
         return result.replaceAll(replaceKey, dateFormat.format(argValue));

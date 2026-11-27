@@ -5,7 +5,6 @@ import { CalendarIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { ar, enUS } from "react-day-picker/locale";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,6 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import type { DataTableDateRangeValue } from "../lib/filter-values";
 import {
@@ -77,7 +77,7 @@ export function DataTableDateRangeFilter<TData, TValue>({
   // Compact label like "May 3 – May 13" (locale-aware).
   const shortFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+      new Intl.DateTimeFormat(withLatinDigits(locale === "ar" ? "ar" : "en"), {
         month: "short",
         day: "numeric",
       }),

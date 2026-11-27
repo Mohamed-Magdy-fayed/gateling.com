@@ -4,7 +4,6 @@ import { CalendarIcon, XCircle } from "lucide-react";
 import { type ComponentProps, useCallback, useMemo, useState } from "react";
 import { type DateRange, isDateRange } from "react-day-picker";
 import { ar, enUS } from "react-day-picker/locale";
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -15,6 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { DateRangePreset } from "@/lib/date-range";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { cn } from "@/lib/utils";
 
 export type DateSelection = Date | Date[] | DateRange | undefined;
@@ -57,7 +57,7 @@ function areRangesEqual(a?: DateRange, b?: DateRange) {
 }
 
 function formatDate(date: Date, locale: string = "en-US"): string {
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(withLatinDigits(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",

@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -9,6 +8,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { Booking } from "@/integrations/trpc/routers/bookings";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   BookingRowActions,
@@ -34,10 +34,13 @@ export function buildBookingColumns(opts: {
   setRowAction: SetBookingRowAction;
 }): ColumnDef<Booking>[] {
   const { t, locale, setRowAction } = opts;
-  const dateTimeFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateTimeFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   return [
     {

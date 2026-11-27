@@ -1,5 +1,6 @@
+import { withLatinDigits } from "@/lib/intl-locale";
 export function formatCurrency(amount: number, locale = "en-EG") {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(withLatinDigits(locale), {
     style: "currency",
     currency: "EGP",
   }).format(amount);
@@ -13,7 +14,7 @@ export function formatDate(
   if (!date) return "";
 
   try {
-    return new Intl.DateTimeFormat(locale, {
+    return new Intl.DateTimeFormat(withLatinDigits(locale), {
       month: opts.month ?? "long",
       day: opts.day ?? "numeric",
       year: opts.year ?? "numeric",

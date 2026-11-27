@@ -20,6 +20,7 @@ import {
 import { Muted } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { DashboardRecentLead } from "@/features/system/dashboard/server/types";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 const LEAD_STATUS_VARIANT: Record<
   string,
@@ -40,7 +41,9 @@ type Props = {
 /** Contact-form leads: the warmest leads there are, so they stay on the dashboard. */
 export function RecentInboundCard({ isLoading, newThisMonth, leads }: Props) {
   const { t, locale } = useTranslation();
-  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFmt = new Intl.DateTimeFormat(withLatinDigits(locale), {
+    dateStyle: "medium",
+  });
   const statusLabel: Record<string, string> = {
     new: t("leads.statusValues.new"),
     contacted: t("leads.statusValues.contacted"),

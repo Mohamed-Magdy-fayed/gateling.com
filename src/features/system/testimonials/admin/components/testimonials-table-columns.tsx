@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -10,6 +9,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { Testimonial } from "@/integrations/trpc/routers/testimonials";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   type SetTestimonialRowAction,
@@ -24,9 +24,12 @@ export function buildTestimonialColumns(opts: {
   setRowAction: SetTestimonialRowAction;
 }): ColumnDef<Testimonial>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
 
   return [
     createSelectColumn<Testimonial>(),
@@ -56,10 +59,7 @@ export function buildTestimonialColumns(opts: {
     {
       accessorKey: "role",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("testimonials.role")}
-        />
+        <DataTableColumnHeader column={column} title={t("testimonials.role")} />
       ),
       meta: { label: t("testimonials.role") },
       cell: ({ row }) => row.original.role ?? "—",
@@ -75,9 +75,7 @@ export function buildTestimonialColumns(opts: {
       meta: { label: t("testimonials.isVisible") },
       cell: ({ row }) => (
         <Badge variant={row.original.isVisible ? "default" : "secondary"}>
-          {row.original.isVisible
-            ? t("common.active")
-            : t("common.inactive")}
+          {row.original.isVisible ? t("common.active") : t("common.inactive")}
         </Badge>
       ),
     },
@@ -94,10 +92,7 @@ export function buildTestimonialColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.createdAt")} />
       ),
       meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>

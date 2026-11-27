@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowRightIcon, VideoIcon } from "lucide-react";
 import { useId } from "react";
 import { toast } from "sonner";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +24,7 @@ import {
 } from "@/features/system/sales/lib/funnel";
 import type { YesAnswers } from "@/features/system/sales/lib/yeses";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { funnelCopy } from "./funnel-copy";
 import { YesPath, YesProgress } from "./yes-checklist";
@@ -32,12 +32,12 @@ import { YesPath, YesProgress } from "./yes-checklist";
 /** Dates in the operator's locale; times only where a time was agreed. */
 function useFunnelCopy(position: FunnelPosition) {
   const { t, locale } = useTranslation();
-  const dateOnly = new Intl.DateTimeFormat(locale, {
+  const dateOnly = new Intl.DateTimeFormat(withLatinDigits(locale), {
     weekday: "short",
     day: "numeric",
     month: "short",
   });
-  const dateTime = new Intl.DateTimeFormat(locale, {
+  const dateTime = new Intl.DateTimeFormat(withLatinDigits(locale), {
     weekday: "short",
     day: "numeric",
     month: "short",

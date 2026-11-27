@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLinkIcon } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -15,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 const STATUS_VARIANT: Record<
   string,
@@ -40,10 +40,13 @@ export function CaseStudyInfoModal({ caseStudy, onOpenChange, open }: Props) {
     enabled: open && Boolean(caseStudy?.id),
   });
 
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   const cs = detail ?? caseStudy;
 
@@ -121,15 +124,11 @@ export function CaseStudyInfoModal({ caseStudy, onOpenChange, open }: Props) {
 
             <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
               <div>
-                <span className="font-medium">
-                  {t("common.createdAt")}:
-                </span>{" "}
+                <span className="font-medium">{t("common.createdAt")}:</span>{" "}
                 {cs.createdAt ? dateFmt.format(new Date(cs.createdAt)) : "—"}
               </div>
               <div>
-                <span className="font-medium">
-                  {t("work.sortOrder")}:
-                </span>{" "}
+                <span className="font-medium">{t("work.sortOrder")}:</span>{" "}
                 {cs.sortOrder}
               </div>
             </div>

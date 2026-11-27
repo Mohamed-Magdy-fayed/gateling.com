@@ -104,7 +104,7 @@ export default {
     // ─── دراسة جديدة ───────────────────────────────────────────────────────
     createStudyTitle: "دراسة جديدة",
     createStudyDesc:
-      "سوق واحد ومشكلة واحدة. أضف الفرضيات اللي هتختبرها في أول ١٠ محادثات.",
+      "سوق واحد ومشكلة واحدة. أضف الفرضيات اللي هتختبرها في أول 10 محادثات.",
     fieldTitle: "العنوان",
     fieldNiche: "السوق",
     fieldProblem: "المشكلة",
@@ -255,8 +255,8 @@ export default {
     removeReasonHint:
       "السبب بيتحفظ مع التواصل، علشان نعرف بعدين النتيجة اتغيرت ليه.",
     removeReasonPlaceholder: "رد موظف مش صاحبة المحل",
-    removeReasonRequired: "اكتب سبب قصير (٣ حروف على الأقل).",
-    removeReasonTooLong: "خلّي السبب أقل من ٥٠٠ حرف.",
+    removeReasonRequired: "اكتب سبب قصير (3 حروف على الأقل).",
+    removeReasonTooLong: "خلّي السبب أقل من 500 حرف.",
     removeConfirm: "شيل التواصل",
     touchpointRemoved: "اتشال التواصل واتحسبت النتيجة من جديد.",
     touchpointRemovedKeptEvidence: dt(

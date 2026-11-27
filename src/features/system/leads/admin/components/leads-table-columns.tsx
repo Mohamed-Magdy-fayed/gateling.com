@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -10,6 +9,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { Lead } from "@/integrations/trpc/routers/leads";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { LeadRowActions, type SetLeadRowAction } from "./lead-row-actions";
 
@@ -31,39 +31,33 @@ export function buildLeadColumns(opts: {
   setRowAction: SetLeadRowAction;
 }): ColumnDef<Lead>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
 
   return [
     createSelectColumn<Lead>(),
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.name")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.name")} />
       ),
       meta: { label: t("leads.name"), filterVariant: "text" },
     },
     {
       accessorKey: "email",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.email")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.email")} />
       ),
       meta: { label: t("leads.email"), filterVariant: "text" },
     },
     {
       accessorKey: "company",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.company")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.company")} />
       ),
       meta: { label: t("leads.company") },
       cell: ({ row }) => row.original.company ?? "—",
@@ -71,10 +65,7 @@ export function buildLeadColumns(opts: {
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.status")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.status")} />
       ),
       meta: { label: t("leads.status") },
       cell: ({ row }) => (
@@ -86,10 +77,7 @@ export function buildLeadColumns(opts: {
     {
       accessorKey: "message",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.message")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.message")} />
       ),
       meta: { label: t("leads.message") },
       cell: ({ row }) => (
@@ -101,10 +89,7 @@ export function buildLeadColumns(opts: {
     {
       accessorKey: "source",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.source")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.source")} />
       ),
       meta: { label: t("leads.source"), filterVariant: "text" },
       cell: ({ row }) => (
@@ -121,10 +106,7 @@ export function buildLeadColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("leads.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("leads.createdAt")} />
       ),
       meta: { label: t("leads.createdAt") },
       cell: ({ row }) =>

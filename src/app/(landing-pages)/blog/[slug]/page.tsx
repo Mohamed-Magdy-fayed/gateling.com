@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/containers";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { breadcrumbJsonLd, canonicalUrl, serializeJsonLd } from "@/lib/json-ld";
 import { buildMetadata, featuredImage, ORG_REF } from "@/lib/seo";
 
@@ -135,7 +136,7 @@ async function BlogDetailContent({ params }: Props) {
                 <span>
                   {t("publicPages.blogDetailPage.publishedOn")}{" "}
                   {new Date(post.publishedAt).toLocaleDateString(
-                    locale === "ar" ? "ar-EG" : undefined,
+                    withLatinDigits(locale === "ar" ? "ar-EG" : undefined),
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </span>
