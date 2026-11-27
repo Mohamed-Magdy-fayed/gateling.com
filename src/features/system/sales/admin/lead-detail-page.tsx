@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +21,7 @@ import {
   yesAnswersFromActivities,
 } from "@/features/system/sales/lib/yeses";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { toWhatsAppUrl } from "@/lib/phone";
 import { BeforeYouCallCard } from "./components/client-account/before-you-call-card";
 import { ClientHero } from "./components/client-account/client-hero";
@@ -70,7 +70,7 @@ export function SalesLeadDetailPage({ leadId }: { leadId: string }) {
     ...lead,
     ...funnelFactsFromActivities(activities),
   });
-  const dateFormat = new Intl.DateTimeFormat(locale, {
+  const dateFormat = new Intl.DateTimeFormat(withLatinDigits(locale), {
     dateStyle: "medium",
     timeStyle: "short",
   });

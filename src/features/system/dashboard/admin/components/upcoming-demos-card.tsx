@@ -2,7 +2,6 @@
 
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import {
 import { Muted } from "@/components/ui/typography";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { SalesDashboard } from "@/features/system/sales/server/dashboard";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 type Props = {
   demos: SalesDashboard["upcomingDemos"];
@@ -24,7 +24,7 @@ type Props = {
 
 export function UpcomingDemosCard({ demos, timeZone }: Props) {
   const { t, locale } = useTranslation();
-  const format = new Intl.DateTimeFormat(locale, {
+  const format = new Intl.DateTimeFormat(withLatinDigits(locale), {
     weekday: "short",
     day: "numeric",
     month: "short",

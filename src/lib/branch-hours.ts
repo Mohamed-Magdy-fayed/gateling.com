@@ -1,3 +1,4 @@
+import { withLatinDigits } from "@/lib/intl-locale";
 /** `HH:mm` or `HH:mm:ss` from Postgres `time` → value for `<input type="time">`. */
 export function toTimeInputValue(value: string | null | undefined): string {
   if (!value) return "";
@@ -31,10 +32,13 @@ export function formatBranchHours(
   const close = toTimeInputValue(closesAt);
   if (!open || !close) return null;
 
-  const fmt = new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const fmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar-EG" : "en"),
+    {
+      hour: "numeric",
+      minute: "2-digit",
+    },
+  );
 
   return `${fmt.format(timePartsToDate(open))} – ${fmt.format(timePartsToDate(close))}`;
 }

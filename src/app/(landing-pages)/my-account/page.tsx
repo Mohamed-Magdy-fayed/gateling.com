@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-
 import { LinkButton } from "@/components/general/link-button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,6 +16,7 @@ import type { LeadStatus } from "@/drizzle/schema";
 import { getCurrentUser } from "@/features/core/auth/nextjs/currentUser";
 import { getLocaleCookie, getT } from "@/features/core/i18n/server";
 import { api } from "@/integrations/trpc/server";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { buildMetadata } from "@/lib/seo";
 
 import { MyBookings } from "./_components/my-bookings";
@@ -71,11 +71,14 @@ export default async function MyAccountPage() {
   }
 
   function formatDate(date: Date) {
-    return date.toLocaleDateString(locale === "ar" ? "ar-EG" : undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return date.toLocaleDateString(
+      withLatinDigits(locale === "ar" ? "ar-EG" : undefined),
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      },
+    );
   }
 
   return (

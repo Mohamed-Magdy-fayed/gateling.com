@@ -1,13 +1,13 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import {
   createEntityActionsColumn,
   DataTableColumnHeader,
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { BranchGridRow } from "@/integrations/trpc/routers/branches";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   BranchRowActions,
@@ -22,10 +22,13 @@ export function buildBranchColumns(opts: {
   t: Translate;
 }): ColumnDef<BranchGridRow>[] {
   const { locale, setRowAction, t } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   return [
     {
@@ -96,10 +99,7 @@ export function buildBranchColumns(opts: {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("common.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("common.createdAt")} />
       ),
       meta: { label: t("common.createdAt") },
       cell: ({ row }) =>
@@ -110,10 +110,7 @@ export function buildBranchColumns(opts: {
     {
       accessorKey: "updatedAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("common.updatedAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("common.updatedAt")} />
       ),
       meta: { label: t("common.updatedAt") },
       cell: ({ row }) =>

@@ -3,7 +3,6 @@
 import { ArrowRightIcon, TriangleAlertIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useId } from "react";
-
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import type {
   YesFunnel,
   YesFunnelStep,
 } from "@/features/system/sales/lib/yeses";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { cn } from "@/lib/utils";
 
 /**
@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 export function YesFunnelCard({ funnel }: { funnel: YesFunnel }) {
   const { t, locale } = useTranslation();
   const headingId = useId();
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const hasTicks = funnel.steps.some((step) => step.yes > 0 || step.no > 0);
 
   return (
@@ -103,8 +103,10 @@ function FunnelRow({
   isWeakest?: boolean;
 }) {
   const { t, locale } = useTranslation();
-  const number = new Intl.NumberFormat(locale);
-  const percent = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
+  const percent = new Intl.NumberFormat(withLatinDigits(locale), {
+    maximumFractionDigits: 0,
+  });
 
   return (
     <li

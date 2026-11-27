@@ -3,7 +3,6 @@
 import { CalendarIcon } from "lucide-react";
 import { type ComponentProps, useCallback, useMemo, useState } from "react";
 import { ar, enUS } from "react-day-picker/locale";
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -15,10 +14,11 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { cn } from "@/lib/utils";
 
 function formatDate(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(withLatinDigits(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -26,7 +26,7 @@ function formatDate(date: Date, locale: string): string {
 }
 
 function formatTime(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(withLatinDigits(locale), {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
@@ -66,7 +66,7 @@ export function SelectDateTimeField({
   const [isOpen, setIsOpen] = useState(false);
   const { locale, dir, t } = useTranslation();
   const rdpLocale = locale === "ar" ? ar : enUS;
-  const intlLocale = locale === "ar" ? "ar" : "en";
+  const intlLocale = withLatinDigits(locale === "ar" ? "ar" : "en");
 
   const hasValue = Boolean(value);
 

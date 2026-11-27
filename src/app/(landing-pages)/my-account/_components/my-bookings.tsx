@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-
 import { LinkButton } from "@/components/general/link-button";
 import {
   AlertDialog,
@@ -25,6 +24,7 @@ import {
 import type { BookingStatus } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 const statusBadgeVariant: Record<
   BookingStatus,
@@ -62,10 +62,13 @@ export function MyBookings() {
 
   const formatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en", {
-        dateStyle: "full",
-        timeStyle: "short",
-      }),
+      new Intl.DateTimeFormat(
+        withLatinDigits(locale === "ar" ? "ar-EG" : "en"),
+        {
+          dateStyle: "full",
+          timeStyle: "short",
+        },
+      ),
     [locale],
   );
 

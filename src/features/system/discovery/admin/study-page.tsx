@@ -5,7 +5,6 @@ import { MessageSquarePlusIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -48,6 +47,7 @@ import { useTranslation } from "@/features/core/i18n/client";
 import type { ReplyStat } from "@/features/system/discovery/lib/reply-stats";
 import type { DiscoveryStudyDetail } from "@/features/system/discovery/server/router";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   CommitmentDialog,
@@ -276,7 +276,7 @@ function StepStepper({ detail }: { detail: DiscoveryStudyDetail }) {
 
 function ReadoutCard({ detail }: { detail: DiscoveryStudyDetail }) {
   const { t, locale } = useTranslation();
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const { readout, study } = detail;
   const hint =
     readout.verdict === "collecting"
@@ -341,7 +341,7 @@ function HypothesesCard({ detail }: { detail: DiscoveryStudyDetail }) {
   const { t, locale } = useTranslation();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const setVerdict = useMutation(
     trpc.discovery.setHypothesisVerdict.mutationOptions({
       onSuccess: () =>
@@ -651,7 +651,7 @@ function TouchpointFeed({
 function CommitmentFeed({ studyId }: { studyId: string }) {
   const { t, locale } = useTranslation();
   const trpc = useTRPC();
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const list = useQuery(
     trpc.discovery.listCommitments.queryOptions({ studyId }),
   );
@@ -751,8 +751,10 @@ export function StatsTable({
   label: (key: string) => string;
 }) {
   const { t, locale } = useTranslation();
-  const number = new Intl.NumberFormat(locale);
-  const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
+  const percent = new Intl.NumberFormat(withLatinDigits(locale), {
+    style: "percent",
+  });
   if (rows.length === 0) return null;
   return (
     <section className="flex flex-col gap-2">

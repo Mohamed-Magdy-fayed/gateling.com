@@ -2,12 +2,12 @@
 
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
-
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "@/features/core/i18n/client";
 import { funnelPositionFor } from "@/features/system/sales/lib/funnel";
 import { topFollowerPlatform } from "@/features/system/sales/lib/social-profiles";
 import type { TodayLeadInput } from "@/features/system/sales/lib/today-rules";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { PlatformIcon } from "./client-account/platform-icon";
 import { FunnelStageLine } from "./funnel-stage";
@@ -21,7 +21,7 @@ import { YesProgress } from "./yes-checklist";
 export function TodayLeadCard({ lead }: { lead: TodayLeadInput }) {
   const { t, locale } = useTranslation();
   const top = topFollowerPlatform(lead);
-  const compact = new Intl.NumberFormat(locale, {
+  const compact = new Intl.NumberFormat(withLatinDigits(locale), {
     notation: "compact",
     maximumFractionDigits: 1,
   });

@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { Lead } from "@/integrations/trpc/routers/leads";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
   new: "default",
@@ -27,10 +28,13 @@ type Props = {
 
 export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
   const { t, locale } = useTranslation();
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -79,9 +83,7 @@ export function LeadInfoModal({ lead, onOpenChange, open }: Props) {
             </div>
             <Separator />
             <div className="text-muted-foreground text-xs">
-              <span className="font-medium">
-                {t("leads.createdAt")}:
-              </span>{" "}
+              <span className="font-medium">{t("leads.createdAt")}:</span>{" "}
               {lead.createdAt ? dateFmt.format(new Date(lead.createdAt)) : "—"}
             </div>
           </div>

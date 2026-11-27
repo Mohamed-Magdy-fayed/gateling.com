@@ -3,7 +3,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { AlertCircleIcon } from "lucide-react";
 import Link from "next/link";
-
 import { Badge } from "@/components/ui/badge";
 import type { LeadPipelineStatus } from "@/drizzle/schema";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { PipelineGridRow } from "@/features/system/sales/server/router";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { cn } from "@/lib/utils";
 
 import {
@@ -79,13 +79,17 @@ export function buildPipelineColumns(opts: {
   setRowAction: SetPipelineRowAction;
 }): ColumnDef<PipelineGridRow>[] {
   const { t, locale, setRowAction } = opts;
-  const lang = locale === "ar" ? "ar" : "en";
-  const dateFmt = new Intl.DateTimeFormat(lang, { dateStyle: "medium" });
+  const lang = withLatinDigits(locale === "ar" ? "ar" : "en");
+  const dateFmt = new Intl.DateTimeFormat(lang, {
+    dateStyle: "medium",
+  });
   const dateTimeFmt = new Intl.DateTimeFormat(lang, {
     dateStyle: "medium",
     timeStyle: "short",
   });
-  const relativeFmt = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+  const relativeFmt = new Intl.RelativeTimeFormat(lang, {
+    numeric: "auto",
+  });
   const numberFmt = new Intl.NumberFormat(lang);
   const now = Date.now();
 

@@ -6,7 +6,6 @@ import { CalendarClockIcon, CheckCircle2Icon, GlobeIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-
 import { useAppForm } from "@/components/forms/hooks";
 import { LinkButton } from "@/components/general/link-button";
 import { SelectDateField } from "@/components/general/select-date-field";
@@ -29,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
 import { trackGaEvent } from "@/lib/ga4";
+import { withLatinDigits } from "@/lib/intl-locale";
 import { trackCustomPixelEvent, trackPixelEvent } from "@/lib/meta-pixel";
 import { readAndClearBookingDraft, saveBookingDraft } from "./booking-draft";
 
@@ -61,7 +61,7 @@ export function BookingWidget({
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
   );
-  const intlLocale = locale === "ar" ? "ar-EG" : "en";
+  const intlLocale = withLatinDigits(locale === "ar" ? "ar-EG" : "en");
 
   const availabilityQuery = useQuery(
     trpc.bookings.getAvailability.queryOptions(),

@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { BlogPostRow } from "@/integrations/trpc/routers/blog-posts";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 type Props = {
   post: BlogPostRow | null;
@@ -20,10 +21,13 @@ type Props = {
 
 export function BlogPostInfoModal({ post, onOpenChange, open }: Props) {
   const { t, locale } = useTranslation();
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,9 +57,7 @@ export function BlogPostInfoModal({ post, onOpenChange, open }: Props) {
             <Separator />
             <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
               <div>
-                <span className="font-medium">
-                  {t("common.createdAt")}:
-                </span>{" "}
+                <span className="font-medium">{t("common.createdAt")}:</span>{" "}
                 {post.createdAt
                   ? dateFmt.format(new Date(post.createdAt))
                   : "—"}

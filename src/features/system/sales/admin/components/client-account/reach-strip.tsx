@@ -7,11 +7,11 @@ import {
   UsersIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
-
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { SocialProfile } from "@/features/system/sales/lib/social-profiles";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { GoogleMapsIcon, PlatformIcon, WhatsappIcon } from "./platform-icon";
 
@@ -57,11 +57,13 @@ export function ReachStrip({
   onEditWhatsapp,
 }: Props) {
   const { t, locale } = useTranslation();
-  const compact = new Intl.NumberFormat(locale, {
+  const compact = new Intl.NumberFormat(withLatinDigits(locale), {
     notation: "compact",
     maximumFractionDigits: 1,
   });
-  const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const decimal = new Intl.NumberFormat(withLatinDigits(locale), {
+    maximumFractionDigits: 1,
+  });
   const known = profiles.flatMap((p) =>
     p.kind === "found" && p.followers != null ? [p.followers] : [],
   );

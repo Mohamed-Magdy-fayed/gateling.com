@@ -5,7 +5,6 @@ import { Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-
 import { useAppForm } from "@/components/forms/hooks";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +24,7 @@ import {
 import { LoadingSwap } from "@/components/ui/loading-swap";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 const blackoutSchema = z
   .object({
@@ -89,7 +89,7 @@ export function BlackoutsCard() {
 
   const rangeFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+      new Intl.DateTimeFormat(withLatinDigits(locale === "ar" ? "ar" : "en"), {
         dateStyle: "medium",
         timeStyle: "short",
       }),

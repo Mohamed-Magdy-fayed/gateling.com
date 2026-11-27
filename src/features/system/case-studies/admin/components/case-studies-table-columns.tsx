@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -10,6 +9,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { CaseStudyRow } from "@/integrations/trpc/routers/case-studies";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   CaseStudyRowActions,
@@ -33,9 +33,12 @@ export function buildCaseStudyColumns(opts: {
   setRowAction: SetCaseStudyRowAction;
 }): ColumnDef<CaseStudyRow>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
 
   return [
     createSelectColumn<CaseStudyRow>(),
@@ -49,30 +52,21 @@ export function buildCaseStudyColumns(opts: {
     {
       accessorKey: "client",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("work.client")}
-        />
+        <DataTableColumnHeader column={column} title={t("work.client")} />
       ),
       meta: { label: t("work.client"), filterVariant: "text" },
     },
     {
       accessorKey: "industry",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("work.industry")}
-        />
+        <DataTableColumnHeader column={column} title={t("work.industry")} />
       ),
       meta: { label: t("work.industry"), filterVariant: "text" },
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("work.status")}
-        />
+        <DataTableColumnHeader column={column} title={t("work.status")} />
       ),
       meta: { label: t("work.status") },
       cell: ({ row }) => (
@@ -84,20 +78,14 @@ export function buildCaseStudyColumns(opts: {
     {
       accessorKey: "sortOrder",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("work.sortOrder")}
-        />
+        <DataTableColumnHeader column={column} title={t("work.sortOrder")} />
       ),
       meta: { label: t("work.sortOrder") },
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("forms.createdAt")}
-        />
+        <DataTableColumnHeader column={column} title={t("forms.createdAt")} />
       ),
       meta: { label: t("forms.createdAt") },
       cell: ({ row }) =>

@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import {
   createEntityActionsColumn,
@@ -10,6 +9,7 @@ import {
 } from "@/features/core/data-table";
 import type { useTranslation } from "@/features/core/i18n/client";
 import type { Subscriber } from "@/integrations/trpc/routers/subscribers";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   type SetSubscriberRowAction,
@@ -24,19 +24,19 @@ export function buildSubscriberColumns(opts: {
   setRowAction: SetSubscriberRowAction;
 }): ColumnDef<Subscriber>[] {
   const { t, locale, setRowAction } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+    },
+  );
 
   return [
     createSelectColumn<Subscriber>(),
     {
       accessorKey: "email",
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={t("subscribers.email")}
-        />
+        <DataTableColumnHeader column={column} title={t("subscribers.email")} />
       ),
       meta: { label: t("subscribers.email"), filterVariant: "text" },
     },

@@ -2,7 +2,6 @@
 
 import { LightbulbIcon } from "lucide-react";
 import { useId } from "react";
-
 import {
   Card,
   CardContent,
@@ -12,16 +11,19 @@ import {
 } from "@/components/ui/card";
 import { useTranslation } from "@/features/core/i18n/client";
 import type { CallTip } from "@/features/system/sales/lib/call-tips";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 /** Numbered openers from `callTips()`; a short prompt when nothing is on file yet. */
 export function BeforeYouCallCard({ tips }: { tips: CallTip[] }) {
   const { t, locale } = useTranslation();
   const headingId = useId();
-  const compact = new Intl.NumberFormat(locale, {
+  const compact = new Intl.NumberFormat(withLatinDigits(locale), {
     notation: "compact",
     maximumFractionDigits: 1,
   });
-  const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const decimal = new Intl.NumberFormat(withLatinDigits(locale), {
+    maximumFractionDigits: 1,
+  });
 
   function text(tip: CallTip): string {
     switch (tip.kind) {

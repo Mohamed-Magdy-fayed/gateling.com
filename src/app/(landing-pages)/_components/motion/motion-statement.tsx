@@ -11,21 +11,21 @@ type Props = {
   stats: Stat[];
 };
 
-/** Splits "+10", "100%", "٢٤/٧" into prefix / number / suffix, keeping the digit script. */
-function parseStat(value: string) {
-  const match = value.match(/^(\D*?)([0-9]+|[٠-٩]+)(.*)$/);
-  if (!match) return null;
-  const [, prefix, digits, suffix] = match;
-  const isArabic = /[٠-٩]/.test(digits);
-  const target = Number(
-    isArabic
-      ? digits.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
-      : digits,
-  );
-  return { prefix, suffix, target, isArabic };
+/** Site rule: numbers are always written with 0-9, in Arabic too. */
+function toLatinDigits(value: string) {
+  return value.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
 }
 
-function StatValue({ value }: { value: string }) {
+/** Splits "+10", "100%", "24/7" into prefix / number / suffix. */
+function parseStat(value: string) {
+  const match = value.match(/^(\D*?)([0-9]+)(.*)$/);
+  if (!match) return null;
+  const [, prefix, digits, suffix] = match;
+  return { prefix, suffix, target: Number(digits) };
+}
+
+function StatValue({ value: raw }: { value: string }) {
+  const value = toLatinDigits(raw);
   const parsed = parseStat(value);
   if (!parsed) return <>{value}</>;
   return (
@@ -35,7 +35,6 @@ function StatValue({ value }: { value: string }) {
         {parsed.prefix}
         <span
           className={styles.count}
-          data-digits={parsed.isArabic ? "arabic" : undefined}
           style={cssVars({ "--to": parsed.target })}
         />
         {parsed.suffix}

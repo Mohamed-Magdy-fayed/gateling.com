@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-
 import { Badge } from "@/components/ui/badge";
 import { Muted } from "@/components/ui/typography";
 import {
@@ -15,6 +14,7 @@ import {
   getSettingDisplayName,
 } from "@/features/system/settings/lib/setting-i18n";
 import type { SettingGridRow } from "@/integrations/trpc/routers/settings";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import {
   type SetSettingRowAction,
@@ -44,10 +44,13 @@ export function buildSettingColumns(opts: {
   t: Translate;
 }): ColumnDef<SettingGridRow>[] {
   const { locale, setRowAction, t } = opts;
-  const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat(
+    withLatinDigits(locale === "ar" ? "ar" : "en"),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 
   return [
     createSelectColumn<SettingGridRow>(),

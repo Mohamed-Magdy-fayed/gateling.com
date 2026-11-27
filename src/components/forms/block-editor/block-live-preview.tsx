@@ -18,7 +18,10 @@ export function BlockLivePreview({ blocks }: { blocks: EditorBlock[] }) {
           Nothing to preview yet — add a block to see it rendered here.
         </p>
       ) : (
-        <BlockRenderer blocks={blocks} locale={locale === "ar" ? "ar" : "en"} />
+        <BlockRenderer
+          blocks={blocks}
+          locale={locale === "ar" ? "ar" : "en"}
+        />
       )}
     </div>
   );

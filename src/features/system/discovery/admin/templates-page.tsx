@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CopyIcon, PencilIcon, PlusIcon } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +36,7 @@ import {
 } from "@/drizzle/schema";
 import { useTranslation } from "@/features/core/i18n/client";
 import { useTRPC } from "@/integrations/trpc/client";
+import { withLatinDigits } from "@/lib/intl-locale";
 
 import { STEP_KEY } from "./labels";
 import { StatsTable } from "./study-page";
@@ -46,7 +46,7 @@ const ALL = "all";
 export function DiscoveryTemplatesPage() {
   const { t, locale } = useTranslation();
   const trpc = useTRPC();
-  const number = new Intl.NumberFormat(locale);
+  const number = new Intl.NumberFormat(withLatinDigits(locale));
   const [editing, setEditing] = useState<DiscoveryTemplate | "new" | null>(
     null,
   );
