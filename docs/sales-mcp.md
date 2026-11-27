@@ -21,7 +21,7 @@ revocation — is as in [content-mcp.md](content-mcp.md). Code:
 `src/features/system/sales/server/mcp-server.ts`, `src/app/api/mcp/sales/route.ts`.
 
 ```bash
-claude mcp add --transport http gateling-sales https://gateling.com/api/mcp/sales --header "Authorization: Bearer gl_live_…"
+claude mcp add --transport http gateling-sales https://gateling.com/api/mcp/sales --header "Authorization: Bearer gl_live_..."
 ```
 
 ## Ground rules (read these)

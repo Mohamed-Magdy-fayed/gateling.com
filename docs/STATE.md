@@ -35,4 +35,4 @@ docs current.
 | Background jobs | [`inngest-offload-policy.md`](inngest-offload-policy.md) |
 | Media uploads | [`media-uploads.md`](media-uploads.md) |
 | Meetings integration | [`meetings-integration.md`](meetings-integration.md) |
-| Deploy facts | Vercel build runs `npm run db:migrate && next build`; merged migrations apply on deploy. Branch flow `feat/*` → `preview` → `main`. |
+| Deploy facts | Vercel build runs `npm run db:migrate && next build`; merged migrations apply on deploy. Branch flow `feat/*` → `main` (preview retired 2026-11-27; roll back via Vercel or `git revert`). |

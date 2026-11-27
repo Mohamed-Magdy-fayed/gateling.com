@@ -2,33 +2,31 @@
 
 ## Branching
 
-Three tiers. **Nothing goes from a feature branch straight to `main`.**
+Two tiers: feature branches merge **straight into `main`** (production).
 
 ```
-feat/<slug>  ──►  preview  ──►  main
-                (Vercel preview)  (production)
+feat/<slug>  ──►  main
+                (production)
 ```
 
-1. **Feature branches** — `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `hotfix/<slug>`.
-   **Branch from `preview`, not `main`** — `preview` is where work integrates, so branching
-   from `main` while `preview` holds unmerged work guarantees a conflict later. Short-lived:
-   days, not weeks. Bigger than that → slice the work or hide it behind a flag and merge
-   incrementally.
-   **Check `git branch --show-current` before your first commit.** Creating or switching
-   branches out-of-band is easy to miss, and commits landing on `preview` directly defeats
-   the whole flow.
-2. **`preview`** — a **permanent, never-deleted** integration branch. Vercel builds its
-   preview deployment from this branch, so the URL must stay stable. Feature branches merge
-   here first and get verified on the real preview deployment before going further.
-   Never force-push `preview`; never delete and recreate it — both break the Vercel
-   deployment history and any bookmarked preview URL.
-3. **`main`** — production. Only ever receives merges **from `preview`**, and only after
-   the preview deployment has been checked.
+The owner chose this on 2026-11-27: it is their own site, and a bad deploy is undone in
+seconds with Vercel's instant rollback or a `git revert`. The old `feat → preview → main`
+flow is retired. The `preview` branch still exists but is no longer part of the flow, so
+don't branch from it or merge into it. Each PR still gets a Vercel preview URL if a change
+needs a look before merging.
 
-- Hotfixes still branch from production state, but follow the same path — through `preview`,
-  not around it. If an incident genuinely cannot wait for a preview build, say so explicitly
-  in the summary per non-negotiable #6.
-- `main` is always deployable; `preview` is always mergeable to `main`.
+1. **Feature branches**: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `hotfix/<slug>`.
+   **Branch from `origin/main`** (fetch first). Keep them short-lived: days, not weeks.
+   Anything bigger gets sliced, or hidden behind a flag and merged incrementally.
+   **Check `git branch --show-current` before your first commit.** Branches created or
+   switched out-of-band are easy to miss.
+2. **`main`** is production. It receives squash-merged PRs from feature branches once
+   the quality gates (`standards/quality-gates.md`) pass. Every merge deploys, and the
+   Vercel build runs migrations first.
+
+- Hotfixes follow the same path: a `hotfix/<slug>` branch, then a PR into `main`.
+- `main` is always deployable. If a deploy breaks production, roll back first (Vercel
+  instant rollback or `git revert`), then fix forward.
 
 ## Commits
 
@@ -41,10 +39,8 @@ feat/<slug>  ──►  preview  ──►  main
 - PR body per `templates/pull-request.md`: what, why, how verified, and any gate skipped.
 - Small PRs review well; >400 lines of real diff needs a reason (generated files don't count).
 - CI green before review is requested. Review findings addressed or explicitly disputed — never silently ignored.
-- Merge strategy: **squash-merge feature branches into `preview`** (clean history); the squash
-  message follows commit conventions. `preview` → `main` is a **regular merge**, not a squash —
-  squashing there would rewrite commits that already exist on `preview` and cause every
-  subsequent merge to conflict.
+- Merge strategy: **squash-merge feature branches into `main`** for a clean history. The squash
+  message follows the commit conventions.
 
 ## Versioning & releases
 
