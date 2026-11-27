@@ -1,6 +1,6 @@
 /* biome-ignore-all lint/correctness/noUnknownProperty: timeline-trigger, animation-trigger and trigger-scope (scroll-triggered animations, Chrome 145+) are newer than Biome's property list. */
 /*
- * /motion-preview: every effect is plain CSS. No JavaScript runs for motion.
+ * Homepage motion: every effect is plain CSS. No JavaScript runs for motion.
  *
  *  - Reveals: scroll-TRIGGERED animations (`timeline-trigger` +
  *    `animation-trigger: play-once`). Scrolling only decides WHEN a reveal
@@ -109,6 +109,11 @@
     --w: 34cqw;
     --v: 2.6;
   }
+}
+
+/* Pop-in wrappers must be boxes so scale applies. */
+.ctaPop {
+  display: inline-flex;
 }
 
 /* Statement headline wipe: the bar is a box around the whole headline. */
@@ -339,7 +344,7 @@
     }
 
     .afterWipe {
-      animation: fade-up 0.9s var(--expo) 1.05s both;
+      animation: fade-up 0.9s var(--expo) var(--d, 1.05s) both;
       animation-trigger: --t play-once;
     }
 
@@ -436,6 +441,16 @@
     .perkPop {
       animation: pop-in 0.7s var(--back-big) calc(1.5s + var(--i) * 0.1s) both;
       animation-trigger: --cta play-once;
+    }
+
+    .methodIn {
+      animation: fade-up 0.8s var(--expo) calc(2.05s + var(--i) * 0.12s) both;
+      animation-trigger: --cta play-once;
+    }
+
+    .ctaPop {
+      animation: pop-in 0.7s var(--back-big) calc(0.25s + var(--i) * 0.1s) both;
+      animation-trigger: --t play-once;
     }
 
     .btnIn {

@@ -7,6 +7,7 @@ import {
   SparklesIcon,
 } from "lucide-react";
 
+import { LinkButton } from "@/components/general/link-button";
 import { cn } from "@/lib/utils";
 import styles from "./motion.module.css";
 import { cssVars } from "./motion-style";
@@ -25,9 +26,15 @@ type Props = {
   eyebrow: string;
   heading: string;
   items: { title: string; description: string; number: string }[];
+  cta: {
+    title: string;
+    description: string;
+    services: string;
+    contact: string;
+  };
 };
 
-export function MotionCapabilities({ eyebrow, heading, items }: Props) {
+export function MotionCapabilities({ eyebrow, heading, items, cta }: Props) {
   const names = items.map((i) => i.title);
 
   return (
@@ -116,6 +123,44 @@ export function MotionCapabilities({ eyebrow, heading, items }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Where to go next: the full services list, or a conversation. */}
+      <div
+        className={cn(
+          styles.tg,
+          "bg-primary/10 px-4 pb-20 text-center md:px-8",
+        )}
+      >
+        <h3
+          className={cn(
+            styles.riseEyebrow,
+            "mx-auto max-w-2xl text-balance text-2xl font-extrabold md:text-3xl",
+          )}
+        >
+          {cta.title}
+        </h3>
+        <p
+          className={cn(
+            styles.afterWipe,
+            "mx-auto mt-3 max-w-2xl text-pretty text-muted-foreground",
+          )}
+          style={cssVars({ "--d": "0.1s" })}
+        >
+          {cta.description}
+        </p>
+        <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <span className={styles.ctaPop} style={cssVars({ "--i": 0 })}>
+            <LinkButton href="/services" size="lg">
+              {cta.services}
+            </LinkButton>
+          </span>
+          <span className={styles.ctaPop} style={cssVars({ "--i": 1 })}>
+            <LinkButton href="/contact" variant="outline" size="lg">
+              {cta.contact}
+            </LinkButton>
+          </span>
+        </div>
+      </div>
 
       <div aria-hidden className="overflow-clip border-y border-border py-8">
         {[0, 1].map((row) => (
