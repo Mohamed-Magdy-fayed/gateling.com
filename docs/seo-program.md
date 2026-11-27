@@ -36,7 +36,7 @@ in the same change (non-negotiable #4).
     Run `npm run build` first to regenerate it, then typecheck.
 - **`.env` points at production Neon.** Any script that writes is a production write. Confirm
   the target before running.
-- English-only for SEO. No `/ar` routes, no hreflang. Arabic remains a full app language —
+- English-only for SEO. No `/ar` routes, no hreflang. **Open decision (2026-11-26):** the atelier research shows every ranking page for the atelier queries is Arabic, so Phase 5 needs one indexable Arabic page; see the top of `docs/seo-research/dress-rental-atelier-software.md`. Until the owner decides, this rule stands. Arabic remains a full app language —
   new user-facing strings still need `en` + `ar` entries.
 - Schema changes go through `/migration`: edit schema → `npm run db:generate` →
   `npm run db:migrate`. Never hand-write structural SQL, never `db:push`.
@@ -53,7 +53,7 @@ in the same change (non-negotiable #4).
 | 2 | Entity, metadata & schema hardening | `feat/seo-phase-2-entity-schema` | **Done** — 1 owner action outstanding, see below |
 | 3 | SEO data model + admin control surface | `feat/seo-phase-3-admin-surface` | Not started |
 | 4 | Content engine (`write-project` skill) | `feat/seo-phase-4-content-engine` | Not started |
-| 5 | Atelier deep pass | `feat/seo-phase-5-atelier` | Not started |
+| 5 | Atelier deep pass | `feat/seo-phase-5-atelier` | Research done 2026-11-26 (`docs/seo-research/dress-rental-atelier-software.md`); build waits on the Arabic-page decision below |
 | 6 | Remaining vertical pillars | `feat/seo-phase-6-pillars` | Not started |
 | 7 | Crawl performance (`use cache`) | `feat/seo-phase-7-caching` | Not started |
 
