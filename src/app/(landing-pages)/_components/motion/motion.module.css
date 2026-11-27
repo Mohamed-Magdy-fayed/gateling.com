@@ -37,6 +37,7 @@
   --back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --back-big: cubic-bezier(0.3, 2, 0.55, 1);
   --in-out: cubic-bezier(0.77, 0, 0.18, 1);
+  --intro: 1.4s; /* hero entrance waits for the logo intro to open */
 }
 
 .page:dir(rtl) {
@@ -54,18 +55,65 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary);
   pointer-events: none;
-  clip-path: inset(0 0 0 0);
-  animation: curtain-lift 1.1s cubic-bezier(0.77, 0, 0.18, 1) 0.55s forwards;
+  /* Hidden once the zoom through the logo has finished. */
+  animation: curtain-done 0s linear 3.5s forwards;
 }
 
-.curtainWord {
-  color: var(--primary-foreground);
-  font-weight: 900;
-  font-size: clamp(3rem, 15vw, 13rem);
-  line-height: 1;
-  animation: curtain-word 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+/*
+ * Intro timeline (seconds):
+ *  0.15–1.35  a line runs in from the left edge and settles as the "A" outline
+ *  1.25–1.55  the "A" fills in
+ *  1.20–1.75  the hook flies in from the right and knocks the "A"
+ *  1.65–2.05  the dot drops in from above; "ateling" rises meanwhile
+ *  2.20       the logo turns into a window onto the site
+ *  2.45–3.45  zoom through the window
+ */
+.curtainSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.curtainZoom {
+  transform-box: view-box;
+  transform-origin: 600px 1420px; /* inside the "A" foot, so the window fills the screen */
+  animation: curtain-zoom 1s cubic-bezier(0.7, 0, 0.84, 0) 2.45s both;
+}
+
+.curtainHole {
+  animation: curtain-hole 0s linear 2.2s both;
+}
+
+.curtainLogo {
+  animation: curtain-logo-out 0.3s ease-out 2.2s forwards;
+}
+
+.curtainTrace {
+  stroke-dasharray: 4738 30000;
+  animation:
+    curtain-trace 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both,
+    curtain-fade 0.3s ease-out 1.35s forwards;
+}
+
+.curtainA {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    curtain-fill 0.3s ease-out 1.25s both,
+    curtain-knock 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1.55s both;
+}
+
+.curtainHook {
+  animation: curtain-hook 0.55s cubic-bezier(0.3, 1.3, 0.5, 1) 1.2s both;
+}
+
+.curtainDot {
+  animation: curtain-dot 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.65s both;
+}
+
+.curtainText {
+  animation: curtain-text 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
 }
 
 .outline {
@@ -155,45 +203,52 @@
 @media (prefers-reduced-motion: no-preference) {
   /* Hero intro: time-based, plays once after the curtain lifts. */
   .introWordmark {
-    animation: wordmark-in 2.2s var(--expo) 0.95s both;
+    animation: wordmark-in 2.2s var(--expo) calc(var(--intro) + 0.95s) both;
   }
 
   .introLine1 [data-word] {
-    animation: rise-big 1.3s var(--expo) calc(0.95s + var(--i) * 0.09s) both;
+    animation: rise-big 1.3s var(--expo)
+      calc(var(--intro) + 0.95s + var(--i) * 0.09s) both;
   }
 
   .introLine2 [data-word] {
-    animation: rise-tilt 1.1s var(--expo) calc(1.2s + var(--i) * 0.05s) both;
+    animation: rise-tilt 1.1s var(--expo)
+      calc(var(--intro) + 1.2s + var(--i) * 0.05s) both;
   }
 
   .introTrust {
-    animation: drop-in 0.7s var(--back-big) calc(1.45s + var(--i) * 0.08s) both;
+    animation: drop-in 0.7s var(--back-big)
+      calc(var(--intro) + 1.45s + var(--i) * 0.08s) both;
   }
 
   .introLead {
-    animation: fade-up 0.9s var(--expo) 1.65s both;
+    animation: fade-up 0.9s var(--expo) calc(var(--intro) + 1.65s) both;
   }
 
   .introCta {
-    animation: pop-in 0.9s var(--back-big) calc(1.8s + var(--i) * 0.1s) both;
+    animation: pop-in 0.9s var(--back-big)
+      calc(var(--intro) + 1.8s + var(--i) * 0.1s) both;
   }
 
   .introBoard {
-    animation: board-in 1.8s var(--expo) 1.3s both;
+    animation: board-in 1.8s var(--expo) calc(var(--intro) + 1.3s) both;
   }
 
   .introBar {
     transform-origin: 50% 100%;
-    animation: bar-grow 0.8s var(--back) calc(2.05s + var(--i) * 0.06s) both;
+    animation: bar-grow 0.8s var(--back)
+      calc(var(--intro) + 2.05s + var(--i) * 0.06s) both;
   }
 
   .introSkel {
     transform-origin: var(--origin) center;
-    animation: skel-grow 0.7s var(--expo) calc(1.95s + var(--i) * 0.07s) both;
+    animation: skel-grow 0.7s var(--expo)
+      calc(var(--intro) + 1.95s + var(--i) * 0.07s) both;
   }
 
   .introBadge {
-    animation: badge-in 0.9s var(--back-big) calc(2.35s + var(--i) * 0.15s) both;
+    animation: badge-in 0.9s var(--back-big)
+      calc(var(--intro) + 2.35s + var(--i) * 0.15s) both;
   }
 
   /* Marquee: endless loop (items carry their own trailing space → seamless). */
@@ -571,17 +626,77 @@
 
 /* ---------- Keyframes ---------- */
 
-@keyframes curtain-lift {
+@keyframes curtain-done {
   to {
-    clip-path: inset(0 0 100% 0);
     visibility: hidden;
   }
 }
 
-@keyframes curtain-word {
+/* Dash = outline length (4738); lead-in = 545. Ends covering just the outline. */
+@keyframes curtain-trace {
+  from {
+    stroke-dashoffset: 4738;
+  }
+  to {
+    stroke-dashoffset: -545;
+  }
+}
+
+@keyframes curtain-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes curtain-fill {
+  from {
+    fill-opacity: 0;
+  }
+}
+
+@keyframes curtain-knock {
+  35% {
+    transform: translateX(-60px) rotate(-1deg);
+  }
+}
+
+@keyframes curtain-hook {
+  from {
+    transform: translateX(7000px);
+  }
+}
+
+@keyframes curtain-dot {
+  from {
+    transform: translateY(-2600px);
+  }
+}
+
+@keyframes curtain-text {
   from {
     opacity: 0;
-    transform: translateY(40%) scale(0.9);
+    transform: translateY(400px);
+  }
+}
+
+@keyframes curtain-hole {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes curtain-logo-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes curtain-zoom {
+  to {
+    transform: scale(250);
   }
 }
 

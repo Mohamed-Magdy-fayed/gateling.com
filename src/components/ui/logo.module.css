@@ -1,0 +1,129 @@
+/*
+ * Animated Gateling mark: the same story as the homepage intro, in miniature.
+ * A line runs in from the left and traces the "A", the hook flies in from the
+ * right and knocks it, the dot drops in from above.
+ *
+ * Every piece shares one duration with no delays, so the same keyframes play
+ * once (data-play, set from JS on hover / keyboard focus) or loop forever
+ * (data-loop). At rest, nothing animates and the logo is static.
+ */
+
+.logo {
+  --logo-duration: 1.6s;
+  overflow: hidden;
+}
+
+.trace {
+  opacity: 0;
+  stroke-dasharray: 4738 30000; /* dash = outline length */
+}
+
+.a {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .logo:is([data-play], [data-loop]) :is(.trace, .a, .hook, .dot) {
+    animation-duration: var(--logo-duration);
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+
+  .logo[data-loop] {
+    --logo-duration: 2.4s;
+  }
+
+  .logo[data-loop] :is(.trace, .a, .hook, .dot) {
+    animation-iteration-count: infinite;
+  }
+
+  .logo:is([data-play], [data-loop]) .trace {
+    animation-name: logo-trace;
+  }
+
+  .logo:is([data-play], [data-loop]) .a {
+    animation-name: logo-a;
+  }
+
+  .logo:is([data-play], [data-loop]) .hook {
+    animation-name: logo-hook;
+  }
+
+  .logo:is([data-play], [data-loop]) .dot {
+    animation-name: logo-dot;
+  }
+}
+
+/* Lead-in is 245 units long; the dash ends covering just the outline. */
+@keyframes logo-trace {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: 4738;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  40% {
+    opacity: 1;
+    stroke-dashoffset: -245;
+  }
+  52%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -245;
+  }
+}
+
+@keyframes logo-a {
+  0%,
+  34% {
+    fill-opacity: 0;
+    transform: none;
+  }
+  48% {
+    fill-opacity: 1;
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  56% {
+    transform: translateX(-50px) rotate(-1.5deg);
+  }
+  68%,
+  100% {
+    fill-opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes logo-hook {
+  0%,
+  30% {
+    transform: translateX(1500px);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  }
+  48% {
+    transform: translateX(-30px);
+    animation-timing-function: ease-out;
+  }
+  54%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes logo-dot {
+  0%,
+  52% {
+    transform: translateY(-1000px);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  }
+  64% {
+    transform: translateY(20px);
+    animation-timing-function: ease-out;
+  }
+  70%,
+  100% {
+    transform: none;
+  }
+}

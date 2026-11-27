@@ -3,6 +3,7 @@ import { ArrowRightIcon, CheckCircleIcon, StarIcon } from "lucide-react";
 import { LinkButton } from "@/components/general/link-button";
 import { cn } from "@/lib/utils";
 import styles from "./motion.module.css";
+import { MotionCurtain } from "./motion-curtain";
 import { cssVars } from "./motion-style";
 import { SplitWords } from "./split-words";
 
@@ -30,9 +31,7 @@ export function MotionHero({
 }: Props) {
   return (
     <>
-      <div className={styles.curtain} aria-hidden>
-        <span className={styles.curtainWord}>Gateling</span>
-      </div>
+      <MotionCurtain />
       <div
         aria-hidden
         className={cn(
